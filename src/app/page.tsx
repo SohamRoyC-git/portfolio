@@ -7,7 +7,7 @@ import { JourneyPath } from "@/components/JourneyPath";
 import { HeroScene } from "@/components/HeroScene";
 import { JourneyIntro } from "@/components/JourneyIntro";
 import { ExperienceStory } from "@/components/ExperienceStory";
-import { ProjectShowcase } from "@/components/ProjectShowcase";
+import { A24DiscShowcase } from "@/components/A24DiscShowcase";
 import { SkillsSection } from "@/components/SkillsSection";
 import { EducationSection } from "@/components/EducationSection";
 import { ContactSection } from "@/components/ContactSection";
@@ -108,8 +108,10 @@ export default function Home() {
         {/* Scene C: International Experience */}
         <ExperienceStory />
 
-        {/* Scene D: Featured Work & Case Studies */}
-        <ProjectShowcase />
+        {/* Scene D: A24-Style Physical Disc Spatial Showcase */}
+        <div id="work">
+          <A24DiscShowcase />
+        </div>
 
         {/* Scene E: The Developer's Toolkit */}
         <SkillsSection />

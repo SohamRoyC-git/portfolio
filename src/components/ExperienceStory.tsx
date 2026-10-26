@@ -109,13 +109,24 @@ export const ExperienceStory: React.FC = () => {
                 </div>
               </div>
 
-              {/* Character Illustration with Traveler Pose */}
-              <div className="flex justify-center my-2">
-                <DoodleCharacter
-                  pose="experience-traveler"
-                  size={240}
-                  caption={`Logged: ${activeExp.organization}`}
-                />
+              {/* 3D Transit Artifact Card with Verified Emblem */}
+              <div className="flex flex-col items-center justify-center my-4 p-4 rounded-2xl bg-white border border-[#E9E7E3] shadow-sm w-full">
+                <div className="relative w-36 h-36 rounded-2xl overflow-hidden bg-[#FAF9F6] border border-[#E9E7E3] p-2 flex items-center justify-center shadow-xs">
+                  {activeExp.badgeAsset ? (
+                    <Image
+                      src={activeExp.badgeAsset}
+                      alt={activeExp.organization}
+                      fill
+                      sizes="150px"
+                      className="object-contain p-2"
+                    />
+                  ) : (
+                    <Globe size={48} className="text-[#F97316]" />
+                  )}
+                </div>
+                <span className="mt-3 text-[11px] font-mono text-[#6B6B6B] bg-[#FAF9F6] px-3 py-1 rounded-full border border-[#E9E7E3]">
+                  Transit Waypoint • Stop 0{activeStopIndex + 1}
+                </span>
               </div>
 
               {/* Verified Status Tag */}

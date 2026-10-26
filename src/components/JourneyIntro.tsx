@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { DoodleCharacter } from "./DoodleCharacter";
+import { SohamAvatar } from "./SohamAvatar";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 
 export const JourneyIntro: React.FC = () => {
@@ -24,8 +24,7 @@ export const JourneyIntro: React.FC = () => {
                 <span className="text-[#F97316] font-semibold">STAGE 01 → 02</span>
               </div>
 
-              <DoodleCharacter
-                pose="path-walking"
+              <SohamAvatar
                 size={270}
                 caption="In Transit: Operations → Engineering"
               />

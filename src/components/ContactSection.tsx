@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import confetti from "canvas-confetti";
 import { PERSONAL_INFO } from "@/data/portfolioData";
-import { DoodleCharacter } from "./DoodleCharacter";
+import { SohamAvatar } from "./SohamAvatar";
 import { Mail, Phone, MapPin, Copy, Check, Send, Sparkles, Clock, ArrowUpRight } from "lucide-react";
 
 export const ContactSection: React.FC = () => {
@@ -75,9 +75,8 @@ export const ContactSection: React.FC = () => {
               <span className="text-[#F97316] font-bold">100% COMPLETE</span>
             </div>
 
-            <DoodleCharacter
-              pose="contact-welcoming"
-              size={290}
+            <SohamAvatar
+              size={300}
               caption="Soham • Ready for collaboration"
             />
 

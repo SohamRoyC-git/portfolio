@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { SKILL_CATEGORIES } from "@/data/portfolioData";
-import { DoodleCharacter } from "./DoodleCharacter";
+import { SohamAvatar } from "./SohamAvatar";
 import { Terminal, Monitor, Smartphone, Tablet, Code2, Cpu, Wrench, Layers, Database, ArrowRight, Play } from "lucide-react";
 
 export const SkillsSection: React.FC = () => {
@@ -87,10 +87,9 @@ export const SkillsSection: React.FC = () => {
           </div>
 
           <div className="lg:col-span-4 flex justify-center">
-            <DoodleCharacter
-              pose="laptop-coding"
-              size={240}
-              caption="Live at the Terminal"
+            <SohamAvatar
+              size={260}
+              caption="Dev Environment • Live at Terminal"
             />
           </div>
         </div>

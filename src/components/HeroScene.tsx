@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { DoodleCharacter } from "./DoodleCharacter";
+import { SohamAvatar } from "./SohamAvatar";
 import { PERSONAL_INFO } from "@/data/portfolioData";
 import { ArrowDown, Sparkles, Code2, Globe2, Layers, Terminal } from "lucide-react";
 
@@ -144,31 +144,14 @@ export const HeroScene: React.FC<HeroSceneProps> = ({ onExploreClick, onContactC
             </div>
           </div>
 
-          {/* Right Column: Original Hand-drawn Protagonist Character (5 cols) */}
+          {/* Right Column: 3D Persona Character (5 cols) */}
           <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
-            {/* Backdrop organic circle sketch */}
-            <div className="relative w-full max-w-[340px] flex items-center justify-center">
-              <div className="absolute inset-0 rounded-full bg-[#FFFFFF] border-2 border-dashed border-[#E9E7E3] transform -rotate-3 scale-95" />
-
-              {/* Character in Hero Standing Pose */}
-              <DoodleCharacter
-                pose="hero-standing"
-                size={320}
-                className="relative z-10"
-                caption="Protagonist • Soham (CSE AI/ML)"
+            <div className="relative w-full max-w-[360px] flex items-center justify-center">
+              {/* Authentic 3D Persona with Mouse Tilt */}
+              <SohamAvatar
+                size={340}
+                caption="Soham Roychoudhury • CSE (AI/ML)"
               />
-
-              {/* Floating interactive tooltip */}
-              <div className="absolute -top-3 -right-2 bg-[#202124] text-white text-[11px] font-mono px-3 py-1.5 rounded-lg shadow-md border border-[#202124] flex items-center gap-1.5 z-20">
-                <Sparkles size={11} className="text-[#F97316]" />
-                <span>Scroll to begin journey</span>
-              </div>
-
-              {/* Floating code badge */}
-              <div className="absolute -bottom-2 -left-2 bg-[#FFFFFF] border border-[#E9E7E3] text-[#202124] text-[11px] font-mono px-3 py-1 rounded-md shadow-sm flex items-center gap-1.5 z-20">
-                <Terminal size={11} className="text-[#F97316]" />
-                <span>status: ready</span>
-              </div>
             </div>
           </div>
         </div>

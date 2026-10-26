@@ -1,0 +1,1114 @@
+{
+  "nav.home": {
+    "en": "Home",
+    "ru": "Главная"
+  },
+  "nav.about": {
+    "en": "About Us",
+    "ru": "О нас"
+  },
+  "nav.products": {
+    "en": "Products",
+    "ru": "Продукция"
+  },
+  "nav.contact": {
+    "en": "Contact",
+    "ru": "Контакты"
+  },
+  "nav.cta": {
+    "en": "Partner With Us",
+    "ru": "Сотрудничество"
+  },
+  "footer.privacy": {
+    "en": "Privacy Policy",
+    "ru": "Политика конфиденциальности"
+  },
+  "footer.terms": {
+    "en": "Terms & Conditions",
+    "ru": "Условия использования"
+  },
+  "footer.cookies": {
+    "en": "Cookie Policy",
+    "ru": "Политика Cookie"
+  },
+  "footer.copyright": {
+    "en": "© 2026 IZIEAT Private Limited. All rights reserved. Premium Product Storytelling Experience.",
+    "ru": "© 2026 IZIEAT Private Limited. Все права защищены. Премиальный продуктовый опыт."
+  },
+  "contact.tagline": {
+    "en": "Get in Touch",
+    "ru": "Связаться с нами"
+  },
+  "contact.title": {
+    "en": "Ready to Elevate Your Supply Chain?",
+    "ru": "Готовы улучшить вашу цепочку поставок?"
+  },
+  "contact.desc.home": {
+    "en": "Partner with IZIEAT for bulk distribution, private labeling, or custom agricultural packaging. Let's discuss your sweet corn requirements today.",
+    "ru": "Станьте партнёром IZIEAT для оптовых поставок, частной маркировки или индивидуальной упаковки. Обсудим ваши потребности в сладкой кукурузе сегодня."
+  },
+  "contact.desc.other": {
+    "en": "Partner with IZIEAT for bulk distribution, private labeling, or custom agricultural packaging. Let's discuss your product requirements today.",
+    "ru": "Станьте партнёром IZIEAT для оптовых поставок, частной маркировки или индивидуальной упаковки. Обсудим ваши потребности в продукции сегодня."
+  },
+  "contact.label.email": {
+    "en": "Email",
+    "ru": "Эл. почта"
+  },
+  "contact.label.phone": {
+    "en": "Phone",
+    "ru": "Телефон"
+  },
+  "contact.label.hq": {
+    "en": "Headquarters",
+    "ru": "Штаб-квартира"
+  },
+  "contact.hq.value": {
+    "en": "New Delhi, India",
+    "ru": "Нью-Дели, Индия"
+  },
+  "contact.form.name": {
+    "en": "Full Name",
+    "ru": "Полное имя"
+  },
+  "contact.form.email": {
+    "en": "Business Email",
+    "ru": "Рабочая эл. почта"
+  },
+  "contact.form.inquiry": {
+    "en": "Your Inquiry",
+    "ru": "Ваш запрос"
+  },
+  "contact.form.submit": {
+    "en": "Send Message",
+    "ru": "Отправить сообщение"
+  },
+  "contact.form.sending": {
+    "en": "Sending...",
+    "ru": "Отправка..."
+  },
+  "contact.form.placeholder.name": {
+    "en": "John Doe",
+    "ru": "Иван Иванов"
+  },
+  "contact.form.placeholder.email": {
+    "en": "john@company.com",
+    "ru": "ivan@company.com"
+  },
+  "contact.form.placeholder.message": {
+    "en": "Please describe your volume requirements or private label interests...",
+    "ru": "Пожалуйста, опишите ваши требования к объёмам или интересы в частной маркировке..."
+  },
+  "preloader.status": {
+    "en": "Cultivating experience...",
+    "ru": "Создаём впечатление..."
+  },
+  "index.stage1.num": {
+    "en": "01 / Introduction",
+    "ru": "01 / Введение"
+  },
+  "index.stage1.h1a": {
+    "en": "Premium",
+    "ru": "Премиальная"
+  },
+  "index.stage1.h1b": {
+    "en": "Sweet Corn",
+    "ru": "Сладкая кукуруза"
+  },
+  "index.stage1.text": {
+    "en": "Naturally grown, carefully selected, and harvested at peak maturity to deliver exceptional taste, texture, and quality.",
+    "ru": "Натуральная, тщательно отобранная и собранная на пике зрелости для исключительного вкуса, текстуры и качества."
+  },
+  "index.stage1.btn": {
+    "en": "Discover Process",
+    "ru": "Узнать процесс"
+  },
+  "index.stage2.num": {
+    "en": "02 / Cultivation",
+    "ru": "02 / Выращивание"
+  },
+  "index.stage2.h2a": {
+    "en": "Farm Fresh",
+    "ru": "Свежее с фермы"
+  },
+  "index.stage2.h2b": {
+    "en": "Excellence",
+    "ru": "Превосходство"
+  },
+  "index.stage2.text": {
+    "en": "Every cob is cultivated under strict quality standards to ensure consistency, freshness, and superior product performance.",
+    "ru": "Каждый початок выращивается по строгим стандартам качества для обеспечения стабильности, свежести и превосходных характеристик продукта."
+  },
+  "index.stage3.num": {
+    "en": "03 / Standard",
+    "ru": "03 / Стандарт"
+  },
+  "index.stage3.h2a": {
+    "en": "Export-Grade",
+    "ru": "Экспортный"
+  },
+  "index.stage3.h2b": {
+    "en": "Quality",
+    "ru": "Качество"
+  },
+  "index.stage3.text": {
+    "en": "Processed and packed to meet international standards, serving food manufacturers, distributors, and retail markets worldwide.",
+    "ru": "Обработано и упаковано в соответствии с международными стандартами для производителей, дистрибьюторов и розничных рынков по всему миру."
+  },
+  "index.stage4.num": {
+    "en": "04 / Processing",
+    "ru": "04 / Обработка"
+  },
+  "index.stage4.h2a": {
+    "en": "From Cob",
+    "ru": "От початка"
+  },
+  "index.stage4.h2b": {
+    "en": "to Kernel",
+    "ru": "до зерна"
+  },
+  "index.stage4.text": {
+    "en": "Advanced processing preserves the natural flavor and nutritional value of every kernel. Watch the disassembly as advanced IQF technologies take over.",
+    "ru": "Передовые технологии обработки сохраняют натуральный вкус и питательную ценность каждого зерна. Наблюдайте, как технологии IQF берут верх."
+  },
+  "index.stage5.num": {
+    "en": "05 / The Hero Product",
+    "ru": "05 / Главный продукт"
+  },
+  "index.stage5.h2a": {
+    "en": "IQF Frozen",
+    "ru": "IQF Замороженная"
+  },
+  "index.stage5.h2b": {
+    "en": "Sweet Corn",
+    "ru": "Сладкая кукуруза"
+  },
+  "index.stage5.text": {
+    "en": "Individually Quick Frozen (IQF) for maximum freshness, vibrant color, natural sweetness, and convenient use across retail and food-service applications.",
+    "ru": "Индивидуальная быстрая заморозка (IQF) для максимальной свежести, яркого цвета, натуральной сладости и удобного использования в розничной торговле и общепите."
+  },
+  "index.spec.moisture.label": {
+    "en": "Moisture Lock",
+    "ru": "Влагоудержание"
+  },
+  "index.spec.moisture.value": {
+    "en": "72% Natural Juiciness",
+    "ru": "72% натуральной сочности"
+  },
+  "index.spec.sugar.label": {
+    "en": "Sugar Content",
+    "ru": "Содержание сахара"
+  },
+  "index.spec.sugar.value": {
+    "en": "14° Brix Peak Sweetness",
+    "ru": "14° Brix — пиковая сладость"
+  },
+  "index.spec.freezing.label": {
+    "en": "Freezing Tech",
+    "ru": "Технология заморозки"
+  },
+  "index.spec.freezing.value": {
+    "en": "Individually Quick Frozen (IQF)",
+    "ru": "Индивидуальная быстрая заморозка (IQF)"
+  },
+  "index.spec.selection.label": {
+    "en": "Selection",
+    "ru": "Отбор"
+  },
+  "index.spec.selection.value": {
+    "en": "100% Grade-A Golden",
+    "ru": "100% Класс-A Золотистый"
+  },
+  "index.stage6.num": {
+    "en": "06 / Premium Kernels",
+    "ru": "06 / Премиальные зёрна"
+  },
+  "index.stage6.h2a": {
+    "en": "The Perfect",
+    "ru": "Идеальное"
+  },
+  "index.stage6.h2b": {
+    "en": "Sweet Kernel",
+    "ru": "Сладкое зерно"
+  },
+  "index.stage6.text": {
+    "en": "Our frozen sweet corn kernels represent agricultural perfection. Sorted using advanced optical sensors to ensure uniform size, each kernel features a crisp, tender outer skin that encapsulates full natural flavor, ready for global retail and manufacturing distribution.",
+    "ru": "Наши замороженные зёрна сладкой кукурузы — воплощение совершенства. Отсортированные с помощью оптических сенсоров для однородного размера, каждое зерно обладает хрустящей нежной оболочкой, сохраняющей натуральный вкус, готово к мировой дистрибуции."
+  },
+  "index.stage6.details.title": {
+    "en": "Pure Ingredient Profile",
+    "ru": "Чистый ингредиентный профиль"
+  },
+  "index.stage6.detail1": {
+    "en": "100% pure sweet corn, no added sugars or artificial elements.",
+    "ru": "100% чистая сладкая кукуруза, без добавленного сахара и искусственных элементов."
+  },
+  "index.stage6.detail1.strong": {
+    "en": "Zero Additives:",
+    "ru": "Без добавок:"
+  },
+  "index.stage6.detail2": {
+    "en": "Intact cellular structure guarantees a satisfying bite when cooked.",
+    "ru": "Нетронутая клеточная структура гарантирует приятный укус при приготовлении."
+  },
+  "index.stage6.detail2.strong": {
+    "en": "Texture Integrity:",
+    "ru": "Целостность текстуры:"
+  },
+  "index.stage6.detail3": {
+    "en": "IQF (Individually Quick Frozen) processing preserves natural vitamins, lutein, and dietary fiber.",
+    "ru": "Обработка IQF сохраняет натуральные витамины, лютеин и пищевые волокна."
+  },
+  "index.stage6.detail3.strong": {
+    "en": "Nutrient Retention:",
+    "ru": "Сохранение питательных веществ:"
+  },
+  "index.stage6.btn.quote": {
+    "en": "Request a Quote",
+    "ru": "Запросить цену"
+  },
+  "index.stage6.btn.restart": {
+    "en": "Restart Journey",
+    "ru": "Начать заново"
+  },
+  "index.scroll.text": {
+    "en": "Scroll to explore the journey",
+    "ru": "Прокрутите, чтобы исследовать путь"
+  },
+  "index.title": {
+    "en": "IZIEAT | Premium Sweet Corn & IQF Frozen Kernels",
+    "ru": "IZIEAT | Премиальная сладкая кукуруза и IQF замороженные зёрна"
+  },
+  "index.meta.desc": {
+    "en": "Experience premium modern agricultural excellence. From our natural sweet corn cobs to advanced IQF frozen kernels, harvested at peak maturity for global markets.",
+    "ru": "Откройте для себя передовое сельскохозяйственное совершенство. От натуральных початков до IQF-замороженных зёрен, собранных на пике зрелости для мировых рынков."
+  },
+  "products.title": {
+    "en": "Our Products | IZIEAT Agricultural & Food Processing Exports",
+    "ru": "Наша продукция | IZIEAT — Экспорт сельскохозяйственной и пищевой продукции"
+  },
+  "products.meta.desc": {
+    "en": "Explore IZIEAT's premium agricultural export catalog: from vacuum-packed corn cobs and fresh beans to advanced IQF (Individually Quick Frozen) kernels.",
+    "ru": "Каталог премиальной экспортной продукции IZIEAT: от вакуумных початков до IQF-замороженных зёрен."
+  },
+  "products.hero.tagline": {
+    "en": "100% PURE & PREMIUM EXPORTS",
+    "ru": "100% ЧИСТЫЙ И ПРЕМИАЛЬНЫЙ ЭКСПОРТ"
+  },
+  "products.hero.title.a": {
+    "en": "Your kitchen's",
+    "ru": "Любимая"
+  },
+  "products.hero.title.b": {
+    "en": "favorite ",
+    "ru": "на вашей кухне "
+  },
+  "products.hero.title.highlight": {
+    "en": "sweet corn",
+    "ru": "сладкая кукуруза"
+  },
+  "products.hero.desc": {
+    "en": "IZIEAT is the premium agricultural export sweet corn you'll actually rely on and crave again tomorrow. Natural, tender, and packed with sweet-corn freshness.",
+    "ru": "IZIEAT — это премиальная экспортная сладкая кукуруза, на которую можно положиться. Натуральная, нежная, с насыщенной свежестью."
+  },
+  "products.hero.btn.explore": {
+    "en": "Explore Products",
+    "ru": "Каталог продукции"
+  },
+  "products.hero.btn.story": {
+    "en": "Our Story",
+    "ru": "Наша история"
+  },
+  "products.hero.stamp": {
+    "en": "100% PURE • PREMIUM EXPORT STORY •",
+    "ru": "100% ЧИСТО • ПРЕМИУМ ЭКСПОРТ •"
+  },
+  "products.hero.click": {
+    "en": "CLICK",
+    "ru": "НАЖМИ"
+  },
+  "marquee.high_protein": {
+    "en": "High Protein",
+    "ru": "Высокое содержание белка"
+  },
+  "marquee.natural": {
+    "en": "100% Natural",
+    "ru": "100% Натуральный"
+  },
+  "marquee.zero_additives": {
+    "en": "Zero Additives",
+    "ru": "Без добавок"
+  },
+  "marquee.iqf": {
+    "en": "IQF Processed",
+    "ru": "IQF обработка"
+  },
+  "marquee.vacuum": {
+    "en": "Vacuum Sealed Freshness",
+    "ru": "Вакуумная свежесть"
+  },
+  "marquee.nongmo": {
+    "en": "Non-GMO Seeds",
+    "ru": "Без ГМО семена"
+  },
+  "marquee.gluten": {
+    "en": "Gluten Free",
+    "ru": "Без глютена"
+  },
+  "marquee.no_sugar": {
+    "en": "No Added Sugar",
+    "ru": "Без добавленного сахара"
+  },
+  "marquee.b2b": {
+    "en": "B2B Export Ready",
+    "ru": "Готово к B2B экспорту"
+  },
+  "marquee.haccp": {
+    "en": "HACCP Safety Compliant",
+    "ru": "Соответствие HACCP"
+  },
+  "marquee.precooked": {
+    "en": "Pre-cooked Convenience",
+    "ru": "Готово к употреблению"
+  },
+  "marquee.shelf": {
+    "en": "18/24 Month Shelf Life",
+    "ru": "Срок хранения 18/24 мес."
+  },
+  "marquee.taste": {
+    "en": "Vibrant Sweet Taste",
+    "ru": "Яркий сладкий вкус"
+  },
+  "marquee.private": {
+    "en": "Custom Private Labels",
+    "ru": "Частные торговые марки"
+  },
+  "catalog.tag": {
+    "en": "Our Offerings",
+    "ru": "Наш ассортимент"
+  },
+  "catalog.title.a": {
+    "en": "Your sweet corn knows",
+    "ru": "Ваша кукуруза знает,"
+  },
+  "catalog.title.b": {
+    "en": "so does ",
+    "ru": "как и "
+  },
+  "catalog.title.highlight": {
+    "en": "agricultural science",
+    "ru": "наука о земледелии"
+  },
+  "filter.all": {
+    "en": "All Products",
+    "ru": "Все продукты"
+  },
+  "filter.vacuum": {
+    "en": "Vacuum Packed Segment",
+    "ru": "Вакуумная упаковка"
+  },
+  "filter.frozen": {
+    "en": "Frozen Segment (-18°C)",
+    "ru": "Замороженный сегмент (-18°C)"
+  },
+  "badge.vacuum": {
+    "en": "Vacuum Preserved",
+    "ru": "Вакуумная консервация"
+  },
+  "badge.frozen": {
+    "en": "Frozen (-18°C)",
+    "ru": "Замороженный (-18°C)"
+  },
+  "badge.shelf18": {
+    "en": "18 Months Shelf Life",
+    "ru": "Срок хранения 18 мес."
+  },
+  "badge.shelf24": {
+    "en": "24 Months Shelf Life",
+    "ru": "Срок хранения 24 мес."
+  },
+  "prod.twin.title": {
+    "en": "Sweet Corn on Cobs (Twin Cobs)",
+    "ru": "Кукуруза в початках (двойная упаковка)"
+  },
+  "prod.twin.desc": {
+    "en": "Naturally grown, vacuum-sealed sweet corn cobs processed directly from our fields in India. Perfectly locks in sweet taste, natural color, and tender texture for premium retail distribution.",
+    "ru": "Натурально выращенные вакуумные початки сладкой кукурузы, обработанные напрямую с наших полей в Индии. Идеально сохраняют сладкий вкус, натуральный цвет и нежную текстуру для премиальной розничной дистрибуции."
+  },
+  "prod.single.title": {
+    "en": "Sweet Corn on Cobs (Single Cob)",
+    "ru": "Кукуруза в початке (одинарная)"
+  },
+  "prod.single.desc": {
+    "en": "Naturally grown, single vacuum-sealed sweet corn cob, retaining maximum freshness and nutrition. Convenient portion size for individual serving and retail ease.",
+    "ru": "Натурально выращенный одинарный вакуумный початок сладкой кукурузы, сохраняющий максимальную свежесть и питательность. Удобный размер порции для индивидуальной подачи."
+  },
+  "prod.cut4.title": {
+    "en": "Vacuum Corn Cut Cobs (2 Cobs in 4 Pieces)",
+    "ru": "Вакуумные нарезные початки (2 початка на 4 части)"
+  },
+  "prod.cut4.desc": {
+    "en": "Premium sweet corn cut into uniform, smaller portions, pre-cooked and vacuum sealed. Perfect for family meals, grills, and effortless cooking.",
+    "ru": "Премиальная сладкая кукуруза, нарезанная на одинаковые небольшие порции, предварительно приготовленная и вакуумированная. Идеально для семейных обедов и гриля."
+  },
+  "prod.cut12.title": {
+    "en": "Vacuum Corn Cut Cobs (12 Pieces)",
+    "ru": "Вакуумные нарезные початки (12 штук)"
+  },
+  "prod.cut12.desc": {
+    "en": "Naturally grown sweet corn portions cut into 12 uniform pieces and vacuum packed to lock in natural sweetness. Perfect for catering, large family meals, and food service.",
+    "ru": "Натурально выращенная кукуруза, нарезанная на 12 одинаковых кусков и вакуумированная для сохранения сладости. Идеально для кейтеринга и общепита."
+  },
+  "prod.cut8.title": {
+    "en": "Vacuum Corn Cut Cobs (8 Pieces)",
+    "ru": "Вакуумные нарезные початки (8 штук)"
+  },
+  "prod.cut8.desc": {
+    "en": "Uniformly cut sweet corn in 8 pieces, pre-cooked and vacuum sealed to retain maximum freshness, tender texture, and rich flavor.",
+    "ru": "Одинаково нарезанная сладкая кукуруза (8 штук), предварительно приготовленная и вакуумированная для максимальной свежести, нежной текстуры и насыщенного вкуса."
+  },
+  "prod.cut6.title": {
+    "en": "Vacuum Corn Cut Cobs (6 Pieces)",
+    "ru": "Вакуумные нарезные початки (6 штук)"
+  },
+  "prod.cut6.desc": {
+    "en": "Uniform sweet corn cut into 6 handy pieces. Vacuum sealed to maintain natural golden color, sweetness, and nutrition.",
+    "ru": "Сладкая кукуруза, нарезанная на 6 удобных кусков. Вакуумная упаковка сохраняет натуральный золотистый цвет, сладость и питательность."
+  },
+  "prod.vkernels.title": {
+    "en": "Vacuum Sweet Corn Kernels",
+    "ru": "Вакуумные зёрна сладкой кукурузы"
+  },
+  "prod.vkernels.desc": {
+    "en": "Extracted kernels, vacuum packed to retain golden color and tender moisture. Fully retail-ready.",
+    "ru": "Отделённые зёрна, вакуумированные для сохранения золотистого цвета и нежной влажности. Полностью готовы к розничной продаже."
+  },
+  "prod.fcobs.title": {
+    "en": "Frozen Sweet Corn on Cob",
+    "ru": "Замороженная сладкая кукуруза в початках"
+  },
+  "prod.fcobs.desc": {
+    "en": "Individually Quick Frozen (IQF) cobs that lock in peak sweetness and dietary integrity throughout the supply chain.",
+    "ru": "Початки IQF, сохраняющие пиковую сладость и диетическую ценность на всём пути цепочки поставок."
+  },
+  "prod.fkernels.title": {
+    "en": "Frozen Sweet Corn Kernels",
+    "ru": "Замороженные зёрна сладкой кукурузы"
+  },
+  "prod.fkernels.desc": {
+    "en": "Individually Quick Frozen (IQF) sweet corn kernels sorted using state-of-the-art optical color-sorters. Ensures clean uniform size and sweet golden freshness, optimized for foodservice and distribution.",
+    "ru": "IQF-замороженные зёрна сладкой кукурузы, отсортированные с помощью оптических сортировщиков. Однородный размер и золотистая свежесть, оптимизированные для общепита и дистрибуции."
+  },
+  "spec.pack_weight": {
+    "en": "Pack Weight",
+    "ru": "Вес упаковки"
+  },
+  "spec.packs_per_box": {
+    "en": "Packs per Box",
+    "ru": "Упаковок в коробке"
+  },
+  "spec.loadability": {
+    "en": "Loadability",
+    "ru": "Загрузка"
+  },
+  "spec.without_pallet": {
+    "en": "Without Pallet",
+    "ru": "Без паллет"
+  },
+  "spec.with_pallet": {
+    "en": "With Pallet",
+    "ru": "С паллетами"
+  },
+  "spec.cobs_per_pack": {
+    "en": "Cobs per Pack",
+    "ru": "Початков в упаковке"
+  },
+  "spec.preservation": {
+    "en": "Preservation",
+    "ru": "Консервация"
+  },
+  "spec.preservation.value": {
+    "en": "Vacuum Preserved",
+    "ru": "Вакуумная консервация"
+  },
+  "spec.shelf_life": {
+    "en": "Shelf Life",
+    "ru": "Срок хранения"
+  },
+  "spec.shelf_life.18": {
+    "en": "18 Months",
+    "ru": "18 месяцев"
+  },
+  "spec.cob_weight": {
+    "en": "Cob Weight",
+    "ru": "Вес початка"
+  },
+  "spec.cobs_per_box": {
+    "en": "Cobs per Box",
+    "ru": "Початков в коробке"
+  },
+  "spec.net_weight": {
+    "en": "Net Weight",
+    "ru": "Масса нетто"
+  },
+  "spec.target_temp": {
+    "en": "Target Temp",
+    "ru": "Целевая темп."
+  },
+  "spec.box_option": {
+    "en": "Box Option",
+    "ru": "Вариант коробки"
+  },
+  "spec.bag_option": {
+    "en": "Bag Option",
+    "ru": "Вариант мешка"
+  },
+  "spec.without_pallet_box": {
+    "en": "Without Pallet (Box)",
+    "ru": "Без паллет (коробки)"
+  },
+  "spec.without_pallet_bag": {
+    "en": "Without Pallet (Bag)",
+    "ru": "Без паллет (мешки)"
+  },
+  "spec.harvest_window": {
+    "en": "Harvest Window",
+    "ru": "Период сбора"
+  },
+  "spec.harvest_window.value": {
+    "en": "IQF Processed within 4 hours",
+    "ru": "IQF обработка в течение 4 часов"
+  },
+  "editorial.title": {
+    "en": "Better fields, better crop",
+    "ru": "Лучшие поля, лучший урожай"
+  },
+  "editorial.desc": {
+    "en": "High fiber, 100% natural, non-GMO, zero additives. Just a pure sweet bite of prime Indian sweet corn.",
+    "ru": "Высокое содержание клетчатки, 100% натуральная, без ГМО, без добавок. Чистый сладкий вкус лучшей индийской кукурузы."
+  },
+  "calc.promo.title": {
+    "en": "Container load calculator",
+    "ru": "Калькулятор загрузки контейнера"
+  },
+  "calc.promo.desc": {
+    "en": "Estimate your container loadability, pallet configurations, and shipment weight automatically.",
+    "ru": "Автоматически рассчитайте загрузку контейнера, конфигурацию паллет и вес партии."
+  },
+  "calc.promo.btn": {
+    "en": "Open Calculator",
+    "ru": "Открыть калькулятор"
+  },
+  "calc.tag": {
+    "en": "Logistics Tools",
+    "ru": "Логистические инструменты"
+  },
+  "calc.title.a": {
+    "en": "B2B Container ",
+    "ru": "B2B Контейнерный "
+  },
+  "calc.title.highlight": {
+    "en": "Load Calculator",
+    "ru": "калькулятор загрузки"
+  },
+  "calc.desc": {
+    "en": "Select a product and specify your volume requirements to estimate shipment weight, container occupancy, and pallet configurations automatically.",
+    "ru": "Выберите продукт и укажите объём, чтобы автоматически рассчитать вес партии, занятость контейнера и конфигурацию паллет."
+  },
+  "calc.select.label": {
+    "en": "Select Product",
+    "ru": "Выберите продукт"
+  },
+  "calc.optgroup.vacuum": {
+    "en": "Vacuum Packed Segment",
+    "ru": "Вакуумная упаковка"
+  },
+  "calc.optgroup.frozen": {
+    "en": "IQF Frozen Segment (-18°C)",
+    "ru": "IQF Замороженный сегмент (-18°C)"
+  },
+  "calc.opt.vtwin": {
+    "en": "Vacuum Sweet Corn Twin Cobs (450g)",
+    "ru": "Вакуумные початки (двойные, 450 г)"
+  },
+  "calc.opt.vsingle": {
+    "en": "Vacuum Sweet Corn Single Cob (250g)",
+    "ru": "Вакуумный початок (одинарный, 250 г)"
+  },
+  "calc.opt.vcut": {
+    "en": "Vacuum Corn Cut Cobs (500g)",
+    "ru": "Вакуумные нарезные початки (500 г)"
+  },
+  "calc.opt.vkernels": {
+    "en": "Vacuum Sweet Corn Kernels (300g)",
+    "ru": "Вакуумные зёрна кукурузы (300 г)"
+  },
+  "calc.opt.fcob": {
+    "en": "Frozen Sweet Corn on Cob (12kg net box)",
+    "ru": "Замороженные початки (12 кг нетто)"
+  },
+  "calc.opt.fkbox": {
+    "en": "Frozen Sweet Corn Kernels (10kg net box)",
+    "ru": "Замороженные зёрна (10 кг нетто, коробка)"
+  },
+  "calc.opt.fkbag": {
+    "en": "Frozen Sweet Corn Kernels (30kg net bag)",
+    "ru": "Замороженные зёрна (30 кг нетто, мешок)"
+  },
+  "calc.qty.boxes": {
+    "en": "Order Volume (Boxes)",
+    "ru": "Объём заказа (коробки)"
+  },
+  "calc.qty.bags": {
+    "en": "Order Volume (Bags)",
+    "ru": "Объём заказа (мешки)"
+  },
+  "calc.palletized": {
+    "en": "Request Palletized Shipment",
+    "ru": "Запросить паллетную отгрузку"
+  },
+  "calc.out.netweight": {
+    "en": "Estimated Total Net Weight",
+    "ru": "Расчётная масса нетто"
+  },
+  "calc.out.packages": {
+    "en": "Estimated Total Boxes/Bags",
+    "ru": "Расчётное кол-во коробок/мешков"
+  },
+  "calc.out.capacity": {
+    "en": "Container Capacity Occupancy",
+    "ru": "Заполнение контейнера"
+  },
+  "calc.out.pallet": {
+    "en": "Pallet Configuration details",
+    "ru": "Конфигурация паллет"
+  },
+  "calc.out.under": {
+    "en": "Under Limit",
+    "ru": "В пределах нормы"
+  },
+  "calc.out.over": {
+    "en": "Exceeds Capacity",
+    "ru": "Превышает ёмкость"
+  },
+  "calc.out.unpalletized": {
+    "en": "Unpalletized Load (Loose Packed Boxes)",
+    "ru": "Без паллет (свободная укладка)"
+  },
+  "modal.specs.title": {
+    "en": "Product Specifications",
+    "ru": "Спецификации продукта"
+  },
+  "modal.btn.inquire": {
+    "en": "Inquire Now",
+    "ru": "Отправить запрос"
+  },
+  "modal.btn.calc": {
+    "en": "Calculate Loadability",
+    "ru": "Рассчитать загрузку"
+  },
+  "about.title": {
+    "en": "About IZIEAT | Global Food Processing & Export Excellence",
+    "ru": "О компании IZIEAT | Мировое совершенство в переработке и экспорте продуктов питания"
+  },
+  "about.meta.desc": {
+    "en": "Founded in 2012, IZIEAT is a trusted global food processing and export partner, delivering premium agricultural products from India to international markets.",
+    "ru": "Основана в 2012 году. IZIEAT — надёжный глобальный партнёр по переработке и экспорту, поставляющий премиальную сельскохозяйственную продукцию из Индии на мировые рынки."
+  },
+  "about.hero.tag": {
+    "en": "Our Heritage",
+    "ru": "Наше наследие"
+  },
+  "about.hero.title.a": {
+    "en": "Global Food Processing",
+    "ru": "Мировая переработка"
+  },
+  "about.hero.title.b": {
+    "en": "and ",
+    "ru": "и "
+  },
+  "about.hero.title.highlight": {
+    "en": "Export Excellence",
+    "ru": "экспортное совершенство"
+  },
+  "about.hero.subtitle": {
+    "en": "Delivering high-quality agricultural products to international markets since 2012.",
+    "ru": "Поставка высококачественной сельскохозяйственной продукции на международные рынки с 2012 года."
+  },
+  "about.tag.est": {
+    "en": "Established 2012",
+    "ru": "Основана в 2012 году"
+  },
+  "about.editorial.headline": {
+    "en": "A Legacy of Trust and Quality Control",
+    "ru": "Наследие доверия и контроля качества"
+  },
+  "about.editorial.p1": {
+    "en": "Founded in 2012, <strong>IZIEAT</strong> is a global food processing and export company dedicated to delivering high-quality Indian food products to international markets.",
+    "ru": "Основанная в 2012 году, <strong>IZIEAT</strong> — глобальная компания по переработке и экспорту продуктов питания, специализирующаяся на поставке высококачественной индийской продукции на мировые рынки."
+  },
+  "about.editorial.p2": {
+    "en": "Built on a foundation of reliability, stringent quality control, and integrated logistics, the company has established itself as a trusted partner in global food trade. Its operations are driven by advanced food processing and modern packaging techniques, with a strong focus on vacuum-packed products.",
+    "ru": "Основанная на надёжности, строгом контроле качества и интегрированной логистике, компания зарекомендовала себя как надёжный партнёр в мировой торговле продовольствием. Её деятельность основана на передовых технологиях переработки и современной упаковке с акцентом на вакуумную продукцию."
+  },
+  "about.editorial.p3": {
+    "en": "In addition to bulk distribution, we operate as a specialized <strong>private labeling company</strong>, custom-packaging our premium agricultural products under your brand specs to meet global retail and barcode standards.",
+    "ru": "Помимо оптовых поставок, мы работаем как специализированная <strong>компания частной маркировки</strong>, упаковывая нашу премиальную продукцию под вашим брендом в соответствии с мировыми стандартами розничной торговли и штрих-кодирования."
+  },
+  "about.milestone.years": {
+    "en": "14+",
+    "ru": "14+"
+  },
+  "about.milestone.years.desc": {
+    "en": "Years of Global Trade",
+    "ru": "Лет в мировой торговле"
+  },
+  "about.milestone.source": {
+    "en": "100%",
+    "ru": "100%"
+  },
+  "about.milestone.source.desc": {
+    "en": "Indian Agricultural Source",
+    "ru": "Индийское сельское хозяйство"
+  },
+  "about.milestone.grade": {
+    "en": "Grade-A",
+    "ru": "Класс-A"
+  },
+  "about.milestone.grade.desc": {
+    "en": "International Compliance",
+    "ru": "Международное соответствие"
+  },
+  "about.img.caption.title": {
+    "en": "IZIEAT Processing & Packaging Facility",
+    "ru": "Перерабатывающий и упаковочный завод IZIEAT"
+  },
+  "about.img.caption.sub": {
+    "en": "Automated vacuum processing, hygienic standards & global export compliance",
+    "ru": "Автоматизированная вакуумная обработка, гигиенические стандарты и глобальное экспортное соответствие"
+  },
+  "about.tech.tag": {
+    "en": "Logistics & Technology",
+    "ru": "Логистика и технологии"
+  },
+  "about.tech.headline": {
+    "en": "Modern Processing & Seamless Export Cycles",
+    "ru": "Современная обработка и бесшовные экспортные циклы"
+  },
+  "about.tech.p1": {
+    "en": "<strong>IZIEAT</strong> maintains rigorous standards across all stages of processing, packaging, and export, ensuring compliance with international food safety regulations. Its product portfolio spans both processed and fresh food segments, each managed with precision to guarantee consistent quality and proper handling.",
+    "ru": "<strong>IZIEAT</strong> поддерживает строгие стандарты на всех этапах переработки, упаковки и экспорта, обеспечивая соответствие международным нормам безопасности пищевых продуктов. Ассортимент включает как переработанные, так и свежие продукты, каждый из которых управляется с точностью для гарантии стабильного качества."
+  },
+  "about.tech.p2": {
+    "en": "With a well-established export network across Northern Europe and Russia, the company oversees the entire export cycle, including documentation, customs clearance, and coordinated logistics, ensuring timely delivery. By sourcing all products from India's rich agricultural base and combining it with advanced processing and efficient global logistics, <strong>IZIEAT</strong> continues to strengthen its international presence while upholding its commitment to quality, efficiency, and long-term partnerships.",
+    "ru": "Имея развитую экспортную сеть в Северной Европе и России, компания контролирует весь экспортный цикл, включая документацию, таможенное оформление и координированную логистику, обеспечивая своевременную доставку. Закупая всю продукцию из богатой сельскохозяйственной базы Индии и сочетая это с передовой переработкой и эффективной логистикой, <strong>IZIEAT</strong> продолжает укреплять международное присутствие."
+  },
+  "about.tech.card1.title": {
+    "en": "Vacuum Packaging Advantages",
+    "ru": "Преимущества вакуумной упаковки"
+  },
+  "about.tech.card1.text": {
+    "en": "Vacuum packaging extends shelf life, preserves freshness, and maintains nutritional value by eliminating air, thereby reducing contamination and spoilage risks.",
+    "ru": "Вакуумная упаковка продлевает срок хранения, сохраняет свежесть и питательную ценность, удаляя воздух и снижая риск загрязнения и порчи."
+  },
+  "about.tech.card2.title": {
+    "en": "Sustainable Distribution",
+    "ru": "Устойчивая дистрибуция"
+  },
+  "about.tech.card2.text": {
+    "en": "This method supports long-distance transportation, minimizes the need for preservatives, improves storage efficiency, and contributes to sustainable distribution by reducing food waste.",
+    "ru": "Этот метод поддерживает транспортировку на дальние расстояния, минимизирует использование консервантов, повышает эффективность хранения и способствует устойчивой дистрибуции, сокращая пищевые отходы."
+  },
+  "about.tech.card3.title": {
+    "en": "Private Label Capabilities",
+    "ru": "Возможности частной маркировки"
+  },
+  "about.tech.card3.text": {
+    "en": "We custom-package our premium crops under your retail brand specifications, delivering compliant, high-volume private label solutions.",
+    "ru": "Мы упаковываем нашу премиальную продукцию по спецификациям вашего бренда, предоставляя сертифицированные решения для частной маркировки."
+  },
+  "contact.page.title": {
+    "en": "Contact Us | IZIEAT Premium Agricultural Exports",
+    "ru": "Свяжитесь с нами | IZIEAT — Премиальный сельскохозяйственный экспорт"
+  },
+  "contact.page.meta.desc": {
+    "en": "Reach out to IZIEAT for bulk sweet corn procurement, private label inquiries, and distribution partnerships. Use our interactive inquiry builder to get in touch.",
+    "ru": "Свяжитесь с IZIEAT для оптовых закупок сладкой кукурузы, частной маркировки и партнёрства в дистрибуции."
+  },
+  "contact.hero.tag": {
+    "en": "Start a Partnership",
+    "ru": "Начните партнёрство"
+  },
+  "contact.hero.title.a": {
+    "en": "Let's Build ",
+    "ru": "Давайте создадим "
+  },
+  "contact.hero.title.highlight": {
+    "en": "Something Great",
+    "ru": "нечто великое"
+  },
+  "contact.hero.subtitle": {
+    "en": "We streamline bulk agricultural sourcing and logistics. Tell us about your needs and get structured answers.",
+    "ru": "Мы оптимизируем оптовые закупки сельскохозяйственной продукции и логистику. Расскажите о ваших потребностях и получите структурированные ответы."
+  },
+  "stepper.step1.title": {
+    "en": "What is the nature of your inquiry?",
+    "ru": "Какова суть вашего запроса?"
+  },
+  "stepper.step1.subtitle": {
+    "en": "Select the option that best fits your business requirement.",
+    "ru": "Выберите вариант, наиболее подходящий для вашего бизнеса."
+  },
+  "stepper.opt.bulk.title": {
+    "en": "Bulk Procurement",
+    "ru": "Оптовые закупки"
+  },
+  "stepper.opt.bulk.desc": {
+    "en": "Full Container Load (FCL) purchases of sweet corn.",
+    "ru": "Закупки сладкой кукурузы полными контейнерами (FCL)."
+  },
+  "stepper.opt.label.title": {
+    "en": "Private Labeling",
+    "ru": "Частная маркировка"
+  },
+  "stepper.opt.label.desc": {
+    "en": "Custom vacuum or frozen packaging branded for your retail stores.",
+    "ru": "Индивидуальная вакуумная или замороженная упаковка для ваших магазинов."
+  },
+  "stepper.opt.logistics.title": {
+    "en": "Logistics Partnership",
+    "ru": "Логистическое партнёрство"
+  },
+  "stepper.opt.logistics.desc": {
+    "en": "Coordinating export cycles and storage routes across Europe/Russia.",
+    "ru": "Координация экспортных циклов и маршрутов хранения в Европе/России."
+  },
+  "stepper.opt.general.title": {
+    "en": "General Inquiry",
+    "ru": "Общий запрос"
+  },
+  "stepper.opt.general.desc": {
+    "en": "Feedback, support, specifications requests, or other questions.",
+    "ru": "Обратная связь, поддержка, запросы спецификаций и другие вопросы."
+  },
+  "stepper.step2.title": {
+    "en": "Which products are you interested in?",
+    "ru": "Какие продукты вас интересуют?"
+  },
+  "stepper.step2.subtitle": {
+    "en": "Select all that apply (minimum of one).",
+    "ru": "Выберите все подходящие варианты (минимум один)."
+  },
+  "stepper.prod.badge.vacuum": {
+    "en": "Vacuum Segment",
+    "ru": "Вакуумный сегмент"
+  },
+  "stepper.prod.badge.frozen": {
+    "en": "Frozen (-18°C)",
+    "ru": "Замороженный (-18°C)"
+  },
+  "stepper.prod.badge.custom": {
+    "en": "Custom Crop",
+    "ru": "Особый продукт"
+  },
+  "stepper.prod.twin.title": {
+    "en": "Twin Corn Cobs",
+    "ru": "Двойные початки"
+  },
+  "stepper.prod.twin.desc": {
+    "en": "Naturally preserved, juicy corn cobs in double vacuum packs.",
+    "ru": "Натурально сохранённые сочные початки в двойной вакуумной упаковке."
+  },
+  "stepper.prod.kernels.title": {
+    "en": "Vacuum Kernels",
+    "ru": "Вакуумные зёрна"
+  },
+  "stepper.prod.kernels.desc": {
+    "en": "Crispy sweet corn kernels, pre-sealed to preserve crisp texture.",
+    "ru": "Хрустящие зёрна сладкой кукурузы, упакованные для сохранения текстуры."
+  },
+  "stepper.prod.frozencob.title": {
+    "en": "IQF Corn on Cob",
+    "ru": "IQF початки"
+  },
+  "stepper.prod.frozencob.desc": {
+    "en": "Individually Quick Frozen (IQF) cobs maintaining peak harvest freshness.",
+    "ru": "IQF-початки, сохраняющие свежесть урожая."
+  },
+  "stepper.prod.frozenkernel.title": {
+    "en": "IQF Corn Kernels",
+    "ru": "IQF зёрна"
+  },
+  "stepper.prod.frozenkernel.desc": {
+    "en": "Individually Quick Frozen kernels in bulk boxes or bags.",
+    "ru": "IQF-зёрна в коробках или мешках."
+  },
+  "stepper.prod.other.title": {
+    "en": "Other Products",
+    "ru": "Другие продукты"
+  },
+  "stepper.prod.other.desc": {
+    "en": "Custom packaging requirements or other agricultural imports.",
+    "ru": "Индивидуальные требования к упаковке или другие сельскохозяйственные импорты."
+  },
+  "stepper.step3.title": {
+    "en": "Tell us about your business",
+    "ru": "Расскажите о вашем бизнесе"
+  },
+  "stepper.step3.subtitle": {
+    "en": "Provide your contact details so our B2B team can reach out.",
+    "ru": "Укажите контактные данные, чтобы наш B2B-отдел мог связаться с вами."
+  },
+  "stepper.form.name": {
+    "en": "Full Name",
+    "ru": "Полное имя"
+  },
+  "stepper.form.company": {
+    "en": "Company Name",
+    "ru": "Название компании"
+  },
+  "stepper.form.email": {
+    "en": "Business Email",
+    "ru": "Рабочая эл. почта"
+  },
+  "stepper.form.details": {
+    "en": "Inquiry Details",
+    "ru": "Детали запроса"
+  },
+  "stepper.form.placeholder.name": {
+    "en": "John Doe",
+    "ru": "Иван Иванов"
+  },
+  "stepper.form.placeholder.company": {
+    "en": "Acme Logistics Ltd",
+    "ru": "ООО «Логистика»"
+  },
+  "stepper.form.placeholder.email": {
+    "en": "john@acme.com",
+    "ru": "ivan@company.com"
+  },
+  "stepper.form.placeholder.message": {
+    "en": "Please outline your estimated volumes, destination port, or specific custom labeling instructions...",
+    "ru": "Укажите примерные объёмы, порт назначения или требования к частной маркировке..."
+  },
+  "stepper.btn.back": {
+    "en": "Back",
+    "ru": "Назад"
+  },
+  "stepper.btn.next": {
+    "en": "Next Step",
+    "ru": "Далее"
+  },
+  "stepper.btn.submit": {
+    "en": "Submit Inquiry",
+    "ru": "Отправить запрос"
+  },
+  "stepper.btn.submitting": {
+    "en": "Submitting...",
+    "ru": "Отправка..."
+  },
+  "sidebar.hq.tag": {
+    "en": "Corporate Headquarters",
+    "ru": "Корпоративная штаб-квартира"
+  },
+  "sidebar.hq.title": {
+    "en": "IZIEAT Private Limited",
+    "ru": "IZIEAT Private Limited"
+  },
+  "sidebar.hq.address.label": {
+    "en": "Office Address",
+    "ru": "Адрес офиса"
+  },
+  "sidebar.hq.address.value": {
+    "en": "Plot No- 498, 4th Floor, Sector-19, Dwarka, New Delhi - 110075, India",
+    "ru": "Участок № 498, 4-й этаж, Сектор-19, Дварка, Нью-Дели - 110075, Индия"
+  },
+  "sidebar.hq.email.label": {
+    "en": "B2B Partnership Email",
+    "ru": "Эл. почта для B2B партнёрства"
+  },
+  "sidebar.hq.phone.label": {
+    "en": "Corporate Phone",
+    "ru": "Корпоративный телефон"
+  },
+  "sidebar.hq.hours.label": {
+    "en": "Operating Hours",
+    "ru": "Время работы"
+  },
+  "sidebar.hq.hours.value": {
+    "en": "Mon - Sat: 9:30 AM - 6:30 PM IST",
+    "ru": "Пн - Сб: 9:30 - 18:30 IST"
+  },
+  "faq.tag": {
+    "en": "Frequently Asked",
+    "ru": "Часто задаваемые"
+  },
+  "faq.title": {
+    "en": "B2B Partnerships FAQ",
+    "ru": "FAQ по B2B-партнёрству"
+  },
+  "faq.q1": {
+    "en": "What is your Minimum Order Quantity (MOQ)?",
+    "ru": "Какой минимальный объём заказа (MOQ)?"
+  },
+  "faq.a1": {
+    "en": "Our standard MOQ for international exports is one 20ft Full Container Load (FCL) for vacuum segments (~4,400 boxes) and one 40ft Reefer Container for frozen IQF segments (~2,500 boxes).",
+    "ru": "Наш стандартный MOQ для международного экспорта — один 20-фт контейнер (FCL) для вакуумной продукции (~4 400 коробок) и один 40-фт рефрижератор для IQF-продукции (~2 500 коробок)."
+  },
+  "faq.q2": {
+    "en": "Do you offer custom private labeling?",
+    "ru": "Вы предлагаете частную маркировку?"
+  },
+  "faq.a2": {
+    "en": "Yes! We offer full private label packaging solutions. We can handle custom pouch designs, cardboard retail boxes, and master boxes printed with your brand logo and UPC codes.",
+    "ru": "Да! Мы предлагаем полные решения для частной маркировки: дизайн пакетов, розничные коробки и мастер-коробки с вашим логотипом и UPC-кодами."
+  },
+  "faq.q3": {
+    "en": "What certifications do your crops hold?",
+    "ru": "Какие сертификаты имеет ваша продукция?"
+  },
+  "faq.a3": {
+    "en": "All our products originate from grade-A compliant fields in India and undergo strict quality checks. Our processing facilities are ISO 22000, HACCP, and APEDA certified for global export.",
+    "ru": "Вся наша продукция выращивается на сертифицированных полях класса А в Индии и проходит строгий контроль качества. Наши предприятия сертифицированы по ISO 22000, HACCP и APEDA."
+  },
+  "faq.q4": {
+    "en": "What are your typical shipping lead times?",
+    "ru": "Каковы типичные сроки доставки?"
+  },
+  "faq.a4": {
+    "en": "For standard specifications, orders are ready for export port handover within 15–20 days. Custom packaging and private labeling orders typically take 30 days for design and plate approvals on the initial run.",
+    "ru": "При стандартных спецификациях заказы готовы к передаче в экспортный порт в течение 15–20 дней. Заказы с частной маркировкой обычно занимают 30 дней для утверждения дизайна при первом выпуске."
+  },
+  "legal.privacy.title": {
+    "en": "Privacy Policy",
+    "ru": "Политика конфиденциальности"
+  },
+  "legal.terms.title": {
+    "en": "Terms & Conditions",
+    "ru": "Условия использования"
+  },
+  "legal.cookies.title": {
+    "en": "Cookie Policy",
+    "ru": "Политика Cookie"
+  },
+  "cookie.title": {
+    "en": "Cookie Preferences",
+    "ru": "Настройки файлов cookie"
+  },
+  "cookie.text": {
+    "en": "We use cookies and essential storage to optimize your browsing experience, remember language settings, and ensure smooth B2B operations.",
+    "ru": "Мы используем файлы cookie и локальное хранилище для оптимизации работы сайта, сохранения настроек языка и удобства B2B-взаимодействия."
+  },
+  "cookie.learn_more": {
+    "en": "Learn more",
+    "ru": "Подробнее"
+  },
+  "cookie.accept": {
+    "en": "Accept All",
+    "ru": "Принять все"
+  },
+  "cookie.decline": {
+    "en": "Necessary Only",
+    "ru": "Только необходимые"
+  }
+}

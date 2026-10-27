@@ -6,7 +6,7 @@ import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import Lenis from "lenis";
 
 import { FluidBackgroundMesh } from "@/components/master/FluidBackgroundMesh";
-import { VolumetricFluidRibbon } from "@/components/master/VolumetricFluidRibbon";
+import { FluidGradientAura } from "@/components/master/FluidGradientAura";
 import { CursorParticleCanvas } from "@/components/master/CursorParticleCanvas";
 import { TravelingPrismaticSphere } from "@/components/master/TravelingPrismaticSphere";
 import { MasterNav } from "@/components/master/MasterNav";
@@ -110,8 +110,8 @@ export default function Home() {
       {/* 1. Fluid Ambient Mesh Gradient */}
       <FluidBackgroundMesh />
 
-      {/* 2. 3D Volumetric Fluid Gradient Wave Ribbon (Inspired by reference screenshot) */}
-      <VolumetricFluidRibbon />
+      {/* 2. Silky GPU-Accelerated Fluid Gradient Aura (Ethereal, zero-lag organic depth) */}
+      <FluidGradientAura />
 
       {/* 3. Interactive Cursor Particle Emitter */}
       <CursorParticleCanvas />

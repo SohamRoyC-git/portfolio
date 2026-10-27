@@ -11,6 +11,21 @@ interface StardustTrailParticle {
   maxLife: number;
 }
 
+interface SparkleParticle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  size: number;
+  rot: number;
+  rotSpeed: number;
+  alpha: number;
+  life: number;
+  maxLife: number;
+  color: string;
+  isStar: boolean;
+}
+
 export const TravelingPrismaticSphere: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const scrollRef = useRef({ progress: 0 });
@@ -31,7 +46,7 @@ export const TravelingPrismaticSphere: React.FC = () => {
     };
     window.addEventListener("resize", handleResize);
 
-    // Mouse tracking for localized color inversion hover
+    // Mouse tracking
     let mouseX = -1000;
     let mouseY = -1000;
     let targetMouseX = -1000;
@@ -67,16 +82,117 @@ export const TravelingPrismaticSphere: React.FC = () => {
     // Smooth hover transition factor (0 = normal, 1 = fully inverted)
     let hoverFactor = 0;
 
-    // Stardust trail
+    // Elastic click bounce & optical shockwave ring
+    let clickScale = 1.0;
+    let clickScaleVel = 0;
+    let shockwaveRadius = 0;
+    let shockwaveAlpha = 0;
+
+    // Stardust trail & click sparkles pools
     const trail: StardustTrailParticle[] = [];
+    const sparkles: SparkleParticle[] = [];
     let lastEmitX = currentX;
     let lastEmitY = currentY;
+
+    // Click handler to trigger sparkles and elastic pulse
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.closest("button") ||
+          target.closest("a") ||
+          target.closest("input") ||
+          target.getAttribute("role") === "button")
+      ) {
+        return;
+      }
+
+      const dx = e.clientX - currentX;
+      const dy = e.clientY - currentY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < currentRadius * 1.35) {
+        // Trigger elastic compression pulse
+        clickScale = 0.90;
+        clickScaleVel = 0.08;
+
+        // Trigger expanding optical shockwave ripple
+        shockwaveRadius = currentRadius * 0.9;
+        shockwaveAlpha = 0.9;
+
+        // Burst of radiant 4-pointed sparkle stars and prismatic diamond embers
+        const count = width < 640 ? 18 : 28;
+        for (let i = 0; i < count; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = Math.random() * 5 + 2.5;
+          const isStar = Math.random() < 0.45; // 45% four-pointed diamond twinkle stars
+          const colors = [
+            "#00FF87",
+            "#10B981",
+            "#38BDF8",
+            "#F472B6",
+            "#E0E7FF",
+            "#FFFFFF",
+          ];
+          const color = colors[Math.floor(Math.random() * colors.length)];
+
+          sparkles.push({
+            x: currentX + Math.cos(angle) * (currentRadius * 0.4),
+            y: currentY + Math.sin(angle) * (currentRadius * 0.4),
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            size: isStar ? Math.random() * 6 + 6 : Math.random() * 3 + 2,
+            rot: Math.random() * Math.PI * 2,
+            rotSpeed: (Math.random() - 0.5) * 0.12,
+            alpha: 1.0,
+            life: 0,
+            maxLife: Math.floor(Math.random() * 25 + 35),
+            color,
+            isStar,
+          });
+        }
+      }
+    };
+    window.addEventListener("click", handleClick);
+
+    // Helper to draw a 4-pointed diamond sparkle star
+    const drawSparkleStar = (
+      context: CanvasRenderingContext2D,
+      cx: number,
+      cy: number,
+      size: number,
+      rotation: number
+    ) => {
+      context.save();
+      context.translate(cx, cy);
+      context.rotate(rotation);
+      context.beginPath();
+
+      const spikes = 4;
+      const outerRadius = size;
+      const innerRadius = size * 0.22;
+
+      for (let i = 0; i < spikes * 2; i++) {
+        const r = i % 2 === 0 ? outerRadius : innerRadius;
+        const angle = (i * Math.PI) / spikes;
+        const x = Math.cos(angle) * r;
+        const y = Math.sin(angle) * r;
+        if (i === 0) {
+          context.moveTo(x, y);
+        } else {
+          context.lineTo(x, y);
+        }
+      }
+      context.closePath();
+      context.fill();
+      context.restore();
+    };
 
     const render = () => {
       time += 0.02;
       ctx.clearRect(0, 0, width, height);
 
-      // Buttery smooth cursor lerp (luxurious inertia, zero harshness)
+      // Smooth cursor lerp
       if (targetMouseX > 0) {
         mouseX += (targetMouseX - mouseX) * 0.08;
         mouseY += (targetMouseY - mouseY) * 0.08;
@@ -91,7 +207,7 @@ export const TravelingPrismaticSphere: React.FC = () => {
       let targetRadius = isMobile ? 75 : 135;
 
       if (p < 0.18) {
-        // Section 00 (Hero): Moves dynamically from LEFT (0.36) to RIGHT (0.64) as you scroll down
+        // Section 00 (Hero): Moves dynamically from LEFT (0.36) to RIGHT (0.64)
         const t = p / 0.18;
         const leftX = width * 0.36;
         const rightX = width * 0.64;
@@ -99,7 +215,7 @@ export const TravelingPrismaticSphere: React.FC = () => {
         targetY = height * (0.42 + t * 0.08);
         targetRadius = isMobile ? 75 : 135;
       } else if (p < 0.38) {
-        // Section 01 (Statement): Sweeps sharply back to the LEFT (0.24) behind kinetic quote
+        // Section 01 (Statement): Sweeps sharply back to the LEFT (0.24)
         const t = (p - 0.18) / 0.20;
         const startX = width * 0.64;
         const endX = width * 0.24;
@@ -107,7 +223,7 @@ export const TravelingPrismaticSphere: React.FC = () => {
         targetY = height * 0.50;
         targetRadius = isMobile ? 65 : 120;
       } else if (p < 0.72) {
-        // Section 02 (Horizontal Work Gallery): Sweeps over to the RIGHT (0.76) behind orbital cards
+        // Section 02 (Horizontal Work Gallery): Sweeps over to the RIGHT (0.76)
         const t = (p - 0.38) / 0.34;
         const startX = width * 0.24;
         const endX = width * (isMobile ? 0.65 : 0.76);
@@ -115,7 +231,7 @@ export const TravelingPrismaticSphere: React.FC = () => {
         targetY = height * 0.50;
         targetRadius = isMobile ? 75 : 135;
       } else if (p < 0.88) {
-        // Section 03 (Blueprint): Sweeps back to the LEFT (0.22) behind technical code matrix
+        // Section 03 (Blueprint): Sweeps back to the LEFT (0.22)
         const t = (p - 0.72) / 0.16;
         const startX = width * (isMobile ? 0.65 : 0.76);
         const endX = width * (isMobile ? 0.30 : 0.22);
@@ -145,7 +261,12 @@ export const TravelingPrismaticSphere: React.FC = () => {
       currentY += (targetY + floatY - currentY) * 0.055;
       currentRadius += (targetRadius - currentRadius) * 0.055;
 
-      const r = Math.max(currentRadius, 50);
+      // Elastic rebound physics on click
+      clickScale += clickScaleVel;
+      clickScaleVel += (1.0 - clickScale) * 0.18;
+      clickScaleVel *= 0.78; // damping
+
+      const r = Math.max(currentRadius * clickScale, 45);
 
       // --- Cursor Distance Check & Inversion Factor ---
       const dx = mouseX - currentX;
@@ -207,7 +328,7 @@ export const TravelingPrismaticSphere: React.FC = () => {
       ctx.arc(0, 0, r * 1.7, 0, Math.PI * 2);
       ctx.fill();
 
-      // 2. Base 3D Volumetric Greenish Gradient Sphere (Always pure emerald - never changes as a whole)
+      // 2. Base 3D Volumetric Greenish Gradient Sphere (Always pure emerald)
       const sphereGrad = ctx.createRadialGradient(-r * 0.28, -r * 0.28, r * 0.04, 0, 0, r);
       sphereGrad.addColorStop(0, "rgba(255, 255, 255, 0.98)");
       sphereGrad.addColorStop(0.18, "rgba(209, 250, 229, 0.92)");
@@ -240,22 +361,17 @@ export const TravelingPrismaticSphere: React.FC = () => {
       ctx.arc(0, 0, r * 1.18, 0, Math.PI * 2);
       ctx.stroke();
 
-      // --- 4. SOFT BUTTERY INVERTED COLOR AURA (Silky, feathered, zero harsh dots or rings) ---
+      // --- 4. BRIGHTER & LARGER SOFT INVERTED COLOR AURA (Restricted ONLY to within the sphere) ---
       if (hoverFactor > 0.01) {
-        // Clip strictly to the sphere geometry so it stays ONLY inside the sphere
         ctx.save();
         ctx.beginPath();
         ctx.arc(0, 0, r, 0, Math.PI * 2);
         ctx.clip();
 
-        // Local cursor coordinates relative to sphere center
         const localX = mouseX - currentX;
         const localY = mouseY - currentY;
-
-        // Brighter and significantly larger soft diffused aura (radius ~82px with rich feathered bloom)
         const softAuraRadius = Math.max(r * 0.72, 82);
 
-        // Luminous difference blend for a vibrant, buttery inverted glow
         ctx.globalCompositeOperation = "difference";
 
         const softGlow = ctx.createRadialGradient(
@@ -266,7 +382,6 @@ export const TravelingPrismaticSphere: React.FC = () => {
           localY,
           softAuraRadius
         );
-        // Bright, luminous, velvety feathered falloff
         softGlow.addColorStop(0, `rgba(255, 255, 255, ${hoverFactor * 0.92})`);
         softGlow.addColorStop(0.28, `rgba(255, 255, 255, ${hoverFactor * 0.75})`);
         softGlow.addColorStop(0.60, `rgba(255, 255, 255, ${hoverFactor * 0.42})`);
@@ -281,7 +396,66 @@ export const TravelingPrismaticSphere: React.FC = () => {
         ctx.restore();
       }
 
+      // --- 5. EXPANDING OPTICAL SHOCKWAVE PULSE ON CLICK ---
+      if (shockwaveAlpha > 0.01) {
+        shockwaveRadius += 3.2;
+        shockwaveAlpha *= 0.92;
+
+        ctx.save();
+        ctx.strokeStyle = `rgba(0, 255, 135, ${shockwaveAlpha * 0.75})`;
+        ctx.lineWidth = 2.0;
+        ctx.beginPath();
+        ctx.arc(0, 0, shockwaveRadius, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Secondary subtle outer ripple
+        ctx.strokeStyle = `rgba(56, 189, 248, ${shockwaveAlpha * 0.45})`;
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.arc(0, 0, shockwaveRadius * 1.15, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
       ctx.restore();
+
+      // --- 6. RENDER CLICK SPARKLES & 4-POINTED TWINKLE STARS ---
+      for (let i = sparkles.length - 1; i >= 0; i--) {
+        const s = sparkles[i];
+        s.x += s.vx;
+        s.y += s.vy;
+        s.vx *= 0.94; // friction
+        s.vy *= 0.94;
+        s.rot += s.rotSpeed;
+        s.life++;
+
+        const ratio = 1 - s.life / s.maxLife;
+        if (ratio <= 0) {
+          sparkles.splice(i, 1);
+          continue;
+        }
+
+        ctx.save();
+        const currentAlpha = ratio * s.alpha;
+
+        if (s.isStar) {
+          // Radiant 4-pointed diamond twinkle star
+          ctx.fillStyle = s.color;
+          ctx.globalAlpha = currentAlpha;
+          ctx.shadowColor = s.color;
+          ctx.shadowBlur = 8;
+          drawSparkleStar(ctx, s.x, s.y, s.size * ratio, s.rot);
+        } else {
+          // Prismatic ember particle
+          ctx.fillStyle = s.color;
+          ctx.globalAlpha = currentAlpha;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.size * ratio, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.restore();
+      }
 
       animId = requestAnimationFrame(render);
     };
@@ -291,7 +465,11 @@ export const TravelingPrismaticSphere: React.FC = () => {
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("pointermove", handleMouseMove);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("pointermove", handleMouseMove);
       window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("click", handleClick);
       cancelAnimationFrame(animId);
     };
   }, []);

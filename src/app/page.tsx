@@ -5,10 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import Lenis from "lenis";
 
-import { FluidBackgroundMesh } from "@/components/master/FluidBackgroundMesh";
-import { FluidGradientAura } from "@/components/master/FluidGradientAura";
-import { CursorParticleCanvas } from "@/components/master/CursorParticleCanvas";
-import { TravelingPrismaticSphere } from "@/components/master/TravelingPrismaticSphere";
+import { SilkyFluidBackdrop } from "@/components/master/SilkyFluidBackdrop";
 import { MasterNav } from "@/components/master/MasterNav";
 import { MonumentalHero } from "@/components/master/MonumentalHero";
 import { KineticStatement } from "@/components/master/KineticStatement";
@@ -25,31 +22,34 @@ export default function Home() {
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReducedMotion) return;
+    const isTouch = window.matchMedia("(pointer: coarse)").matches;
 
-    // Direct, pristine Lenis + GSAP synchronization
+    // On touch mobile devices, use ultra-fast native hardware-accelerated scrolling for zero lag!
+    if (prefersReducedMotion || isTouch) {
+      ScrollTrigger.refresh();
+      return;
+    }
+
+    // On desktop, use lightweight, ultra-responsive Lenis synchronization
     const lenis = new Lenis({
-      lerp: 0.08,
-      duration: 1.2,
+      lerp: 0.1,
+      duration: 1.0,
       smoothWheel: true,
-      wheelMultiplier: 0.95,
+      wheelMultiplier: 1.0,
     });
     lenisRef.current = lenis;
 
-    // Connect Lenis to ScrollTrigger update
     lenis.on("scroll", ScrollTrigger.update);
 
-    // Sync GSAP ticker with Lenis raf for zero lag / jitter
     const tickerCallback = (time: number) => {
       lenis.raf(time * 1000);
     };
     gsap.ticker.add(tickerCallback);
     gsap.ticker.lagSmoothing(0);
 
-    // Refresh ScrollTrigger once DOM is stabilized
     const timeout = setTimeout(() => {
       ScrollTrigger.refresh();
-    }, 400);
+    }, 250);
 
     return () => {
       clearTimeout(timeout);
@@ -96,7 +96,7 @@ export default function Home() {
     if (!el) return;
 
     if (lenisRef.current) {
-      lenisRef.current.scrollTo(el, { duration: 1.2 });
+      lenisRef.current.scrollTo(el, { duration: 1.0 });
     } else {
       el.scrollIntoView({ behavior: "smooth" });
     }
@@ -104,25 +104,16 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen bg-[#FAFAF9] text-[#0F172A] selection:bg-[#10B981]/20 selection:text-[#059669] overflow-x-hidden">
-      {/* 0. Authentic YouTube Shimmer Skeleton Loader (Mounts on initial load, dissolves smoothly) */}
+      {/* 0. Authentic YouTube Shimmer Skeleton Loader (Mounts once on load, dissolves smoothly) */}
       <YouTubeSkeletonLoader />
 
-      {/* 1. Fluid Ambient Mesh Gradient */}
-      <FluidBackgroundMesh />
+      {/* 1. Silky Fluid Gradient Backdrop (Direct match to reference screenshot: lightweight, GPU-composited, zero-lag) */}
+      <SilkyFluidBackdrop />
 
-      {/* 2. Silky GPU-Accelerated Fluid Gradient Aura (Ethereal, zero-lag organic depth) */}
-      <FluidGradientAura />
-
-      {/* 3. Interactive Cursor Particle Emitter */}
-      <CursorParticleCanvas />
-
-      {/* 4. Autonomous Emerald Optical Orb */}
-      <TravelingPrismaticSphere />
-
-      {/* 5. Architectural Minimal Navigation */}
+      {/* 2. Architectural Minimal Navigation */}
       <MasterNav onNavigate={handleNavigate} activeId={activeId} />
 
-      {/* 6. Cohesive Spatial Storytelling Sequence */}
+      {/* 3. Cohesive Spatial Storytelling Sequence */}
       <main className="relative z-10 flex flex-col">
         {/* Movement 00: Monumental Hero */}
         <MonumentalHero onExplore={() => handleNavigate("monument-statement")} />

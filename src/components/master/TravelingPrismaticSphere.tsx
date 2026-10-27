@@ -154,7 +154,7 @@ export const TravelingPrismaticSphere: React.FC = () => {
       const isCursorInside = dist < r * 1.35;
 
       if (isCursorInside) {
-        hoverFactor += (1 - hoverFactor) * 0.08;
+        hoverFactor += (1 - hoverFactor) * 0.14;
       } else {
         hoverFactor += (0 - hoverFactor) * 0.08;
       }
@@ -252,10 +252,10 @@ export const TravelingPrismaticSphere: React.FC = () => {
         const localX = mouseX - currentX;
         const localY = mouseY - currentY;
 
-        // Soft, diffused feathered aura (radius ~52px with dreamy soft falloff)
-        const softAuraRadius = 52;
+        // Brighter and significantly larger soft diffused aura (radius ~82px with rich feathered bloom)
+        const softAuraRadius = Math.max(r * 0.72, 82);
 
-        // Subtle, mathematical difference blend for a soft, silky inverted glow
+        // Luminous difference blend for a vibrant, buttery inverted glow
         ctx.globalCompositeOperation = "difference";
 
         const softGlow = ctx.createRadialGradient(
@@ -266,10 +266,11 @@ export const TravelingPrismaticSphere: React.FC = () => {
           localY,
           softAuraRadius
         );
-        // Soft, progressive feathered falloff: gentle, dreamy, buttery
-        softGlow.addColorStop(0, `rgba(255, 255, 255, ${hoverFactor * 0.48})`);
-        softGlow.addColorStop(0.35, `rgba(255, 255, 255, ${hoverFactor * 0.32})`);
-        softGlow.addColorStop(0.70, `rgba(255, 255, 255, ${hoverFactor * 0.12})`);
+        // Bright, luminous, velvety feathered falloff
+        softGlow.addColorStop(0, `rgba(255, 255, 255, ${hoverFactor * 0.92})`);
+        softGlow.addColorStop(0.28, `rgba(255, 255, 255, ${hoverFactor * 0.75})`);
+        softGlow.addColorStop(0.60, `rgba(255, 255, 255, ${hoverFactor * 0.42})`);
+        softGlow.addColorStop(0.85, `rgba(255, 255, 255, ${hoverFactor * 0.15})`);
         softGlow.addColorStop(1, "rgba(255, 255, 255, 0)");
 
         ctx.fillStyle = softGlow;

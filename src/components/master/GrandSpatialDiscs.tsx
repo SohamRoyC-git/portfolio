@@ -13,7 +13,6 @@ import {
   Building2,
   Ship,
   Activity,
-  Layers,
 } from "lucide-react";
 import { LocalizationDemo } from "@/components/LocalizationDemo";
 
@@ -177,8 +176,9 @@ export const GrandSpatialDiscs: React.FC = () => {
     // Apply exact centering and straight flat zone
     const updateOrbitalCards = () => {
       const screenCenter = window.innerWidth / 2;
-      // Generous flat zone (±20% of viewport width ~ 280px each side)
-      const flatZone = window.innerWidth * 0.20;
+      const isMobile = window.innerWidth < 768;
+      // On mobile, keep cards straight with smaller tilt so text is always ultra-sharp
+      const flatZone = window.innerWidth * (isMobile ? 0.25 : 0.20);
 
       let closestIdx = 0;
       let minDistance = Infinity;
@@ -201,20 +201,20 @@ export const GrandSpatialDiscs: React.FC = () => {
         let opacity = 1;
 
         if (absDist <= flatZone) {
-          // IN THE VIEWING CENTER: 100% straight, zero slant, full opacity!
           rotateY = 0;
           translateZ = 0;
           scale = 1;
           opacity = 1;
         } else {
-          // OUTSIDE THE FLAT ZONE: smoothly curve and slant away as it leaves/enters
           const excess = (absDist - flatZone) / (window.innerWidth * 0.40);
           const sign = distFromCenter > 0 ? 1 : -1;
           const t = Math.min(Math.max(excess, 0), 1.6);
 
-          rotateY = sign * -22 * Math.min(t, 1);
-          translateZ = -Math.pow(t, 1.3) * 120;
-          scale = 1 - Math.min(t * 0.08, 0.16);
+          // On mobile, use softer tilt (12deg vs 20deg) for optimal readability
+          const maxTilt = isMobile ? 12 : 20;
+          rotateY = sign * -maxTilt * Math.min(t, 1);
+          translateZ = -Math.pow(t, 1.2) * (isMobile ? 60 : 120);
+          scale = 1 - Math.min(t * (isMobile ? 0.04 : 0.08), 0.14);
           opacity = 1 - Math.min(t * 0.28, 0.5);
         }
 
@@ -225,10 +225,6 @@ export const GrandSpatialDiscs: React.FC = () => {
       setActiveIdx(closestIdx);
     };
 
-    // EXACT pixel offset calculation:
-    // Distance from Card 1's offsetLeft to Card 4's offsetLeft!
-    // Since Card 1 starts at center, translating by exactly -(card4 - card1)
-    // guarantees Card 4 arrives at the EXACT SAME CENTER coordinate!
     const getExactScrollAmount = () => {
       const card1 = cardsRef.current[0];
       const card4 = cardsRef.current[cardsRef.current.length - 1];
@@ -237,15 +233,13 @@ export const GrandSpatialDiscs: React.FC = () => {
     };
 
     const ctx = gsap.context(() => {
-      // Immediate response: transit starts immediately at 0.0 with NO sluggish initial pause!
-      // Card 4 reaches dead-center at 0.78, and holds dead-center until 1.00 (generous dwell buffer).
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
           pin: pin,
           start: "top top",
           end: "+=3200",
-          scrub: 0.4, // Snappy, immediate scroll response
+          scrub: 0.4,
           anticipatePin: 1,
           invalidateOnRefresh: true,
           onUpdate: (self) => {
@@ -255,7 +249,6 @@ export const GrandSpatialDiscs: React.FC = () => {
         },
       });
 
-      // Horizontal track translation begins immediately
       tl.to(
         track,
         {
@@ -266,11 +259,9 @@ export const GrandSpatialDiscs: React.FC = () => {
         0
       );
 
-      // Card 4 rest / dwell buffer (0.78 to 1.00)
       tl.to({}, { duration: 0.22 }, 0.78);
     }, section);
 
-    // Initial update
     updateOrbitalCards();
     window.addEventListener("resize", updateOrbitalCards);
 
@@ -281,6 +272,8 @@ export const GrandSpatialDiscs: React.FC = () => {
   }, []);
 
   const handlePlatterMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const isTouch = window.matchMedia("(pointer: coarse)").matches;
+    if (isTouch) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left - rect.width / 2;
     const y = e.clientY - rect.top - rect.height / 2;
@@ -305,16 +298,16 @@ export const GrandSpatialDiscs: React.FC = () => {
       ref={sectionRef}
       className="relative w-full overflow-hidden"
     >
-      {/* Pinned Fullscreen Stage with Generous Top/Bottom Clearance below fixed Navbar */}
+      {/* Pinned Fullscreen Stage with Generous Top/Bottom Clearance */}
       <div
         ref={pinRef}
-        className="h-screen w-full flex flex-col justify-between pt-24 sm:pt-28 pb-6 sm:pb-10 px-4 sm:px-12 relative overflow-hidden bg-transparent z-20"
+        className="h-[100svh] w-full flex flex-col justify-between pt-20 sm:pt-28 pb-4 sm:pb-8 px-3 sm:px-8 md:px-12 relative overflow-hidden bg-transparent z-20"
       >
-        {/* Pinned Top HUD Header (Safely below fixed navbar with ample air) */}
-        <div className="relative z-20 flex items-center justify-between w-full max-w-7xl mx-auto px-2 mb-2 sm:mb-4">
-          <div className="font-sans font-black text-xs text-[#10B981] tracking-widest uppercase flex items-center gap-3">
-            <span className="w-8 h-[2px] bg-[#10B981]" />
-            <span>02 / SELECTED WORK &amp; EXPERIENCES</span>
+        {/* Pinned Top HUD Header */}
+        <div className="relative z-20 flex items-center justify-between w-full max-w-7xl mx-auto px-2 mb-1 sm:mb-4">
+          <div className="font-sans font-black text-xs text-[#10B981] tracking-widest uppercase flex items-center gap-2 sm:gap-3">
+            <span className="w-5 sm:w-8 h-[2px] bg-[#10B981]" />
+            <span className="truncate">02 / SELECTED WORK</span>
           </div>
 
           {/* Interactive Progress Scrub Indicator */}
@@ -333,22 +326,21 @@ export const GrandSpatialDiscs: React.FC = () => {
             </span>
           </div>
 
-          <div className="font-sans font-black text-xs text-slate-500 uppercase tracking-wider flex items-center gap-2">
-            <span>SCROLL TO EXPLORE</span>
-            <ArrowRight size={14} className="text-[#10B981] animate-pulse" />
+          <div className="font-sans font-black text-[11px] sm:text-xs text-slate-500 uppercase tracking-wider flex items-center gap-1.5 sm:gap-2">
+            <span>SCROLL</span>
+            <ArrowRight size={13} className="text-[#10B981] animate-pulse" />
           </div>
         </div>
 
-        {/* Horizontal Orbital 3D Track:
-            Symmetrical padding ensures Card 1 starts exactly centered at 50vw */}
-        <div className="relative z-10 my-auto w-full overflow-visible py-2">
+        {/* Horizontal Orbital 3D Track */}
+        <div className="relative z-10 my-auto w-full overflow-visible py-1 sm:py-2">
           <div
             ref={trackRef}
-            className="flex gap-8 sm:gap-14 items-center will-change-transform"
+            className="flex gap-6 sm:gap-14 items-center will-change-transform"
             style={{
               transformStyle: "preserve-3d",
-              paddingLeft: "calc((100vw - min(880px, 80vw)) / 2)",
-              paddingRight: "calc((100vw - min(880px, 80vw)) / 2)",
+              paddingLeft: "calc((100vw - min(880px, 86vw)) / 2)",
+              paddingRight: "calc((100vw - min(880px, 86vw)) / 2)",
             }}
           >
             {PROJECTS.map((project, idx) => (
@@ -357,41 +349,41 @@ export const GrandSpatialDiscs: React.FC = () => {
                 ref={(el) => {
                   cardsRef.current[idx] = el;
                 }}
-                /* Premium Frosted Glassmorphism Card with safe vertical constraints */
-                className="w-[82vw] max-w-[880px] shrink-0 p-6 sm:p-8 lg:p-10 rounded-[2.25rem] bg-white/75 border-2 border-white/90 backdrop-blur-3xl shadow-[0_25px_60px_-15px_rgba(15,23,42,0.12),0_10px_25px_-5px_rgba(16,185,129,0.08),inset_0_1px_2px_rgba(255,255,255,0.95)] hover:border-[#10B981]/50 transition-all duration-200 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center will-change-transform max-h-[calc(100vh-210px)]"
+                /* Responsive Frosted Glassmorphism Card with Mobile Scroll Guard */
+                className="w-[86vw] max-w-[880px] shrink-0 p-5 sm:p-8 lg:p-10 rounded-[2rem] sm:rounded-[2.25rem] bg-white/75 border-2 border-white/90 backdrop-blur-3xl shadow-[0_25px_60px_-15px_rgba(15,23,42,0.12),0_10px_25px_-5px_rgba(16,185,129,0.08),inset_0_1px_2px_rgba(255,255,255,0.95)] hover:border-[#10B981]/50 transition-all duration-200 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8 items-center will-change-transform max-h-[calc(100svh-160px)] overflow-y-auto sm:overflow-visible"
                 style={{ transformStyle: "preserve-3d" }}
               >
-                {/* Left Card Editorial Metadata (7 Cols) */}
+                {/* Left Card Editorial Metadata (7 Cols on desktop, full on mobile) */}
                 <div className="lg:col-span-7 flex flex-col justify-between z-10">
                   <div>
                     {/* Catalogue Badge & Category */}
-                    <div className="inline-flex items-center gap-2 font-sans font-black text-xs text-[#10B981] uppercase tracking-wider mb-2">
-                      <Disc3 size={15} className="animate-spin" />
+                    <div className="inline-flex items-center gap-1.5 sm:gap-2 font-sans font-black text-[10px] sm:text-xs text-[#10B981] uppercase tracking-wider mb-1.5 sm:mb-2">
+                      <Disc3 size={14} className="animate-spin" />
                       <span>{project.catalogueNo}</span>
                       <span className="text-slate-300">·</span>
-                      <span className="text-slate-500">{project.category}</span>
+                      <span className="text-slate-500 truncate max-w-[150px] sm:max-w-none">{project.category}</span>
                     </div>
 
                     {/* Headline */}
-                    <h3 className="font-sans font-black text-2xl sm:text-3xl lg:text-4xl text-[#0F172A] tracking-tight leading-[1.05] mb-1.5">
+                    <h3 className="font-sans font-black text-2xl xs:text-3xl sm:text-4xl text-[#0F172A] tracking-tight leading-[1.05] mb-1">
                       {project.title}
                     </h3>
 
                     {/* Client & Year */}
-                    <div className="font-sans font-black text-xs text-slate-500 uppercase tracking-wider mb-2.5">
+                    <div className="font-sans font-black text-[11px] sm:text-xs text-slate-500 uppercase tracking-wider mb-2">
                       {project.client} · {project.year}
                     </div>
 
                     {/* Editorial Summary in Apple Garamond Light Italic */}
-                    <p className="font-serif italic font-light text-sm sm:text-base text-slate-700 leading-relaxed mb-4 line-clamp-3 sm:line-clamp-none">
+                    <p className="font-serif italic font-light text-sm sm:text-base text-slate-700 leading-relaxed mb-3 sm:mb-4 line-clamp-3 sm:line-clamp-none">
                       {project.summary}
                     </p>
 
                     {/* Metrics Grid */}
-                    <div className="grid grid-cols-3 gap-2 sm:gap-3 py-2.5 border-y border-slate-200/80 mb-4 bg-white/40 rounded-xl px-4 backdrop-blur-xs">
+                    <div className="grid grid-cols-3 gap-2 py-2 sm:py-2.5 border-y border-slate-200/80 mb-3 sm:mb-4 bg-white/40 rounded-xl px-3 sm:px-4 backdrop-blur-xs">
                       {project.metrics.map((m) => (
                         <div key={m.label}>
-                          <div className="font-sans font-black text-[9px] sm:text-[10px] text-slate-400 uppercase tracking-wider mb-0.5">
+                          <div className="font-sans font-black text-[9px] sm:text-[10px] text-slate-400 uppercase tracking-wider mb-0.5 truncate">
                             {m.label}
                           </div>
                           <div className="font-sans font-black text-xs sm:text-sm text-[#0F172A]">
@@ -403,21 +395,21 @@ export const GrandSpatialDiscs: React.FC = () => {
 
                     {/* Social Icons for Latvian Cricket Federation */}
                     {project.socials && (
-                      <div className="mb-4">
-                        <div className="font-sans font-black text-[10px] text-slate-400 uppercase tracking-wider mb-1.5">
+                      <div className="mb-3 sm:mb-4">
+                        <div className="font-sans font-black text-[9px] sm:text-[10px] text-slate-400 uppercase tracking-wider mb-1">
                           OFFICIAL CHANNELS &amp; SOCIALS:
                         </div>
-                        <div className="flex flex-wrap items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                           {project.socials.map((s) => (
                             <button
                               key={s.name}
                               title={s.name}
-                              className="w-8 h-8 rounded-full bg-white/80 hover:bg-[#10B981] text-slate-700 hover:text-white border border-slate-200/90 shadow-xs flex items-center justify-center transition-all duration-200 cursor-pointer p-2"
+                              className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/80 hover:bg-[#10B981] text-slate-700 hover:text-white border border-slate-200/90 shadow-xs flex items-center justify-center transition-all duration-200 cursor-pointer p-1.5"
                             >
                               <svg
                                 viewBox={s.viewBox || "0 0 24 24"}
                                 fill="currentColor"
-                                className="w-3.5 h-3.5 fill-current"
+                                className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current"
                               >
                                 <path d={s.svgPath} />
                               </svg>
@@ -429,25 +421,25 @@ export const GrandSpatialDiscs: React.FC = () => {
                   </div>
 
                   {/* Actions Row with DIRECT CLICKABLE LINKS */}
-                  <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                     {/* Primary Clickable Live URL */}
                     <a
                       href={project.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-[#0F172A] hover:bg-[#10B981] text-white font-sans font-black text-xs uppercase tracking-wider shadow-md transition-all duration-300 cursor-pointer group"
+                      className="inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-[#0F172A] hover:bg-[#10B981] text-white font-sans font-black text-[11px] sm:text-xs uppercase tracking-wider shadow-md transition-all duration-300 cursor-pointer group"
                     >
                       <span>Visit {new URL(project.url).hostname.replace("www.", "")}</span>
-                      <ExternalLink size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                      <ExternalLink size={13} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                     </a>
 
                     {/* Interactive 278-Key Lab Demo Button for IZIEAT */}
                     {project.hasDemo && (
                       <button
                         onClick={() => setIsDemoOpen(true)}
-                        className="px-4 sm:px-5 py-2.5 sm:py-3 rounded-full bg-[#10B981]/15 hover:bg-[#10B981] text-[#059669] hover:text-white border border-[#10B981]/30 font-sans font-black text-xs uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer shadow-xs"
+                        className="px-3.5 sm:px-5 py-2 sm:py-3 rounded-full bg-[#10B981]/15 hover:bg-[#10B981] text-[#059669] hover:text-white border border-[#10B981]/30 font-sans font-black text-[11px] sm:text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-xs"
                       >
-                        <Sparkles size={14} />
+                        <Sparkles size={13} />
                         <span>Launch 278-Key Lab</span>
                       </button>
                     )}
@@ -455,20 +447,20 @@ export const GrandSpatialDiscs: React.FC = () => {
                     {/* Full Technical Dossier Modal */}
                     <button
                       onClick={() => openDossier(project)}
-                      className="px-4 sm:px-5 py-2.5 sm:py-3 rounded-full bg-white/80 hover:bg-slate-100 text-[#0F172A] border border-slate-200/90 font-sans font-black text-xs uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer shadow-xs"
+                      className="px-3.5 sm:px-5 py-2 sm:py-3 rounded-full bg-white/80 hover:bg-slate-100 text-[#0F172A] border border-slate-200/90 font-sans font-black text-[11px] sm:text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-xs"
                     >
-                      <Eye size={14} />
+                      <Eye size={13} />
                       <span>Inspect Dossier</span>
                     </button>
                   </div>
                 </div>
 
-                {/* Right Interactive Visual Stage (5 Cols) with Glassmorphic Pod */}
-                <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
+                {/* Right Interactive Visual Stage (Hidden on very compact mobile, visible on tablet & desktop) */}
+                <div className="hidden sm:flex lg:col-span-5 flex-col items-center justify-center relative">
                   {/* Visual 1: 3D Turntable Vinyl (IZIEAT) */}
                   {project.visualType === "turntable" && project.discImage && (
                     <div
-                      className="relative w-52 h-52 sm:w-64 sm:h-64 transition-transform duration-200 ease-out flex items-center justify-center cursor-pointer select-none p-3 rounded-3xl bg-white/40 border border-white/60 shadow-inner"
+                      className="relative w-48 h-48 sm:w-60 sm:h-60 transition-transform duration-200 ease-out flex items-center justify-center cursor-pointer select-none p-3 rounded-3xl bg-white/40 border border-white/60 shadow-inner"
                       style={{
                         transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
                       }}
@@ -480,8 +472,8 @@ export const GrandSpatialDiscs: React.FC = () => {
                       <Image
                         src={project.discImage}
                         alt={project.title}
-                        width={280}
-                        height={280}
+                        width={260}
+                        height={260}
                         priority
                         className="relative w-full h-full object-contain filter drop-shadow-2xl animate-spin-slow hover:scale-105 transition-transform duration-500"
                         style={{ animationDuration: "22s" }}
@@ -497,7 +489,7 @@ export const GrandSpatialDiscs: React.FC = () => {
                     <div className="w-full max-w-xs sm:max-w-sm rounded-3xl bg-white/80 border-2 border-white/90 p-4 sm:p-5 flex flex-col justify-between shadow-xl backdrop-blur-xl">
                       <div className="flex items-center justify-between pb-2 border-b border-slate-200/80">
                         <div className="flex items-center gap-2">
-                          <Activity size={16} className="text-[#10B981] animate-pulse" />
+                          <Activity size={15} className="text-[#10B981] animate-pulse" />
                           <span className="font-sans font-black text-xs text-[#0F172A] uppercase tracking-wider">
                             CRICLV.COM ENGINE
                           </span>
@@ -507,9 +499,9 @@ export const GrandSpatialDiscs: React.FC = () => {
                         </span>
                       </div>
 
-                      <div className="space-y-2 my-2.5 sm:my-3">
+                      <div className="space-y-2 my-2.5">
                         <div className="p-2.5 rounded-2xl bg-white/70 border border-slate-200/80">
-                          <div className="font-sans font-black text-[9px] sm:text-[10px] text-slate-400 uppercase mb-0.5">
+                          <div className="font-sans font-black text-[9px] text-slate-400 uppercase mb-0.5">
                             TOURNAMENT EVENT BUS
                           </div>
                           <div className="font-sans font-black text-xs text-[#0F172A]">
@@ -518,7 +510,7 @@ export const GrandSpatialDiscs: React.FC = () => {
                         </div>
 
                         <div className="p-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-                          <div className="font-sans font-black text-[9px] sm:text-[10px] text-[#059669] uppercase mb-0.5">
+                          <div className="font-sans font-black text-[9px] text-[#059669] uppercase mb-0.5">
                             EU REGULATORY COMPLIANCE
                           </div>
                           <div className="font-sans font-black text-xs text-[#059669]">
@@ -543,7 +535,7 @@ export const GrandSpatialDiscs: React.FC = () => {
                     <div className="w-full max-w-xs sm:max-w-sm rounded-3xl bg-white/80 border-2 border-white/90 p-4 sm:p-5 flex flex-col justify-between shadow-xl backdrop-blur-xl">
                       <div className="flex items-center justify-between pb-2 border-b border-slate-200/80">
                         <div className="flex items-center gap-2">
-                          <Building2 size={16} className="text-[#10B981]" />
+                          <Building2 size={15} className="text-[#10B981]" />
                           <span className="font-sans font-black text-xs text-[#0F172A] uppercase tracking-wider">
                             INDIJASCENTRS.LV
                           </span>
@@ -553,9 +545,9 @@ export const GrandSpatialDiscs: React.FC = () => {
                         </span>
                       </div>
 
-                      <div className="space-y-2 my-2.5 sm:my-3">
+                      <div className="space-y-2 my-2.5">
                         <div className="p-2.5 rounded-2xl bg-white/70 border border-slate-200/80">
-                          <div className="font-sans font-black text-[9px] sm:text-[10px] text-slate-400 uppercase mb-0.5">
+                          <div className="font-sans font-black text-[9px] text-slate-400 uppercase mb-0.5">
                             BILATERAL DIPLOMATIC BRIDGE
                           </div>
                           <div className="font-sans font-black text-xs text-[#0F172A]">
@@ -564,7 +556,7 @@ export const GrandSpatialDiscs: React.FC = () => {
                         </div>
 
                         <div className="p-2.5 rounded-2xl bg-sky-500/10 border border-sky-500/20">
-                          <div className="font-sans font-black text-[9px] sm:text-[10px] text-sky-700 uppercase mb-0.5">
+                          <div className="font-sans font-black text-[9px] text-sky-700 uppercase mb-0.5">
                             CONSULAR SCHEDULING BUS
                           </div>
                           <div className="font-sans font-black text-xs text-sky-700">
@@ -589,7 +581,7 @@ export const GrandSpatialDiscs: React.FC = () => {
                     <div className="w-full max-w-xs sm:max-w-sm rounded-3xl bg-white/80 border-2 border-white/90 p-4 sm:p-5 flex flex-col justify-between shadow-xl backdrop-blur-xl">
                       <div className="flex items-center justify-between pb-2 border-b border-slate-200/80">
                         <div className="flex items-center gap-2">
-                          <Ship size={16} className="text-[#10B981]" />
+                          <Ship size={15} className="text-[#10B981]" />
                           <span className="font-sans font-black text-xs text-[#0F172A] uppercase tracking-wider">
                             VARTIINTERNATIONAL.COM
                           </span>
@@ -599,9 +591,9 @@ export const GrandSpatialDiscs: React.FC = () => {
                         </span>
                       </div>
 
-                      <div className="space-y-2 my-2.5 sm:my-3">
+                      <div className="space-y-2 my-2.5">
                         <div className="p-2.5 rounded-2xl bg-white/70 border border-slate-200/80">
-                          <div className="font-sans font-black text-[9px] sm:text-[10px] text-slate-400 uppercase mb-0.5">
+                          <div className="font-sans font-black text-[9px] text-slate-400 uppercase mb-0.5">
                             COMMODITY TRADING MATRIX
                           </div>
                           <div className="font-sans font-black text-xs text-[#0F172A]">
@@ -610,7 +602,7 @@ export const GrandSpatialDiscs: React.FC = () => {
                         </div>
 
                         <div className="p-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-                          <div className="font-sans font-black text-[9px] sm:text-[10px] text-[#059669] uppercase mb-0.5">
+                          <div className="font-sans font-black text-[9px] text-[#059669] uppercase mb-0.5">
                             BUYER VERIFICATION ENGINE
                           </div>
                           <div className="font-sans font-black text-xs text-[#059669]">
@@ -636,12 +628,12 @@ export const GrandSpatialDiscs: React.FC = () => {
         </div>
 
         {/* Pinned Bottom HUD Bar with card navigation indicators */}
-        <div className="relative z-20 flex items-center justify-between w-full max-w-7xl mx-auto pt-2 border-t border-slate-200/80 px-2">
-          <div className="flex items-center gap-3">
+        <div className="relative z-20 flex items-center justify-between w-full max-w-7xl mx-auto pt-1 sm:pt-2 border-t border-slate-200/80 px-2">
+          <div className="flex items-center gap-2 sm:gap-3">
             {PROJECTS.map((p, i) => (
               <span
                 key={p.id}
-                className={`transition-all duration-300 font-sans font-black text-[10px] sm:text-[11px] uppercase tracking-wider flex items-center gap-1.5 ${
+                className={`transition-all duration-300 font-sans font-black text-[10px] sm:text-[11px] uppercase tracking-wider flex items-center gap-1 sm:gap-1.5 ${
                   activeIdx === i
                     ? "text-[#10B981] font-black"
                     : "text-slate-400 font-medium"
@@ -657,23 +649,23 @@ export const GrandSpatialDiscs: React.FC = () => {
             ))}
           </div>
 
-          <div className="font-sans font-black text-[10px] sm:text-[11px] text-slate-500 uppercase tracking-wider">
-            SCROLL TO EXPLORE ALL 4 PROJECTS
+          <div className="font-sans font-black text-[9px] sm:text-[11px] text-slate-500 uppercase tracking-wider truncate">
+            SCROLL TO EXPLORE
           </div>
         </div>
       </div>
 
       {/* Interactive Translation Lab Modal */}
       {isDemoOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white border border-slate-200 p-8 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white border border-slate-200 p-6 sm:p-8 shadow-2xl">
             <button
               onClick={() => setIsDemoOpen(false)}
-              className="absolute top-6 right-6 px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200 text-[#0F172A] font-sans font-black text-xs uppercase tracking-wider cursor-pointer"
+              className="absolute top-4 sm:top-6 right-4 sm:right-6 px-3.5 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-[#0F172A] font-sans font-black text-xs uppercase tracking-wider cursor-pointer"
             >
               ✕ Exit Lab
             </button>
-            <div className="mt-4">
+            <div className="mt-6 sm:mt-4">
               <LocalizationDemo />
             </div>
           </div>
@@ -682,24 +674,24 @@ export const GrandSpatialDiscs: React.FC = () => {
 
       {/* Full Technical Dossier Modal */}
       {isDossierOpen && selectedDossier && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="relative w-full max-w-2xl rounded-3xl bg-white border border-slate-200 p-8 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-2xl rounded-3xl bg-white border border-slate-200 p-6 sm:p-8 shadow-2xl">
             <button
               onClick={() => setIsDossierOpen(false)}
-              className="absolute top-6 right-6 px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200 text-[#0F172A] font-sans font-black text-xs uppercase tracking-wider cursor-pointer"
+              className="absolute top-4 sm:top-6 right-4 sm:right-6 px-3.5 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-[#0F172A] font-sans font-black text-xs uppercase tracking-wider cursor-pointer"
             >
               ✕ Exit
             </button>
             <div className="font-sans font-black text-xs text-[#10B981] mb-2 uppercase tracking-wider">
               {selectedDossier.catalogueNo}
             </div>
-            <h3 className="font-sans font-black text-2xl text-[#0F172A] mb-3">
+            <h3 className="font-sans font-black text-xl sm:text-2xl text-[#0F172A] mb-3">
               {selectedDossier.title}
             </h3>
-            <p className="font-serif italic font-light text-base text-slate-700 leading-relaxed mb-6">
+            <p className="font-serif italic font-light text-sm sm:text-base text-slate-700 leading-relaxed mb-6">
               {selectedDossier.summary}
             </p>
-            <div className="space-y-4 pt-6 border-t border-slate-200">
+            <div className="space-y-4 pt-4 sm:pt-6 border-t border-slate-200">
               <div className="flex items-center justify-between">
                 <span className="font-sans font-black text-xs text-slate-500 uppercase tracking-wider">
                   DIRECT PORTAL:
@@ -710,7 +702,7 @@ export const GrandSpatialDiscs: React.FC = () => {
                   rel="noopener noreferrer"
                   className="font-sans font-black text-xs text-[#10B981] hover:underline flex items-center gap-1"
                 >
-                  <span>{selectedDossier.url}</span>
+                  <span className="truncate max-w-[180px] sm:max-w-none">{selectedDossier.url}</span>
                   <ExternalLink size={12} />
                 </a>
               </div>
@@ -719,11 +711,11 @@ export const GrandSpatialDiscs: React.FC = () => {
                 <div className="font-sans font-black text-xs text-slate-500 uppercase tracking-wider mb-2">
                   CORE ARCHITECTURE STACK:
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
                   {selectedDossier.stack.map((s) => (
                     <span
                       key={s}
-                      className="px-3 py-1 rounded-full bg-slate-100 border border-slate-200 font-sans font-black text-xs text-[#0F172A] uppercase tracking-wider"
+                      className="px-2.5 sm:px-3 py-1 rounded-full bg-slate-100 border border-slate-200 font-sans font-black text-[11px] sm:text-xs text-[#0F172A] uppercase tracking-wider"
                     >
                       {s}
                     </span>

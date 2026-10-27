@@ -1,129 +1,131 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import confetti from "canvas-confetti";
-import { ArrowUpRight, Check, Copy, Mail, MapPin, Phone } from "lucide-react";
+import { Mail, Phone, MapPin, Copy, Check, ArrowUpRight } from "lucide-react";
 
 export const TerminalFinale: React.FC = () => {
   const [copied, setCopied] = useState(false);
+
   const email = "roychoudhurysoham006@gmail.com";
   const phone = "+91 8240708402";
 
-  const handleCopyEmail = () => {
-    navigator.clipboard.writeText(email);
-    setCopied(true);
-
-    confetti({
-      particleCount: 65,
-      spread: 75,
-      origin: { y: 0.8 },
-      colors: ["#10B981", "#00FF87", "#34D399", "#059669", "#0F172A"],
-    });
-
-    setTimeout(() => setCopied(false), 2500);
+  const handleCopyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(email);
+      setCopied(true);
+      confetti({
+        particleCount: 50,
+        spread: 60,
+        origin: { y: 0.8 },
+        colors: ["#10B981", "#34D399", "#00FF87"],
+      });
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      window.location.href = `mailto:${email}`;
+    }
   };
 
   return (
     <footer
       id="monument-terminal"
-      className="relative min-h-[85vh] py-32 px-6 sm:px-12 z-10 max-w-7xl mx-auto flex flex-col justify-between"
+      className="relative min-h-[100svh] pt-28 sm:pt-36 pb-20 px-4 sm:px-8 md:px-12 z-10 max-w-7xl mx-auto flex flex-col justify-between"
     >
-      <div>
-        {/* Chapter Marker */}
-        <div className="font-sans font-black text-xs text-[#10B981] tracking-widest uppercase mb-12 flex items-center gap-3">
-          <span className="w-8 h-[2px] bg-[#10B981]" />
-          <span>04 / CONTACT</span>
-        </div>
+      {/* Chapter Marker */}
+      <div className="font-sans font-black text-xs text-[#10B981] tracking-widest uppercase mb-6 flex items-center gap-3">
+        <span className="w-8 h-[2px] bg-[#10B981]" />
+        <span>04 / CONTACT</span>
+      </div>
 
-        {/* Headline */}
-        <h2 className="font-sans font-black text-5xl sm:text-7xl md:text-8xl lg:text-[7.5vw] text-[#0F172A] uppercase tracking-tight leading-[0.92] mb-6 max-w-4xl">
-          Let&apos;s build <br />
-          <span className="bg-gradient-to-r from-[#0F172A] via-slate-700 to-slate-500 bg-clip-text text-transparent">
-            something real.
+      {/* Main Massive Editorial Headline */}
+      <div className="my-auto py-4">
+        <h2 className="font-sans font-black text-4xl xs:text-5xl sm:text-7xl md:text-8xl lg:text-9xl text-[#0F172A] tracking-tighter leading-[0.9] uppercase mb-4 sm:mb-6">
+          LET&apos;S BUILD <br />
+          <span className="bg-gradient-to-r from-[#0F172A] via-slate-800 to-slate-600 bg-clip-text text-transparent">
+            SOMETHING REAL.
           </span>
         </h2>
-
-        {/* Narrative */}
-        <p className="font-serif italic font-light text-xl sm:text-2xl text-slate-700 tracking-normal max-w-xl leading-relaxed mb-16">
+        <p className="font-serif italic font-light text-lg sm:text-2xl text-slate-700 max-w-xl">
           Open to software engineering and frontend development internships.
         </p>
+      </div>
 
-        {/* Action Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
-          {/* Card 1: Copy Email */}
-          <div
-            onClick={handleCopyEmail}
-            className="p-8 rounded-3xl bg-white/80 border border-slate-200/80 hover:border-[#10B981]/60 transition-all duration-300 shadow-sm flex flex-col justify-between cursor-pointer group"
-            data-cursor="pointer"
-            data-cursor-text={copied ? "COPIED!" : "COPY"}
-          >
-            <div>
-              <div className="flex items-center justify-between mb-8">
-                <span className="font-sans font-black text-xs text-slate-400 uppercase tracking-widest">EMAIL</span>
-                <Mail size={18} className="text-[#10B981]" />
-              </div>
-              <div className="font-sans font-black text-base sm:text-lg text-[#0F172A] break-all mb-4 group-hover:text-[#10B981] transition-colors">
-                {email}
-              </div>
+      {/* Direct Contact Monoliths */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 pt-8 sm:pt-12 border-t border-slate-200/80">
+        {/* Email Monolith */}
+        <div
+          onClick={handleCopyEmail}
+          className="p-6 sm:p-8 rounded-3xl bg-white/75 backdrop-blur-xl border border-slate-200/80 hover:border-[#10B981]/60 transition-all duration-300 shadow-xs cursor-pointer group flex flex-col justify-between"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <span className="font-sans font-black text-[10px] sm:text-xs text-slate-400 uppercase tracking-widest">EMAIL</span>
+              <Mail size={18} className="text-[#10B981]" />
             </div>
-            <div className="flex items-center gap-2 font-sans font-black text-xs text-slate-500 uppercase tracking-wider">
-              {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
-              <span>{copied ? "COPIED TO CLIPBOARD" : "CLICK TO COPY"}</span>
+            <div className="font-sans font-black text-sm xs:text-base sm:text-lg text-[#0F172A] tracking-tight mb-2 break-all">
+              {email}
             </div>
           </div>
+          <div className="flex items-center gap-2 font-sans font-black text-xs text-slate-500 uppercase tracking-wider group-hover:text-[#10B981] transition-colors mt-4">
+            {copied ? (
+              <>
+                <Check size={14} className="text-[#10B981]" />
+                <span className="text-[#10B981]">COPIED TO CLIPBOARD</span>
+              </>
+            ) : (
+              <>
+                <Copy size={14} />
+                <span>CLICK TO COPY</span>
+              </>
+            )}
+          </div>
+        </div>
 
-          {/* Card 2: Phone */}
-          <a
-            href={`tel:${phone}`}
-            className="p-8 rounded-3xl bg-white/80 border border-slate-200/80 hover:border-[#10B981]/60 transition-all duration-300 shadow-sm flex flex-col justify-between group cursor-pointer"
-            data-cursor="pointer"
-            data-cursor-text="CALL"
-          >
-            <div>
-              <div className="flex items-center justify-between mb-8">
-                <span className="font-sans font-black text-xs text-slate-400 uppercase tracking-widest">PHONE &amp; WHATSAPP</span>
-                <Phone size={18} className="text-[#10B981]" />
-              </div>
-              <div className="font-sans font-black text-xl sm:text-2xl text-[#0F172A] mb-4 group-hover:text-[#10B981] transition-colors">
-                {phone}
-              </div>
+        {/* Phone Monolith */}
+        <a
+          href={`tel:${phone.replace(/\s+/g, "")}`}
+          className="p-6 sm:p-8 rounded-3xl bg-white/75 backdrop-blur-xl border border-slate-200/80 hover:border-[#10B981]/60 transition-all duration-300 shadow-xs group flex flex-col justify-between cursor-pointer"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <span className="font-sans font-black text-[10px] sm:text-xs text-slate-400 uppercase tracking-widest">PHONE &amp; WHATSAPP</span>
+              <Phone size={18} className="text-emerald-600" />
             </div>
-            <div className="flex items-center gap-2 font-sans font-black text-xs text-slate-500 uppercase tracking-wider">
-              <span>DIRECT VOICE</span>
-              <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            <div className="font-sans font-black text-lg sm:text-xl text-[#0F172A] tracking-tight mb-2">
+              {phone}
             </div>
-          </a>
+          </div>
+          <div className="flex items-center gap-1 font-sans font-black text-xs text-slate-500 uppercase tracking-wider group-hover:text-emerald-600 transition-colors mt-4">
+            <span>DIRECT VOICE</span>
+            <ArrowUpRight size={14} />
+          </div>
+        </a>
 
-          {/* Card 3: Location */}
-          <div 
-            className="p-8 rounded-3xl bg-white/80 border border-slate-200/80 shadow-sm flex flex-col justify-between"
-            data-cursor="pointer"
-            data-cursor-text="LOCATION"
-          >
-            <div>
-              <div className="flex items-center justify-between mb-8">
-                <span className="font-sans font-black text-xs text-slate-400 uppercase tracking-widest">LOCATION</span>
-                <MapPin size={18} className="text-emerald-600" />
-              </div>
-              <div className="font-sans font-black text-xl text-[#0F172A] mb-1">
-                Kolkata, India
-              </div>
-              <div className="font-serif italic font-light text-sm text-slate-600">
-                Netaji Subhash Engineering College (AI/ML)
-              </div>
+        {/* Location Monolith */}
+        <div className="p-6 sm:p-8 rounded-3xl bg-white/75 backdrop-blur-xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <span className="font-sans font-black text-[10px] sm:text-xs text-slate-400 uppercase tracking-widest">LOCATION</span>
+              <MapPin size={18} className="text-emerald-600" />
             </div>
-            <div className="flex items-center gap-2 font-sans font-black text-xs text-emerald-600 pt-4 border-t border-slate-200 uppercase tracking-wider">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>REMOTE &amp; RELOCATION</span>
+            <div className="font-sans font-black text-lg sm:text-xl text-[#0F172A] tracking-tight mb-2">
+              Kolkata, India
             </div>
+          </div>
+          <div className="font-sans font-black text-xs text-slate-400 uppercase tracking-wider mt-4">
+            TIMEZONE: IST (UTC+05:30)
           </div>
         </div>
       </div>
 
-      {/* Clean Minimal Colophon */}
-      <div className="pt-8 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-4 font-sans font-black text-xs text-slate-400 uppercase tracking-wider">
-        <div>© 2026 SOHAM ROYCHOUDHURY</div>
-        <div>KOLKATA, INDIA</div>
+      {/* Colophon */}
+      <div className="pt-8 sm:pt-12 mt-6 sm:mt-12 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-3">
+        <div className="font-sans font-black text-[10px] uppercase tracking-widest">
+          SOHAM ROYCHOUDHURY · 2026 ARCHIVE
+        </div>
+        <div className="font-serif italic font-light text-slate-500 text-center sm:text-right">
+          Designed with kinetic intention.
+        </div>
       </div>
     </footer>
   );

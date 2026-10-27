@@ -46,7 +46,7 @@ export const TravelingPrismaticSphere: React.FC = () => {
     // Smooth position interpolation state (Initial: Centered behind monumental hero name)
     let currentX = width * 0.5;
     let currentY = height * 0.46;
-    let currentRadius = 140;
+    let currentRadius = width < 640 ? 80 : 140;
 
     // Stardust trail history
     const trail: StardustTrailParticle[] = [];
@@ -61,13 +61,13 @@ export const TravelingPrismaticSphere: React.FC = () => {
       // --- Autonomous Trajectory from Section to Section ---
       let targetX = width * 0.5;
       let targetY = height * 0.46;
-      let targetRadius = 140;
+      let targetRadius = width < 640 ? 80 : 140;
 
       if (p < 0.16) {
         // Section 00 (Hero): Strictly in the CENTER directly behind "SOHAM ROYCHOUDHURY"
         targetX = width * 0.5;
         targetY = height * 0.46;
-        targetRadius = 145;
+        targetRadius = width < 640 ? 85 : 145;
       } else if (p < 0.36) {
         // Section 01 (Statement): Glides smoothly to the LEFT behind the kinetic quote
         const t = (p - 0.16) / 0.20;
@@ -75,7 +75,7 @@ export const TravelingPrismaticSphere: React.FC = () => {
         const endX = width * 0.32;
         targetX = startX + (endX - startX) * Math.min(t, 1);
         targetY = height * 0.50;
-        targetRadius = 125;
+        targetRadius = width < 640 ? 70 : 125;
       } else if (p < 0.76) {
         // Section 02 (Horizontal Work Gallery): Glides to center-right behind the active orbital cards
         const t = (p - 0.36) / 0.40;
@@ -83,7 +83,7 @@ export const TravelingPrismaticSphere: React.FC = () => {
         const rightSide = width > 1024 ? width * 0.62 : width * 0.5;
         targetX = leftSide + (rightSide - leftSide) * Math.min(t * 1.2, 1);
         targetY = height * 0.50;
-        targetRadius = 140;
+        targetRadius = width < 640 ? 80 : 140;
       } else if (p < 0.90) {
         // Section 03 (Blueprint): Glides back to the LEFT behind code telemetry
         const t = (p - 0.76) / 0.14;
@@ -91,14 +91,14 @@ export const TravelingPrismaticSphere: React.FC = () => {
         const leftSide = width * 0.32;
         targetX = rightSide - (rightSide - leftSide) * Math.min(t * 1.3, 1);
         targetY = height * 0.50;
-        targetRadius = 120;
+        targetRadius = width < 640 ? 70 : 120;
       } else {
         // Section 04 (Terminal): Glides to the CENTER behind the dispatch contact cards
         const t = (p - 0.90) / 0.10;
         const leftSide = width * 0.32;
         targetX = leftSide + (width * 0.5 - leftSide) * Math.min(t * 1.2, 1);
         targetY = height * 0.52;
-        targetRadius = 125;
+        targetRadius = width < 640 ? 70 : 125;
       }
 
       // Calm, silk-smooth lerping (Zero wobble)

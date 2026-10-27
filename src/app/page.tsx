@@ -1,63 +1,82 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import Lenis from "lenis";
-import { SiteNavigation } from "@/components/SiteNavigation";
-import { JourneyPath } from "@/components/JourneyPath";
-import { HeroScene } from "@/components/HeroScene";
-import { JourneyIntro } from "@/components/JourneyIntro";
-import { ExperienceStory } from "@/components/ExperienceStory";
-import { A24DiscShowcase } from "@/components/A24DiscShowcase";
-import { SkillsSection } from "@/components/SkillsSection";
-import { EducationSection } from "@/components/EducationSection";
-import { ContactSection } from "@/components/ContactSection";
-import { SiteFooter } from "@/components/SiteFooter";
+
+import { FluidBackgroundMesh } from "@/components/master/FluidBackgroundMesh";
+import { CursorParticleCanvas } from "@/components/master/CursorParticleCanvas";
+import { TravelingPrismaticSphere } from "@/components/master/TravelingPrismaticSphere";
+import { MasterNav } from "@/components/master/MasterNav";
+import { MonumentalHero } from "@/components/master/MonumentalHero";
+import { KineticStatement } from "@/components/master/KineticStatement";
+import { GrandSpatialDiscs } from "@/components/master/GrandSpatialDiscs";
+import { ArchitecturalMatrix } from "@/components/master/ArchitecturalMatrix";
+import { TerminalFinale } from "@/components/master/TerminalFinale";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function Home() {
-  const [activeSection, setActiveSection] = useState("hero");
+  const [activeId, setActiveId] = useState("monument-hero");
+  const lenisRef = useRef<Lenis | null>(null);
 
-  // Initialize Lenis smooth scroll
   useEffect(() => {
-    // Check prefers-reduced-motion
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) return;
 
+    // Direct, pristine Lenis + GSAP synchronization
     const lenis = new Lenis({
+      lerp: 0.08,
       duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: "vertical",
-      gestureOrientation: "vertical",
       smoothWheel: true,
-      wheelMultiplier: 0.9,
+      wheelMultiplier: 0.95,
     });
+    lenisRef.current = lenis;
 
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
+    // Connect Lenis to ScrollTrigger update
+    lenis.on("scroll", ScrollTrigger.update);
 
-    const rafId = requestAnimationFrame(raf);
+    // Sync GSAP ticker with Lenis raf for zero lag / jitter
+    const tickerCallback = (time: number) => {
+      lenis.raf(time * 1000);
+    };
+    gsap.ticker.add(tickerCallback);
+    gsap.ticker.lagSmoothing(0);
+
+    // Refresh ScrollTrigger once DOM is stabilized
+    const timeout = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 400);
 
     return () => {
-      cancelAnimationFrame(rafId);
+      clearTimeout(timeout);
+      gsap.ticker.remove(tickerCallback);
       lenis.destroy();
+      ScrollTrigger.getAll().forEach((t) => t.kill());
     };
   }, []);
 
-  // Section observer for navigation spy
+  // Section Observer for Navigation Spy
   useEffect(() => {
-    const sectionIds = ["hero", "journey", "experience", "work", "skills", "education", "contact"];
+    const sectionIds = [
+      "monument-hero",
+      "monument-statement",
+      "monument-exhibition",
+      "monument-matrix",
+      "monument-terminal",
+    ];
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
+            setActiveId(entry.target.id);
           }
         });
       },
       {
-        rootMargin: "-25% 0px -65% 0px",
+        rootMargin: "-20% 0px -60% 0px",
         threshold: 0,
       }
     );
@@ -70,61 +89,48 @@ export default function Home() {
     return () => observer.disconnect();
   }, []);
 
-  const scrollToContact = () => {
-    const el = document.getElementById("contact");
-    if (el) el.scrollIntoView({ behavior: "smooth" });
-  };
+  const handleNavigate = (id: string) => {
+    const el = document.getElementById(id);
+    if (!el) return;
 
-  const scrollToJourney = () => {
-    const el = document.getElementById("journey");
-    if (el) el.scrollIntoView({ behavior: "smooth" });
+    if (lenisRef.current) {
+      lenisRef.current.scrollTo(el, { duration: 1.2 });
+    } else {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   return (
-    <div className="relative min-h-screen bg-[#FAF9F6] text-[#202124] selection:bg-[#F97316]/20 selection:text-[#EA580C]">
-      {/* Editorial Grain Overlay */}
-      <div
-        className="fixed inset-0 pointer-events-none z-30 opacity-[0.025]"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-        }}
-      />
+    <div className="relative min-h-screen bg-[#FAFAF9] text-[#0F172A] selection:bg-[#10B981]/20 selection:text-[#059669] overflow-x-hidden">
+      {/* 1. Fluid Ambient Mesh Gradient */}
+      <FluidBackgroundMesh />
 
-      {/* Navigation & Progress Line */}
-      <SiteNavigation activeSection={activeSection} />
-      <JourneyPath />
+      {/* 2. Interactive Cursor Particle Emitter (Emits subtle glowing green/mint particles) */}
+      <CursorParticleCanvas />
 
-      {/* Narrative Scenes */}
-      <main>
-        {/* Scene A: Introduction */}
-        <HeroScene
-          onExploreClick={scrollToJourney}
-          onContactClick={scrollToContact}
-        />
+      {/* 3. Autonomous Emerald Optical Orb (Travels smoothly BEHIND text on scroll) */}
+      <TravelingPrismaticSphere />
 
-        {/* Scene B: The Journey Begins */}
-        <JourneyIntro />
+      {/* 4. Architectural Minimal Navigation */}
+      <MasterNav onNavigate={handleNavigate} activeId={activeId} />
 
-        {/* Scene C: International Experience */}
-        <ExperienceStory />
+      {/* 5. Cohesive Spatial Storytelling Sequence */}
+      <main className="relative z-10 flex flex-col">
+        {/* Movement 00: Monumental Hero (Centered with 3D Parallax Tilt) */}
+        <MonumentalHero onExplore={() => handleNavigate("monument-statement")} />
 
-        {/* Scene D: A24-Style Physical Disc Spatial Showcase */}
-        <div id="work">
-          <A24DiscShowcase />
-        </div>
+        {/* Movement 01: Kinetic Pinned Statement & Credentials */}
+        <KineticStatement />
 
-        {/* Scene E: The Developer's Toolkit */}
-        <SkillsSection />
+        {/* Movement 02: 360° Cylindrical Horizontal Scroll Exhibition */}
+        <GrandSpatialDiscs />
 
-        {/* Scene F: Education & Direction */}
-        <EducationSection onContactClick={scrollToContact} />
+        {/* Movement 03: Architectural Bento Matrix & Live Code */}
+        <ArchitecturalMatrix />
 
-        {/* Scene G: Destination / Contact */}
-        <ContactSection />
+        {/* Movement 04: The Initiation Terminal */}
+        <TerminalFinale />
       </main>
-
-      {/* Footer */}
-      <SiteFooter />
     </div>
   );
 }

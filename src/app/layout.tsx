@@ -1,21 +1,28 @@
-import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+﻿import type { Metadata } from "next";
+import { Inter, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 
+// Strictly Font 1: Inter (Black 900 for bold headers/numbers, plus weights for structure)
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  weight: ["400", "500", "700", "900"],
   display: "swap",
 });
 
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
+// Strictly Font 2: Apple Garamond equivalent (Light Italic 300 for narrative/quotes)
+const cormorantGaramond = Cormorant_Garamond({
+  variable: "--font-garamond",
   subsets: ["latin"],
+  weight: ["300", "400"],
+  style: ["italic"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "Soham Roychoudhury — Software & Web Development | Digital Operations",
+  description:
+    "Interactive developer portfolio of Soham Roychoudhury — Computer Science & Engineering (AI/ML) at NSEC Kolkata. Frontend development, cross-border digital operations, and intelligent systems.",
 };
 
 export default function RootLayout({
@@ -24,8 +31,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} scroll-smooth`} suppressHydrationWarning>
-      <body className="bg-[#FAF9F6] text-[#202124] font-sans antialiased selection:bg-[#F97316]/20 selection:text-[#EA580C] min-h-screen" suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${inter.variable} ${cormorantGaramond.variable}`}
+      suppressHydrationWarning
+    >
+      <body
+        className="bg-[#FAFAF9] text-[#0F172A] font-sans antialiased selection:bg-[#10B981]/20 selection:text-[#059669] min-h-screen overflow-x-hidden"
+        suppressHydrationWarning
+      >
         {children}
       </body>
     </html>

@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { SohamAvatar } from "./SohamAvatar";
 import { PERSONAL_INFO } from "@/data/portfolioData";
-import { ArrowDown, Sparkles, Code2, Globe2, Layers, Terminal } from "lucide-react";
+import { ArrowDown, Code2, Globe2, Layers } from "lucide-react";
 
 interface HeroSceneProps {
   onExploreClick: () => void;
@@ -14,6 +14,7 @@ export const HeroScene: React.FC<HeroSceneProps> = ({ onExploreClick, onContactC
   return (
     <section
       id="hero"
+      data-scroll-section
       className="relative min-h-[92vh] pt-28 pb-16 flex flex-col justify-between overflow-hidden bg-[#FAF9F6]"
     >
       {/* Subtle architectural background grid & paper grain */}
@@ -32,7 +33,11 @@ export const HeroScene: React.FC<HeroSceneProps> = ({ onExploreClick, onContactC
 
       {/* Narrative chapter tag */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFFFFF] border border-[#E9E7E3] text-xs font-mono text-[#6B6B6B] shadow-sm mb-6 animate-in fade-in slide-in-from-bottom-2 duration-700">
+        <div 
+          data-scroll
+          data-scroll-speed="0.05"
+          className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFFFFF] border border-[#E9E7E3] text-xs font-mono text-[#6B6B6B] shadow-sm mb-6 animate-in fade-in slide-in-from-bottom-2 duration-700"
+        >
           <span className="w-2 h-2 rounded-full bg-[#F97316]" />
           <span>SCENE 01 / PROTAGONIST INTRODUCTION</span>
           <span className="text-[#E9E7E3]">|</span>
@@ -87,7 +92,7 @@ export const HeroScene: React.FC<HeroSceneProps> = ({ onExploreClick, onContactC
             <div className="flex flex-wrap items-center gap-4 mb-10">
               <button
                 onClick={onExploreClick}
-                className="group inline-flex items-center gap-2.5 px-6 py-3.5 bg-[#F97316] hover:bg-[#EA580C] text-white font-mono text-sm font-semibold rounded-full shadow-[0_8px_20px_rgba(249,115,22,0.25)] transition-all duration-200 transform hover:-translate-y-0.5"
+                className="group inline-flex items-center gap-2.5 px-6 py-3.5 bg-[#F97316] hover:bg-[#EA580C] text-white font-mono text-sm font-semibold rounded-full shadow-[0_8px_20px_rgba(249,115,22,0.25)] transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer"
               >
                 <span>Explore My Work</span>
                 <ArrowDown size={15} className="group-hover:translate-y-0.5 transition-transform" />
@@ -95,15 +100,19 @@ export const HeroScene: React.FC<HeroSceneProps> = ({ onExploreClick, onContactC
 
               <button
                 onClick={onContactClick}
-                className="inline-flex items-center gap-2 px-6 py-3.5 bg-[#FFFFFF] hover:bg-[#FAF9F6] text-[#202124] border border-[#E9E7E3] hover:border-[#202124] font-mono text-sm font-medium rounded-full shadow-sm transition-all duration-200"
+                className="inline-flex items-center gap-2 px-6 py-3.5 bg-[#FFFFFF] hover:bg-[#FAF9F6] text-[#202124] border border-[#E9E7E3] hover:border-[#202124] font-mono text-sm font-medium rounded-full shadow-sm transition-all duration-200 cursor-pointer"
               >
                 <span>Contact Me</span>
               </button>
             </div>
 
-            {/* Verified Credentials Pills */}
-            <div className="pt-6 border-t border-[#E9E7E3] grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <div className="p-3 bg-[#FFFFFF] rounded-xl border border-[#E9E7E3] shadow-xs">
+            {/* Verified Credentials Pills with subtle Locomotive parallax */}
+            <div 
+              data-scroll
+              data-scroll-speed="0.1"
+              className="pt-6 border-t border-[#E9E7E3] grid grid-cols-2 sm:grid-cols-3 gap-3"
+            >
+              <div className="p-3 bg-[#FFFFFF] rounded-xl border border-[#E9E7E3] shadow-xs hover:border-[#F97316]/50 transition-colors">
                 <div className="text-[11px] font-mono text-[#6B6B6B] uppercase flex items-center gap-1.5 mb-1">
                   <Code2 size={12} className="text-[#F97316]" />
                   Education
@@ -116,7 +125,7 @@ export const HeroScene: React.FC<HeroSceneProps> = ({ onExploreClick, onContactC
                 </div>
               </div>
 
-              <div className="p-3 bg-[#FFFFFF] rounded-xl border border-[#E9E7E3] shadow-xs">
+              <div className="p-3 bg-[#FFFFFF] rounded-xl border border-[#E9E7E3] shadow-xs hover:border-[#F97316]/50 transition-colors">
                 <div className="text-[11px] font-mono text-[#6B6B6B] uppercase flex items-center gap-1.5 mb-1">
                   <Globe2 size={12} className="text-[#F97316]" />
                   Cross-Border
@@ -129,7 +138,7 @@ export const HeroScene: React.FC<HeroSceneProps> = ({ onExploreClick, onContactC
                 </div>
               </div>
 
-              <div className="col-span-2 sm:col-span-1 p-3 bg-[#FFFFFF] rounded-xl border border-[#E9E7E3] shadow-xs">
+              <div className="col-span-2 sm:col-span-1 p-3 bg-[#FFFFFF] rounded-xl border border-[#E9E7E3] shadow-xs hover:border-[#F97316]/50 transition-colors">
                 <div className="text-[11px] font-mono text-[#6B6B6B] uppercase flex items-center gap-1.5 mb-1">
                   <Layers size={12} className="text-[#F97316]" />
                   Focus
@@ -144,8 +153,12 @@ export const HeroScene: React.FC<HeroSceneProps> = ({ onExploreClick, onContactC
             </div>
           </div>
 
-          {/* Right Column: 3D Persona Character (5 cols) */}
-          <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
+          {/* Right Column: 3D Persona Character with Locomotive Parallax */}
+          <div 
+            data-scroll
+            data-scroll-speed="0.2"
+            className="lg:col-span-5 flex flex-col items-center justify-center relative"
+          >
             <div className="relative w-full max-w-[360px] flex items-center justify-center">
               {/* Authentic 3D Persona with Mouse Tilt */}
               <SohamAvatar

@@ -1,44 +1,108 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
+@import "locomotive-scroll/locomotive-scroll.css";
 
 :root {
-  --background: #FAF9F6;
-  --foreground: #202124;
-  --primary-orange: #F97316;
-  --deep-orange: #EA580C;
-  --charcoal: #202124;
-  --muted-text: #6B6B6B;
-  --subtle-border: #E9E7E3;
+  --background: #FAFAF9;
+  --foreground: #0F172A;
+  --primary-green: #10B981;
+  --deep-green: #059669;
+  --neon-mint: #34D399;
+  --fluid-emerald: #00FF87;
+  --card-surface: rgba(255, 255, 255, 0.85);
+  --muted-text: #64748B;
+  --subtle-border: rgba(15, 23, 42, 0.08);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-orange-primary: #F97316;
-  --color-orange-deep: #EA580C;
-  --color-charcoal: #202124;
-  --color-muted: #6B6B6B;
-  --color-border-subtle: #E9E7E3;
+  --color-primary-green: #10B981;
+  --color-deep-green: #059669;
+  --color-neon-mint: #34D399;
+  --color-fluid-emerald: #00FF87;
+  --color-card-surface: rgba(255, 255, 255, 0.85);
+  --color-muted: #64748B;
+  --color-border-subtle: rgba(15, 23, 42, 0.08);
+
+  /* Strictly two font families */
   --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono: var(--font-jetbrains-mono), monospace;
+  --font-serif: "Apple Garamond", var(--font-garamond), "EB Garamond", Garamond, serif;
 }
 
-/* Custom scrollbar matching editorial aesthetic */
+/* Strictly Two Font Utility Helpers */
+.font-inter-black {
+  font-family: var(--font-sans);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.font-garamond-italic {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 300;
+}
+
+/* Custom Light Minimal Scrollbar with Emerald Accent */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #FAF9F6;
+  background: #FAFAF9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #E9E7E3;
+  background: #CBD5E1;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #D6D3CD;
+  background: #10B981;
+}
+
+/* Luminous Fluid Green Mesh Gradients */
+@keyframes fluidAuroraOne {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translate(50px, -40px) scale(1.15);
+    opacity: 0.85;
+  }
+}
+
+@keyframes fluidAuroraTwo {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1.1);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translate(-60px, 45px) scale(0.92);
+    opacity: 0.75;
+  }
+}
+
+@keyframes spinSlow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-aurora-one {
+  animation: fluidAuroraOne 16s ease-in-out infinite;
+}
+
+.animate-aurora-two {
+  animation: fluidAuroraTwo 22s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spinSlow 22s linear infinite;
 }
 
 /* Smooth motion accessibility */

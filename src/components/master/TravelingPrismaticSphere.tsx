@@ -88,6 +88,11 @@ export const TravelingPrismaticSphere: React.FC = () => {
     let shockwaveRadius = 0;
     let shockwaveAlpha = 0;
 
+    // Double-Click Orbital Escape Loop (Figure-eight Lemniscate)
+    let isOrbiting = false;
+    let orbitProgress = 0; // 0 to 1
+    const ORBIT_DURATION_FRAMES = 115; // ~1.9 seconds at 60fps
+
     // Stardust trail & click sparkles pools
     const trail: StardustTrailParticle[] = [];
     const sparkles: SparkleParticle[] = [];
@@ -154,6 +159,57 @@ export const TravelingPrismaticSphere: React.FC = () => {
       }
     };
     window.addEventListener("click", handleClick);
+
+    // Double-Click handler: triggers the energetic Figure-Eight Orbital Escape
+    const handleDblClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.closest("button") ||
+          target.closest("a") ||
+          target.closest("input") ||
+          target.getAttribute("role") === "button")
+      ) {
+        return;
+      }
+
+      const dx = e.clientX - currentX;
+      const dy = e.clientY - currentY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < currentRadius * 1.5) {
+        isOrbiting = true;
+        orbitProgress = 0;
+
+        // Dynamic launch impulse
+        clickScale = 0.82;
+        clickScaleVel = 0.14;
+        shockwaveRadius = currentRadius * 0.85;
+        shockwaveAlpha = 1.0;
+
+        // Energetic launch sparkles
+        const count = width < 640 ? 18 : 26;
+        for (let i = 0; i < count; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = Math.random() * 6 + 3.5;
+          sparkles.push({
+            x: currentX,
+            y: currentY,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            size: Math.random() * 7 + 4,
+            rot: Math.random() * Math.PI * 2,
+            rotSpeed: (Math.random() - 0.5) * 0.16,
+            alpha: 1.0,
+            life: 0,
+            maxLife: 42,
+            color: Math.random() < 0.5 ? "#00FF87" : "#38BDF8",
+            isStar: true,
+          });
+        }
+      }
+    };
+    window.addEventListener("dblclick", handleDblClick);
 
     // Helper to draw a 4-pointed diamond sparkle star
     const drawSparkleStar = (
@@ -253,20 +309,90 @@ export const TravelingPrismaticSphere: React.FC = () => {
         targetRadius = isMobile ? 70 : 125;
       }
 
+      // --- Figure-Eight (Lemniscate) Orbital Escape Math ---
+      let orbitOffsetX = 0;
+      let orbitOffsetY = 0;
+      let orbitScaleFactor = 1.0;
+
+      if (isOrbiting) {
+        orbitProgress += 1 / ORBIT_DURATION_FRAMES;
+        if (orbitProgress >= 1.0) {
+          isOrbiting = false;
+          orbitProgress = 0;
+
+          // Arrival celebration shockwave + sparkles
+          shockwaveRadius = currentRadius * 0.9;
+          shockwaveAlpha = 0.85;
+          clickScale = 0.88;
+          clickScaleVel = 0.09;
+
+          for (let i = 0; i < 14; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = Math.random() * 4 + 2;
+            sparkles.push({
+              x: currentX,
+              y: currentY,
+              vx: Math.cos(angle) * speed,
+              vy: Math.sin(angle) * speed,
+              size: Math.random() * 5 + 3,
+              rot: Math.random() * Math.PI * 2,
+              rotSpeed: (Math.random() - 0.5) * 0.12,
+              alpha: 1.0,
+              life: 0,
+              maxLife: 35,
+              color: "#00FF87",
+              isStar: true,
+            });
+          }
+        } else {
+          // Smooth sinusoidal ease-in-out trajectory
+          const eased = 0.5 - 0.5 * Math.cos(orbitProgress * Math.PI);
+          const theta = eased * Math.PI * 2;
+          const ampX = isMobile ? width * 0.35 : width * 0.38;
+          const ampY = isMobile ? height * 0.22 : height * 0.26;
+
+          // Lemniscate figure-8 parametric equation
+          orbitOffsetX = ampX * Math.sin(theta);
+          orbitOffsetY = ampY * Math.sin(theta * 2);
+
+          // Dynamic 3D parallax zoom
+          orbitScaleFactor = 1.0 + 0.22 * Math.sin(orbitProgress * Math.PI);
+
+          // Emit dense comet stardust tail during orbital flight
+          if (trail.length < 36) {
+            for (let k = 0; k < 2; k++) {
+              trail.push({
+                x: currentX + (Math.random() - 0.5) * 16,
+                y: currentY + (Math.random() - 0.5) * 16,
+                size: Math.random() * 3.5 + 2.0,
+                alpha: 0.85,
+                life: 0,
+                maxLife: 40,
+              });
+            }
+          }
+        }
+      }
+
       // Organic idle floating drift
       const floatX = Math.sin(time * 1.3) * (isMobile ? 16 : 32);
       const floatY = Math.cos(time * 1.0) * (isMobile ? 12 : 20);
 
-      currentX += (targetX + floatX - currentX) * 0.055;
-      currentY += (targetY + floatY - currentY) * 0.055;
+      const finalTargetX = targetX + orbitOffsetX;
+      const finalTargetY = targetY + orbitOffsetY;
+
+      // Higher lerp responsiveness during orbital flight so it tracks the figure-8 energetically
+      const lerpSpeed = isOrbiting ? 0.18 : 0.055;
+      currentX += (finalTargetX + floatX - currentX) * lerpSpeed;
+      currentY += (finalTargetY + floatY - currentY) * lerpSpeed;
       currentRadius += (targetRadius - currentRadius) * 0.055;
 
-      // Elastic rebound physics on click
+      // Elastic rebound physics on click & orbit
       clickScale += clickScaleVel;
       clickScaleVel += (1.0 - clickScale) * 0.18;
       clickScaleVel *= 0.78; // damping
 
-      const r = Math.max(currentRadius * clickScale, 45);
+      const r = Math.max(currentRadius * clickScale * orbitScaleFactor, 45);
 
       // --- Cursor Distance Check & Inversion Factor ---
       const dx = mouseX - currentX;
@@ -280,20 +406,22 @@ export const TravelingPrismaticSphere: React.FC = () => {
         hoverFactor += (0 - hoverFactor) * 0.08;
       }
 
-      // Stardust trail update
-      const distMoved = Math.hypot(currentX - lastEmitX, currentY - lastEmitY);
-      if (distMoved > 7) {
-        lastEmitX = currentX;
-        lastEmitY = currentY;
-        if (trail.length < 12) {
-          trail.push({
-            x: currentX + (Math.random() - 0.5) * 20,
-            y: currentY + (Math.random() - 0.5) * 20,
-            size: Math.random() * 2.5 + 1.2,
-            alpha: 0.6,
-            life: 0,
-            maxLife: 32,
-          });
+      // Stardust trail update for normal flight
+      if (!isOrbiting) {
+        const distMoved = Math.hypot(currentX - lastEmitX, currentY - lastEmitY);
+        if (distMoved > 7) {
+          lastEmitX = currentX;
+          lastEmitY = currentY;
+          if (trail.length < 16) {
+            trail.push({
+              x: currentX + (Math.random() - 0.5) * 20,
+              y: currentY + (Math.random() - 0.5) * 20,
+              size: Math.random() * 2.5 + 1.2,
+              alpha: 0.6,
+              life: 0,
+              maxLife: 32,
+            });
+          }
         }
       }
 
@@ -396,7 +524,7 @@ export const TravelingPrismaticSphere: React.FC = () => {
         ctx.restore();
       }
 
-      // --- 5. EXPANDING OPTICAL SHOCKWAVE PULSE ON CLICK ---
+      // --- 5. EXPANDING OPTICAL SHOCKWAVE PULSE ON CLICK OR LAUNCH ---
       if (shockwaveAlpha > 0.01) {
         shockwaveRadius += 3.2;
         shockwaveAlpha *= 0.92;
@@ -470,6 +598,7 @@ export const TravelingPrismaticSphere: React.FC = () => {
       document.removeEventListener("pointermove", handleMouseMove);
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("click", handleClick);
+      window.removeEventListener("dblclick", handleDblClick);
       cancelAnimationFrame(animId);
     };
   }, []);

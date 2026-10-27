@@ -115,7 +115,7 @@ export const TravelingPrismaticSphere: React.FC = () => {
       if (dist > 5) {
         lastEmitX = currentX;
         lastEmitY = currentY;
-        trail.push({
+        if (trail.length < 12) trail.push({
           x: currentX + (Math.random() - 0.5) * 24,
           y: currentY + (Math.random() - 0.5) * 24,
           size: Math.random() * 2.8 + 1.2,

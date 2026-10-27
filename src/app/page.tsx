@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import Lenis from "lenis";
 
 import { SilkyFluidBackdrop } from "@/components/master/SilkyFluidBackdrop";
+import { TravelingPrismaticSphere } from "@/components/master/TravelingPrismaticSphere";
 import { MasterNav } from "@/components/master/MasterNav";
 import { MonumentalHero } from "@/components/master/MonumentalHero";
 import { KineticStatement } from "@/components/master/KineticStatement";
@@ -109,6 +110,9 @@ export default function Home() {
 
       {/* 1. Silky Fluid Gradient Backdrop (Direct match to reference screenshot: lightweight, GPU-composited, zero-lag) */}
       <SilkyFluidBackdrop />
+
+      {/* Autonomous Emerald Optical Guiding Sphere */}
+      <TravelingPrismaticSphere />
 
       {/* 2. Architectural Minimal Navigation */}
       <MasterNav onNavigate={handleNavigate} activeId={activeId} />

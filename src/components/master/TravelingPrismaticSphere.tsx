@@ -76,10 +76,10 @@ export const TravelingPrismaticSphere: React.FC = () => {
       time += 0.02;
       ctx.clearRect(0, 0, width, height);
 
-      // Smooth cursor lerp
+      // Buttery smooth cursor lerp (luxurious inertia, zero harshness)
       if (targetMouseX > 0) {
-        mouseX += (targetMouseX - mouseX) * 0.2;
-        mouseY += (targetMouseY - mouseY) * 0.2;
+        mouseX += (targetMouseX - mouseX) * 0.08;
+        mouseY += (targetMouseY - mouseY) * 0.08;
       }
 
       const p = scrollRef.current.progress;
@@ -154,9 +154,9 @@ export const TravelingPrismaticSphere: React.FC = () => {
       const isCursorInside = dist < r * 1.35;
 
       if (isCursorInside) {
-        hoverFactor += (1 - hoverFactor) * 0.3;
+        hoverFactor += (1 - hoverFactor) * 0.08;
       } else {
-        hoverFactor += (0 - hoverFactor) * 0.15;
+        hoverFactor += (0 - hoverFactor) * 0.08;
       }
 
       // Stardust trail update
@@ -240,8 +240,8 @@ export const TravelingPrismaticSphere: React.FC = () => {
       ctx.arc(0, 0, r * 1.18, 0, Math.PI * 2);
       ctx.stroke();
 
-      // --- 4. LOCALIZED INVERTED COLOR SPOT (Only a small compact area directly around the cursor inside the sphere) ---
-      if (hoverFactor > 0.02) {
+      // --- 4. SOFT BUTTERY INVERTED COLOR AURA (Silky, feathered, zero harsh dots or rings) ---
+      if (hoverFactor > 0.01) {
         // Clip strictly to the sphere geometry so it stays ONLY inside the sphere
         ctx.save();
         ctx.beginPath();
@@ -252,40 +252,29 @@ export const TravelingPrismaticSphere: React.FC = () => {
         const localX = mouseX - currentX;
         const localY = mouseY - currentY;
 
-        // Small, tight area around the cursor (radius 36px)
-        const spotRadius = 36;
+        // Soft, diffused feathered aura (radius ~52px with dreamy soft falloff)
+        const softAuraRadius = 52;
 
-        // A. Small localized inverted chromatic lens directly under cursor
-        const invertSpot = ctx.createRadialGradient(
+        // Subtle, mathematical difference blend for a soft, silky inverted glow
+        ctx.globalCompositeOperation = "difference";
+
+        const softGlow = ctx.createRadialGradient(
           localX,
           localY,
           0,
           localX,
           localY,
-          spotRadius
+          softAuraRadius
         );
-        invertSpot.addColorStop(0, `rgba(15, 23, 42, ${hoverFactor * 0.95})`); // Deep obsidian core
-        invertSpot.addColorStop(0.35, `rgba(124, 58, 237, ${hoverFactor * 0.92})`); // Royal violet
-        invertSpot.addColorStop(0.70, `rgba(217, 70, 239, ${hoverFactor * 0.85})`); // Vivid neon magenta
-        invertSpot.addColorStop(0.92, `rgba(249, 115, 22, ${hoverFactor * 0.75})`); // Neon gold-coral rim
-        invertSpot.addColorStop(1, "rgba(217, 70, 239, 0)"); // Smooth fade out
+        // Soft, progressive feathered falloff: gentle, dreamy, buttery
+        softGlow.addColorStop(0, `rgba(255, 255, 255, ${hoverFactor * 0.48})`);
+        softGlow.addColorStop(0.35, `rgba(255, 255, 255, ${hoverFactor * 0.32})`);
+        softGlow.addColorStop(0.70, `rgba(255, 255, 255, ${hoverFactor * 0.12})`);
+        softGlow.addColorStop(1, "rgba(255, 255, 255, 0)");
 
-        ctx.fillStyle = invertSpot;
+        ctx.fillStyle = softGlow;
         ctx.beginPath();
-        ctx.arc(localX, localY, spotRadius, 0, Math.PI * 2);
-        ctx.fill();
-
-        // B. Precision optical white reticle ring around the small spot
-        ctx.strokeStyle = `rgba(255, 255, 255, ${hoverFactor * 0.92})`;
-        ctx.lineWidth = 1.6;
-        ctx.beginPath();
-        ctx.arc(localX, localY, spotRadius * 0.55, 0, Math.PI * 2);
-        ctx.stroke();
-
-        // Micro-focus optical center bead
-        ctx.fillStyle = `rgba(255, 255, 255, ${hoverFactor * 0.95})`;
-        ctx.beginPath();
-        ctx.arc(localX, localY, 2.5, 0, Math.PI * 2);
+        ctx.arc(localX, localY, softAuraRadius, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.restore();

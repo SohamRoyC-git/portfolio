@@ -207,24 +207,14 @@ export const TravelingPrismaticSphere: React.FC = () => {
       ctx.arc(0, 0, r * 1.7, 0, Math.PI * 2);
       ctx.fill();
 
-      // 2. Base 3D Volumetric Sphere (Smoothly inverts into chromatic negative when hovered)
+      // 2. Base 3D Volumetric Greenish Gradient Sphere (Always pure emerald - never changes as a whole)
       const sphereGrad = ctx.createRadialGradient(-r * 0.28, -r * 0.28, r * 0.04, 0, 0, r);
-      if (hoverFactor > 0.01) {
-        // Inverted chromatic negative state (Obsidian core -> Electric ultraviolet magenta -> Neon gold)
-        sphereGrad.addColorStop(0, `rgba(${Math.round(255 - hoverFactor * 240)}, ${Math.round(255 - hoverFactor * 240)}, ${Math.round(255 - hoverFactor * 230)}, 0.98)`);
-        sphereGrad.addColorStop(0.25, `rgba(${Math.round(209 - hoverFactor * 85)}, ${Math.round(250 - hoverFactor * 192)}, ${Math.round(229 + hoverFactor * 8)}, 0.92)`);
-        sphereGrad.addColorStop(0.55, `rgba(${Math.round(52 + hoverFactor * 165)}, ${Math.round(211 - hoverFactor * 141)}, ${Math.round(153 + hoverFactor * 86)}, 0.85)`);
-        sphereGrad.addColorStop(0.85, `rgba(${Math.round(16 + hoverFactor * 233)}, ${Math.round(185 - hoverFactor * 70)}, ${Math.round(129 - hoverFactor * 107)}, 0.65)`);
-        sphereGrad.addColorStop(1, `rgba(${Math.round(16 + hoverFactor * 201)}, ${Math.round(185 - hoverFactor * 115)}, ${Math.round(129 + hoverFactor * 110)}, 0.05)`);
-      } else {
-        // Resting emerald state
-        sphereGrad.addColorStop(0, "rgba(255, 255, 255, 0.98)");
-        sphereGrad.addColorStop(0.18, "rgba(209, 250, 229, 0.92)");
-        sphereGrad.addColorStop(0.48, "rgba(52, 211, 153, 0.52)");
-        sphereGrad.addColorStop(0.75, "rgba(16, 185, 129, 0.36)");
-        sphereGrad.addColorStop(0.95, "rgba(5, 150, 105, 0.18)");
-        sphereGrad.addColorStop(1, "rgba(16, 185, 129, 0.02)");
-      }
+      sphereGrad.addColorStop(0, "rgba(255, 255, 255, 0.98)");
+      sphereGrad.addColorStop(0.18, "rgba(209, 250, 229, 0.92)");
+      sphereGrad.addColorStop(0.48, "rgba(52, 211, 153, 0.52)");
+      sphereGrad.addColorStop(0.75, "rgba(16, 185, 129, 0.36)");
+      sphereGrad.addColorStop(0.95, "rgba(5, 150, 105, 0.18)");
+      sphereGrad.addColorStop(1, "rgba(16, 185, 129, 0.02)");
 
       ctx.fillStyle = sphereGrad;
       ctx.beginPath();
@@ -250,9 +240,9 @@ export const TravelingPrismaticSphere: React.FC = () => {
       ctx.arc(0, 0, r * 1.18, 0, Math.PI * 2);
       ctx.stroke();
 
-      // --- 4. INVERTED COLOR HOVER EFFECT (Restricted ONLY to within the sphere) ---
+      // --- 4. LOCALIZED INVERTED COLOR SPOT (Only a small compact area directly around the cursor inside the sphere) ---
       if (hoverFactor > 0.02) {
-        // Clip strictly to the sphere geometry so the inverted effect stays ONLY inside the sphere
+        // Clip strictly to the sphere geometry so it stays ONLY inside the sphere
         ctx.save();
         ctx.beginPath();
         ctx.arc(0, 0, r, 0, Math.PI * 2);
@@ -261,59 +251,41 @@ export const TravelingPrismaticSphere: React.FC = () => {
         // Local cursor coordinates relative to sphere center
         const localX = mouseX - currentX;
         const localY = mouseY - currentY;
-        const lensRadius = Math.max(r * 0.88, 55);
 
-        // A. True Inverted Negative Spectrum Gradient
-        // Green inverted -> Electric Ultraviolet Magenta
-        // White highlight inverted -> Deep Obsidian Core
-        const invertGrad = ctx.createRadialGradient(
+        // Small, tight area around the cursor (radius 36px)
+        const spotRadius = 36;
+
+        // A. Small localized inverted chromatic lens directly under cursor
+        const invertSpot = ctx.createRadialGradient(
           localX,
           localY,
-          r * 0.05,
+          0,
           localX,
           localY,
-          lensRadius
+          spotRadius
         );
-        invertGrad.addColorStop(0, `rgba(15, 23, 42, ${hoverFactor * 0.95})`); // Deep obsidian core
-        invertGrad.addColorStop(0.35, `rgba(124, 58, 237, ${hoverFactor * 0.90})`); // Royal violet
-        invertGrad.addColorStop(0.70, `rgba(217, 70, 239, ${hoverFactor * 0.82})`); // Vivid neon magenta
-        invertGrad.addColorStop(0.92, `rgba(249, 115, 22, ${hoverFactor * 0.70})`); // Inverted neon flame rim
-        invertGrad.addColorStop(1, "rgba(217, 70, 239, 0)");
+        invertSpot.addColorStop(0, `rgba(15, 23, 42, ${hoverFactor * 0.95})`); // Deep obsidian core
+        invertSpot.addColorStop(0.35, `rgba(124, 58, 237, ${hoverFactor * 0.92})`); // Royal violet
+        invertSpot.addColorStop(0.70, `rgba(217, 70, 239, ${hoverFactor * 0.85})`); // Vivid neon magenta
+        invertSpot.addColorStop(0.92, `rgba(249, 115, 22, ${hoverFactor * 0.75})`); // Neon gold-coral rim
+        invertSpot.addColorStop(1, "rgba(217, 70, 239, 0)"); // Smooth fade out
 
-        ctx.fillStyle = invertGrad;
+        ctx.fillStyle = invertSpot;
         ctx.beginPath();
-        ctx.arc(localX, localY, lensRadius, 0, Math.PI * 2);
+        ctx.arc(localX, localY, spotRadius, 0, Math.PI * 2);
         ctx.fill();
 
-        // B. Inverted Specular Glint (Glowing white-cyan highlight tracking cursor)
-        const glintGrad = ctx.createRadialGradient(
-          localX - 12,
-          localY - 12,
-          1,
-          localX,
-          localY,
-          32
-        );
-        glintGrad.addColorStop(0, `rgba(255, 255, 255, ${hoverFactor * 0.95})`);
-        glintGrad.addColorStop(0.4, `rgba(168, 85, 247, ${hoverFactor * 0.6})`);
-        glintGrad.addColorStop(1, "rgba(124, 58, 237, 0)");
-
-        ctx.fillStyle = glintGrad;
-        ctx.beginPath();
-        ctx.arc(localX, localY, 32, 0, Math.PI * 2);
-        ctx.fill();
-
-        // C. Precision Chromatic Reticle Ring around cursor hotspot inside sphere
+        // B. Precision optical white reticle ring around the small spot
         ctx.strokeStyle = `rgba(255, 255, 255, ${hoverFactor * 0.92})`;
-        ctx.lineWidth = 1.8;
+        ctx.lineWidth = 1.6;
         ctx.beginPath();
-        ctx.arc(localX, localY, 22, 0, Math.PI * 2);
+        ctx.arc(localX, localY, spotRadius * 0.55, 0, Math.PI * 2);
         ctx.stroke();
 
-        // Optical center bead
+        // Micro-focus optical center bead
         ctx.fillStyle = `rgba(255, 255, 255, ${hoverFactor * 0.95})`;
         ctx.beginPath();
-        ctx.arc(localX, localY, 3, 0, Math.PI * 2);
+        ctx.arc(localX, localY, 2.5, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.restore();

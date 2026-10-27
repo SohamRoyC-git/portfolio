@@ -85,8 +85,11 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = ({ onExplore }) => 
 
       {/* Main Monumental Centerpiece */}
       <div className="relative z-10 my-auto flex flex-col items-center justify-center text-center max-w-6xl mx-auto w-full py-6 sm:py-8">
+        {/* Soft radial backdrop halo for crisp contrast against fluid background */}
+        <div className="absolute inset-0 max-w-2xl sm:max-w-3xl mx-auto rounded-full bg-white/75 blur-3xl -z-10 pointer-events-none" />
+
         {/* Education & Institutional Origin Eyebrow */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 border border-slate-200/80 shadow-xs backdrop-blur-md mb-4 sm:mb-6 hover:border-[#10B981]/50 transition-colors max-w-full">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/85 border border-slate-200/80 shadow-xs backdrop-blur-md mb-4 sm:mb-6 hover:border-[#10B981]/50 transition-colors max-w-full">
           <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] shrink-0" />
           <span className="font-sans font-black text-[10px] sm:text-xs text-[#0F172A] tracking-wider uppercase truncate">
             Netaji Subhash Engineering College (2024-2028) · Kolkata, India
@@ -100,28 +103,28 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = ({ onExplore }) => 
             transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
           }}
         >
-          <h1 className="font-sans font-black text-4xl xs:text-5xl sm:text-7xl md:text-8xl lg:text-9xl xl:text-[9.5rem] text-[#0F172A] uppercase tracking-tighter leading-[0.88] mb-4 sm:mb-6 drop-shadow-xs break-words">
+          <h1 className="font-sans font-black text-3xl xs:text-4xl sm:text-5xl md:text-7xl lg:text-[5.5rem] xl:text-[7.2rem] text-[#0F172A] uppercase tracking-tighter leading-[0.92] mb-4 sm:mb-6 drop-shadow-sm">
             SOHAM <br />
-            <span className="bg-gradient-to-r from-[#0F172A] via-slate-800 to-slate-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#0F172A] via-slate-800 to-slate-600 bg-clip-text text-transparent whitespace-nowrap">
               ROYCHOUDHURY
             </span>
           </h1>
         </div>
 
         {/* Editorial Subtitle in Apple Garamond Light Italic */}
-        <p className="font-serif italic font-light text-lg sm:text-2xl md:text-3xl text-slate-700 tracking-normal leading-relaxed max-w-2xl sm:max-w-3xl mx-auto mb-6 sm:mb-8 px-2">
+        <p className="font-serif italic font-light text-lg sm:text-2xl md:text-3xl text-slate-800 tracking-normal leading-relaxed max-w-2xl sm:max-w-3xl mx-auto mb-6 sm:mb-8 px-2">
           Artificial Intelligence &amp; Machine Learning · Frontend Architect · Digital Operations
         </p>
 
         {/* Interactive Engineering Capsules */}
         <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 max-w-2xl mx-auto px-2">
-          <div className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/70 border border-slate-200/80 backdrop-blur-md font-sans font-black text-[10px] sm:text-[11px] text-[#0F172A] uppercase tracking-wider shadow-xs">
+          <div className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/80 border border-slate-200/80 backdrop-blur-md font-sans font-black text-[10px] sm:text-[11px] text-[#0F172A] uppercase tracking-wider shadow-xs">
             ⚡ 278-Key Instant Translation
           </div>
-          <div className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/70 border border-slate-200/80 backdrop-blur-md font-sans font-black text-[10px] sm:text-[11px] text-[#0F172A] uppercase tracking-wider shadow-xs">
+          <div className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/80 border border-slate-200/80 backdrop-blur-md font-sans font-black text-[10px] sm:text-[11px] text-[#0F172A] uppercase tracking-wider shadow-xs">
             🧠 Real-Time Tensor Pipelines
           </div>
-          <div className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/70 border border-slate-200/80 backdrop-blur-md font-sans font-black text-[10px] sm:text-[11px] text-[#0F172A] uppercase tracking-wider shadow-xs">
+          <div className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/80 border border-slate-200/80 backdrop-blur-md font-sans font-black text-[10px] sm:text-[11px] text-[#0F172A] uppercase tracking-wider shadow-xs">
             🌐 60 FPS WebGL Spatial Canvas
           </div>
         </div>
@@ -129,7 +132,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = ({ onExplore }) => 
 
       {/* Bottom Bar: Action Button & Studio Coordinates */}
       <div className="relative z-10 w-full max-w-7xl mx-auto flex items-center justify-center sm:justify-between pt-4 sm:pt-6 border-t border-slate-200/80">
-        <div className="font-sans font-black text-[11px] text-slate-400 uppercase tracking-widest hidden md:flex items-center gap-2">
+        <div className="font-sans font-black text-[11px] text-slate-500 uppercase tracking-widest hidden md:flex items-center gap-2">
           <span>LAT 22.5726° N</span>
           <span>·</span>
           <span>LON 88.3639° E</span>
@@ -144,7 +147,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = ({ onExplore }) => 
           <ArrowDown size={14} className="group-hover:translate-y-1 transition-transform" />
         </button>
 
-        <div className="font-sans font-black text-[11px] text-slate-400 uppercase tracking-widest hidden sm:block">
+        <div className="font-sans font-black text-[11px] text-slate-500 uppercase tracking-widest hidden sm:block">
           SCROLL TO ORBIT // 360°
         </div>
       </div>

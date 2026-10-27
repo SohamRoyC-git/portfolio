@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import Lenis from "lenis";
 
 import { FluidBackgroundMesh } from "@/components/master/FluidBackgroundMesh";
+import { VolumetricFluidRibbon } from "@/components/master/VolumetricFluidRibbon";
 import { CursorParticleCanvas } from "@/components/master/CursorParticleCanvas";
 import { TravelingPrismaticSphere } from "@/components/master/TravelingPrismaticSphere";
 import { MasterNav } from "@/components/master/MasterNav";
@@ -14,6 +15,7 @@ import { KineticStatement } from "@/components/master/KineticStatement";
 import { GrandSpatialDiscs } from "@/components/master/GrandSpatialDiscs";
 import { ArchitecturalMatrix } from "@/components/master/ArchitecturalMatrix";
 import { TerminalFinale } from "@/components/master/TerminalFinale";
+import { YouTubeSkeletonLoader } from "@/components/master/YouTubeSkeletonLoader";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -102,21 +104,27 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen bg-[#FAFAF9] text-[#0F172A] selection:bg-[#10B981]/20 selection:text-[#059669] overflow-x-hidden">
+      {/* 0. Authentic YouTube Shimmer Skeleton Loader (Mounts on initial load, dissolves smoothly) */}
+      <YouTubeSkeletonLoader />
+
       {/* 1. Fluid Ambient Mesh Gradient */}
       <FluidBackgroundMesh />
 
-      {/* 2. Interactive Cursor Particle Emitter (Emits subtle glowing green/mint particles) */}
+      {/* 2. 3D Volumetric Fluid Gradient Wave Ribbon (Inspired by reference screenshot) */}
+      <VolumetricFluidRibbon />
+
+      {/* 3. Interactive Cursor Particle Emitter */}
       <CursorParticleCanvas />
 
-      {/* 3. Autonomous Emerald Optical Orb (Travels smoothly BEHIND text on scroll) */}
+      {/* 4. Autonomous Emerald Optical Orb */}
       <TravelingPrismaticSphere />
 
-      {/* 4. Architectural Minimal Navigation */}
+      {/* 5. Architectural Minimal Navigation */}
       <MasterNav onNavigate={handleNavigate} activeId={activeId} />
 
-      {/* 5. Cohesive Spatial Storytelling Sequence */}
+      {/* 6. Cohesive Spatial Storytelling Sequence */}
       <main className="relative z-10 flex flex-col">
-        {/* Movement 00: Monumental Hero (Centered with 3D Parallax Tilt) */}
+        {/* Movement 00: Monumental Hero */}
         <MonumentalHero onExplore={() => handleNavigate("monument-statement")} />
 
         {/* Movement 01: Kinetic Pinned Statement & Credentials */}

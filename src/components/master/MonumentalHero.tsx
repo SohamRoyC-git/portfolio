@@ -85,9 +85,6 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = ({ onExplore }) => 
 
       {/* Main Monumental Centerpiece */}
       <div className="relative z-10 my-auto flex flex-col items-center justify-center text-center max-w-6xl mx-auto w-full py-6 sm:py-8">
-        {/* Soft radial backdrop halo for crisp contrast against fluid background */}
-        <div className="absolute inset-0 max-w-2xl sm:max-w-3xl mx-auto rounded-full bg-white/75 blur-3xl -z-10 pointer-events-none" />
-
         {/* Education & Institutional Origin Eyebrow */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/85 border border-slate-200/80 shadow-xs backdrop-blur-md mb-4 sm:mb-6 hover:border-[#10B981]/50 transition-colors max-w-full">
           <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] shrink-0" />

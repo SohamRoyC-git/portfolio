@@ -2,11 +2,9 @@
 
 import React, { useEffect, useRef } from "react";
 
-interface DropletParticle {
+interface StardustTrailParticle {
   x: number;
   y: number;
-  vx: number;
-  vy: number;
   size: number;
   alpha: number;
   life: number;
@@ -33,19 +31,20 @@ export const TravelingPrismaticSphere: React.FC = () => {
     };
     window.addEventListener("resize", handleResize);
 
-    // Mouse tracking for liquid cursor interaction
-    let mouseX = width / 2;
-    let mouseY = height / 2;
-    let targetMouseX = mouseX;
-    let targetMouseY = mouseY;
-    let isHovered = false;
-    let liquidDeform = 0; // 0 to 1 liquid wobble intensity
+    // Mouse tracking for localized color inversion hover
+    let mouseX = -1000;
+    let mouseY = -1000;
+    let targetMouseX = -1000;
+    let targetMouseY = -1000;
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const handleMouseMove = (e: MouseEvent | PointerEvent) => {
       targetMouseX = e.clientX;
       targetMouseY = e.clientY;
     };
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    window.addEventListener("pointermove", handleMouseMove, { passive: true });
+    document.addEventListener("mousemove", handleMouseMove, { passive: true });
+    document.addEventListener("pointermove", handleMouseMove, { passive: true });
 
     // Scroll progress listener
     const handleScroll = () => {
@@ -65,16 +64,23 @@ export const TravelingPrismaticSphere: React.FC = () => {
     let currentY = height * 0.44;
     let currentRadius = width < 640 ? 75 : 135;
 
-    // Droplets pool
-    const droplets: DropletParticle[] = [];
+    // Smooth hover transition factor (0 = normal, 1 = fully inverted)
+    let hoverFactor = 0;
+
+    // Stardust trail
+    const trail: StardustTrailParticle[] = [];
+    let lastEmitX = currentX;
+    let lastEmitY = currentY;
 
     const render = () => {
-      time += 0.022;
+      time += 0.02;
       ctx.clearRect(0, 0, width, height);
 
-      // Smooth mouse lerp
-      mouseX += (targetMouseX - mouseX) * 0.1;
-      mouseY += (targetMouseY - mouseY) * 0.1;
+      // Smooth cursor lerp
+      if (targetMouseX > 0) {
+        mouseX += (targetMouseX - mouseX) * 0.2;
+        mouseY += (targetMouseY - mouseY) * 0.2;
+      }
 
       const p = scrollRef.current.progress;
       const isMobile = width < 640;
@@ -85,7 +91,7 @@ export const TravelingPrismaticSphere: React.FC = () => {
       let targetRadius = isMobile ? 75 : 135;
 
       if (p < 0.18) {
-        // Section 00 (Hero): Moves dynamically from LEFT (0.36) to RIGHT (0.64) as you scroll down the hero
+        // Section 00 (Hero): Moves dynamically from LEFT (0.36) to RIGHT (0.64) as you scroll down
         const t = p / 0.18;
         const leftX = width * 0.36;
         const rightX = width * 0.64;
@@ -93,7 +99,7 @@ export const TravelingPrismaticSphere: React.FC = () => {
         targetY = height * (0.42 + t * 0.08);
         targetRadius = isMobile ? 75 : 135;
       } else if (p < 0.38) {
-        // Section 01 (Statement): Sweeps sharply back to the LEFT (0.24) behind the kinetic quote
+        // Section 01 (Statement): Sweeps sharply back to the LEFT (0.24) behind kinetic quote
         const t = (p - 0.18) / 0.20;
         const startX = width * 0.64;
         const endX = width * 0.24;
@@ -101,7 +107,7 @@ export const TravelingPrismaticSphere: React.FC = () => {
         targetY = height * 0.50;
         targetRadius = isMobile ? 65 : 120;
       } else if (p < 0.72) {
-        // Section 02 (Horizontal Work Gallery): Sweeps over to the RIGHT (0.76) behind the orbital cards
+        // Section 02 (Horizontal Work Gallery): Sweeps over to the RIGHT (0.76) behind orbital cards
         const t = (p - 0.38) / 0.34;
         const startX = width * 0.24;
         const endX = width * (isMobile ? 0.65 : 0.76);
@@ -109,7 +115,7 @@ export const TravelingPrismaticSphere: React.FC = () => {
         targetY = height * 0.50;
         targetRadius = isMobile ? 75 : 135;
       } else if (p < 0.88) {
-        // Section 03 (Blueprint): Sweeps back to the LEFT (0.22) behind technical matrix code
+        // Section 03 (Blueprint): Sweeps back to the LEFT (0.22) behind technical code matrix
         const t = (p - 0.72) / 0.16;
         const startX = width * (isMobile ? 0.65 : 0.76);
         const endX = width * (isMobile ? 0.30 : 0.22);
@@ -117,7 +123,7 @@ export const TravelingPrismaticSphere: React.FC = () => {
         targetY = height * 0.48;
         targetRadius = isMobile ? 65 : 115;
       } else {
-        // Section 04 (Terminal): Sweeps to the RIGHT (0.70) then settles into the CENTER (0.50)
+        // Section 04 (Terminal): Sweeps to the RIGHT (0.70) then settles into CENTER (0.50)
         const t = (p - 0.88) / 0.12;
         const startX = width * (isMobile ? 0.30 : 0.22);
         const midX = width * 0.70;
@@ -131,151 +137,187 @@ export const TravelingPrismaticSphere: React.FC = () => {
         targetRadius = isMobile ? 70 : 125;
       }
 
-      // Add continuous organic breathing & floating drift so it NEVER stays statically in one spot
-      const floatX = Math.sin(time * 1.4) * (isMobile ? 18 : 36);
-      const floatY = Math.cos(time * 1.1) * (isMobile ? 12 : 22);
+      // Organic idle floating drift
+      const floatX = Math.sin(time * 1.3) * (isMobile ? 16 : 32);
+      const floatY = Math.cos(time * 1.0) * (isMobile ? 12 : 20);
 
-      currentX += (targetX + floatX - currentX) * 0.06;
-      currentY += (targetY + floatY - currentY) * 0.06;
-      currentRadius += (targetRadius - currentRadius) * 0.06;
+      currentX += (targetX + floatX - currentX) * 0.055;
+      currentY += (targetY + floatY - currentY) * 0.055;
+      currentRadius += (targetRadius - currentRadius) * 0.055;
 
       const r = Math.max(currentRadius, 50);
 
-      // --- Liquid Cursor Hover Effect & Surface Deformation ---
+      // --- Cursor Distance Check & Inversion Factor ---
       const dx = mouseX - currentX;
       const dy = mouseY - currentY;
       const dist = Math.sqrt(dx * dx + dy * dy);
-      const hoverThreshold = r * 1.7;
+      const isCursorInside = dist < r * 1.35;
 
-      if (dist < hoverThreshold) {
-        isHovered = true;
-        const proximity = 1 - dist / hoverThreshold;
-        liquidDeform += (proximity - liquidDeform) * 0.12;
-
-        // Emit subtle liquid micro-droplets when touching the surface
-        if (Math.random() < 0.25 && droplets.length < 15) {
-          const angle = Math.atan2(dy, dx) + (Math.random() - 0.5) * 0.8;
-          droplets.push({
-            x: currentX + Math.cos(angle) * r,
-            y: currentY + Math.sin(angle) * r,
-            vx: Math.cos(angle) * (Math.random() * 2 + 1),
-            vy: Math.sin(angle) * (Math.random() * 2 + 1),
-            size: Math.random() * 3 + 2,
-            alpha: 0.8,
-            life: 0,
-            maxLife: 28,
-          });
-        }
+      if (isCursorInside) {
+        hoverFactor += (1 - hoverFactor) * 0.3;
       } else {
-        isHovered = false;
-        liquidDeform += (0 - liquidDeform) * 0.08;
+        hoverFactor += (0 - hoverFactor) * 0.15;
       }
 
-      // --- Render Liquid Droplets ---
-      for (let i = droplets.length - 1; i >= 0; i--) {
-        const d = droplets[i];
-        d.x += d.vx;
-        d.y += d.vy;
-        d.life++;
-        const ratio = 1 - d.life / d.maxLife;
+      // Stardust trail update
+      const distMoved = Math.hypot(currentX - lastEmitX, currentY - lastEmitY);
+      if (distMoved > 7) {
+        lastEmitX = currentX;
+        lastEmitY = currentY;
+        if (trail.length < 12) {
+          trail.push({
+            x: currentX + (Math.random() - 0.5) * 20,
+            y: currentY + (Math.random() - 0.5) * 20,
+            size: Math.random() * 2.5 + 1.2,
+            alpha: 0.6,
+            life: 0,
+            maxLife: 32,
+          });
+        }
+      }
+
+      // Render stardust trail
+      for (let i = trail.length - 1; i >= 0; i--) {
+        const pt = trail[i];
+        pt.life++;
+        const ratio = 1 - pt.life / pt.maxLife;
         if (ratio <= 0) {
-          droplets.splice(i, 1);
+          trail.splice(i, 1);
           continue;
         }
-
-        ctx.fillStyle = `rgba(0, 255, 135, ${ratio * d.alpha})`;
+        ctx.fillStyle = `rgba(0, 255, 135, ${ratio * pt.alpha})`;
         ctx.beginPath();
-        ctx.arc(d.x, d.y, d.size * ratio, 0, Math.PI * 2);
+        ctx.arc(pt.x, pt.y, pt.size * ratio, 0, Math.PI * 2);
         ctx.fill();
       }
 
-      // --- Draw Deformable Liquid Prismatic Sphere ---
+      // --- Draw Optical Sphere ---
       ctx.save();
       ctx.translate(currentX, currentY);
 
-      // Liquid pull angle toward cursor
-      const pullAngle = Math.atan2(dy, dx);
-      const pullDistance = Math.min(dist * 0.15, 25) * liquidDeform;
-
-      // 1. Ambient Greenish Radial Bloom (Expands on liquid hover)
-      const bloomRadius = r * (1.7 + liquidDeform * 0.3);
-      const bloomGrad = ctx.createRadialGradient(0, 0, r * 0.2, 0, 0, bloomRadius);
-      bloomGrad.addColorStop(0, `rgba(0, 255, 135, ${0.35 + liquidDeform * 0.25})`);
-      bloomGrad.addColorStop(0.35, `rgba(16, 185, 129, ${0.22 + liquidDeform * 0.15})`);
+      // 1. Ambient Greenish Radial Bloom
+      const bloomGrad = ctx.createRadialGradient(0, 0, r * 0.2, 0, 0, r * 1.7);
+      bloomGrad.addColorStop(0, "rgba(0, 255, 135, 0.35)");
+      bloomGrad.addColorStop(0.35, "rgba(16, 185, 129, 0.20)");
       bloomGrad.addColorStop(0.75, "rgba(5, 150, 105, 0.06)");
       bloomGrad.addColorStop(1, "rgba(250, 250, 249, 0)");
 
       ctx.fillStyle = bloomGrad;
       ctx.beginPath();
-      ctx.arc(0, 0, bloomRadius, 0, Math.PI * 2);
+      ctx.arc(0, 0, r * 1.7, 0, Math.PI * 2);
       ctx.fill();
 
-      // 2. Liquid Surface Path using Multi-Harmonic Ripple Polygon
-      const numPoints = 36;
-      ctx.beginPath();
-
-      for (let i = 0; i < numPoints; i++) {
-        const angle = (i / numPoints) * Math.PI * 2;
-
-        // Mercury fluid harmonic ripples
-        const wave1 = Math.sin(angle * 4 + time * 5) * (liquidDeform * 14);
-        const wave2 = Math.cos(angle * 6 - time * 4) * (liquidDeform * 8);
-
-        // Surface pull toward cursor
-        const angleDiff = Math.cos(angle - pullAngle);
-        const directionalStretch = Math.max(angleDiff, 0) * pullDistance;
-
-        const currentPtRadius = r + wave1 + wave2 + directionalStretch;
-        const px = Math.cos(angle) * currentPtRadius;
-        const py = Math.sin(angle) * currentPtRadius;
-
-        if (i === 0) {
-          ctx.moveTo(px, py);
-        } else {
-          ctx.lineTo(px, py);
-        }
+      // 2. Base 3D Volumetric Sphere (Smoothly inverts into chromatic negative when hovered)
+      const sphereGrad = ctx.createRadialGradient(-r * 0.28, -r * 0.28, r * 0.04, 0, 0, r);
+      if (hoverFactor > 0.01) {
+        // Inverted chromatic negative state (Obsidian core -> Electric ultraviolet magenta -> Neon gold)
+        sphereGrad.addColorStop(0, `rgba(${Math.round(255 - hoverFactor * 240)}, ${Math.round(255 - hoverFactor * 240)}, ${Math.round(255 - hoverFactor * 230)}, 0.98)`);
+        sphereGrad.addColorStop(0.25, `rgba(${Math.round(209 - hoverFactor * 85)}, ${Math.round(250 - hoverFactor * 192)}, ${Math.round(229 + hoverFactor * 8)}, 0.92)`);
+        sphereGrad.addColorStop(0.55, `rgba(${Math.round(52 + hoverFactor * 165)}, ${Math.round(211 - hoverFactor * 141)}, ${Math.round(153 + hoverFactor * 86)}, 0.85)`);
+        sphereGrad.addColorStop(0.85, `rgba(${Math.round(16 + hoverFactor * 233)}, ${Math.round(185 - hoverFactor * 70)}, ${Math.round(129 - hoverFactor * 107)}, 0.65)`);
+        sphereGrad.addColorStop(1, `rgba(${Math.round(16 + hoverFactor * 201)}, ${Math.round(185 - hoverFactor * 115)}, ${Math.round(129 + hoverFactor * 110)}, 0.05)`);
+      } else {
+        // Resting emerald state
+        sphereGrad.addColorStop(0, "rgba(255, 255, 255, 0.98)");
+        sphereGrad.addColorStop(0.18, "rgba(209, 250, 229, 0.92)");
+        sphereGrad.addColorStop(0.48, "rgba(52, 211, 153, 0.52)");
+        sphereGrad.addColorStop(0.75, "rgba(16, 185, 129, 0.36)");
+        sphereGrad.addColorStop(0.95, "rgba(5, 150, 105, 0.18)");
+        sphereGrad.addColorStop(1, "rgba(16, 185, 129, 0.02)");
       }
-      ctx.closePath();
-
-      // 3D Liquid Volumetric Fluid Gradient (Light source dynamically tracks cursor)
-      const lightOffsetX = -r * 0.28 + (isHovered ? (dx / hoverThreshold) * 20 : 0);
-      const lightOffsetY = -r * 0.28 + (isHovered ? (dy / hoverThreshold) * 20 : 0);
-
-      const sphereGrad = ctx.createRadialGradient(
-        lightOffsetX,
-        lightOffsetY,
-        r * 0.04,
-        0,
-        0,
-        r * 1.05
-      );
-      sphereGrad.addColorStop(0, "rgba(255, 255, 255, 0.98)");
-      sphereGrad.addColorStop(0.18, "rgba(209, 250, 229, 0.92)");
-      sphereGrad.addColorStop(0.45, "rgba(52, 211, 153, 0.55)");
-      sphereGrad.addColorStop(0.75, "rgba(16, 185, 129, 0.38)");
-      sphereGrad.addColorStop(0.95, "rgba(5, 150, 105, 0.20)");
-      sphereGrad.addColorStop(1, "rgba(16, 185, 129, 0.04)");
 
       ctx.fillStyle = sphereGrad;
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0, Math.PI * 2);
       ctx.fill();
 
-      // Precision Optical Hairline Rim with Liquid Shimmer
+      // 3. Precision Optical Glass Hairline Rim
       const rimGrad = ctx.createLinearGradient(-r, -r, r, r);
-      rimGrad.addColorStop(0, `rgba(0, 255, 135, ${0.85 + liquidDeform * 0.15})`);
+      rimGrad.addColorStop(0, "rgba(0, 255, 135, 0.85)");
       rimGrad.addColorStop(0.5, "rgba(16, 185, 129, 0.75)");
       rimGrad.addColorStop(1, "rgba(56, 189, 248, 0.55)");
 
       ctx.strokeStyle = rimGrad;
-      ctx.lineWidth = 1.6 + liquidDeform * 0.8;
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0, Math.PI * 2);
       ctx.stroke();
 
-      // Secondary Concentric Precision Hairline Ring (Ripples when liquid is disturbed)
-      const rippleRadius = r * (1.18 + Math.sin(time * 3) * 0.04 + liquidDeform * 0.1);
-      ctx.strokeStyle = `rgba(16, 185, 129, ${0.18 + liquidDeform * 0.2})`;
+      // Outer concentric ring
+      ctx.strokeStyle = "rgba(16, 185, 129, 0.18)";
       ctx.lineWidth = 0.8;
       ctx.beginPath();
-      ctx.arc(0, 0, rippleRadius, 0, Math.PI * 2);
+      ctx.arc(0, 0, r * 1.18, 0, Math.PI * 2);
       ctx.stroke();
+
+      // --- 4. INVERTED COLOR HOVER EFFECT (Restricted ONLY to within the sphere) ---
+      if (hoverFactor > 0.02) {
+        // Clip strictly to the sphere geometry so the inverted effect stays ONLY inside the sphere
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.clip();
+
+        // Local cursor coordinates relative to sphere center
+        const localX = mouseX - currentX;
+        const localY = mouseY - currentY;
+        const lensRadius = Math.max(r * 0.88, 55);
+
+        // A. True Inverted Negative Spectrum Gradient
+        // Green inverted -> Electric Ultraviolet Magenta
+        // White highlight inverted -> Deep Obsidian Core
+        const invertGrad = ctx.createRadialGradient(
+          localX,
+          localY,
+          r * 0.05,
+          localX,
+          localY,
+          lensRadius
+        );
+        invertGrad.addColorStop(0, `rgba(15, 23, 42, ${hoverFactor * 0.95})`); // Deep obsidian core
+        invertGrad.addColorStop(0.35, `rgba(124, 58, 237, ${hoverFactor * 0.90})`); // Royal violet
+        invertGrad.addColorStop(0.70, `rgba(217, 70, 239, ${hoverFactor * 0.82})`); // Vivid neon magenta
+        invertGrad.addColorStop(0.92, `rgba(249, 115, 22, ${hoverFactor * 0.70})`); // Inverted neon flame rim
+        invertGrad.addColorStop(1, "rgba(217, 70, 239, 0)");
+
+        ctx.fillStyle = invertGrad;
+        ctx.beginPath();
+        ctx.arc(localX, localY, lensRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // B. Inverted Specular Glint (Glowing white-cyan highlight tracking cursor)
+        const glintGrad = ctx.createRadialGradient(
+          localX - 12,
+          localY - 12,
+          1,
+          localX,
+          localY,
+          32
+        );
+        glintGrad.addColorStop(0, `rgba(255, 255, 255, ${hoverFactor * 0.95})`);
+        glintGrad.addColorStop(0.4, `rgba(168, 85, 247, ${hoverFactor * 0.6})`);
+        glintGrad.addColorStop(1, "rgba(124, 58, 237, 0)");
+
+        ctx.fillStyle = glintGrad;
+        ctx.beginPath();
+        ctx.arc(localX, localY, 32, 0, Math.PI * 2);
+        ctx.fill();
+
+        // C. Precision Chromatic Reticle Ring around cursor hotspot inside sphere
+        ctx.strokeStyle = `rgba(255, 255, 255, ${hoverFactor * 0.92})`;
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.arc(localX, localY, 22, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Optical center bead
+        ctx.fillStyle = `rgba(255, 255, 255, ${hoverFactor * 0.95})`;
+        ctx.beginPath();
+        ctx.arc(localX, localY, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      }
 
       ctx.restore();
 

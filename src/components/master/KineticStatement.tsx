@@ -53,12 +53,12 @@ export const KineticStatement: React.FC = memo(() => {
       {/* Kinetic Big Typography in Apple Garamond Light Italic */}
       <h2
         ref={textRef}
-        className="font-serif italic font-light text-2xl xs:text-3xl sm:text-5xl md:text-6xl lg:text-7xl text-[#0F172A] tracking-tight leading-[1.2] sm:leading-[1.15] mb-12 sm:mb-20 max-w-5xl"
+        className="font-serif italic font-light text-2xl xs:text-3xl sm:text-5xl md:text-6xl lg:text-7xl text-[#0F172A] max-md:text-white tracking-tight leading-[1.2] sm:leading-[1.15] mb-12 sm:mb-20 max-w-5xl"
       >
         &ldquo;{statement.split(" ").map((word, i) => (
           <span
             key={i}
-            className="kinetic-word inline-block mr-2 sm:mr-3 transition-colors duration-150 text-[#0F172A]"
+            className="kinetic-word inline-block mr-2 sm:mr-3 transition-colors duration-150 text-[#0F172A] max-md:text-white"
           >
             {word}
           </span>
@@ -66,10 +66,10 @@ export const KineticStatement: React.FC = memo(() => {
       </h2>
 
       {/* 4 Clean Architectural Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pt-8 sm:pt-12 border-t border-slate-200/80">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pt-8 sm:pt-12 border-t border-slate-200/80 max-md:border-white/10">
         {/* Monolith 1 */}
         <div 
-          className="p-5 sm:p-8 rounded-2xl bg-white/75 backdrop-blur-xl border border-slate-200/80 hover:border-[#10B981]/60 transition-all duration-300 shadow-xs group"
+          className="p-5 sm:p-8 rounded-2xl bg-white/75 max-md:bg-[#0B0F17]/90 backdrop-blur-xl border border-slate-200/80 max-md:border-white/10 hover:border-[#10B981]/60 transition-all duration-300 shadow-xs group"
           data-cursor="pointer"
           data-cursor-text="ACADEMIC"
         >
@@ -77,17 +77,17 @@ export const KineticStatement: React.FC = memo(() => {
             <span className="font-sans font-black text-xs text-slate-400 uppercase tracking-widest">01</span>
             <GraduationCap size={18} className="text-[#10B981]" />
           </div>
-          <div className="font-sans font-black text-base sm:text-lg text-[#0F172A] uppercase tracking-tight mb-2">
+          <div className="font-sans font-black text-base sm:text-lg text-[#0F172A] max-md:text-white uppercase tracking-tight mb-2">
             B.Tech CSE (AI &amp; ML)
           </div>
-          <p className="font-serif italic font-light text-xs sm:text-sm text-slate-600 leading-relaxed">
+          <p className="font-serif italic font-light text-xs sm:text-sm text-slate-600 max-md:text-slate-300 leading-relaxed">
             Netaji Subhash Engineering College (2024-2028). Specialized in machine learning models and scalable systems.
           </p>
         </div>
 
         {/* Monolith 2 */}
         <div 
-          className="p-5 sm:p-8 rounded-2xl bg-white/75 backdrop-blur-xl border border-slate-200/80 hover:border-[#10B981]/60 transition-all duration-300 shadow-xs group"
+          className="p-5 sm:p-8 rounded-2xl bg-white/75 max-md:bg-[#0B0F17]/90 backdrop-blur-xl border border-slate-200/80 max-md:border-white/10 hover:border-[#10B981]/60 transition-all duration-300 shadow-xs group"
           data-cursor="pointer"
           data-cursor-text="LATVIA"
         >
@@ -95,17 +95,17 @@ export const KineticStatement: React.FC = memo(() => {
             <span className="font-sans font-black text-xs text-slate-400 uppercase tracking-widest">02</span>
             <Globe size={18} className="text-sky-600" />
           </div>
-          <div className="font-sans font-black text-base sm:text-lg text-[#0F172A] uppercase tracking-tight mb-2">
+          <div className="font-sans font-black text-base sm:text-lg text-[#0F172A] max-md:text-white uppercase tracking-tight mb-2">
             Latvia Cricket &amp; EU Ops
           </div>
-          <p className="font-serif italic font-light text-xs sm:text-sm text-slate-600 leading-relaxed">
+          <p className="font-serif italic font-light text-xs sm:text-sm text-slate-600 max-md:text-slate-300 leading-relaxed">
             Modernized national digital governing infrastructure for the Latvian Cricket Federation and EU trade channels.
           </p>
         </div>
 
         {/* Monolith 3 */}
         <div 
-          className="p-5 sm:p-8 rounded-2xl bg-white/75 backdrop-blur-xl border border-slate-200/80 hover:border-[#10B981]/60 transition-all duration-300 shadow-xs group"
+          className="p-5 sm:p-8 rounded-2xl bg-white/75 max-md:bg-[#0B0F17]/90 backdrop-blur-xl border border-slate-200/80 max-md:border-white/10 hover:border-[#10B981]/60 transition-all duration-300 shadow-xs group"
           data-cursor="pointer"
           data-cursor-text="ENGINE"
         >
@@ -113,17 +113,17 @@ export const KineticStatement: React.FC = memo(() => {
             <span className="font-sans font-black text-xs text-slate-400 uppercase tracking-widest">03</span>
             <Compass size={18} className="text-emerald-600" />
           </div>
-          <div className="font-sans font-black text-base sm:text-lg text-[#0F172A] uppercase tracking-tight mb-2">
+          <div className="font-sans font-black text-base sm:text-lg text-[#0F172A] max-md:text-white uppercase tracking-tight mb-2">
             278-Key Client Engine
           </div>
-          <p className="font-serif italic font-light text-xs sm:text-sm text-slate-600 leading-relaxed">
+          <p className="font-serif italic font-light text-xs sm:text-sm text-slate-600 max-md:text-slate-300 leading-relaxed">
             Zero-API in-memory English-Russian dictionary with &lt;5ms lookup for global B2B agricultural export buyers.
           </p>
         </div>
 
         {/* Monolith 4 */}
         <div 
-          className="p-5 sm:p-8 rounded-2xl bg-white/75 backdrop-blur-xl border border-slate-200/80 hover:border-[#10B981]/60 transition-all duration-300 shadow-xs group"
+          className="p-5 sm:p-8 rounded-2xl bg-white/75 max-md:bg-[#0B0F17]/90 backdrop-blur-xl border border-slate-200/80 max-md:border-white/10 hover:border-[#10B981]/60 transition-all duration-300 shadow-xs group"
           data-cursor="pointer"
           data-cursor-text="SCHOLAR"
         >
@@ -131,10 +131,10 @@ export const KineticStatement: React.FC = memo(() => {
             <span className="font-sans font-black text-xs text-slate-400 uppercase tracking-widest">04</span>
             <Award size={18} className="text-emerald-600" />
           </div>
-          <div className="font-sans font-black text-base sm:text-lg text-[#0F172A] uppercase tracking-tight mb-2">
+          <div className="font-sans font-black text-base sm:text-lg text-[#0F172A] max-md:text-white uppercase tracking-tight mb-2">
             The Heritage School
           </div>
-          <p className="font-serif italic font-light text-xs sm:text-sm text-slate-600 leading-relaxed">
+          <p className="font-serif italic font-light text-xs sm:text-sm text-slate-600 max-md:text-slate-300 leading-relaxed">
             ISC Class XII (82.75%, 2024) with distinction in Computer Science &amp; Mathematics; ICSE (89.4%).
           </p>
         </div>

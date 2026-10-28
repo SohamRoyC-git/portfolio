@@ -5,7 +5,7 @@ import React, { memo } from "react";
 export const SilkyFluidBackdrop: React.FC = memo(() => {
   return (
     <div
-      className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none bg-[#FAFAF9]"
+      className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none bg-[#FAFAF9] max-md:bg-[#070A11]"
       style={{
         transform: "translate3d(0, 0, 0)",
         willChange: "transform",
@@ -20,7 +20,7 @@ export const SilkyFluidBackdrop: React.FC = memo(() => {
         - Locked 60/120 FPS buttery smooth scrolling even on low-end mobile devices
       */}
       <div
-        className="absolute inset-0 opacity-75 sm:opacity-85 blur-xl sm:blur-3xl"
+        className="absolute inset-0 opacity-75 sm:opacity-85 max-md:opacity-25 blur-xl sm:blur-3xl"
         style={{
           background: `
             radial-gradient(ellipse 70% 55% at 15% 75%, rgba(14, 165, 233, 0.40) 0%, transparent 70%),

@@ -376,7 +376,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                   cardsRef.current[idx] = el;
                 }}
                 /* Responsive Frosted Glassmorphism Card with Generous Margins & No Overflow Collisions */
-                className="w-[86vw] max-w-[880px] shrink-0 p-5 sm:p-8 lg:p-9 rounded-[2rem] sm:rounded-[2.25rem] bg-white/80 border-2 border-white/95 backdrop-blur-md shadow-[0_25px_60px_-15px_rgba(15,23,42,0.12),0_10px_25px_-5px_rgba(16,185,129,0.08),inset_0_1px_2px_rgba(255,255,255,0.95)] hover:border-[#10B981]/50 transition-all duration-200 grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-center will-change-transform max-h-[calc(100svh-175px)] overflow-y-auto sm:overflow-visible"
+                className="w-[86vw] max-w-[880px] shrink-0 p-5 sm:p-8 lg:p-9 rounded-[2rem] sm:rounded-[2.25rem] bg-white/80 max-md:bg-[#0B0F17]/95 border-2 border-white/95 max-md:border-white/15 backdrop-blur-md shadow-[0_25px_60px_-15px_rgba(15,23,42,0.12),0_10px_25px_-5px_rgba(16,185,129,0.08),inset_0_1px_2px_rgba(255,255,255,0.95)] max-md:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] hover:border-[#10B981]/50 transition-all duration-200 grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-center will-change-transform max-h-[calc(100svh-175px)] overflow-y-auto sm:overflow-visible"
                 style={{ transformStyle: "preserve-3d" }}
               >
                 {/* Left Card Editorial Metadata (7 Cols on desktop, full on mobile) */}
@@ -404,7 +404,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                         />
                       </div>
                       <div>
-                        <div className="font-sans font-black text-sm sm:text-base text-[#0F172A] leading-tight">
+                        <div className="font-sans font-black text-sm sm:text-base text-[#0F172A] max-md:text-white leading-tight">
                           {project.client}
                         </div>
                         <div className="font-sans font-medium text-xs text-slate-500">
@@ -414,12 +414,12 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                     </div>
 
                     {/* Headline */}
-                    <h3 className="font-sans font-black text-2xl sm:text-3xl lg:text-4xl text-[#0F172A] tracking-tight leading-[1.08] mb-2.5">
+                    <h3 className="font-sans font-black text-2xl sm:text-3xl lg:text-4xl text-[#0F172A] max-md:text-white tracking-tight leading-[1.08] mb-2.5">
                       {project.title}
                     </h3>
 
                     {/* Editorial Summary in Apple Garamond Light Italic - Concise 2-line brief */}
-                    <p className="font-serif italic font-light text-sm sm:text-base text-slate-700 leading-relaxed mb-3.5 line-clamp-2 sm:line-clamp-3">
+                    <p className="font-serif italic font-light text-sm sm:text-base text-slate-700 max-md:text-slate-300 leading-relaxed mb-3.5 line-clamp-2 sm:line-clamp-3">
                       {project.summary}
                     </p>
 
@@ -429,7 +429,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                         <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
                         <span>{project.metrics[0].label}: {project.metrics[0].value}</span>
                       </div>
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 border border-slate-200/90 text-slate-700 font-sans font-black text-[10px] sm:text-[11px] uppercase tracking-wider shadow-xs">
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 max-md:bg-[#161F30] border border-slate-200/90 max-md:border-white/10 text-slate-700 max-md:text-slate-200 font-sans font-black text-[10px] sm:text-[11px] uppercase tracking-wider shadow-xs">
                         <span>{project.metrics[1].label}: {project.metrics[1].value}</span>
                       </div>
                     </div>
@@ -471,7 +471,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
 
                     <button
                       onClick={() => openDossier(project)}
-                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 font-sans font-black text-xs tracking-wider uppercase hover:text-[#0F172A] hover:border-slate-400 transition-colors"
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white max-md:bg-[#161F30] border border-slate-200 max-md:border-white/10 text-slate-600 max-md:text-slate-200 font-sans font-black text-xs tracking-wider uppercase hover:text-[#0F172A] max-md:hover:text-white hover:border-slate-400 transition-colors"
                     >
                       <Eye size={13} />
                       <span>Dossier</span>

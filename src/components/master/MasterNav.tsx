@@ -106,10 +106,11 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
         paddingLeft: isMobile ? "16px" : "24px",
         paddingRight: isMobile ? "16px" : "24px",
         borderRadius: "9999px",
-        backgroundColor: "rgba(255, 255, 255, 0.86)",
-        borderColor: "rgba(15, 23, 42, 0.08)",
-        boxShadow:
-          "0 16px 38px -6px rgba(15, 23, 42, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.85)",
+        backgroundColor: isMobile ? "rgba(11, 15, 23, 0.92)" : "rgba(255, 255, 255, 0.86)",
+        borderColor: isMobile ? "rgba(255, 255, 255, 0.12)" : "rgba(15, 23, 42, 0.08)",
+        boxShadow: isMobile
+          ? "0 16px 38px -6px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.15)"
+          : "0 16px 38px -6px rgba(15, 23, 42, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.85)",
         backdropFilter: "blur(20px)",
         duration: 0.48,
         ease: "power3.out",
@@ -208,7 +209,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
             <span
               className={`font-sans font-black text-xs tracking-[0.2em] uppercase transition-colors duration-300 truncate ${
                 isScrolled
-                  ? "text-[#0F172A] group-hover:text-[#10B981]"
+                  ? "text-[#0F172A] max-md:text-white group-hover:text-[#10B981]"
                   : "text-white group-hover:text-emerald-300 drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]"
               }`}
             >
@@ -267,7 +268,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
               onClick={() => onNavigate("monument-terminal")}
               className={`inline-flex items-center gap-1.5 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full font-sans font-black text-[11px] uppercase tracking-wider cursor-pointer transition-all duration-300 shadow-md active:scale-95 ${
                 isScrolled
-                  ? "bg-[#0F172A] text-white hover:bg-[#10B981]"
+                  ? "bg-[#0F172A] max-md:bg-white text-white max-md:text-[#070A11] hover:bg-[#10B981] max-md:hover:bg-emerald-400"
                   : "bg-white text-[#0F172A] hover:bg-[#10B981] hover:text-white"
               }`}
             >
@@ -280,7 +281,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className={`lg:hidden p-2 rounded-full transition-colors ${
                 isScrolled
-                  ? "text-[#0F172A] hover:bg-slate-100"
+                  ? "text-[#0F172A] max-md:text-white hover:bg-slate-100 max-md:hover:bg-white/10"
                   : "text-white hover:bg-white/15 drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]"
               }`}
               aria-label="Toggle menu"
@@ -291,17 +292,17 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
         </div>
       </header>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Drawer (Luxury Dark Themed) */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 bg-[#FAFAF9]/95 backdrop-blur-2xl lg:hidden flex flex-col justify-between p-6 animate-in fade-in duration-200">
-          <div className="flex items-center justify-between border-b border-slate-200 pb-4">
-            <div className="flex items-center gap-2 font-sans font-black text-xs text-[#0F172A] tracking-widest uppercase">
+        <div className="fixed inset-0 z-50 bg-[#070A11]/98 backdrop-blur-2xl lg:hidden flex flex-col justify-between p-6 animate-in fade-in duration-200">
+          <div className="flex items-center justify-between border-b border-white/10 pb-4">
+            <div className="flex items-center gap-2 font-sans font-black text-xs text-white tracking-widest uppercase">
               <span className="w-2 h-2 rounded-full bg-[#10B981]" />
               <span>NAVIGATION</span>
             </div>
             <button
               onClick={() => setMobileMenuOpen(false)}
-              className="p-2 rounded-full hover:bg-slate-200 text-[#0F172A]"
+              className="p-2 rounded-full hover:bg-white/10 text-white"
             >
               <X size={20} />
             </button>
@@ -315,10 +316,10 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
                   key={link.id}
                   onClick={() => handleLinkClick(link.id)}
                   className={`text-left font-sans font-black text-2xl uppercase tracking-tight flex items-baseline gap-4 ${
-                    isActive ? "text-[#10B981]" : "text-[#0F172A]"
+                    isActive ? "text-[#10B981]" : "text-white hover:text-emerald-300"
                   }`}
                 >
-                  <span className="font-sans font-black text-xs text-slate-400">
+                  <span className="font-sans font-black text-xs text-slate-500">
                     0{idx}
                   </span>
                   <span>{link.label}</span>
@@ -327,8 +328,8 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
             })}
           </div>
 
-          <div className="border-t border-slate-200 pt-4 flex items-center justify-between font-sans text-xs text-slate-600">
-            <span className="font-black">KOLKATA {time || "00:00:00"} IST</span>
+          <div className="border-t border-white/10 pt-4 flex items-center justify-between font-sans text-xs text-slate-400">
+            <span className="font-black text-slate-300">KOLKATA {time || "00:00:00"} IST</span>
             <span className="text-[#10B981] font-black">OPEN FOR WORK</span>
           </div>
         </div>

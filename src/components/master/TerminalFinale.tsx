@@ -39,30 +39,30 @@ export const TerminalFinale: React.FC = memo(() => {
 
       {/* Main Massive Editorial Headline */}
       <div className="my-auto py-4">
-        <h2 className="font-sans font-black text-4xl xs:text-5xl sm:text-7xl md:text-8xl lg:text-9xl text-[#0F172A] tracking-tighter leading-[0.9] uppercase mb-4 sm:mb-6">
+        <h2 className="font-sans font-black text-4xl xs:text-5xl sm:text-7xl md:text-8xl lg:text-9xl text-[#0F172A] max-md:text-white tracking-tighter leading-[0.9] uppercase mb-4 sm:mb-6">
           LET&apos;S BUILD <br />
-          <span className="bg-gradient-to-r from-[#0F172A] via-slate-800 to-slate-600 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-[#0F172A] via-slate-800 to-slate-600 max-md:from-white max-md:via-slate-200 max-md:to-emerald-300 bg-clip-text text-transparent">
             SOMETHING REAL.
           </span>
         </h2>
-        <p className="font-serif italic font-light text-lg sm:text-2xl text-slate-700 max-w-xl">
+        <p className="font-serif italic font-light text-lg sm:text-2xl text-slate-700 max-md:text-slate-300 max-w-xl">
           Open to software engineering and frontend development internships.
         </p>
       </div>
 
       {/* Direct Contact Monoliths */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 pt-8 sm:pt-12 border-t border-slate-200/80">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 pt-8 sm:pt-12 border-t border-slate-200/80 max-md:border-white/10">
         {/* Email Monolith */}
         <div
           onClick={handleCopyEmail}
-          className="p-6 sm:p-8 rounded-3xl bg-white/75 backdrop-blur-xl border border-slate-200/80 hover:border-[#10B981]/60 transition-all duration-300 shadow-xs cursor-pointer group flex flex-col justify-between"
+          className="p-6 sm:p-8 rounded-3xl bg-white/75 max-md:bg-[#0B0F17]/90 backdrop-blur-xl border border-slate-200/80 max-md:border-white/10 hover:border-[#10B981]/60 transition-all duration-300 shadow-xs cursor-pointer group flex flex-col justify-between"
         >
           <div>
             <div className="flex items-center justify-between mb-4 sm:mb-6">
               <span className="font-sans font-black text-[10px] sm:text-xs text-slate-400 uppercase tracking-widest">EMAIL</span>
               <Mail size={18} className="text-[#10B981]" />
             </div>
-            <div className="font-sans font-black text-sm xs:text-base sm:text-lg text-[#0F172A] tracking-tight mb-2 break-all">
+            <div className="font-sans font-black text-sm xs:text-base sm:text-lg text-[#0F172A] max-md:text-white tracking-tight mb-2 break-all">
               {email}
             </div>
           </div>
@@ -84,14 +84,14 @@ export const TerminalFinale: React.FC = memo(() => {
         {/* Phone Monolith */}
         <a
           href={`tel:${phone.replace(/\s+/g, "")}`}
-          className="p-6 sm:p-8 rounded-3xl bg-white/75 backdrop-blur-xl border border-slate-200/80 hover:border-[#10B981]/60 transition-all duration-300 shadow-xs group flex flex-col justify-between cursor-pointer"
+          className="p-6 sm:p-8 rounded-3xl bg-white/75 max-md:bg-[#0B0F17]/90 backdrop-blur-xl border border-slate-200/80 max-md:border-white/10 hover:border-[#10B981]/60 transition-all duration-300 shadow-xs group flex flex-col justify-between cursor-pointer"
         >
           <div>
             <div className="flex items-center justify-between mb-4 sm:mb-6">
               <span className="font-sans font-black text-[10px] sm:text-xs text-slate-400 uppercase tracking-widest">PHONE &amp; WHATSAPP</span>
               <Phone size={18} className="text-emerald-600" />
             </div>
-            <div className="font-sans font-black text-lg sm:text-xl text-[#0F172A] tracking-tight mb-2">
+            <div className="font-sans font-black text-lg sm:text-xl text-[#0F172A] max-md:text-white tracking-tight mb-2">
               {phone}
             </div>
           </div>
@@ -102,13 +102,13 @@ export const TerminalFinale: React.FC = memo(() => {
         </a>
 
         {/* Location Monolith */}
-        <div className="p-6 sm:p-8 rounded-3xl bg-white/75 backdrop-blur-xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
+        <div className="p-6 sm:p-8 rounded-3xl bg-white/75 max-md:bg-[#0B0F17]/90 backdrop-blur-xl border border-slate-200/80 max-md:border-white/10 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4 sm:mb-6">
               <span className="font-sans font-black text-[10px] sm:text-xs text-slate-400 uppercase tracking-widest">LOCATION</span>
               <MapPin size={18} className="text-emerald-600" />
             </div>
-            <div className="font-sans font-black text-lg sm:text-xl text-[#0F172A] tracking-tight mb-2">
+            <div className="font-sans font-black text-lg sm:text-xl text-[#0F172A] max-md:text-white tracking-tight mb-2">
               Kolkata, India
             </div>
           </div>

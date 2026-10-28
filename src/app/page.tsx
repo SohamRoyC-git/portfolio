@@ -104,7 +104,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-[#FAFAF9] text-[#0F172A] selection:bg-[#10B981]/20 selection:text-[#059669] overflow-x-hidden">
+    <div className="relative min-h-screen bg-[#FAFAF9] text-[#0F172A] selection:bg-[#10B981]/20 selection:text-[#059669] overflow-x-clip">
       {/* 0. Authentic YouTube Shimmer Skeleton Loader (Mounts once on load, dissolves smoothly) */}
       <YouTubeSkeletonLoader />
 

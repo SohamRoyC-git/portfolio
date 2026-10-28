@@ -22,7 +22,6 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
   const laptopCueRef = useRef<HTMLDivElement | null>(null);
   const mobileIdentityRef = useRef<HTMLDivElement | null>(null);
   const mobileTitleRef = useRef<HTMLHeadingElement | null>(null);
-  const mobileTerraceFooterRef = useRef<HTMLDivElement | null>(null);
 
   // Desktop Refs
   const desktopSectionRef = useRef<HTMLElement | null>(null);
@@ -62,11 +61,11 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
       if (mobileVideoWrapperRef.current) {
         mobileVideoWrapperRef.current.style.webkitMaskImage = "";
         mobileVideoWrapperRef.current.style.maskImage = "";
-        gsap.set(mobileVideoWrapperRef.current, { opacity: 1, scale: 1 });
+        gsap.set(mobileVideoWrapperRef.current, { opacity: 1, scale: 1, display: "block" });
       }
 
       if (mobileFluidBackdropRef.current) {
-        gsap.set(mobileFluidBackdropRef.current, { opacity: 0 });
+        gsap.set(mobileFluidBackdropRef.current, { opacity: 0, scale: 1, y: 0 });
       }
 
       if (mobileIdentityRef.current) {
@@ -103,6 +102,15 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
           end: "bottom bottom",
           scrub: 0.35, // Smooth touch momentum tracking
           onUpdate: (self) => {
+            // Instantly stop and freeze video when aperture has closed
+            const videoEl = mobileVideoWrapperRef.current?.querySelector("video");
+            if (videoEl) {
+              if (self.progress >= 0.35 && !videoEl.paused) {
+                videoEl.pause();
+              } else if (self.progress < 0.35 && videoEl.paused) {
+                videoEl.play().catch(() => {});
+              }
+            }
             if (mobileIdentityRef.current) {
               mobileIdentityRef.current.style.pointerEvents =
                 self.progress > 0.45 ? "auto" : "none";
@@ -111,7 +119,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         },
       });
 
-      // Phase 1 (0 -> 15%): Laptop micro-cue & terrace footer dissolve early
+      // Phase 1 (0 -> 14%): Laptop micro-cue dissolves early
       if (laptopCueRef.current) {
         masterTl.to(
           laptopCueRef.current,
@@ -119,19 +127,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             opacity: 0,
             y: -18,
             scale: 0.92,
-            duration: 0.15,
-            ease: "power2.out",
-          },
-          0
-        );
-      }
-
-      if (mobileTerraceFooterRef.current) {
-        masterTl.to(
-          mobileTerraceFooterRef.current,
-          {
-            opacity: 0,
-            duration: 0.12,
+            duration: 0.14,
             ease: "power2.out",
           },
           0
@@ -165,19 +161,42 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
           },
           0
         );
+
+        // HARD CUT: At exact moment 0.35 (aperture 100% closed into solid black),
+        // completely hide and remove the video wrapper so it NEVER shows or plays for a split second!
+        masterTl.set(
+          mobileVideoWrapperRef.current,
+          {
+            display: "none",
+            opacity: 0,
+          },
+          0.35
+        );
       }
 
-      // Phase 2b (32% -> 50%): As the black aperture finishes swallowing the scene,
-      // reveal the reference-matched smoky fluid artwork while hiding the video underneath
+      // Phase 2b (0.35 -> 0.52): With video completely gone behind solid black,
+      // the black overlay dissolves to unveil the reference smoky fluid artwork
       if (mobileFluidBackdropRef.current) {
         masterTl.to(
           mobileFluidBackdropRef.current,
           {
             opacity: 1,
-            duration: 0.18,
+            duration: 0.17,
             ease: "power1.inOut",
           },
-          0.32
+          0.35
+        );
+
+        // Fluid ribbon reactive scroll movement: gently drifts and scales as user scrolls down
+        masterTl.to(
+          mobileFluidBackdropRef.current,
+          {
+            y: -36,
+            scale: 1.05,
+            duration: 0.65,
+            ease: "none",
+          },
+          0.35
         );
       }
 
@@ -186,26 +205,14 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
           irisOverlayRef.current,
           {
             opacity: 0,
-            duration: 0.18,
+            duration: 0.17,
             ease: "power1.inOut",
           },
-          0.32
+          0.35
         );
       }
 
-      if (mobileVideoWrapperRef.current) {
-        masterTl.to(
-          mobileVideoWrapperRef.current,
-          {
-            opacity: 0,
-            duration: 0.10,
-            ease: "power1.inOut",
-          },
-          0.36
-        );
-      }
-
-      // Phase 3 (42% -> 72%): Monumental Header materializes cleanly on the reference fluid canvas
+      // Phase 3 (0.44 -> 0.72): Monumental Header materializes cleanly on the reference fluid canvas
       if (mobileIdentityRef.current) {
         masterTl.to(
           mobileIdentityRef.current,
@@ -213,14 +220,14 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             opacity: 1,
             y: 0,
             scale: 1,
-            duration: 0.30,
+            duration: 0.28,
             ease: "power2.out",
           },
-          0.42
+          0.44
         );
       }
 
-      // Phase 4 (72% -> 100%): Dedicated luxury hold period before unpinning smoothly into Movement 01
+      // Phase 4 (0.72 -> 1.00): Dedicated luxury hold period before unpinning smoothly into Movement 01
       masterTl.to({}, { duration: 0.28 });
 
       return () => {
@@ -267,9 +274,9 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
       {/* ========================================================================= */}
       <div
         ref={mobileContainerRef}
-        className="md:hidden relative w-full h-[360vh] bg-[#0C0C0E]"
+        className="md:hidden relative w-full h-[360vh] bg-[#0C0C0E] overflow-clip"
       >
-        <div className="sticky top-0 h-[100svh] w-full overflow-hidden bg-[#0C0C0E] flex flex-col justify-between">
+        <div className="sticky top-0 h-[100dvh] min-h-[100dvh] min-h-screen w-full overflow-hidden bg-[#0C0C0E] flex flex-col justify-between">
           {/* 1. Living Pixel-Art Terrace Video Layer */}
           <div
             ref={mobileVideoWrapperRef}
@@ -281,7 +288,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               muted
               playsInline
               preload="auto"
-              className="w-full h-full object-cover object-[85%_bottom]"
+              className="w-full h-full object-cover object-[85%_60%]"
             >
               <source src="/assets/hero_pixel_art_loop.mp4" type="video/mp4" />
               <source src="/assets/Animate_pixel_art_environment_loop_03a9505a.mp4" type="video/mp4" />
@@ -291,7 +298,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
           {/* 2. Reference-Matched Smoky Orange Fluid Artwork (Unveiled as black aperture completes) */}
           <div
             ref={mobileFluidBackdropRef}
-            className="absolute inset-0 z-5 pointer-events-none select-none overflow-hidden opacity-0 will-change-[opacity]"
+            className="absolute inset-0 z-5 pointer-events-none select-none overflow-hidden opacity-0 will-change-[opacity,transform]"
           >
             <Image
               src="/assets/mobile_fluid_ember_reference.jpg"
@@ -393,15 +400,6 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               <span>KOLKATA // LAT 22.5726° N</span>
               <span>ARCHIVE 2026</span>
             </div>
-          </div>
-
-          {/* Initial Bottom Bar on Terrace (Fades on early scroll) */}
-          <div
-            ref={mobileTerraceFooterRef}
-            className="relative z-10 w-full flex items-center justify-between p-4 border-t border-white/15 text-[9px] font-sans font-bold text-white/80 uppercase tracking-widest will-change-[opacity]"
-          >
-            <span>KOLKATA // 22.5726° N</span>
-            <span>TERRACE</span>
           </div>
         </div>
       </div>

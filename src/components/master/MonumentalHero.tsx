@@ -1,9 +1,9 @@
 "use client";
 
-import React, { memo, useState, useEffect, useRef } from "react";
+import React, { memo, useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
-import { ArrowDown, ArrowUpRight, Compass, Sparkles } from "lucide-react";
+import { ArrowDown, ArrowUpRight, Sparkles } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -13,27 +13,8 @@ interface MonumentalHeroProps {
 }
 
 export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, onConnect }) => {
-  const [timeStr, setTimeStr] = useState<string>("");
   const sectionRef = useRef<HTMLElement | null>(null);
   const videoWrapperRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      setTimeStr(
-        now.toLocaleTimeString("en-US", {
-          timeZone: "Asia/Kolkata",
-          hour12: false,
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        })
-      );
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   // GSAP Smooth Scroll Parallax & Organic Dissolve into Movement 01
   useEffect(() => {
@@ -47,7 +28,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         ease: "power1.out",
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: "45% top", // Video stays visible longer before dissolving
+          start: "45% top",
           end: "bottom top",
           scrub: 0.6,
         },
@@ -70,7 +51,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
     <section
       id="monument-hero"
       ref={sectionRef}
-      className="relative min-h-[100svh] flex flex-col justify-between pt-24 sm:pt-28 pb-10 sm:pb-14 px-4 sm:px-8 md:px-12 z-10 select-none overflow-visible"
+      className="relative min-h-[100svh] flex flex-col justify-between pt-28 sm:pt-36 pb-10 sm:pb-14 px-4 sm:px-8 md:px-12 z-10 select-none overflow-visible"
     >
       {/* 1. Living Pixel-Art Environment Video with Feathered Progressive Alpha Bleed at the Very Bottom */}
       <div
@@ -109,33 +90,6 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
 
         {/* Soft, Lowered Multi-Stop Bleed Gradient at the Very Bottom Edge */}
         <div className="absolute inset-x-0 bottom-0 h-32 sm:h-44 bg-gradient-to-t from-[#FAFAF9] via-[#FAFAF9]/85 to-transparent pointer-events-none z-10" />
-      </div>
-
-      {/* Top Telemetry Header Bar (Whitish High-Contrast Glass Pills) */}
-      <div className="relative z-20 flex items-center justify-between w-full max-w-7xl mx-auto">
-        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/40 border border-white/20 shadow-md backdrop-blur-md">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#10B981] opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#10B981]" />
-          </span>
-          <span className="font-sans font-black text-[10px] sm:text-[11px] text-white tracking-wider uppercase drop-shadow-xs">
-            PORTFOLIO // 2026
-          </span>
-        </div>
-
-        {/* Live Kolkata Clock & Availability Pill */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          <div className="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/40 border border-white/20 shadow-md backdrop-blur-md">
-            <Compass size={12} className="text-[#10B981]" />
-            <span className="font-sans font-black text-[10px] sm:text-[11px] text-white uppercase tracking-wider drop-shadow-xs">
-              KOLKATA {timeStr || "00:00:00"} IST
-            </span>
-          </div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-sans font-black text-[10px] sm:text-[11px] uppercase tracking-wider shadow-sm backdrop-blur-md">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
-            <span>OPEN FOR ROLES</span>
-          </div>
-        </div>
       </div>
 
       {/* Centered Monumental Hero: Headline in BN Riley as the Grand Focal Highlight */}

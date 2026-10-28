@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import React, { memo, useRef, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { Award, Compass, Globe, GraduationCap } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export const KineticStatement: React.FC = () => {
+export const KineticStatement: React.FC = memo(() => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const textRef = useRef<HTMLHeadingElement | null>(null);
 
@@ -141,4 +141,6 @@ export const KineticStatement: React.FC = () => {
       </div>
     </section>
   );
-};
+});
+
+KineticStatement.displayName = "KineticStatement";

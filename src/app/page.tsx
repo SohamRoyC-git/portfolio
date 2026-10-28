@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import Lenis from "lenis";
@@ -92,7 +92,7 @@ export default function Home() {
     return () => observer.disconnect();
   }, []);
 
-  const handleNavigate = (id: string) => {
+  const handleNavigate = useCallback((id: string) => {
     const el = document.getElementById(id);
     if (!el) return;
 
@@ -101,7 +101,7 @@ export default function Home() {
     } else {
       el.scrollIntoView({ behavior: "smooth" });
     }
-  };
+  }, []);
 
   return (
     <div className="relative min-h-screen bg-[#FAFAF9] text-[#0F172A] selection:bg-[#10B981]/20 selection:text-[#059669] overflow-x-hidden">

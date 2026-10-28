@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { memo, useState } from "react";
 import { Terminal, Layers } from "lucide-react";
 
-export const ArchitecturalMatrix: React.FC = () => {
+export const ArchitecturalMatrix: React.FC = memo(() => {
   const [activeCodeTab, setActiveCodeTab] = useState<"dictionary" | "neural">("dictionary");
 
   return (
@@ -172,4 +172,6 @@ export const ArchitecturalMatrix: React.FC = () => {
       </div>
     </section>
   );
-};
+});
+
+ArchitecturalMatrix.displayName = "ArchitecturalMatrix";

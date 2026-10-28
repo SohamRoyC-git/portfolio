@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, memo } from "react";
 
 interface StardustTrailParticle {
   x: number;
@@ -26,7 +26,7 @@ interface SparkleParticle {
   isStar: boolean;
 }
 
-export const TravelingPrismaticSphere: React.FC = () => {
+export const TravelingPrismaticSphere: React.FC = memo(() => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const scrollRef = useRef({ progress: 0 });
 
@@ -284,6 +284,10 @@ export const TravelingPrismaticSphere: React.FC = () => {
     };
 
     const render = () => {
+      if (typeof document !== "undefined" && document.hidden) {
+        animId = requestAnimationFrame(render);
+        return;
+      }
       time += 0.02;
       ctx.clearRect(0, 0, width, height);
 
@@ -651,4 +655,6 @@ export const TravelingPrismaticSphere: React.FC = () => {
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
     </div>
   );
-};
+});
+
+TravelingPrismaticSphere.displayName = "TravelingPrismaticSphere";

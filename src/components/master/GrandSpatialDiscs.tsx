@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, memo } from "react";
 import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
@@ -154,12 +154,15 @@ const PROJECTS: ProjectItem[] = [
   },
 ];
 
-export const GrandSpatialDiscs: React.FC = () => {
+export const GrandSpatialDiscs: React.FC = memo(() => {
   const [activeIdx, setActiveIdx] = useState(0);
-  const [scrollProgress, setScrollProgress] = useState(0);
   const [isDemoOpen, setIsDemoOpen] = useState(false);
   const [isDossierOpen, setIsDossierOpen] = useState(false);
   const [selectedDossier, setSelectedDossier] = useState<ProjectItem | null>(null);
+
+  const activeIdxRef = useRef(0);
+  const progressBarRef = useRef<HTMLDivElement | null>(null);
+  const counterRef = useRef<HTMLSpanElement | null>(null);
 
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const pinRef = useRef<HTMLDivElement | null>(null);
@@ -175,20 +178,33 @@ export const GrandSpatialDiscs: React.FC = () => {
     const track = trackRef.current;
     if (!section || !pin || !track) return;
 
-    // Apply exact centering and straight flat zone for active card
-    const updateOrbitalCards = () => {
+    let cardOffsets: number[] = [];
+    const measureCards = () => {
+      cardOffsets = cardsRef.current.map((card) =>
+        card ? card.offsetLeft + card.offsetWidth / 2 : 0
+      );
+    };
+
+    const getExactScrollAmount = () => {
+      const card1 = cardsRef.current[0];
+      const cardLast = cardsRef.current[cardsRef.current.length - 1];
+      if (!card1 || !cardLast) return 0;
+      return -(cardLast.offsetLeft - card1.offsetLeft);
+    };
+
+    const updateOrbitalCards = (trackX: number) => {
       const screenCenter = window.innerWidth / 2;
       const isMobile = window.innerWidth < 768;
-      // Flat zone where the active card is totally straight and centered
       const flatZone = window.innerWidth * (isMobile ? 0.28 : 0.22);
+      const paddingLeft = (window.innerWidth - Math.min(880, window.innerWidth * 0.86)) / 2;
 
       let closestIdx = 0;
       let minDistance = Infinity;
 
       cardsRef.current.forEach((card, index) => {
         if (!card) return;
-        const rect = card.getBoundingClientRect();
-        const cardCenter = rect.left + rect.width / 2;
+        const offset = cardOffsets[index] || (card.offsetLeft + card.offsetWidth / 2);
+        const cardCenter = paddingLeft + trackX + offset;
         const distFromCenter = cardCenter - screenCenter;
         const absDist = Math.abs(distFromCenter);
 
@@ -212,7 +228,6 @@ export const GrandSpatialDiscs: React.FC = () => {
           const sign = distFromCenter > 0 ? 1 : -1;
           const t = Math.min(Math.max(excess, 0), 1.6);
 
-          // Softer tilt for elegant spatial depth without clipping text
           const maxTilt = isMobile ? 10 : 16;
           rotateY = sign * -maxTilt * Math.min(t, 1);
           translateZ = -Math.pow(t, 1.2) * (isMobile ? 50 : 100);
@@ -224,17 +239,18 @@ export const GrandSpatialDiscs: React.FC = () => {
         card.style.opacity = opacity.toFixed(3);
       });
 
-      setActiveIdx(closestIdx);
-    };
-
-    const getExactScrollAmount = () => {
-      const card1 = cardsRef.current[0];
-      const cardLast = cardsRef.current[cardsRef.current.length - 1];
-      if (!card1 || !cardLast) return 0;
-      return -(cardLast.offsetLeft - card1.offsetLeft);
+      if (closestIdx !== activeIdxRef.current) {
+        activeIdxRef.current = closestIdx;
+        setActiveIdx(closestIdx);
+        if (counterRef.current) {
+          counterRef.current.textContent = `0${closestIdx + 1} / 0${PROJECTS.length}`;
+        }
+      }
     };
 
     const ctx = gsap.context(() => {
+      measureCards();
+
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
@@ -244,9 +260,17 @@ export const GrandSpatialDiscs: React.FC = () => {
           scrub: 0.45,
           anticipatePin: 1,
           invalidateOnRefresh: true,
+          onRefresh: () => {
+            measureCards();
+          },
           onUpdate: (self) => {
-            setScrollProgress(self.progress);
-            updateOrbitalCards();
+            if (progressBarRef.current) {
+              progressBarRef.current.style.width = `${Math.round(self.progress * 100)}%`;
+            }
+            const totalScroll = getExactScrollAmount();
+            const tProgress = Math.min(self.progress / 0.80, 1.0);
+            const currentTrackX = totalScroll * tProgress;
+            updateOrbitalCards(currentTrackX);
           },
         },
       });
@@ -261,15 +285,20 @@ export const GrandSpatialDiscs: React.FC = () => {
         0
       );
 
-      // Resting buffer at the end before unpinning
       tl.to({}, { duration: 0.20 }, 0.80);
     }, section);
 
-    updateOrbitalCards();
-    window.addEventListener("resize", updateOrbitalCards);
+    measureCards();
+    updateOrbitalCards(0);
+
+    const handleResize = () => {
+      measureCards();
+      updateOrbitalCards(0);
+    };
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("resize", updateOrbitalCards);
+      window.removeEventListener("resize", handleResize);
       ctx.revert();
     };
   }, []);
@@ -304,12 +333,13 @@ export const GrandSpatialDiscs: React.FC = () => {
             </span>
             <div className="w-44 h-2 rounded-full bg-slate-200/80 p-0.5 overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-[#10B981] via-[#00FF87] to-[#10B981] transition-all duration-75 ease-out rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)]"
-                style={{ width: `${Math.round(scrollProgress * 100)}%` }}
+                ref={progressBarRef}
+                className="h-full bg-gradient-to-r from-[#10B981] via-[#00FF87] to-[#10B981] rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                style={{ width: "0%" }}
               />
             </div>
-            <span className="font-sans font-black text-xs text-[#0F172A]">
-              0{activeIdx + 1} / 0{PROJECTS.length}
+            <span ref={counterRef} className="font-sans font-black text-xs text-[#0F172A]">
+              01 / 0{PROJECTS.length}
             </span>
           </div>
 
@@ -337,7 +367,7 @@ export const GrandSpatialDiscs: React.FC = () => {
                   cardsRef.current[idx] = el;
                 }}
                 /* Responsive Frosted Glassmorphism Card with Generous Margins & No Overflow Collisions */
-                className="w-[86vw] max-w-[880px] shrink-0 p-5 sm:p-8 lg:p-9 rounded-[2rem] sm:rounded-[2.25rem] bg-white/80 border-2 border-white/95 backdrop-blur-3xl shadow-[0_25px_60px_-15px_rgba(15,23,42,0.12),0_10px_25px_-5px_rgba(16,185,129,0.08),inset_0_1px_2px_rgba(255,255,255,0.95)] hover:border-[#10B981]/50 transition-all duration-200 grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-center will-change-transform max-h-[calc(100svh-175px)] overflow-y-auto sm:overflow-visible"
+                className="w-[86vw] max-w-[880px] shrink-0 p-5 sm:p-8 lg:p-9 rounded-[2rem] sm:rounded-[2.25rem] bg-white/80 border-2 border-white/95 backdrop-blur-md shadow-[0_25px_60px_-15px_rgba(15,23,42,0.12),0_10px_25px_-5px_rgba(16,185,129,0.08),inset_0_1px_2px_rgba(255,255,255,0.95)] hover:border-[#10B981]/50 transition-all duration-200 grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-center will-change-transform max-h-[calc(100svh-175px)] overflow-y-auto sm:overflow-visible"
                 style={{ transformStyle: "preserve-3d" }}
               >
                 {/* Left Card Editorial Metadata (7 Cols on desktop, full on mobile) */}
@@ -879,4 +909,6 @@ export const GrandSpatialDiscs: React.FC = () => {
       )}
     </section>
   );
-};
+});
+
+GrandSpatialDiscs.displayName = "GrandSpatialDiscs";

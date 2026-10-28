@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { memo, useState, useEffect, useRef } from "react";
 import { ArrowDown, Compass } from "lucide-react";
 
 interface MonumentalHeroProps {
   onExplore: () => void;
 }
 
-export const MonumentalHero: React.FC<MonumentalHeroProps> = ({ onExplore }) => {
+export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore }) => {
   const [timeStr, setTimeStr] = useState<string>("");
   const [tilt, setTilt] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -150,4 +150,6 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = ({ onExplore }) => 
       </div>
     </section>
   );
-};
+});
+
+MonumentalHero.displayName = "MonumentalHero";

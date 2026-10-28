@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { memo, useState } from "react";
 import confetti from "canvas-confetti";
 import { Mail, Phone, MapPin, Copy, Check, ArrowUpRight } from "lucide-react";
 
-export const TerminalFinale: React.FC = () => {
+export const TerminalFinale: React.FC = memo(() => {
   const [copied, setCopied] = useState(false);
 
   const email = "roychoudhurysoham006@gmail.com";
@@ -129,4 +129,6 @@ export const TerminalFinale: React.FC = () => {
       </div>
     </footer>
   );
-};
+});
+
+TerminalFinale.displayName = "TerminalFinale";

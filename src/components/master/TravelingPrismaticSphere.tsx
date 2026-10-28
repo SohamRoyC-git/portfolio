@@ -99,8 +99,79 @@ export const TravelingPrismaticSphere: React.FC = () => {
     let lastEmitX = currentX;
     let lastEmitY = currentY;
 
-    // Click handler to trigger sparkles and elastic pulse
+    // Trigger elastic pulse and sparkle burst
+    const triggerClickPulse = () => {
+      clickScale = 0.90;
+      clickScaleVel = 0.08;
+      shockwaveRadius = currentRadius * 0.9;
+      shockwaveAlpha = 0.9;
+
+      const count = width < 640 ? 18 : 28;
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 5 + 2.5;
+        const isStar = Math.random() < 0.45;
+        const colors = [
+          "#00FF87",
+          "#10B981",
+          "#38BDF8",
+          "#F472B6",
+          "#E0E7FF",
+          "#FFFFFF",
+        ];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+
+        sparkles.push({
+          x: currentX + Math.cos(angle) * (currentRadius * 0.4),
+          y: currentY + Math.sin(angle) * (currentRadius * 0.4),
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          size: isStar ? Math.random() * 6 + 6 : Math.random() * 3 + 2,
+          rot: Math.random() * Math.PI * 2,
+          rotSpeed: (Math.random() - 0.5) * 0.12,
+          alpha: 1.0,
+          life: 0,
+          maxLife: Math.floor(Math.random() * 25 + 35),
+          color,
+          isStar,
+        });
+      }
+    };
+
+    // Trigger figure-eight orbital escape loop
+    const triggerOrbitalEscape = () => {
+      isOrbiting = true;
+      orbitProgress = 0;
+
+      clickScale = 0.82;
+      clickScaleVel = 0.14;
+      shockwaveRadius = currentRadius * 0.85;
+      shockwaveAlpha = 1.0;
+
+      const count = width < 640 ? 18 : 26;
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 6 + 3.5;
+        sparkles.push({
+          x: currentX,
+          y: currentY,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          size: Math.random() * 7 + 4,
+          rot: Math.random() * Math.PI * 2,
+          rotSpeed: (Math.random() - 0.5) * 0.16,
+          alpha: 1.0,
+          life: 0,
+          maxLife: 42,
+          color: Math.random() < 0.5 ? "#00FF87" : "#38BDF8",
+          isStar: true,
+        });
+      }
+    };
+
+    // Mouse click handler
     const handleClick = (e: MouseEvent) => {
+      if (window.matchMedia("(pointer: coarse)").matches) return;
       const target = e.target as HTMLElement | null;
       if (
         target &&
@@ -117,51 +188,14 @@ export const TravelingPrismaticSphere: React.FC = () => {
       const dist = Math.sqrt(dx * dx + dy * dy);
 
       if (dist < currentRadius * 1.35) {
-        // Trigger elastic compression pulse
-        clickScale = 0.90;
-        clickScaleVel = 0.08;
-
-        // Trigger expanding optical shockwave ripple
-        shockwaveRadius = currentRadius * 0.9;
-        shockwaveAlpha = 0.9;
-
-        // Burst of radiant 4-pointed sparkle stars and prismatic diamond embers
-        const count = width < 640 ? 18 : 28;
-        for (let i = 0; i < count; i++) {
-          const angle = Math.random() * Math.PI * 2;
-          const speed = Math.random() * 5 + 2.5;
-          const isStar = Math.random() < 0.45; // 45% four-pointed diamond twinkle stars
-          const colors = [
-            "#00FF87",
-            "#10B981",
-            "#38BDF8",
-            "#F472B6",
-            "#E0E7FF",
-            "#FFFFFF",
-          ];
-          const color = colors[Math.floor(Math.random() * colors.length)];
-
-          sparkles.push({
-            x: currentX + Math.cos(angle) * (currentRadius * 0.4),
-            y: currentY + Math.sin(angle) * (currentRadius * 0.4),
-            vx: Math.cos(angle) * speed,
-            vy: Math.sin(angle) * speed,
-            size: isStar ? Math.random() * 6 + 6 : Math.random() * 3 + 2,
-            rot: Math.random() * Math.PI * 2,
-            rotSpeed: (Math.random() - 0.5) * 0.12,
-            alpha: 1.0,
-            life: 0,
-            maxLife: Math.floor(Math.random() * 25 + 35),
-            color,
-            isStar,
-          });
-        }
+        triggerClickPulse();
       }
     };
     window.addEventListener("click", handleClick);
 
-    // Double-Click handler: triggers the energetic Figure-Eight Orbital Escape
+    // Mouse double-click handler
     const handleDblClick = (e: MouseEvent) => {
+      if (window.matchMedia("(pointer: coarse)").matches) return;
       const target = e.target as HTMLElement | null;
       if (
         target &&
@@ -178,38 +212,43 @@ export const TravelingPrismaticSphere: React.FC = () => {
       const dist = Math.sqrt(dx * dx + dy * dy);
 
       if (dist < currentRadius * 1.5) {
-        isOrbiting = true;
-        orbitProgress = 0;
-
-        // Dynamic launch impulse
-        clickScale = 0.82;
-        clickScaleVel = 0.14;
-        shockwaveRadius = currentRadius * 0.85;
-        shockwaveAlpha = 1.0;
-
-        // Energetic launch sparkles
-        const count = width < 640 ? 18 : 26;
-        for (let i = 0; i < count; i++) {
-          const angle = Math.random() * Math.PI * 2;
-          const speed = Math.random() * 6 + 3.5;
-          sparkles.push({
-            x: currentX,
-            y: currentY,
-            vx: Math.cos(angle) * speed,
-            vy: Math.sin(angle) * speed,
-            size: Math.random() * 7 + 4,
-            rot: Math.random() * Math.PI * 2,
-            rotSpeed: (Math.random() - 0.5) * 0.16,
-            alpha: 1.0,
-            life: 0,
-            maxLife: 42,
-            color: Math.random() < 0.5 ? "#00FF87" : "#38BDF8",
-            isStar: true,
-          });
-        }
+        triggerOrbitalEscape();
       }
     };
     window.addEventListener("dblclick", handleDblClick);
+
+    // Touch tap and double-tap handler for mobile screens
+    let lastTapTime = 0;
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (e.changedTouches.length === 0) return;
+      const touch = e.changedTouches[0];
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.closest("button") ||
+          target.closest("a") ||
+          target.closest("input") ||
+          target.getAttribute("role") === "button")
+      ) {
+        return;
+      }
+
+      const dx = touch.clientX - currentX;
+      const dy = touch.clientY - currentY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < currentRadius * 1.6) {
+        const now = Date.now();
+        if (now - lastTapTime < 380) {
+          triggerOrbitalEscape();
+          lastTapTime = 0;
+        } else {
+          lastTapTime = now;
+          triggerClickPulse();
+        }
+      }
+    };
+    window.addEventListener("touchend", handleTouchEnd, { passive: true });
 
     // Helper to draw a 4-pointed diamond sparkle star
     const drawSparkleStar = (
@@ -599,6 +638,7 @@ export const TravelingPrismaticSphere: React.FC = () => {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("click", handleClick);
       window.removeEventListener("dblclick", handleDblClick);
+      window.removeEventListener("touchend", handleTouchEnd);
       cancelAnimationFrame(animId);
     };
   }, []);

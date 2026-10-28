@@ -5,7 +5,7 @@ import React, { memo } from "react";
 export const SilkyFluidBackdrop: React.FC = memo(() => {
   return (
     <div
-      className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none bg-[#FAFAF9] max-md:bg-[#0A0502]"
+      className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none bg-[#FAFAF9] max-md:bg-[#0C0C0E]"
       style={{
         transform: "translate3d(0, 0, 0)",
         willChange: "transform",
@@ -14,47 +14,48 @@ export const SilkyFluidBackdrop: React.FC = memo(() => {
       aria-hidden="true"
     >
       {/* ========================================================================= */}
-      {/* MOBILE EXPERIENCE (< 768px): VIBRANT ORANGE FLUID GRADIENT BACKDROP       */}
+      {/* MOBILE EXPERIENCE (< 768px): UNDERSTATED SMOKY EMBER FLUID RIBBON        */}
+      {/* (Directly matched to user reference: deep matte charcoal + organic ribbon)*/}
       {/* ========================================================================= */}
       <div
         className="md:hidden absolute inset-0 overflow-hidden"
         style={{
-          background: "radial-gradient(ellipse at 50% 20%, #1c0a02 0%, #0a0401 100%)",
+          background: "radial-gradient(ellipse at 85% 15%, #180C08 0%, #0C0C0E 70%)",
         }}
       >
-        {/* Radiant Molten Orange Fluid Glow (Top-Right) */}
+        {/* Upper-Right Molten Ember Bloom (Primary focal light from reference) */}
         <div
-          className="absolute -top-[10%] -right-[15%] w-[115vw] h-[115vw] rounded-full blur-[70px] opacity-80 animate-aurora-one will-change-transform"
+          className="absolute -top-[8%] -right-[15%] w-[115vw] h-[115vw] rounded-full blur-[85px] opacity-75 animate-aurora-one will-change-transform"
           style={{
             background:
-              "radial-gradient(circle, #FF5500 0%, #FF3300 45%, transparent 70%)",
+              "radial-gradient(ellipse 60% 60% at 55% 45%, #E63B08 0%, #C42D05 35%, #7A1705 60%, transparent 75%)",
           }}
         />
 
-        {/* Luminous Electric Mandarin / Amber Fluid Glow (Center-Left) */}
+        {/* Diagonal S-Curve Smoky Fluid Stream (Organic ribbon body) */}
         <div
-          className="absolute top-[30%] -left-[20%] w-[125vw] h-[125vw] rounded-full blur-[80px] opacity-75 animate-aurora-two will-change-transform"
+          className="absolute top-[28%] -right-[10%] w-[100vw] h-[110vw] rounded-full blur-[95px] opacity-65 animate-aurora-two will-change-transform"
           style={{
             background:
-              "radial-gradient(circle, #FF8C00 0%, #FF5000 40%, transparent 70%)",
+              "radial-gradient(ellipse 55% 65% at 60% 50%, #D83A08 0%, #8E1F06 42%, #420C04 68%, transparent 80%)",
           }}
         />
 
-        {/* Deep Sunset Coral Fluid Glow (Mid-Lower) */}
+        {/* Subtle Smoky Shadow Crevice (Creates the 3D ribbon depth from reference) */}
         <div
-          className="absolute top-[60%] -right-[10%] w-[120vw] h-[120vw] rounded-full blur-[85px] opacity-70 animate-aurora-one will-change-transform"
+          className="absolute top-[38%] right-[18%] w-[65vw] h-[75vw] rounded-full blur-[80px] opacity-45 will-change-transform"
           style={{
             background:
-              "radial-gradient(circle, #FF3700 0%, #FF6A00 45%, transparent 75%)",
+              "radial-gradient(circle, #080D11 0%, rgba(12,12,14,0.6) 50%, transparent 75%)",
           }}
         />
 
-        {/* Golden Dawn Fluid Accent (Bottom-Left) */}
+        {/* Lower-Right Soft Residual Ember Horizon */}
         <div
-          className="absolute -bottom-[10%] -left-[10%] w-[110vw] h-[110vw] rounded-full blur-[75px] opacity-65 animate-aurora-two will-change-transform"
+          className="absolute -bottom-[8%] right-[0%] w-[105vw] h-[105vw] rounded-full blur-[90px] opacity-55 animate-aurora-one will-change-transform"
           style={{
             background:
-              "radial-gradient(circle, #FFAA00 0%, #FF4400 45%, transparent 70%)",
+              "radial-gradient(circle, #B83006 0%, #631404 45%, transparent 75%)",
           }}
         />
       </div>

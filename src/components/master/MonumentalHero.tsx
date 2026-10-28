@@ -16,6 +16,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
   // Mobile Refs
   const mobileContainerRef = useRef<HTMLDivElement | null>(null);
   const mobileVideoWrapperRef = useRef<HTMLDivElement | null>(null);
+  const irisOverlayRef = useRef<HTMLDivElement | null>(null);
   const laptopCueRef = useRef<HTMLDivElement | null>(null);
   const mobileIdentityRef = useRef<HTMLDivElement | null>(null);
   const mobileTitleRef = useRef<HTMLHeadingElement | null>(null);
@@ -33,24 +34,34 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
 
     // =========================================================================
     // MOBILE TIMELINE (< 768px):
-    // Organic Ellipse Video Dissolve into Vibrant Orange Fluid Gradient
+    // Black Lens Ellipse Aperture Transition & Smoky Orange Fluid Reveal
     // =========================================================================
     mm.add("(max-width: 767px)", () => {
       if (!mobileContainerRef.current) return;
 
-      // 1. Initial State: Photographic Elliptical Aperture Mask on the Video (Wide open at 150%)
+      // 1. Initial State: Dedicated Black Elliptical Aperture (Wide open at 150%)
       const irisData = { r: 150 };
 
-      const updateVideoMask = (r: number) => {
-        if (!mobileVideoWrapperRef.current) return;
+      const updateIrisMask = (r: number) => {
+        if (!irisOverlayRef.current) return;
         const inner = Math.max(0, r);
         const outer = Math.max(0, r + 24);
-        const mask = `radial-gradient(ellipse 70% 60% at 56% 52%, black 0%, black ${inner.toFixed(1)}%, transparent ${outer.toFixed(1)}%, transparent 100%)`;
-        mobileVideoWrapperRef.current.style.webkitMaskImage = mask;
-        mobileVideoWrapperRef.current.style.maskImage = mask;
+        const mask = `radial-gradient(ellipse 70% 60% at 56% 52%, transparent 0%, transparent ${inner.toFixed(1)}%, black ${outer.toFixed(1)}%, black 100%)`;
+        irisOverlayRef.current.style.webkitMaskImage = mask;
+        irisOverlayRef.current.style.maskImage = mask;
       };
 
-      updateVideoMask(150);
+      updateIrisMask(150);
+
+      if (irisOverlayRef.current) {
+        gsap.set(irisOverlayRef.current, { opacity: 1 });
+      }
+
+      if (mobileVideoWrapperRef.current) {
+        mobileVideoWrapperRef.current.style.webkitMaskImage = "";
+        mobileVideoWrapperRef.current.style.maskImage = "";
+        gsap.set(mobileVideoWrapperRef.current, { opacity: 1, scale: 1 });
+      }
 
       if (mobileIdentityRef.current) {
         gsap.set(mobileIdentityRef.current, {
@@ -77,7 +88,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         });
       }
 
-      // 3. Silky Responsive Scroll Scrub Timeline (Aesthetic, organic & fluid)
+      // 3. Silky Continuous Scroll Scrub Timeline (Aesthetic, organic & fluid)
       const masterTl = gsap.timeline({
         scrollTrigger: {
           trigger: mobileContainerRef.current,
@@ -93,7 +104,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         },
       });
 
-      // Phase 1 (0 -> 24%): Laptop micro-cue & terrace footer dissolve
+      // Phase 1 (0 -> 22%): Laptop micro-cue & terrace footer dissolve
       if (laptopCueRef.current) {
         masterTl.to(
           laptopCueRef.current,
@@ -120,16 +131,16 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         );
       }
 
-      // Phase 2 (0 -> 50%): Photographic Elliptical Mask contracts smoothly into the laptop
-      // Unveiling the vibrant orange fluid gradient background (Zero square edges!)
+      // Phase 2 (0 -> 48%): Black Photographic Ellipse contracts smoothly into the laptop
+      // Pure deep black (#0C0C0E) closes in on the laptop at 56% 52% (Never becomes a square!)
       masterTl.to(
         irisData,
         {
           r: -24,
-          duration: 0.50,
+          duration: 0.48,
           ease: "power2.inOut",
           onUpdate: () => {
-            updateVideoMask(irisData.r);
+            updateIrisMask(irisData.r);
           },
         },
         0
@@ -141,14 +152,29 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
           mobileVideoWrapperRef.current,
           {
             scale: 0.95,
-            duration: 0.50,
+            opacity: 0.2,
+            duration: 0.48,
             ease: "power1.inOut",
           },
           0
         );
       }
 
-      // Phase 3 (38% -> 76%): Monumental Header materializes on the vibrant orange fluid canvas
+      // Phase 2b (42% -> 60%): Once the black aperture has enclosed the scene,
+      // dissolve the black overlay to unveil the subtle smoky orange fluid ribbon backdrop
+      if (irisOverlayRef.current) {
+        masterTl.to(
+          irisOverlayRef.current,
+          {
+            opacity: 0,
+            duration: 0.18,
+            ease: "power1.inOut",
+          },
+          0.42
+        );
+      }
+
+      // Phase 3 (40% -> 76%): Monumental Header materializes on the subtle smoky fluid canvas
       if (mobileIdentityRef.current) {
         masterTl.to(
           mobileIdentityRef.current,
@@ -156,10 +182,10 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             opacity: 1,
             y: 0,
             scale: 1,
-            duration: 0.42,
+            duration: 0.36,
             ease: "power2.out",
           },
-          0.38
+          0.40
         );
       }
 
@@ -213,10 +239,10 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         className="md:hidden relative w-full h-[220vh] bg-transparent"
       >
         <div className="sticky top-0 h-[100svh] w-full overflow-hidden bg-transparent flex flex-col justify-between">
-          {/* 1. Living Pixel-Art Terrace Video Layer with Photographic Elliptical Mask */}
+          {/* 1. Living Pixel-Art Terrace Video Layer */}
           <div
             ref={mobileVideoWrapperRef}
-            className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden will-change-[mask-image,transform]"
+            className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden will-change-[transform,opacity]"
           >
             <video
               autoPlay
@@ -231,7 +257,13 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             </video>
           </div>
 
-          {/* 2. Understated Editorial Swiss Laptop Micro-Cue (Anchored above laptop) */}
+          {/* 2. Full-Screen Black Elliptical Aperture Overlay (Deep black #0C0C0E lens eclipse) */}
+          <div
+            ref={irisOverlayRef}
+            className="absolute inset-0 z-10 pointer-events-none bg-[#0C0C0E] will-change-[mask-image,opacity]"
+          />
+
+          {/* 3. Understated Editorial Swiss Laptop Micro-Cue (Anchored above laptop) */}
           <div
             ref={laptopCueRef}
             className="absolute pointer-events-none z-20 flex flex-col items-center will-change-[transform,opacity]"

@@ -69,7 +69,7 @@ export const KineticStatement: React.FC = memo(() => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pt-8 sm:pt-12 border-t border-slate-200/80 max-md:border-white/10">
         {/* Monolith 1 */}
         <div 
-          className="p-5 sm:p-8 rounded-2xl bg-white/75 max-md:bg-[#0A0502]/70 backdrop-blur-xl border border-slate-200/80 max-md:border-white/15 hover:border-[#FF5500]/60 transition-all duration-300 shadow-xs group"
+          className="p-5 sm:p-8 rounded-2xl bg-white/75 max-md:bg-[#0C0C0E]/70 backdrop-blur-xl border border-slate-200/80 max-md:border-white/15 hover:border-[#FF5500]/60 transition-all duration-300 shadow-xs group"
           data-cursor="pointer"
           data-cursor-text="ACADEMIC"
         >
@@ -87,7 +87,7 @@ export const KineticStatement: React.FC = memo(() => {
 
         {/* Monolith 2 */}
         <div 
-          className="p-5 sm:p-8 rounded-2xl bg-white/75 max-md:bg-[#0A0502]/70 backdrop-blur-xl border border-slate-200/80 max-md:border-white/15 hover:border-[#FF5500]/60 transition-all duration-300 shadow-xs group"
+          className="p-5 sm:p-8 rounded-2xl bg-white/75 max-md:bg-[#0C0C0E]/70 backdrop-blur-xl border border-slate-200/80 max-md:border-white/15 hover:border-[#FF5500]/60 transition-all duration-300 shadow-xs group"
           data-cursor="pointer"
           data-cursor-text="LATVIA"
         >
@@ -105,7 +105,7 @@ export const KineticStatement: React.FC = memo(() => {
 
         {/* Monolith 3 */}
         <div 
-          className="p-5 sm:p-8 rounded-2xl bg-white/75 max-md:bg-[#0A0502]/70 backdrop-blur-xl border border-slate-200/80 max-md:border-white/15 hover:border-[#FF5500]/60 transition-all duration-300 shadow-xs group"
+          className="p-5 sm:p-8 rounded-2xl bg-white/75 max-md:bg-[#0C0C0E]/70 backdrop-blur-xl border border-slate-200/80 max-md:border-white/15 hover:border-[#FF5500]/60 transition-all duration-300 shadow-xs group"
           data-cursor="pointer"
           data-cursor-text="ENGINE"
         >
@@ -123,7 +123,7 @@ export const KineticStatement: React.FC = memo(() => {
 
         {/* Monolith 4 */}
         <div 
-          className="p-5 sm:p-8 rounded-2xl bg-white/75 max-md:bg-[#0A0502]/70 backdrop-blur-xl border border-slate-200/80 max-md:border-white/15 hover:border-[#FF5500]/60 transition-all duration-300 shadow-xs group"
+          className="p-5 sm:p-8 rounded-2xl bg-white/75 max-md:bg-[#0C0C0E]/70 backdrop-blur-xl border border-slate-200/80 max-md:border-white/15 hover:border-[#FF5500]/60 transition-all duration-300 shadow-xs group"
           data-cursor="pointer"
           data-cursor-text="SCHOLAR"
         >

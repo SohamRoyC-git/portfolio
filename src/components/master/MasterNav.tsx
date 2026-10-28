@@ -106,7 +106,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
         paddingLeft: isMobile ? "16px" : "24px",
         paddingRight: isMobile ? "16px" : "24px",
         borderRadius: "9999px",
-        backgroundColor: isMobile ? "rgba(10, 5, 2, 0.88)" : "rgba(255, 255, 255, 0.86)",
+        backgroundColor: isMobile ? "rgba(12, 12, 14, 0.88)" : "rgba(255, 255, 255, 0.86)",
         borderColor: isMobile ? "rgba(255, 255, 255, 0.18)" : "rgba(15, 23, 42, 0.08)",
         boxShadow: isMobile
           ? "0 16px 38px -6px rgba(0, 0, 0, 0.9), inset 0 1px 1px rgba(255, 255, 255, 0.1)"
@@ -292,9 +292,9 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
         </div>
       </header>
 
-      {/* Mobile Drawer (Vibrant Orange Fluid Warm Dark) */}
+      {/* Mobile Drawer (Understated Smoky Fluid Dark) */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 bg-[#0A0502]/98 backdrop-blur-2xl lg:hidden flex flex-col justify-between p-6 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 bg-[#0C0C0E]/98 backdrop-blur-2xl lg:hidden flex flex-col justify-between p-6 animate-in fade-in duration-200">
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
             <div className="flex items-center gap-2 font-sans font-black text-xs text-white tracking-widest uppercase">
               <span className="w-2 h-2 rounded-full bg-[#10B981]" />

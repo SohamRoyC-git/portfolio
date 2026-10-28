@@ -14,13 +14,18 @@ interface MonumentalHeroProps {
 }
 
 export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, onConnect }) => {
-  // Desktop refs
+  // Mobile Refs
+  const mobileContainerRef = useRef<HTMLDivElement | null>(null);
+  const mobileVideoWrapperRef = useRef<HTMLDivElement | null>(null);
+  const irisCircleRef = useRef<SVGCircleElement | null>(null);
+  const laptopCueRef = useRef<HTMLDivElement | null>(null);
+  const mobileIdentityRef = useRef<HTMLDivElement | null>(null);
+  const mobileTitleRef = useRef<HTMLHeadingElement | null>(null);
+  const mobileTerraceFooterRef = useRef<HTMLDivElement | null>(null);
+
+  // Desktop Refs
   const desktopSectionRef = useRef<HTMLElement | null>(null);
   const desktopVideoRef = useRef<HTMLDivElement | null>(null);
-
-  // Mobile refs
-  const mobileTerraceRef = useRef<HTMLDivElement | null>(null);
-  const mobileAlertRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -28,13 +33,38 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
 
     const mm = gsap.matchMedia();
 
+    // =========================================================================
     // MOBILE TIMELINE (< 768px):
+    // A24 / Midnight Monolith Cinematic Lens Iris & Optical De-blur Sequence
+    // =========================================================================
     mm.add("(max-width: 767px)", () => {
-      // 1. Gentle continuous levitation for the laptop alert telemetry beacon
-      let levitationTween: gsap.core.Tween | null = null;
-      if (mobileAlertRef.current) {
-        levitationTween = gsap.to(mobileAlertRef.current, {
-          y: -8,
+      if (!mobileContainerRef.current) return;
+
+      const initialRadius = Math.max(window.innerWidth, window.innerHeight) * 1.5;
+
+      // 1. Set Initial Visual States
+      if (irisCircleRef.current) {
+        irisCircleRef.current.setAttribute("r", initialRadius.toString());
+      }
+
+      if (mobileIdentityRef.current) {
+        gsap.set(mobileIdentityRef.current, {
+          opacity: 0,
+          scale: 0.94,
+          filter: "blur(20px)",
+          pointerEvents: "none",
+        });
+      }
+
+      if (laptopCueRef.current) {
+        gsap.set(laptopCueRef.current, { opacity: 1, y: 0 });
+      }
+
+      // 2. Idle Levitation for the Laptop Micro-Cue
+      let cueTween: gsap.core.Tween | null = null;
+      if (laptopCueRef.current) {
+        cueTween = gsap.to(laptopCueRef.current, {
+          y: -6,
           duration: 2.2,
           ease: "sine.inOut",
           yoyo: true,
@@ -42,28 +72,108 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         });
       }
 
-      // 2. Smooth scroll-out as user begins scrolling down the terrace
-      if (mobileAlertRef.current && mobileTerraceRef.current) {
-        gsap.to(mobileAlertRef.current, {
-          opacity: 0,
-          y: -25,
-          scale: 0.92,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: mobileTerraceRef.current,
-            start: "top top",
-            end: "28% top",
-            scrub: 0.5,
+      // 3. Main Master Scroll Choreography (Lens Iris -> Pure Black -> De-blur Materialize)
+      const irisObj = { r: initialRadius };
+      const masterTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: mobileContainerRef.current,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 0.55,
+          onUpdate: (self) => {
+            if (mobileIdentityRef.current) {
+              mobileIdentityRef.current.style.pointerEvents =
+                self.progress > 0.42 ? "auto" : "none";
+            }
           },
-        });
+        },
+      });
+
+      // Phase 1 (0 -> 25%): Laptop micro-cue & terrace coordinates dissolve
+      if (laptopCueRef.current) {
+        masterTl.to(
+          laptopCueRef.current,
+          {
+            opacity: 0,
+            y: -18,
+            scale: 0.92,
+            duration: 0.22,
+            ease: "power2.out",
+          },
+          0
+        );
       }
 
+      if (mobileTerraceFooterRef.current) {
+        masterTl.to(
+          mobileTerraceFooterRef.current,
+          {
+            opacity: 0,
+            duration: 0.18,
+            ease: "power2.out",
+          },
+          0
+        );
+      }
+
+      // Phase 2 (0 -> 44%): Cinematic Lens Iris Aperture Closes Down into Pure Black (#000000)
+      if (irisCircleRef.current) {
+        masterTl.to(
+          irisObj,
+          {
+            r: 0,
+            duration: 0.44,
+            ease: "power2.inOut",
+            onUpdate: () => {
+              if (irisCircleRef.current) {
+                irisCircleRef.current.setAttribute("r", Math.max(0, irisObj.r).toString());
+              }
+            },
+          },
+          0
+        );
+      }
+
+      if (mobileVideoWrapperRef.current) {
+        masterTl.to(
+          mobileVideoWrapperRef.current,
+          {
+            scale: 0.95,
+            opacity: 0.2,
+            duration: 0.44,
+            ease: "power1.inOut",
+          },
+          0
+        );
+      }
+
+      // Phase 3 (38% -> 76%): Monumental Header materializes from the dark frame with optical de-blur
+      if (mobileIdentityRef.current) {
+        masterTl.to(
+          mobileIdentityRef.current,
+          {
+            opacity: 1,
+            scale: 1,
+            filter: "blur(0px)",
+            duration: 0.42,
+            ease: "power2.out",
+          },
+          0.38
+        );
+      }
+
+      // Phase 4 (76% -> 100%): Luxury hold period before unpinning into Movement 01
+      masterTl.to({}, { duration: 0.24 });
+
       return () => {
-        if (levitationTween) levitationTween.kill();
+        if (cueTween) cueTween.kill();
       };
     });
 
+    // =========================================================================
     // DESKTOP TIMELINE (>= 768px):
+    // High-Art Gallery Hero with Video Dissolve Parallax
+    // =========================================================================
     mm.add("(min-width: 768px)", () => {
       if (desktopVideoRef.current && desktopSectionRef.current) {
         gsap.to(desktopVideoRef.current, {
@@ -95,16 +205,18 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
   return (
     <div id="monument-hero" className="relative w-full overflow-visible">
       {/* ========================================================================= */}
-      {/* MOBILE EXPERIENCE (< 768px): BESPOKE CINEMATIC DARK-THEMED SEQUENCE        */}
+      {/* MOBILE EXPERIENCE (< 768px): MIDNIGHT MONOLITH LENS IRIS CINEMATIC APERTURE */}
       {/* ========================================================================= */}
-      <div className="md:hidden w-full flex flex-col">
-        {/* SCENE 1: ATMOSPHERIC LIVING TERRACE (100svh) */}
-        <section
-          ref={mobileTerraceRef}
-          className="relative h-[100svh] w-full flex flex-col justify-between pt-24 pb-6 px-4 z-10 select-none overflow-hidden"
-        >
-          {/* Living Pixel Art Terrace Video (Mobile focused on right: cat, coffee, laptop) */}
-          <div className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden">
+      <div
+        ref={mobileContainerRef}
+        className="md:hidden relative w-full h-[220vh] bg-[#000000]"
+      >
+        <div className="sticky top-0 h-[100svh] w-full overflow-hidden bg-[#000000] flex flex-col justify-between">
+          {/* 1. Living Pixel-Art Terrace Video Layer (Cropped to cat, coffee, laptop) */}
+          <div
+            ref={mobileVideoWrapperRef}
+            className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden will-change-transform"
+          >
             <video
               autoPlay
               loop
@@ -116,17 +228,39 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               <source src="/assets/hero_pixel_art_loop.mp4" type="video/mp4" />
               <source src="/assets/Animate_pixel_art_environment_loop_03a9505a.mp4" type="video/mp4" />
             </video>
-
-            {/* Seamless Bottom Gradient Bleed directly into luxury dark palette */}
-            <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#070A11] via-[#070A11]/70 to-transparent pointer-events-none z-10" />
           </div>
 
-          {/* Top spacer */}
-          <div className="relative z-20" />
+          {/* 2. Cinematic Lens Iris / Eclipse Dissolve Mask (Closes in to #000000) */}
+          <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden">
+            <svg className="w-full h-full" preserveAspectRatio="none">
+              <defs>
+                <filter id="lens-iris-blur">
+                  <feGaussianBlur stdDeviation="34" />
+                </filter>
+                <mask id="lens-iris-mask">
+                  <rect width="100%" height="100%" fill="white" />
+                  <circle
+                    ref={irisCircleRef}
+                    cx="56%"
+                    cy="52%"
+                    r="1200"
+                    fill="black"
+                    filter="url(#lens-iris-blur)"
+                  />
+                </mask>
+              </defs>
+              <rect
+                width="100%"
+                height="100%"
+                fill="#000000"
+                mask="url(#lens-iris-mask)"
+              />
+            </svg>
+          </div>
 
-          {/* GSAP Floating Laptop Alert Notification / HUD Telemetry Beacon */}
+          {/* 3. Understated Editorial Swiss Laptop Micro-Cue (Anchored above laptop) */}
           <div
-            ref={mobileAlertRef}
+            ref={laptopCueRef}
             className="absolute pointer-events-none z-20 flex flex-col items-center will-change-[transform,opacity]"
             style={{
               left: "56%",
@@ -134,83 +268,92 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               transform: "translate(-50%, -100%)",
             }}
           >
-            {/* Holographic Pill */}
-            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#070A11]/85 border border-emerald-400/50 backdrop-blur-md shadow-[0_0_24px_rgba(0,255,135,0.35)]">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00FF87] opacity-80" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00FF87]" />
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/80 border border-white/20 backdrop-blur-md shadow-2xl">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+              <span className="font-sans font-bold text-[9px] tracking-[0.22em] text-white/95 uppercase">
+                TERRACE 01
               </span>
-              <span className="font-sans font-black text-[9px] tracking-[0.22em] text-emerald-300 uppercase">
-                LAPTOP ACTIVE
-              </span>
-              <span className="text-white/30 text-[9px]">/</span>
-              <span className="font-sans font-bold text-[9px] tracking-wider text-slate-100 uppercase flex items-center gap-1">
-                Scroll to meet Soham
-                <ArrowDown size={10} className="text-emerald-400 animate-bounce" />
+              <span className="text-white/30 text-[8px]">•</span>
+              <span className="font-sans font-medium text-[9px] tracking-widest text-slate-300 uppercase flex items-center gap-1">
+                SCROLL
+                <ArrowDown size={9} className="text-white/80 animate-bounce" />
               </span>
             </div>
-
-            {/* Telemetry connector stem pointing down toward laptop */}
-            <div className="w-[1.5px] h-4 bg-gradient-to-b from-emerald-400/80 to-transparent mx-auto" />
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#00FF87] mx-auto -mt-0.5" />
+            <div className="w-[1px] h-3.5 bg-gradient-to-b from-white/40 to-transparent mx-auto" />
+            <div className="w-1 h-1 rounded-full bg-white/60 mx-auto -mt-0.5" />
           </div>
 
-          {/* Bottom Coordinates & Location Bar */}
-          <div className="relative z-20 w-full flex items-center justify-between pt-3 border-t border-white/20 text-[10px] font-sans font-bold text-white/90 uppercase tracking-widest drop-shadow-[0_1px_8px_rgba(0,0,0,0.85)]">
-            <span>KOLKATA // LAT 22.5726° N</span>
-            <span className="text-emerald-300">TERRACE ONLINE</span>
-          </div>
-        </section>
+          {/* 4. Monumental Identity Section with Understated Wireframe & Stark Typography */}
+          <div
+            ref={mobileIdentityRef}
+            className="absolute inset-0 z-20 flex flex-col justify-between pt-24 pb-8 px-6 text-center will-change-[transform,opacity,filter] pointer-events-none opacity-0"
+          >
+            {/* Background Understated 3D Mathematical Wireframe Matrix */}
+            <AnimatedWireframeMatrix />
 
-        {/* SCENE 2: MONUMENTAL IDENTITY WITH CONTINUOUS 3D WIREFRAME MATRIX */}
-        <section
-          id="monument-identity"
-          className="relative min-h-[100svh] w-full flex flex-col justify-center items-center text-center px-4 py-16 bg-[#070A11] select-none overflow-hidden"
-        >
-          {/* Continuous 60FPS 3D Wireframe Polyhedron & Horizon Terrain Matrix */}
-          <AnimatedWireframeMatrix />
+            {/* Top spacer */}
+            <div />
 
-          {/* Foreground Identity Lockup */}
-          <div className="relative z-10 w-full max-w-lg mx-auto flex flex-col items-center">
-            {/* Institutional Eyebrow */}
-            <div className="inline-flex items-center gap-2 text-[10px] font-sans font-bold uppercase tracking-wider text-emerald-300 mb-4 px-3.5 py-1.5 rounded-full bg-[#0F172A]/85 border border-emerald-500/30 backdrop-blur-md shadow-lg">
-              <Sparkles size={12} className="text-[#10B981]" />
-              <span>Netaji Subhash Engineering College (2024–2028)</span>
-            </div>
+            {/* Centered Identity Lockup (A24 / Balenciaga High-Fashion Minimal) */}
+            <div className="relative z-10 w-full max-w-sm mx-auto flex flex-col items-center my-auto">
+              {/* Minimalist Hairline Eyebrow */}
+              <div className="inline-flex items-center gap-2 text-[9px] font-sans font-bold uppercase tracking-[0.24em] text-slate-300 mb-5 px-3.5 py-1 rounded-full border border-white/15 bg-black/50 backdrop-blur-md">
+                <Sparkles size={10} className="text-white/80" />
+                <span>NSEC (2024–2028)</span>
+              </div>
 
-            {/* Cinematic Grand Headline in BN Riley */}
-            <h1 className="font-riley text-5xl xs:text-6xl text-white tracking-tight uppercase leading-[0.92] mb-4 drop-shadow-[0_8px_36px_rgba(0,0,0,0.95)] select-none">
-              Soham <br />
-              <span className="bg-gradient-to-r from-white via-slate-100 to-emerald-300 bg-clip-text text-transparent drop-shadow-[0_0_35px_rgba(16,185,129,0.45)]">
-                Roychoudhury
-              </span>
-            </h1>
-
-            {/* Editorial Subtitle in Athelas Italic */}
-            <p className="font-athelas italic font-normal text-sm xs:text-base text-slate-300 leading-relaxed mb-8 max-w-md drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] px-2">
-              Artificial Intelligence &amp; Machine Learning · Frontend Architect · Digital Operations
-            </p>
-
-            {/* Action Buttons */}
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              <button
-                onClick={onExplore}
-                className="group inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white text-[#070A11] hover:bg-[#10B981] hover:text-white transition-all duration-300 font-sans font-black text-xs uppercase tracking-wider cursor-pointer shadow-xl active:scale-95"
+              {/* Cinematic Grand Headline in BN Riley (Pure Stark White) */}
+              <h1
+                ref={mobileTitleRef}
+                className="font-riley text-5xl xs:text-6xl text-white tracking-tight uppercase leading-[0.92] mb-5 select-none drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]"
               >
-                <span>Explore Work</span>
-                <ArrowDown size={14} className="group-hover:translate-y-0.5 transition-transform" />
-              </button>
+                Soham <br />
+                <span className="text-white">
+                  Roychoudhury
+                </span>
+              </h1>
 
-              <button
-                onClick={handleConnectClick}
-                className="group inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[#0B0F17]/90 hover:bg-[#0B0F17] text-white border border-white/25 transition-all duration-300 font-sans font-black text-xs uppercase tracking-wider cursor-pointer shadow-xl backdrop-blur-md active:scale-95"
-              >
-                <span>Get In Touch</span>
-                <ArrowUpRight size={14} className="text-[#10B981] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-              </button>
+              {/* Editorial Subtitle in Athelas Italic */}
+              <p className="font-athelas italic font-normal text-sm xs:text-base text-slate-300 leading-relaxed mb-8 max-w-xs px-1">
+                Artificial Intelligence &amp; Machine Learning · Frontend Architect · Digital Operations
+              </p>
+
+              {/* Minimalist High-Contrast Action Controls */}
+              <div className="flex items-center justify-center gap-3 w-full max-w-xs">
+                <button
+                  onClick={onExplore}
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-white text-black hover:bg-slate-200 transition-all duration-200 font-sans font-bold text-xs uppercase tracking-wider cursor-pointer shadow-lg active:scale-95"
+                >
+                  <span>Explore</span>
+                  <ArrowDown size={13} />
+                </button>
+
+                <button
+                  onClick={handleConnectClick}
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-black hover:bg-white/10 text-white border border-white/20 transition-all duration-200 font-sans font-bold text-xs uppercase tracking-wider cursor-pointer backdrop-blur-md active:scale-95"
+                >
+                  <span>Contact</span>
+                  <ArrowUpRight size={13} className="text-slate-300" />
+                </button>
+              </div>
+            </div>
+
+            {/* Bottom Coordinates & Location Bar */}
+            <div className="relative z-10 w-full flex items-center justify-between pt-3 border-t border-white/10 text-[9px] font-sans font-bold text-slate-400 uppercase tracking-widest">
+              <span>KOLKATA // LAT 22.5726° N</span>
+              <span>ARCHIVE 2026</span>
             </div>
           </div>
-        </section>
+
+          {/* Initial Bottom Bar on Terrace (Fades on early scroll) */}
+          <div
+            ref={mobileTerraceFooterRef}
+            className="relative z-10 w-full flex items-center justify-between p-4 border-t border-white/15 text-[9px] font-sans font-bold text-white/80 uppercase tracking-widest will-change-[opacity]"
+          >
+            <span>KOLKATA // 22.5726° N</span>
+            <span>TERRACE</span>
+          </div>
+        </div>
       </div>
 
       {/* ========================================================================= */}

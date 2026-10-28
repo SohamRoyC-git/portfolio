@@ -106,10 +106,10 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
         paddingLeft: isMobile ? "16px" : "24px",
         paddingRight: isMobile ? "16px" : "24px",
         borderRadius: "9999px",
-        backgroundColor: isMobile ? "rgba(11, 15, 23, 0.92)" : "rgba(255, 255, 255, 0.86)",
-        borderColor: isMobile ? "rgba(255, 255, 255, 0.12)" : "rgba(15, 23, 42, 0.08)",
+        backgroundColor: isMobile ? "rgba(0, 0, 0, 0.94)" : "rgba(255, 255, 255, 0.86)",
+        borderColor: isMobile ? "rgba(255, 255, 255, 0.15)" : "rgba(15, 23, 42, 0.08)",
         boxShadow: isMobile
-          ? "0 16px 38px -6px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.15)"
+          ? "0 16px 38px -6px rgba(0, 0, 0, 0.9), inset 0 1px 1px rgba(255, 255, 255, 0.1)"
           : "0 16px 38px -6px rgba(15, 23, 42, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.85)",
         backdropFilter: "blur(20px)",
         duration: 0.48,
@@ -292,9 +292,9 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
         </div>
       </header>
 
-      {/* Mobile Drawer (Luxury Dark Themed) */}
+      {/* Mobile Drawer (Midnight Monolith Pure Black) */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 bg-[#070A11]/98 backdrop-blur-2xl lg:hidden flex flex-col justify-between p-6 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 bg-[#000000]/98 backdrop-blur-2xl lg:hidden flex flex-col justify-between p-6 animate-in fade-in duration-200">
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
             <div className="flex items-center gap-2 font-sans font-black text-xs text-white tracking-widest uppercase">
               <span className="w-2 h-2 rounded-full bg-[#10B981]" />

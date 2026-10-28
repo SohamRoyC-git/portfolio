@@ -52,7 +52,6 @@ export const AnimatedWireframeMatrix: React.FC = memo(() => {
           Math.pow(vertices[i][0] - vertices[j][0], 2) +
           Math.pow(vertices[i][1] - vertices[j][1], 2) +
           Math.pow(vertices[i][2] - vertices[j][2], 2);
-        // Golden ratio edge distance check (~1.05)
         if (d2 < 1.15) {
           edges.push([i, j]);
         }
@@ -76,43 +75,43 @@ export const AnimatedWireframeMatrix: React.FC = memo(() => {
       animId = requestAnimationFrame(render);
       if (!isVisible) return;
 
-      time += 0.016;
-      rotX += 0.007;
-      rotY += 0.009;
-      rotZ += 0.004;
+      time += 0.014;
+      rotX += 0.005;
+      rotY += 0.007;
+      rotZ += 0.003;
 
       ctx.clearRect(0, 0, width, height);
 
       const cx = width / 2;
       const cy = height / 2;
       const isMobile = width < 768;
-      const scale = isMobile ? Math.min(width * 0.42, 160) : Math.min(width * 0.26, 210);
+      const scale = isMobile ? Math.min(width * 0.38, 145) : Math.min(width * 0.24, 195);
 
       // --- 1. CONTINUOUS ROTATING PERSPECTIVE GRID TERRAIN (Horizon wave) ---
       ctx.save();
-      ctx.strokeStyle = "rgba(16, 185, 129, 0.14)";
-      ctx.lineWidth = 1;
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.035)";
+      ctx.lineWidth = 0.8;
 
-      const gridLines = 14;
-      const horizonY = cy + (isMobile ? 70 : 90);
+      const gridLines = 12;
+      const horizonY = cy + (isMobile ? 65 : 85);
       const gridWidth = width * 1.2;
 
       // Perspective vertical rays
       for (let i = -gridLines; i <= gridLines; i++) {
         const xStart = cx + i * (gridWidth / (gridLines * 2));
         ctx.beginPath();
-        ctx.moveTo(cx, horizonY - 40);
+        ctx.moveTo(cx, horizonY - 35);
         ctx.lineTo(xStart * 1.35, height);
         ctx.stroke();
       }
 
-      // Horizontal moving wave lines
-      const offset = (time * 24) % 28;
-      for (let y = horizonY - 20; y < height; y += 22) {
+      // Horizontal moving wave lines (whisper quiet)
+      const offset = (time * 18) % 24;
+      for (let y = horizonY - 15; y < height; y += 20) {
         const currentY = y + offset;
         if (currentY > height) continue;
-        const progress = (currentY - (horizonY - 20)) / (height - horizonY + 20);
-        ctx.strokeStyle = `rgba(0, 255, 135, ${progress * 0.18})`;
+        const progress = (currentY - (horizonY - 15)) / (height - horizonY + 15);
+        ctx.strokeStyle = `rgba(255, 255, 255, ${(progress * 0.06).toFixed(3)})`;
         ctx.beginPath();
         ctx.moveTo(0, currentY);
         ctx.lineTo(width, currentY);
@@ -148,49 +147,41 @@ export const AnimatedWireframeMatrix: React.FC = memo(() => {
 
         return {
           x: cx + x3 * scale * fov,
-          y: cy + y3 * scale * fov - (isMobile ? 15 : 0),
+          y: cy + y3 * scale * fov - (isMobile ? 12 : 0),
           z: z3,
           fov,
         };
       });
 
-      // Render wireframe edges with luminous gradient stroke
+      // Render wireframe edges with delicate platinum & whisper-mint stroke
       ctx.save();
       for (const [i, j] of edges) {
         const p1 = projected[i];
         const p2 = projected[j];
 
         const avgZ = (p1.z + p2.z) / 2;
-        const depthAlpha = Math.max(0.12, Math.min(0.65, (avgZ + 1.2) / 2.2));
+        const depthAlpha = Math.max(0.08, Math.min(0.42, (avgZ + 1.2) / 2.4));
 
         const grad = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
-        grad.addColorStop(0, `rgba(0, 255, 135, ${depthAlpha * 0.85})`);
-        grad.addColorStop(0.5, `rgba(56, 189, 248, ${depthAlpha * 0.75})`);
-        grad.addColorStop(1, `rgba(16, 185, 129, ${depthAlpha * 0.85})`);
+        grad.addColorStop(0, `rgba(255, 255, 255, ${(depthAlpha * 0.75).toFixed(3)})`);
+        grad.addColorStop(0.5, `rgba(226, 232, 240, ${(depthAlpha * 0.55).toFixed(3)})`);
+        grad.addColorStop(1, `rgba(16, 185, 129, ${(depthAlpha * 0.35).toFixed(3)})`);
 
         ctx.strokeStyle = grad;
-        ctx.lineWidth = isMobile ? 1.2 : 1.6;
+        ctx.lineWidth = isMobile ? 0.8 : 1.1;
         ctx.beginPath();
         ctx.moveTo(p1.x, p1.y);
         ctx.lineTo(p2.x, p2.y);
         ctx.stroke();
       }
 
-      // Render glowing vertices
+      // Render minimalist pinhead vertices
       for (const p of projected) {
-        const alpha = Math.max(0.2, (p.z + 1.2) / 2.4);
-        ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.9})`;
+        const alpha = Math.max(0.15, (p.z + 1.2) / 2.4);
+        ctx.fillStyle = `rgba(255, 255, 255, ${(alpha * 0.8).toFixed(3)})`;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, (isMobile ? 2.2 : 3.0) * p.fov, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, (isMobile ? 1.4 : 1.8) * p.fov, 0, Math.PI * 2);
         ctx.fill();
-
-        // Pulsing emerald halo on front vertices
-        if (p.z > 0.2) {
-          ctx.fillStyle = `rgba(0, 255, 135, ${alpha * 0.4})`;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, (isMobile ? 5.5 : 7.0) * p.fov, 0, Math.PI * 2);
-          ctx.fill();
-        }
       }
       ctx.restore();
     };
@@ -209,12 +200,12 @@ export const AnimatedWireframeMatrix: React.FC = memo(() => {
       className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none"
       aria-hidden="true"
     >
-      {/* Ambient Radial Vignette behind wireframe */}
+      {/* Subtle architectural vignette */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.08) 0%, rgba(0, 255, 135, 0.03) 45%, transparent 75%)",
+            "radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.02) 0%, transparent 65%)",
         }}
       />
       <canvas ref={canvasRef} className="w-full h-full block will-change-transform" />

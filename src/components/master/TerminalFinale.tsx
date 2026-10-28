@@ -55,7 +55,7 @@ export const TerminalFinale: React.FC = memo(() => {
         {/* Email Monolith */}
         <div
           onClick={handleCopyEmail}
-          className="p-6 sm:p-8 rounded-3xl bg-white/75 max-md:bg-[#0B0F17]/90 backdrop-blur-xl border border-slate-200/80 max-md:border-white/10 hover:border-[#10B981]/60 transition-all duration-300 shadow-xs cursor-pointer group flex flex-col justify-between"
+          className="p-6 sm:p-8 rounded-3xl bg-white/75 max-md:bg-[#09090B] backdrop-blur-xl border border-slate-200/80 max-md:border-white/10 hover:border-[#10B981]/60 transition-all duration-300 shadow-xs cursor-pointer group flex flex-col justify-between"
         >
           <div>
             <div className="flex items-center justify-between mb-4 sm:mb-6">
@@ -84,7 +84,7 @@ export const TerminalFinale: React.FC = memo(() => {
         {/* Phone Monolith */}
         <a
           href={`tel:${phone.replace(/\s+/g, "")}`}
-          className="p-6 sm:p-8 rounded-3xl bg-white/75 max-md:bg-[#0B0F17]/90 backdrop-blur-xl border border-slate-200/80 max-md:border-white/10 hover:border-[#10B981]/60 transition-all duration-300 shadow-xs group flex flex-col justify-between cursor-pointer"
+          className="p-6 sm:p-8 rounded-3xl bg-white/75 max-md:bg-[#09090B] backdrop-blur-xl border border-slate-200/80 max-md:border-white/10 hover:border-[#10B981]/60 transition-all duration-300 shadow-xs group flex flex-col justify-between cursor-pointer"
         >
           <div>
             <div className="flex items-center justify-between mb-4 sm:mb-6">
@@ -102,7 +102,7 @@ export const TerminalFinale: React.FC = memo(() => {
         </a>
 
         {/* Location Monolith */}
-        <div className="p-6 sm:p-8 rounded-3xl bg-white/75 max-md:bg-[#0B0F17]/90 backdrop-blur-xl border border-slate-200/80 max-md:border-white/10 shadow-xs flex flex-col justify-between">
+        <div className="p-6 sm:p-8 rounded-3xl bg-white/75 max-md:bg-[#09090B] backdrop-blur-xl border border-slate-200/80 max-md:border-white/10 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4 sm:mb-6">
               <span className="font-sans font-black text-[10px] sm:text-xs text-slate-400 uppercase tracking-widest">LOCATION</span>

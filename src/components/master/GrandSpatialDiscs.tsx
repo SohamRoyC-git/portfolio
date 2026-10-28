@@ -414,35 +414,32 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                     </div>
 
                     {/* Headline */}
-                    <h3 className="font-sans font-black text-2xl xs:text-3xl sm:text-4xl text-[#0F172A] tracking-tight leading-[1.05] mb-2">
+                    <h3 className="font-sans font-black text-2xl sm:text-3xl lg:text-4xl text-[#0F172A] tracking-tight leading-[1.08] mb-2.5">
                       {project.title}
                     </h3>
 
-                    {/* Editorial Summary in Apple Garamond Light Italic */}
-                    <p className="font-serif italic font-light text-sm sm:text-base text-slate-700 leading-relaxed mb-3 sm:mb-4 line-clamp-3 sm:line-clamp-none">
+                    {/* Editorial Summary in Apple Garamond Light Italic - Concise 2-line brief */}
+                    <p className="font-serif italic font-light text-sm sm:text-base text-slate-700 leading-relaxed mb-3.5 line-clamp-2 sm:line-clamp-3">
                       {project.summary}
                     </p>
 
-                    {/* Metrics Grid */}
-                    <div className="grid grid-cols-3 gap-2 sm:gap-3 py-2.5 sm:py-3 px-3 sm:px-4 rounded-2xl bg-white/70 border border-slate-200/70 mb-3 sm:mb-4 shadow-sm">
-                      {project.metrics.map((m, i) => (
-                        <div key={i} className="text-left">
-                          <div className="font-sans font-black text-[9px] sm:text-[10px] text-slate-400 uppercase tracking-wider mb-0.5 truncate">
-                            {m.label}
-                          </div>
-                          <div className="font-sans font-black text-xs sm:text-sm text-[#0F172A] truncate">
-                            {m.value}
-                          </div>
-                        </div>
-                      ))}
+                    {/* Curated High-Impact System Benchmarks (Clean horizontal badge row, zero visual clutter) */}
+                    <div className="flex flex-wrap items-center gap-2 mb-3.5">
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[#059669] font-sans font-black text-[10px] sm:text-[11px] uppercase tracking-wider shadow-xs">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
+                        <span>{project.metrics[0].label}: {project.metrics[0].value}</span>
+                      </div>
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 border border-slate-200/90 text-slate-700 font-sans font-black text-[10px] sm:text-[11px] uppercase tracking-wider shadow-xs">
+                        <span>{project.metrics[1].label}: {project.metrics[1].value}</span>
+                      </div>
                     </div>
 
-                    {/* Tech Stack Pills */}
+                    {/* Essential Tech Stack */}
                     <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4">
-                      {project.stack.map((tech) => (
+                      {project.stack.slice(0, 4).map((tech) => (
                         <span
                           key={tech}
-                          className="px-2.5 py-1 rounded-lg bg-slate-100 font-sans font-black text-[10px] sm:text-[11px] text-slate-600 border border-slate-200/60"
+                          className="px-2.5 py-1 rounded-lg bg-slate-100 font-sans font-bold text-[10px] sm:text-[11px] text-slate-600 border border-slate-200/60"
                         >
                           {tech}
                         </span>
@@ -889,63 +886,66 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
         </div>
       )}
 
-      {/* Technical Architecture Dossier Modal */}
+      {/* Technical Architecture Dossier Modal - Zero text clipping with flex scroll bounds */}
       {isDossierOpen && selectedDossier && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-fade-in"
           onClick={() => setIsDossierOpen(false)}
         >
           <div
-            className="w-full max-w-2xl bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-2xl relative"
+            className="w-full max-w-2xl max-h-[85vh] bg-white rounded-[2rem] p-5 sm:p-8 border border-slate-200 shadow-2xl relative flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4 shrink-0">
               <div className="flex items-center gap-3">
-                <div className="h-10 px-2 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center justify-center">
+                <div className="h-12 w-12 px-2 rounded-xl bg-white shadow-sm border border-slate-200 flex items-center justify-center shrink-0">
                   <Image
                     src={selectedDossier.logo}
                     alt={selectedDossier.client}
-                    width={70}
-                    height={30}
-                    className="object-contain max-h-7 w-auto"
+                    width={44}
+                    height={44}
+                    className="object-contain max-h-9 w-auto"
                   />
                 </div>
                 <div>
-                  <span className="font-sans font-black text-xs text-[#10B981] uppercase tracking-wider block">
+                  <span className="font-sans font-black text-[10px] text-[#10B981] uppercase tracking-wider block">
                     {selectedDossier.catalogueNo}
                   </span>
-                  <h4 className="font-sans font-black text-xl text-[#0F172A]">
+                  <h4 className="font-sans font-black text-lg sm:text-xl text-[#0F172A]">
                     {selectedDossier.title}
                   </h4>
                 </div>
               </div>
               <button
                 onClick={() => setIsDossierOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-[#0F172A] hover:bg-slate-200 flex items-center justify-center font-bold text-sm transition-colors"
+                className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-[#0F172A] hover:bg-slate-200 flex items-center justify-center transition-colors cursor-pointer"
+                aria-label="Close Dossier"
               >
-                ✕
+                <X size={16} />
               </button>
             </div>
 
-            <div className="space-y-4 text-left">
+            {/* Scrollable Modal Content (Guarantees zero text overflow) */}
+            <div className="space-y-4 text-left overflow-y-auto pr-2 flex-1 overscroll-contain">
               <div>
-                <h5 className="font-sans font-black text-xs text-slate-400 uppercase tracking-wider mb-1">
+                <h5 className="font-sans font-black text-[11px] text-slate-400 uppercase tracking-wider mb-1.5">
                   Executive Brief &amp; Architecture
                 </h5>
-                <p className="font-serif italic font-light text-slate-700 leading-relaxed text-sm sm:text-base">
+                <p className="font-serif italic font-light text-slate-700 leading-relaxed text-sm sm:text-base break-words">
                   {selectedDossier.summary}
                 </p>
               </div>
 
               <div>
-                <h5 className="font-sans font-black text-xs text-slate-400 uppercase tracking-wider mb-2">
+                <h5 className="font-sans font-black text-[11px] text-slate-400 uppercase tracking-wider mb-2">
                   System Benchmarks
                 </h5>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                   {selectedDossier.metrics.map((m, i) => (
                     <div
                       key={i}
-                      className="p-3 rounded-2xl bg-slate-50 border border-slate-200/60"
+                      className="p-3 rounded-2xl bg-slate-50 border border-slate-200/70"
                     >
                       <div className="font-sans font-black text-[9px] text-slate-400 uppercase mb-0.5">
                         {m.label}
@@ -959,14 +959,14 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
               </div>
 
               <div>
-                <h5 className="font-sans font-black text-xs text-slate-400 uppercase tracking-wider mb-2">
-                  Engineering Stack
+                <h5 className="font-sans font-black text-[11px] text-slate-400 uppercase tracking-wider mb-2">
+                  Production Engineering Stack
                 </h5>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {selectedDossier.stack.map((t) => (
                     <span
                       key={t}
-                      className="px-3 py-1 rounded-xl bg-slate-100 text-slate-700 font-sans font-black text-xs border border-slate-200"
+                      className="px-3 py-1 rounded-xl bg-slate-100 text-slate-700 font-sans font-black text-xs border border-slate-200/80"
                     >
                       {t}
                     </span>
@@ -975,14 +975,15 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
               </div>
             </div>
 
-            <div className="mt-8 pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+            {/* Modal Footer */}
+            <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-end gap-3 shrink-0">
               <a
                 href={selectedDossier.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#0F172A] text-white font-sans font-black text-xs uppercase tracking-wider hover:bg-[#10B981] transition-colors"
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#0F172A] text-white font-sans font-black text-xs uppercase tracking-wider hover:bg-[#10B981] transition-colors shadow-sm"
               >
-                <span>Launch Deployment</span>
+                <span>Launch Live Site</span>
                 <ExternalLink size={13} />
               </a>
             </div>

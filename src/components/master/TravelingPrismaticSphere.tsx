@@ -456,14 +456,13 @@ export const TravelingPrismaticSphere: React.FC = () => {
       ctx.arc(0, 0, r * 1.7, 0, Math.PI * 2);
       ctx.fill();
 
-      // 2. Base 3D Volumetric Greenish Gradient Sphere (Always pure emerald)
-      const sphereGrad = ctx.createRadialGradient(-r * 0.28, -r * 0.28, r * 0.04, 0, 0, r);
-      sphereGrad.addColorStop(0, "rgba(255, 255, 255, 0.98)");
-      sphereGrad.addColorStop(0.18, "rgba(209, 250, 229, 0.92)");
-      sphereGrad.addColorStop(0.48, "rgba(52, 211, 153, 0.52)");
-      sphereGrad.addColorStop(0.75, "rgba(16, 185, 129, 0.36)");
-      sphereGrad.addColorStop(0.95, "rgba(5, 150, 105, 0.18)");
-      sphereGrad.addColorStop(1, "rgba(16, 185, 129, 0.02)");
+      // 2. Base 3D Volumetric Jade / Sea-Glass Crystal Orb (Frosted jade, NO pure white hotspot, zero black spots on inversion)
+      const sphereGrad = ctx.createRadialGradient(-r * 0.15, -r * 0.15, r * 0.08, 0, 0, r);
+      sphereGrad.addColorStop(0, "rgba(110, 231, 183, 0.86)"); // Luminous mint (#6EE7B7) - inverts to cosmic violet
+      sphereGrad.addColorStop(0.32, "rgba(52, 211, 153, 0.70)"); // Vibrant spring emerald (#34D399)
+      sphereGrad.addColorStop(0.68, "rgba(16, 185, 129, 0.48)"); // Core emerald (#10B981)
+      sphereGrad.addColorStop(0.92, "rgba(5, 150, 105, 0.28)"); // Deep jade emerald (#059669)
+      sphereGrad.addColorStop(1, "rgba(4, 120, 87, 0.05)");
 
       ctx.fillStyle = sphereGrad;
       ctx.beginPath();

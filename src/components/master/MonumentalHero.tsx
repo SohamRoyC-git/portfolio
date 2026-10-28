@@ -137,24 +137,24 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         {/* Left Column (Open & Uncluttered so the pixel art animation shines through) */}
         <div className="hidden lg:block lg:col-span-6 xl:col-span-7 pointer-events-none" />
 
-        {/* Right Column: Sleek, Decluttered, Cinematic Typography */}
-        <div className="col-span-12 lg:col-span-6 xl:col-span-5 flex flex-col justify-center text-left bg-white/45 lg:bg-white/60 backdrop-blur-md p-6 sm:p-8 rounded-3xl border border-white/85 shadow-[0_8px_32px_rgba(15,23,42,0.06)]">
+        {/* Right Column: Direct Cinematic Typography (No Card Wrapper, Pure Film Title Look) */}
+        <div className="col-span-12 lg:col-span-6 xl:col-span-5 flex flex-col justify-center text-left py-4">
           {/* Subtle Institutional Eyebrow */}
           <div className="inline-flex items-center gap-2 text-[10px] sm:text-xs font-sans font-black uppercase tracking-wider text-[#059669] mb-3">
             <Sparkles size={13} className="text-[#10B981]" />
             <span>Netaji Subhash Engineering College (2024–2028)</span>
           </div>
 
-          {/* Cinematic Headline (Clean, elegant, film title typography) */}
-          <h1 className="font-sans font-black text-2xl xs:text-3xl sm:text-4xl lg:text-[2.65rem] text-[#0F172A] uppercase tracking-[0.05em] leading-[1.08] mb-3 drop-shadow-xs">
+          {/* Cinematic Headline sitting directly on the landscape */}
+          <h1 className="font-sans font-black text-3xl xs:text-4xl sm:text-5xl lg:text-[3.1rem] text-[#0F172A] uppercase tracking-[0.05em] leading-[1.05] mb-4 drop-shadow-[0_2px_14px_rgba(255,255,255,0.7)]">
             SOHAM <br />
             <span className="bg-gradient-to-r from-[#0F172A] via-slate-800 to-[#10B981] bg-clip-text text-transparent">
               ROYCHOUDHURY
             </span>
           </h1>
 
-          {/* Editorial Subtitle in Elegant Light Italic Serif */}
-          <p className="font-serif italic font-normal text-base sm:text-lg text-slate-800 leading-relaxed mb-6">
+          {/* Editorial Subtitle sitting directly on background */}
+          <p className="font-serif italic font-normal text-lg sm:text-xl text-slate-900 leading-relaxed mb-6 drop-shadow-[0_1px_8px_rgba(255,255,255,0.6)]">
             Artificial Intelligence &amp; Machine Learning · Frontend Architect · Digital Operations
           </p>
 

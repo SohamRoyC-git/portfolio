@@ -120,7 +120,7 @@ export default function Home() {
       {/* 3. Cohesive Spatial Storytelling Sequence */}
       <main className="relative z-10 flex flex-col">
         {/* Movement 00: Monumental Hero */}
-        <MonumentalHero onExplore={() => handleNavigate("monument-statement")} />
+        <MonumentalHero onExplore={() => handleNavigate("monument-statement")} onConnect={() => handleNavigate("monument-terminal")} />
 
         {/* Movement 01: Kinetic Pinned Statement & Credentials */}
         <KineticStatement />

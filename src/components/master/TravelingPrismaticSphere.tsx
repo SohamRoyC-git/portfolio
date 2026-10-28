@@ -306,17 +306,17 @@ export const TravelingPrismaticSphere: React.FC = memo(() => {
       let targetRadius = isMobile ? 75 : 135;
 
       if (p < 0.18) {
-        // Section 00 (Hero): Moves dynamically from LEFT (0.36) to RIGHT (0.64)
+        // Section 00 (Hero): Anchored in the cyber-pastoral sky right above the terrace desk!
         const t = p / 0.18;
-        const leftX = width * 0.36;
-        const rightX = width * 0.64;
-        targetX = leftX + (rightX - leftX) * t;
-        targetY = height * (0.42 + t * 0.08);
-        targetRadius = isMobile ? 75 : 135;
+        const startX = width * 0.73;
+        const endX = width * 0.68;
+        targetX = isMobile ? width * 0.50 : (startX + (endX - startX) * t);
+        targetY = isMobile ? height * 0.26 : (height * (0.35 + t * 0.08));
+        targetRadius = isMobile ? 65 : 120;
       } else if (p < 0.38) {
-        // Section 01 (Statement): Sweeps sharply back to the LEFT (0.24)
+        // Section 01 (Statement): Sweeps smoothly back to the LEFT (0.24)
         const t = (p - 0.18) / 0.20;
-        const startX = width * 0.64;
+        const startX = isMobile ? width * 0.50 : width * 0.68;
         const endX = width * 0.24;
         targetX = startX + (endX - startX) * Math.min(t, 1);
         targetY = height * 0.50;

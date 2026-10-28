@@ -17,7 +17,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
   // Mobile Refs
   const mobileContainerRef = useRef<HTMLDivElement | null>(null);
   const mobileVideoWrapperRef = useRef<HTMLDivElement | null>(null);
-  const irisCircleRef = useRef<SVGCircleElement | null>(null);
+  const irisOverlayRef = useRef<HTMLDivElement | null>(null);
   const laptopCueRef = useRef<HTMLDivElement | null>(null);
   const mobileIdentityRef = useRef<HTMLDivElement | null>(null);
   const mobileTitleRef = useRef<HTMLHeadingElement | null>(null);
@@ -35,23 +35,24 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
 
     // =========================================================================
     // MOBILE TIMELINE (< 768px):
-    // A24 / Midnight Monolith Cinematic Lens Iris & Optical De-blur Sequence
+    // 100% GPU-Composited Silky Smooth Lens Iris & Kinetic Materialization
     // =========================================================================
     mm.add("(max-width: 767px)", () => {
       if (!mobileContainerRef.current) return;
 
-      const initialRadius = Math.max(window.innerWidth, window.innerHeight) * 1.5;
-
-      // 1. Set Initial Visual States
-      if (irisCircleRef.current) {
-        irisCircleRef.current.setAttribute("r", initialRadius.toString());
+      // 1. Initial GPU-Composited States
+      if (irisOverlayRef.current) {
+        gsap.set(irisOverlayRef.current, {
+          scale: 1,
+          transformOrigin: "50% 50%",
+        });
       }
 
       if (mobileIdentityRef.current) {
         gsap.set(mobileIdentityRef.current, {
           opacity: 0,
-          scale: 0.94,
-          filter: "blur(20px)",
+          y: 35,
+          scale: 0.95,
           pointerEvents: "none",
         });
       }
@@ -72,18 +73,17 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         });
       }
 
-      // 3. Main Master Scroll Choreography (Lens Iris -> Pure Black -> De-blur Materialize)
-      const irisObj = { r: initialRadius };
+      // 3. Silky 1:1 Responsive Scrub Timeline (zero rubber-band lag, 120 FPS compositor)
       const masterTl = gsap.timeline({
         scrollTrigger: {
           trigger: mobileContainerRef.current,
           start: "top top",
           end: "bottom bottom",
-          scrub: 0.55,
+          scrub: 0.2, // Ultra-responsive tactile tracking with user touch momentum
           onUpdate: (self) => {
             if (mobileIdentityRef.current) {
               mobileIdentityRef.current.style.pointerEvents =
-                self.progress > 0.42 ? "auto" : "none";
+                self.progress > 0.45 ? "auto" : "none";
             }
           },
         },
@@ -116,19 +116,14 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         );
       }
 
-      // Phase 2 (0 -> 44%): Cinematic Lens Iris Aperture Closes Down into Pure Black (#000000)
-      if (irisCircleRef.current) {
+      // Phase 2 (0 -> 46%): 100% Hardware GPU-Accelerated Lens Iris Scale Down (Zero CPU/SVG repaint bottleneck)
+      if (irisOverlayRef.current) {
         masterTl.to(
-          irisObj,
+          irisOverlayRef.current,
           {
-            r: 0,
-            duration: 0.44,
+            scale: 0,
+            duration: 0.46,
             ease: "power2.inOut",
-            onUpdate: () => {
-              if (irisCircleRef.current) {
-                irisCircleRef.current.setAttribute("r", Math.max(0, irisObj.r).toString());
-              }
-            },
           },
           0
         );
@@ -138,23 +133,23 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         masterTl.to(
           mobileVideoWrapperRef.current,
           {
-            scale: 0.95,
-            opacity: 0.2,
-            duration: 0.44,
+            scale: 0.96,
+            opacity: 0,
+            duration: 0.46,
             ease: "power1.inOut",
           },
           0
         );
       }
 
-      // Phase 3 (38% -> 76%): Monumental Header materializes from the dark frame with optical de-blur
+      // Phase 3 (38% -> 76%): Monumental Header materializes cleanly with GPU opacity & translation
       if (mobileIdentityRef.current) {
         masterTl.to(
           mobileIdentityRef.current,
           {
             opacity: 1,
+            y: 0,
             scale: 1,
-            filter: "blur(0px)",
             duration: 0.42,
             ease: "power2.out",
           },
@@ -162,7 +157,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         );
       }
 
-      // Phase 4 (76% -> 100%): Luxury hold period before unpinning into Movement 01
+      // Phase 4 (76% -> 100%): Luxury hold period before unpinning smoothly into Movement 01
       masterTl.to({}, { duration: 0.24 });
 
       return () => {
@@ -230,33 +225,20 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             </video>
           </div>
 
-          {/* 2. Cinematic Lens Iris / Eclipse Dissolve Mask (Closes in to #000000) */}
-          <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden">
-            <svg className="w-full h-full" preserveAspectRatio="none">
-              <defs>
-                <filter id="lens-iris-blur">
-                  <feGaussianBlur stdDeviation="34" />
-                </filter>
-                <mask id="lens-iris-mask">
-                  <rect width="100%" height="100%" fill="white" />
-                  <circle
-                    ref={irisCircleRef}
-                    cx="56%"
-                    cy="52%"
-                    r="1200"
-                    fill="black"
-                    filter="url(#lens-iris-blur)"
-                  />
-                </mask>
-              </defs>
-              <rect
-                width="100%"
-                height="100%"
-                fill="#000000"
-                mask="url(#lens-iris-mask)"
-              />
-            </svg>
-          </div>
+          {/* 2. 100% GPU-Composited Photographic Lens Iris / Eclipse Dissolve Layer */}
+          <div
+            ref={irisOverlayRef}
+            className="absolute pointer-events-none z-10 will-change-transform"
+            style={{
+              left: "56%",
+              top: "52%",
+              width: "360vmax",
+              height: "360vmax",
+              transform: "translate3d(-50%, -50%, 0) scale(1)",
+              background:
+                "radial-gradient(circle at 50% 50%, transparent 0%, transparent 20%, rgba(0,0,0,0.45) 28%, rgba(0,0,0,0.92) 38%, #000000 48%, #000000 100%)",
+            }}
+          />
 
           {/* 3. Understated Editorial Swiss Laptop Micro-Cue (Anchored above laptop) */}
           <div
@@ -286,7 +268,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
           {/* 4. Monumental Identity Section with Understated Wireframe & Stark Typography */}
           <div
             ref={mobileIdentityRef}
-            className="absolute inset-0 z-20 flex flex-col justify-between pt-24 pb-8 px-6 text-center will-change-[transform,opacity,filter] pointer-events-none opacity-0"
+            className="absolute inset-0 z-20 flex flex-col justify-between pt-24 pb-8 px-6 text-center will-change-[transform,opacity] pointer-events-none opacity-0"
           >
             {/* Background Understated 3D Mathematical Wireframe Matrix */}
             <AnimatedWireframeMatrix />

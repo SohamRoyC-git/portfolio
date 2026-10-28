@@ -18,51 +18,83 @@ export const SilkyFluidBackdrop: React.FC = memo(() => {
 
     // =========================================================================
     // MOBILE STORYTELLING CHROMATIC TRANSITIONS (< 768px):
-    // Smooth temperature shifts per movement
+    // Slow, continuous scroll-scrubbed temperature shifts across sections
     // =========================================================================
     mm.add("(max-width: 767px)", () => {
-      const hueObj = { val: 0 };
-
-      const setHue = (targetHue: number) => {
-        gsap.to(hueObj, {
-          val: targetHue,
-          duration: 1.1,
-          ease: "power2.out",
-          overwrite: "auto",
-          onUpdate: () => {
-            if (mobileBgWrapperRef.current) {
-              mobileBgWrapperRef.current.style.filter = `hue-rotate(${hueObj.val.toFixed(1)}deg)`;
-            }
-          },
-        });
-      };
+      let currentHue = 0;
+      let targetHue = 0;
 
       const sections = [
         { id: "monument-hero", hue: 0 },
-        { id: "monument-statement", hue: 25 },
-        { id: "monument-exhibition", hue: 115 },
-        { id: "monument-matrix", hue: 180 },
-        { id: "monument-terminal", hue: -20 },
+        { id: "monument-statement", hue: 30 },
+        { id: "monument-exhibition", hue: 100 },
+        { id: "monument-matrix", hue: 170 },
+        { id: "monument-terminal", hue: 230 },
       ];
 
-      const triggers: ScrollTrigger[] = [];
+      // Measure section positions relative to viewport transition zones
+      const updateTargetHue = () => {
+        const vh = window.innerHeight;
+        // Start transition when next section reaches 85% of viewport height
+        // Complete transition when next section reaches 15% of viewport height
+        const startY = vh * 0.85;
+        const endY = vh * 0.15;
+        const distance = startY - endY;
 
-      sections.forEach((sec) => {
-        const el = document.getElementById(sec.id);
-        if (!el) return;
+        let computedHue = sections[0].hue;
 
-        const st = ScrollTrigger.create({
-          trigger: el,
-          start: "top 60%",
-          end: "bottom 40%",
-          onEnter: () => setHue(sec.hue),
-          onEnterBack: () => setHue(sec.hue),
-        });
-        triggers.push(st);
+        for (let i = 1; i < sections.length; i++) {
+          const el = document.getElementById(sections[i].id);
+          if (!el) continue;
+
+          const rect = el.getBoundingClientRect();
+
+          if (rect.top <= endY) {
+            // Next section is fully in active reading zone, inherit its hue
+            computedHue = sections[i].hue;
+          } else if (rect.top < startY) {
+            // Next section is in active transition zone: scrub slowly with scroll
+            const prevHue = computedHue;
+            const target = sections[i].hue;
+            const progress = (startY - rect.top) / distance;
+            // Smooth sine curve for natural fluid easing
+            const eased = (1 - Math.cos(progress * Math.PI)) / 2;
+            computedHue = prevHue + (target - prevHue) * eased;
+            break;
+          } else {
+            // Next section is still below transition zone, keep current computed hue
+            break;
+          }
+        }
+
+        targetHue = computedHue;
+      };
+
+      // Ticker for liquid inertia smoothing (chases targetHue smoothly at 60/120fps)
+      const tickerCallback = () => {
+        if (Math.abs(currentHue - targetHue) > 0.05) {
+          currentHue += (targetHue - currentHue) * 0.08;
+          if (mobileBgWrapperRef.current) {
+            mobileBgWrapperRef.current.style.filter = `hue-rotate(${currentHue.toFixed(1)}deg)`;
+          }
+        }
+      };
+
+      gsap.ticker.add(tickerCallback);
+
+      // Connect to ScrollTrigger update so it updates during all user scrolls and momentum
+      const st = ScrollTrigger.create({
+        start: 0,
+        end: "max",
+        onUpdate: updateTargetHue,
       });
 
+      // Initial measurement
+      updateTargetHue();
+
       return () => {
-        triggers.forEach((t) => t.kill());
+        st.kill();
+        gsap.ticker.remove(tickerCallback);
       };
     });
 

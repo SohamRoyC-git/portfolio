@@ -319,10 +319,11 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
 
   return (
     <section
-      id="work"
+      id="monument-exhibition"
       ref={sectionRef}
       className="relative w-full overflow-hidden z-10"
     >
+      <span id="work" className="sr-only" aria-hidden="true" />
       {/* Pinned Fullscreen Stage with Generous Top/Bottom Clearance */}
       <div
         ref={pinRef}
@@ -425,7 +426,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
 
                     {/* Curated High-Impact System Benchmarks (Clean horizontal badge row, zero visual clutter) */}
                     <div className="flex flex-wrap items-center gap-2 mb-3.5">
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[#059669] font-sans font-black text-[10px] sm:text-[11px] uppercase tracking-wider shadow-xs">
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 max-md:bg-white/10 border border-emerald-500/20 max-md:border-white/10 text-[#059669] max-md:text-emerald-400 font-sans font-black text-[10px] sm:text-[11px] uppercase tracking-wider shadow-xs">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
                         <span>{project.metrics[0].label}: {project.metrics[0].value}</span>
                       </div>
@@ -439,7 +440,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                       {project.stack.slice(0, 4).map((tech) => (
                         <span
                           key={tech}
-                          className="px-2.5 py-1 rounded-lg bg-slate-100 font-sans font-bold text-[10px] sm:text-[11px] text-slate-600 border border-slate-200/60"
+                          className="px-2.5 py-1 rounded-lg bg-slate-100 max-md:bg-white/5 font-sans font-bold text-[10px] sm:text-[11px] text-slate-600 max-md:text-slate-300 border border-slate-200/60 max-md:border-white/10"
                         >
                           {tech}
                         </span>
@@ -487,11 +488,11 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                       href={project.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group/showcase block w-full max-w-sm rounded-[2rem] bg-gradient-to-b from-white/95 to-emerald-50/40 border-2 border-white/95 p-4 sm:p-5 shadow-xl backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:border-[#10B981]/60 hover:shadow-2xl relative overflow-hidden"
+                      className="group/showcase block w-full max-w-sm rounded-[2rem] bg-gradient-to-b from-white/95 to-emerald-50/40 max-md:from-[#121318]/90 max-md:to-[#121318]/90 border-2 border-white/95 max-md:border-white/10 p-4 sm:p-5 shadow-xl backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:border-[#10B981]/60 hover:shadow-2xl relative overflow-hidden"
                     >
-                      {/* Signature Emerald Ambient Backlight */}
+                      {/* Signature Emerald Ambient Backlight (Desktop only; on mobile ambient glow is provided by the section backdrop) */}
                       <div
-                        className="absolute -top-12 -right-12 w-44 h-44 rounded-full pointer-events-none opacity-40 blur-2xl group-hover/showcase:opacity-70 transition-opacity duration-500"
+                        className="hidden md:block absolute -top-12 -right-12 w-44 h-44 rounded-full pointer-events-none opacity-40 blur-2xl group-hover/showcase:opacity-70 transition-opacity duration-500"
                         style={{ background: "radial-gradient(circle, rgba(16,185,129,0.8) 0%, transparent 70%)" }}
                       />
 
@@ -501,12 +502,12 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                           <span className="w-2.5 h-2.5 rounded-full bg-red-400/80" />
                           <span className="w-2.5 h-2.5 rounded-full bg-amber-400/80" />
                           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400/80" />
-                          <span className="ml-2 px-2.5 py-0.5 rounded-full bg-white/90 font-sans font-bold text-[10px] text-slate-600 border border-slate-200/80 flex items-center gap-1.5 shadow-xs">
+                          <span className="ml-2 px-2.5 py-0.5 rounded-full bg-white/90 max-md:bg-white/10 font-sans font-bold text-[10px] text-slate-600 max-md:text-slate-300 border border-slate-200/80 max-md:border-white/10 flex items-center gap-1.5 shadow-xs">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                             izieat.com
                           </span>
                         </div>
-                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[#059669] font-sans font-black text-[10px] uppercase tracking-wider">
+                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 max-md:bg-white/10 border border-emerald-500/20 max-md:border-white/10 text-[#059669] max-md:text-slate-200 font-sans font-black text-[10px] uppercase tracking-wider">
                           ACTIVE PROD
                         </span>
                       </div>
@@ -579,25 +580,25 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                       href={project.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group/showcase block w-full max-w-sm rounded-[2rem] bg-gradient-to-b from-white/95 to-red-50/40 border-2 border-white/95 p-4 sm:p-5 shadow-xl backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:border-red-500/60 hover:shadow-2xl relative overflow-hidden"
+                      className="group/showcase block w-full max-w-sm rounded-[2rem] bg-gradient-to-b from-white/95 to-red-50/40 max-md:from-[#121318]/90 max-md:to-[#121318]/90 border-2 border-white/95 max-md:border-white/10 p-4 sm:p-5 shadow-xl backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:border-red-500/60 hover:shadow-2xl relative overflow-hidden"
                     >
-                      {/* Signature Baltic Carmine Crimson Backlight */}
+                      {/* Signature Baltic Carmine Crimson Backlight (Desktop only) */}
                       <div
-                        className="absolute -top-12 -right-12 w-48 h-48 rounded-full pointer-events-none opacity-30 blur-2xl group-hover/showcase:opacity-60 transition-opacity duration-500"
+                        className="hidden md:block absolute -top-12 -right-12 w-48 h-48 rounded-full pointer-events-none opacity-30 blur-2xl group-hover/showcase:opacity-60 transition-opacity duration-500"
                         style={{ background: "radial-gradient(circle, rgba(185,28,28,0.7) 0%, transparent 70%)" }}
                       />
 
                       {/* Top Header: Federation Accreditation Tag */}
                       <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 mb-3.5 relative z-10">
                         <div className="flex items-center gap-2">
-                          <span className="px-2.5 py-0.5 rounded-full bg-red-600/10 border border-red-600/20 text-red-700 font-sans font-black text-[10px] uppercase tracking-wider">
+                          <span className="px-2.5 py-0.5 rounded-full bg-red-600/10 max-md:bg-white/10 border border-red-600/20 max-md:border-white/10 text-red-700 max-md:text-slate-200 font-sans font-black text-[10px] uppercase tracking-wider">
                             LV-FED // OFFICIAL
                           </span>
-                          <span className="font-sans font-bold text-[10px] text-slate-500">
+                          <span className="font-sans font-bold text-[10px] text-slate-500 max-md:text-slate-400">
                             Latvijas Kriketa Federācija
                           </span>
                         </div>
-                        <span className="flex items-center gap-1 font-sans font-black text-[10px] text-[#059669] px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                        <span className="flex items-center gap-1 font-sans font-black text-[10px] text-[#059669] max-md:text-emerald-400 px-2.5 py-0.5 rounded-full bg-emerald-500/10 max-md:bg-white/10 border border-emerald-500/20 max-md:border-white/10">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                           99.98% UPTIME
                         </span>
@@ -626,19 +627,19 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
 
                       {/* Telemetry Monoliths */}
                       <div className="space-y-2 mb-3.5 relative z-10">
-                        <div className="p-2.5 rounded-xl bg-white/80 border border-slate-200/80 flex items-center justify-between">
+                        <div className="p-2.5 rounded-xl bg-white/80 max-md:bg-white/5 border border-slate-200/80 max-md:border-white/10 flex items-center justify-between">
                           <span className="font-sans font-black text-[9px] text-slate-400 uppercase tracking-wider">
                             GOVERNANCE ENGINE
                           </span>
-                          <span className="font-sans font-black text-xs text-[#0F172A]">
+                          <span className="font-sans font-black text-xs text-[#0F172A] max-md:text-white">
                             EU Compliance &amp; Match Ingest
                           </span>
                         </div>
-                        <div className="p-2.5 rounded-xl bg-red-600/10 border border-red-600/20 flex items-center justify-between">
-                          <span className="font-sans font-black text-[9px] text-red-700 uppercase tracking-wider">
+                        <div className="p-2.5 rounded-xl bg-red-600/10 max-md:bg-white/5 border border-red-600/20 max-md:border-white/10 flex items-center justify-between">
+                          <span className="font-sans font-black text-[9px] text-red-700 max-md:text-slate-300 uppercase tracking-wider">
                             LIVE TELEMETRY
                           </span>
-                          <span className="font-sans font-black text-xs text-red-700">
+                          <span className="font-sans font-black text-xs text-red-700 max-md:text-white">
                             100k+ Event Ingestion/mo
                           </span>
                         </div>
@@ -646,7 +647,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
 
                       {/* Dedicated Interactive Live Status Pill */}
                       <div className="relative group/pill overflow-hidden rounded-full p-[1.5px] transition-all duration-300 relative z-10">
-                        <span className="absolute inset-0 bg-gradient-to-r from-red-500 via-[#10B981] to-red-500 opacity-0 group-hover/showcase:opacity-100 transition-opacity duration-300 animate-pulse" />
+                        <span className="absolute inset-0 bg-gradient-to-r from-red-500 via-[#10B981] to-red-500 max-md:from-white/20 max-md:via-white/40 max-md:to-white/20 opacity-0 group-hover/showcase:opacity-100 transition-opacity duration-300 animate-pulse" />
                         <div className="relative flex items-center justify-between gap-3 px-4 py-2.5 rounded-full bg-[#0F172A] text-white font-sans font-black text-[11px] sm:text-xs uppercase tracking-wider shadow-md group-hover/showcase:bg-[#0F172A]/90 transition-colors">
                           <span className="flex items-center gap-2">
                             <span className="relative flex h-2 w-2">
@@ -667,25 +668,25 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                       href={project.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group/showcase block w-full max-w-sm rounded-[2rem] bg-gradient-to-b from-white/95 to-amber-50/40 border-2 border-white/95 p-4 sm:p-5 shadow-xl backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:border-amber-500/60 hover:shadow-2xl relative overflow-hidden"
+                      className="group/showcase block w-full max-w-sm rounded-[2rem] bg-gradient-to-b from-white/95 to-amber-50/40 max-md:from-[#121318]/90 max-md:to-[#121318]/90 border-2 border-white/95 max-md:border-white/10 p-4 sm:p-5 shadow-xl backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:border-amber-500/60 hover:shadow-2xl relative overflow-hidden"
                     >
-                      {/* Signature Saffron Gold Ambient Backlight */}
+                      {/* Signature Saffron Gold Ambient Backlight (Desktop only) */}
                       <div
-                        className="absolute -top-12 -right-12 w-48 h-48 rounded-full pointer-events-none opacity-35 blur-2xl group-hover/showcase:opacity-65 transition-opacity duration-500"
+                        className="hidden md:block absolute -top-12 -right-12 w-48 h-48 rounded-full pointer-events-none opacity-35 blur-2xl group-hover/showcase:opacity-65 transition-opacity duration-500"
                         style={{ background: "radial-gradient(circle, rgba(245,158,11,0.7) 0%, transparent 70%)" }}
                       />
 
                       {/* Top Header: Bilateral Liaison Tag */}
                       <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 mb-3.5 relative z-10">
                         <div className="flex items-center gap-2">
-                          <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-700 font-sans font-black text-[10px] uppercase tracking-wider">
+                          <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 max-md:bg-white/10 border border-amber-500/20 max-md:border-white/10 text-amber-700 max-md:text-slate-200 font-sans font-black text-[10px] uppercase tracking-wider">
                             IN-LV // DIPLOMATIC BRIDGE
                           </span>
-                          <span className="font-sans font-bold text-[10px] text-slate-500">
+                          <span className="font-sans font-bold text-[10px] text-slate-500 max-md:text-slate-400">
                             Indijas Centrs • Latvia
                           </span>
                         </div>
-                        <span className="font-sans font-black text-[10px] text-amber-700 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20">
+                        <span className="font-sans font-black text-[10px] text-amber-700 max-md:text-slate-200 px-2.5 py-0.5 rounded-full bg-amber-500/10 max-md:bg-white/10 border border-amber-500/20 max-md:border-white/10">
                           LV / EN DUAL
                         </span>
                       </div>
@@ -713,19 +714,19 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
 
                       {/* Telemetry Monoliths */}
                       <div className="space-y-2 mb-3.5 relative z-10">
-                        <div className="p-2.5 rounded-xl bg-white/80 border border-slate-200/80 flex items-center justify-between">
+                        <div className="p-2.5 rounded-xl bg-white/80 max-md:bg-white/5 border border-slate-200/80 max-md:border-white/10 flex items-center justify-between">
                           <span className="font-sans font-black text-[9px] text-slate-400 uppercase tracking-wider">
                             CONSULAR SCHEDULING
                           </span>
-                          <span className="font-sans font-black text-xs text-[#0F172A]">
+                          <span className="font-sans font-black text-xs text-[#0F172A] max-md:text-white">
                             Academic &amp; Event Dispatch
                           </span>
                         </div>
-                        <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-between">
-                          <span className="font-sans font-black text-[9px] text-amber-700 uppercase tracking-wider">
+                        <div className="p-2.5 rounded-xl bg-amber-500/10 max-md:bg-white/5 border border-amber-500/20 max-md:border-white/10 flex items-center justify-between">
+                          <span className="font-sans font-black text-[9px] text-amber-700 max-md:text-slate-300 uppercase tracking-wider">
                             EDGE LATENCY
                           </span>
-                          <span className="font-sans font-black text-xs text-amber-700">
+                          <span className="font-sans font-black text-xs text-amber-700 max-md:text-white">
                             &lt; 18ms Baltic Edge
                           </span>
                         </div>
@@ -733,7 +734,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
 
                       {/* Dedicated Interactive Live Status Pill */}
                       <div className="relative group/pill overflow-hidden rounded-full p-[1.5px] transition-all duration-300 relative z-10">
-                        <span className="absolute inset-0 bg-gradient-to-r from-amber-500 via-[#10B981] to-amber-500 opacity-0 group-hover/showcase:opacity-100 transition-opacity duration-300 animate-pulse" />
+                        <span className="absolute inset-0 bg-gradient-to-r from-amber-500 via-[#10B981] to-amber-500 max-md:from-white/20 max-md:via-white/40 max-md:to-white/20 opacity-0 group-hover/showcase:opacity-100 transition-opacity duration-300 animate-pulse" />
                         <div className="relative flex items-center justify-between gap-3 px-4 py-2.5 rounded-full bg-[#0F172A] text-white font-sans font-black text-[11px] sm:text-xs uppercase tracking-wider shadow-md group-hover/showcase:bg-[#0F172A]/90 transition-colors">
                           <span className="flex items-center gap-2">
                             <span className="relative flex h-2 w-2">
@@ -754,25 +755,25 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                       href={project.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group/showcase block w-full max-w-sm rounded-[2rem] bg-gradient-to-b from-white/95 to-blue-50/40 border-2 border-white/95 p-4 sm:p-5 shadow-xl backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:border-blue-500/60 hover:shadow-2xl relative overflow-hidden"
+                      className="group/showcase block w-full max-w-sm rounded-[2rem] bg-gradient-to-b from-white/95 to-blue-50/40 max-md:from-[#121318]/90 max-md:to-[#121318]/90 border-2 border-white/95 max-md:border-white/10 p-4 sm:p-5 shadow-xl backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:border-blue-500/60 hover:shadow-2xl relative overflow-hidden"
                     >
-                      {/* Signature Enterprise Sapphire Ambient Backlight */}
+                      {/* Signature Enterprise Sapphire Ambient Backlight (Desktop only) */}
                       <div
-                        className="absolute -top-12 -right-12 w-48 h-48 rounded-full pointer-events-none opacity-35 blur-2xl group-hover/showcase:opacity-65 transition-opacity duration-500"
+                        className="hidden md:block absolute -top-12 -right-12 w-48 h-48 rounded-full pointer-events-none opacity-35 blur-2xl group-hover/showcase:opacity-65 transition-opacity duration-500"
                         style={{ background: "radial-gradient(circle, rgba(37,99,235,0.7) 0%, transparent 70%)" }}
                       />
 
                       {/* Top Header: Global Export Tag */}
                       <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 mb-3.5 relative z-10">
                         <div className="flex items-center gap-2">
-                          <span className="px-2.5 py-0.5 rounded-full bg-blue-600/10 border border-blue-600/20 text-blue-700 font-sans font-black text-[10px] uppercase tracking-wider">
+                          <span className="px-2.5 py-0.5 rounded-full bg-blue-600/10 max-md:bg-white/10 border border-blue-600/20 max-md:border-white/10 text-blue-700 max-md:text-slate-200 font-sans font-black text-[10px] uppercase tracking-wider">
                             GLOBAL-SUPPLY // AGRO
                           </span>
-                          <span className="font-sans font-bold text-[10px] text-slate-500">
+                          <span className="font-sans font-bold text-[10px] text-slate-500 max-md:text-slate-400">
                             Varti International Corp
                           </span>
                         </div>
-                        <span className="font-sans font-black text-[10px] text-blue-700 px-2.5 py-0.5 rounded-full bg-blue-600/10 border border-blue-600/20">
+                        <span className="font-sans font-black text-[10px] text-blue-700 max-md:text-slate-200 px-2.5 py-0.5 rounded-full bg-blue-600/10 max-md:bg-white/10 border border-blue-600/20 max-md:border-white/10">
                           INSTITUTIONAL
                         </span>
                       </div>
@@ -792,19 +793,19 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
 
                       {/* Telemetry Monoliths */}
                       <div className="space-y-2 mb-3.5 relative z-10">
-                        <div className="p-2.5 rounded-xl bg-white/80 border border-slate-200/80 flex items-center justify-between">
+                        <div className="p-2.5 rounded-xl bg-white/80 max-md:bg-white/5 border border-slate-200/80 max-md:border-white/10 flex items-center justify-between">
                           <span className="font-sans font-black text-[9px] text-slate-400 uppercase tracking-wider">
                             COMMODITY PIPELINE
                           </span>
-                          <span className="font-sans font-black text-xs text-[#0F172A]">
+                          <span className="font-sans font-black text-xs text-[#0F172A] max-md:text-white">
                             Multi-Currency Automated Settlement
                           </span>
                         </div>
-                        <div className="p-2.5 rounded-xl bg-blue-600/10 border border-blue-600/20 flex items-center justify-between">
-                          <span className="font-sans font-black text-[9px] text-blue-700 uppercase tracking-wider">
+                        <div className="p-2.5 rounded-xl bg-blue-600/10 max-md:bg-white/5 border border-blue-600/20 max-md:border-white/10 flex items-center justify-between">
+                          <span className="font-sans font-black text-[9px] text-blue-700 max-md:text-slate-300 uppercase tracking-wider">
                             BUYER VERIFICATION
                           </span>
-                          <span className="font-sans font-black text-xs text-blue-700">
+                          <span className="font-sans font-black text-xs text-blue-700 max-md:text-white">
                             Institutional Security Tier
                           </span>
                         </div>
@@ -812,7 +813,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
 
                       {/* Dedicated Interactive Live Status Pill */}
                       <div className="relative group/pill overflow-hidden rounded-full p-[1.5px] transition-all duration-300 relative z-10">
-                        <span className="absolute inset-0 bg-gradient-to-r from-blue-600 via-[#10B981] to-blue-600 opacity-0 group-hover/showcase:opacity-100 transition-opacity duration-300 animate-pulse" />
+                        <span className="absolute inset-0 bg-gradient-to-r from-blue-600 via-[#10B981] to-blue-600 max-md:from-white/20 max-md:via-white/40 max-md:to-white/20 opacity-0 group-hover/showcase:opacity-100 transition-opacity duration-300 animate-pulse" />
                         <div className="relative flex items-center justify-between gap-3 px-4 py-2.5 rounded-full bg-[#0F172A] text-white font-sans font-black text-[11px] sm:text-xs uppercase tracking-wider shadow-md group-hover/showcase:bg-[#0F172A]/90 transition-colors">
                           <span className="flex items-center gap-2">
                             <span className="relative flex h-2 w-2">

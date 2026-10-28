@@ -55,14 +55,14 @@ export const KineticStatement: React.FC = memo(() => {
         ref={textRef}
         className="font-serif italic font-light text-2xl xs:text-3xl sm:text-5xl md:text-6xl lg:text-7xl text-[#0F172A] tracking-tight leading-[1.2] sm:leading-[1.15] mb-12 sm:mb-20 max-w-5xl"
       >
-        "{statement.split(" ").map((word, i) => (
+        &ldquo;{statement.split(" ").map((word, i) => (
           <span
             key={i}
             className="kinetic-word inline-block mr-2 sm:mr-3 transition-colors duration-150 text-[#0F172A]"
           >
             {word}
           </span>
-        ))}"
+        ))}&rdquo;
       </h2>
 
       {/* 4 Clean Architectural Cards */}

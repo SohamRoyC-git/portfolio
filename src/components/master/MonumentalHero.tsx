@@ -96,9 +96,16 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
           <source src="/assets/Animate_pixel_art_environment_loop_03a9505a.mp4" type="video/mp4" />
         </video>
 
-        {/* Ambient Contrast Balance Vignettes for Razor-Sharp Whitish Text Readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-transparent to-black/35 pointer-events-none z-10" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-transparent pointer-events-none z-10" />
+        {/* Ambient Contrast Balance Vignettes for Razor-Sharp Centered Readability */}
+        <div className="absolute inset-0 bg-black/20 pointer-events-none z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-black/30 pointer-events-none z-10" />
+        <div
+          className="absolute inset-0 pointer-events-none z-10"
+          style={{
+            background:
+              "radial-gradient(ellipse 80% 65% at 50% 50%, rgba(0,0,0,0.48) 0%, rgba(0,0,0,0.15) 65%, transparent 100%)",
+          }}
+        />
 
         {/* Soft, Lowered Multi-Stop Bleed Gradient at the Very Bottom Edge */}
         <div className="absolute inset-x-0 bottom-0 h-32 sm:h-44 bg-gradient-to-t from-[#FAFAF9] via-[#FAFAF9]/85 to-transparent pointer-events-none z-10" />
@@ -131,50 +138,44 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         </div>
       </div>
 
-      {/* Main Grid: Left side open for living pixel-art scene; Right side hosts cinematic text */}
-      <div className="relative z-20 my-auto w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center py-6 sm:py-10">
-        {/* Left Column (Open & Uncluttered so the pixel art animation shines through) */}
-        <div className="hidden lg:block lg:col-span-6 xl:col-span-7 pointer-events-none" />
+      {/* Centered Monumental Hero: Headline in BN Riley as the Grand Focal Highlight */}
+      <div className="relative z-20 my-auto w-full max-w-5xl mx-auto flex flex-col items-center justify-center text-center py-6 sm:py-10">
+        {/* Institutional Eyebrow */}
+        <div className="inline-flex items-center gap-2 text-[10px] sm:text-xs font-sans font-bold uppercase tracking-wider text-emerald-300 mb-4 sm:mb-6 px-4 py-1.5 rounded-full bg-black/45 border border-white/20 backdrop-blur-md shadow-lg">
+          <Sparkles size={13} className="text-[#10B981]" />
+          <span>Netaji Subhash Engineering College (2024–2028)</span>
+        </div>
 
-        {/* Right Column: Direct Cinematic Typography on Background (Whitish, 100% Readable) */}
-        <div className="col-span-12 lg:col-span-6 xl:col-span-5 flex flex-col justify-center text-left py-4">
-          {/* Subtle Institutional Eyebrow */}
-          <div className="inline-flex items-center gap-2 text-[10px] sm:text-xs font-sans font-bold uppercase tracking-wider text-emerald-300 mb-3 px-3.5 py-1.5 rounded-full bg-black/40 border border-white/20 backdrop-blur-md w-fit shadow-md">
-            <Sparkles size={13} className="text-[#10B981]" />
-            <span>Netaji Subhash Engineering College (2024–2028)</span>
-          </div>
+        {/* Cinematic Grand Headline in BN Riley (Monumental Focal Highlight) */}
+        <h1 className="font-riley text-5xl xs:text-6xl sm:text-7xl md:text-8xl lg:text-[6.8rem] xl:text-[8rem] text-white tracking-tight uppercase leading-[0.92] mb-5 sm:mb-6 drop-shadow-[0_6px_36px_rgba(0,0,0,0.95)]">
+          Soham <br />
+          <span className="bg-gradient-to-r from-white via-slate-100 to-emerald-200 bg-clip-text text-transparent drop-shadow-[0_0_40px_rgba(16,185,129,0.35)]">
+            Roychoudhury
+          </span>
+        </h1>
 
-          {/* Cinematic Headline in Optizither with Luminous Whitish Aesthetic */}
-          <h1 className="font-optizither text-4xl xs:text-5xl sm:text-6xl lg:text-[4.2rem] text-white tracking-[0.02em] leading-[1.08] mb-4 drop-shadow-[0_4px_24px_rgba(0,0,0,0.85)]">
-            Soham <br />
-            <span className="bg-gradient-to-r from-white via-slate-100 to-emerald-200 bg-clip-text text-transparent">
-              Roychoudhury
-            </span>
-          </h1>
+        {/* Editorial Subtitle in Athelas Italic (Centered & High Legibility) */}
+        <p className="font-athelas italic font-normal text-lg sm:text-2xl md:text-3xl text-slate-100 leading-relaxed mb-8 sm:mb-10 max-w-3xl drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]">
+          Artificial Intelligence &amp; Machine Learning · Frontend Architect · Digital Operations
+        </p>
 
-          {/* Editorial Subtitle in Athelas Italic (Whitish, High Legibility) */}
-          <p className="font-athelas italic font-normal text-lg sm:text-xl md:text-2xl text-slate-100 leading-relaxed mb-6 max-w-lg drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
-            Artificial Intelligence &amp; Machine Learning · Frontend Architect · Digital Operations
-          </p>
+        {/* Dual Action Controls (Centered) */}
+        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+          <button
+            onClick={onExplore}
+            className="group inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-white text-[#0F172A] hover:bg-[#10B981] hover:text-white transition-all duration-300 font-sans font-black text-xs sm:text-sm uppercase tracking-wider cursor-pointer shadow-xl active:scale-98"
+          >
+            <span>Explore Work</span>
+            <ArrowDown size={14} className="group-hover:translate-y-0.5 transition-transform" />
+          </button>
 
-          {/* Dual Action Controls */}
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              onClick={onExplore}
-              className="group inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-white text-[#0F172A] hover:bg-[#10B981] hover:text-white transition-all duration-300 font-sans font-black text-[11px] sm:text-xs uppercase tracking-wider cursor-pointer shadow-lg active:scale-98"
-            >
-              <span>Explore Work</span>
-              <ArrowDown size={13} className="group-hover:translate-y-0.5 transition-transform" />
-            </button>
-
-            <button
-              onClick={handleConnectClick}
-              className="group inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-black/45 hover:bg-black/65 text-white border border-white/30 transition-all duration-300 font-sans font-black text-[11px] sm:text-xs uppercase tracking-wider cursor-pointer shadow-md backdrop-blur-md active:scale-98"
-            >
-              <span>Get In Touch</span>
-              <ArrowUpRight size={13} className="text-[#10B981] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-            </button>
-          </div>
+          <button
+            onClick={handleConnectClick}
+            className="group inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-black/50 hover:bg-black/75 text-white border border-white/30 transition-all duration-300 font-sans font-black text-xs sm:text-sm uppercase tracking-wider cursor-pointer shadow-xl backdrop-blur-md active:scale-98"
+          >
+            <span>Get In Touch</span>
+            <ArrowUpRight size={14} className="text-[#10B981] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          </button>
         </div>
       </div>
 

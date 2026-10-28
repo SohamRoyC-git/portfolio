@@ -1,5 +1,6 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import { Inter, Cormorant_Garamond } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
 // Strictly Font 1: Inter (Black 900 for bold headers/numbers, plus weights for structure)
@@ -19,6 +20,13 @@ const cormorantGaramond = Cormorant_Garamond({
   display: "swap",
 });
 
+// Hero Display Font: BN Riley
+const bnRiley = localFont({
+  src: "../../public/fonts/BNRiley.otf",
+  variable: "--font-riley",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Soham Roychoudhury — Software & Web Development | Digital Operations",
   description:
@@ -33,7 +41,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${cormorantGaramond.variable}`}
+      className={`${inter.variable} ${cormorantGaramond.variable} ${bnRiley.variable}`}
       suppressHydrationWarning
     >
       <body

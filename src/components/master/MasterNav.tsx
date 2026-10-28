@@ -15,6 +15,15 @@ interface MasterNavProps {
 export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) => {
   const [time, setTime] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // On mobile: hidden at initial landing, smoothly reveals as user scrolls
+  const [isNavVisible, setIsNavVisible] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.scrollY > 35;
+    }
+    return false;
+  });
+
   const [isScrolled, setIsScrolled] = useState(() => {
     if (typeof window !== "undefined") {
       const nextSection = document.getElementById("monument-statement");
@@ -47,6 +56,16 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
     updateTime();
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Track scroll on mobile to fade in nav smoothly as user scrolls
+  useEffect(() => {
+    const handleScroll = () => {
+      const visible = window.scrollY > 35;
+      setIsNavVisible((prev) => (prev !== visible ? visible : prev));
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // GSAP ScrollTrigger: Stays edge-to-edge transparent through the entire Hero,
@@ -153,7 +172,13 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-40 flex justify-center w-full pointer-events-none select-none transition-none">
+      <header
+        className={`fixed top-0 left-0 right-0 z-40 flex justify-center w-full pointer-events-none select-none transition-opacity duration-350 ${
+          isNavVisible
+            ? "opacity-100"
+            : "max-md:opacity-0 max-md:pointer-events-none opacity-100"
+        }`}
+      >
         <div
           ref={navRef}
           className={`w-full flex items-center justify-between pointer-events-auto border transition-colors duration-400 ${

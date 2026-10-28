@@ -118,7 +118,7 @@ export default function Home() {
       <MasterNav onNavigate={handleNavigate} activeId={activeId} />
 
       {/* 3. Cohesive Spatial Storytelling Sequence */}
-      <main className="relative z-10 flex flex-col">
+      <main className="relative z-10">
         {/* Movement 00: Monumental Hero */}
         <MonumentalHero onExplore={() => handleNavigate("monument-statement")} onConnect={() => handleNavigate("monument-terminal")} />
 

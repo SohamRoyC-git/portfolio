@@ -4,7 +4,6 @@ import React, { memo, useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { ArrowDown, ArrowUpRight, Sparkles } from "lucide-react";
-import { AnimatedWireframeMatrix } from "./AnimatedWireframeMatrix";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -17,7 +16,6 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
   // Mobile Refs
   const mobileContainerRef = useRef<HTMLDivElement | null>(null);
   const mobileVideoWrapperRef = useRef<HTMLDivElement | null>(null);
-  const irisOverlayRef = useRef<HTMLDivElement | null>(null);
   const laptopCueRef = useRef<HTMLDivElement | null>(null);
   const mobileIdentityRef = useRef<HTMLDivElement | null>(null);
   const mobileTitleRef = useRef<HTMLHeadingElement | null>(null);
@@ -35,24 +33,24 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
 
     // =========================================================================
     // MOBILE TIMELINE (< 768px):
-    // Organic Ellipse Eclipse Dissolve & Kinetic Identity Materialization
+    // Organic Ellipse Video Dissolve into Vibrant Orange Fluid Gradient
     // =========================================================================
     mm.add("(max-width: 767px)", () => {
       if (!mobileContainerRef.current) return;
 
-      // 1. Initial State: Photographic Elliptical Aperture (Wide open at 150%)
+      // 1. Initial State: Photographic Elliptical Aperture Mask on the Video (Wide open at 150%)
       const irisData = { r: 150 };
 
-      const updateIrisMask = (r: number) => {
-        if (!irisOverlayRef.current) return;
+      const updateVideoMask = (r: number) => {
+        if (!mobileVideoWrapperRef.current) return;
         const inner = Math.max(0, r);
         const outer = Math.max(0, r + 24);
-        const mask = `radial-gradient(ellipse 70% 60% at 56% 52%, transparent 0%, transparent ${inner.toFixed(1)}%, black ${outer.toFixed(1)}%, black 100%)`;
-        irisOverlayRef.current.style.webkitMaskImage = mask;
-        irisOverlayRef.current.style.maskImage = mask;
+        const mask = `radial-gradient(ellipse 70% 60% at 56% 52%, black 0%, black ${inner.toFixed(1)}%, transparent ${outer.toFixed(1)}%, transparent 100%)`;
+        mobileVideoWrapperRef.current.style.webkitMaskImage = mask;
+        mobileVideoWrapperRef.current.style.maskImage = mask;
       };
 
-      updateIrisMask(150);
+      updateVideoMask(150);
 
       if (mobileIdentityRef.current) {
         gsap.set(mobileIdentityRef.current, {
@@ -79,13 +77,13 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         });
       }
 
-      // 3. Silky Continuous Scroll Scrub Timeline (Aesthetic, organic & fluid)
+      // 3. Silky Responsive Scroll Scrub Timeline (Aesthetic, organic & fluid)
       const masterTl = gsap.timeline({
         scrollTrigger: {
           trigger: mobileContainerRef.current,
           start: "top top",
           end: "bottom bottom",
-          scrub: 0.35, // Buttery smooth touch momentum tracking
+          scrub: 0.35, // Smooth touch momentum tracking
           onUpdate: (self) => {
             if (mobileIdentityRef.current) {
               mobileIdentityRef.current.style.pointerEvents =
@@ -95,7 +93,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         },
       });
 
-      // Phase 1 (0 -> 24%): Laptop micro-cue & terrace footer gracefully dissolve
+      // Phase 1 (0 -> 24%): Laptop micro-cue & terrace footer dissolve
       if (laptopCueRef.current) {
         masterTl.to(
           laptopCueRef.current,
@@ -122,7 +120,8 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         );
       }
 
-      // Phase 2 (0 -> 50%): Photographic Ellipse Contracts Smoothly to Zero (Zero square edges!)
+      // Phase 2 (0 -> 50%): Photographic Elliptical Mask contracts smoothly into the laptop
+      // Unveiling the vibrant orange fluid gradient background (Zero square edges!)
       masterTl.to(
         irisData,
         {
@@ -130,19 +129,18 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
           duration: 0.50,
           ease: "power2.inOut",
           onUpdate: () => {
-            updateIrisMask(irisData.r);
+            updateVideoMask(irisData.r);
           },
         },
         0
       );
 
-      // Terrace video subtle camera depth and luminance dissolve
+      // Terrace video subtle camera scale for optical depth
       if (mobileVideoWrapperRef.current) {
         masterTl.to(
           mobileVideoWrapperRef.current,
           {
             scale: 0.95,
-            opacity: 0.25,
             duration: 0.50,
             ease: "power1.inOut",
           },
@@ -150,7 +148,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         );
       }
 
-      // Phase 3 (38% -> 76%): Monumental Header materializes from the deep black frame
+      // Phase 3 (38% -> 76%): Monumental Header materializes on the vibrant orange fluid canvas
       if (mobileIdentityRef.current) {
         masterTl.to(
           mobileIdentityRef.current,
@@ -165,7 +163,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         );
       }
 
-      // Phase 4 (76% -> 100%): Luxury hold period before unpinning seamlessly into Movement 01
+      // Phase 4 (76% -> 100%): Luxury hold period before unpinning smoothly into Movement 01
       masterTl.to({}, { duration: 0.24 });
 
       return () => {
@@ -208,17 +206,17 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
   return (
     <div id="monument-hero" className="relative w-full overflow-visible">
       {/* ========================================================================= */}
-      {/* MOBILE EXPERIENCE (< 768px): MIDNIGHT MONOLITH LENS IRIS CINEMATIC APERTURE */}
+      {/* MOBILE EXPERIENCE (< 768px): VIBRANT ORANGE FLUID CINEMATIC APERTURE      */}
       {/* ========================================================================= */}
       <div
         ref={mobileContainerRef}
-        className="md:hidden relative w-full h-[220vh] bg-[#000000]"
+        className="md:hidden relative w-full h-[220vh] bg-transparent"
       >
-        <div className="sticky top-0 h-[100svh] w-full overflow-hidden bg-[#000000] flex flex-col justify-between">
-          {/* 1. Living Pixel-Art Terrace Video Layer (Cropped to cat, coffee, laptop) */}
+        <div className="sticky top-0 h-[100svh] w-full overflow-hidden bg-transparent flex flex-col justify-between">
+          {/* 1. Living Pixel-Art Terrace Video Layer with Photographic Elliptical Mask */}
           <div
             ref={mobileVideoWrapperRef}
-            className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden will-change-transform"
+            className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden will-change-[mask-image,transform]"
           >
             <video
               autoPlay
@@ -233,13 +231,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             </video>
           </div>
 
-          {/* 2. Full-Screen Photographic Elliptical Aperture Overlay (Always stays a perfect ellipse!) */}
-          <div
-            ref={irisOverlayRef}
-            className="absolute inset-0 z-10 pointer-events-none bg-[#000000] will-change-[mask-image]"
-          />
-
-          {/* 3. Understated Editorial Swiss Laptop Micro-Cue (Anchored above laptop) */}
+          {/* 2. Understated Editorial Swiss Laptop Micro-Cue (Anchored above laptop) */}
           <div
             ref={laptopCueRef}
             className="absolute pointer-events-none z-20 flex flex-col items-center will-change-[transform,opacity]"
@@ -250,44 +242,41 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             }}
           >
             <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/85 border border-white/20 backdrop-blur-md shadow-2xl">
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FF5500] animate-pulse" />
               <span className="font-sans font-bold text-[9px] tracking-[0.2em] text-white/95 uppercase">
                 TERRACE
               </span>
               <span className="text-white/30 text-[8px]">•</span>
               <span className="font-sans font-medium text-[9px] tracking-wider text-slate-200 uppercase flex items-center gap-1.5">
                 <span>Scroll to see portfolio</span>
-                <ArrowDown size={10} className="text-white/90 animate-bounce" />
+                <ArrowDown size={10} className="text-[#FF7A00] animate-bounce" />
               </span>
             </div>
             {/* Minimalist hairline pointer stem */}
-            <div className="w-[1px] h-3.5 bg-gradient-to-b from-white/40 to-transparent mx-auto" />
-            <div className="w-1 h-1 rounded-full bg-white/60 mx-auto -mt-0.5" />
+            <div className="w-[1px] h-3.5 bg-gradient-to-b from-[#FF5500]/60 to-transparent mx-auto" />
+            <div className="w-1 h-1 rounded-full bg-[#FF5500] mx-auto -mt-0.5" />
           </div>
 
-          {/* 4. Monumental Identity Section with Understated Wireframe & Stark Typography */}
+          {/* 3. Monumental Identity Section (Vibrant Orange Fluid Background throughout) */}
           <div
             ref={mobileIdentityRef}
             className="absolute inset-0 z-20 flex flex-col justify-between pt-24 pb-8 px-6 text-center will-change-[transform,opacity] pointer-events-none opacity-0"
           >
-            {/* Background Understated 3D Mathematical Wireframe Matrix */}
-            <AnimatedWireframeMatrix />
-
             {/* Top spacer */}
             <div />
 
-            {/* Centered Identity Lockup (A24 / Balenciaga High-Fashion Minimal) */}
+            {/* Centered Identity Lockup */}
             <div className="relative z-10 w-full max-w-sm mx-auto flex flex-col items-center my-auto">
               {/* Minimalist Hairline Eyebrow */}
-              <div className="inline-flex items-center gap-2 text-[9px] font-sans font-bold uppercase tracking-[0.24em] text-slate-300 mb-5 px-3.5 py-1 rounded-full border border-white/15 bg-black/50 backdrop-blur-md">
-                <Sparkles size={10} className="text-white/80" />
+              <div className="inline-flex items-center gap-2 text-[9px] font-sans font-bold uppercase tracking-[0.24em] text-orange-200/90 mb-5 px-3.5 py-1 rounded-full border border-orange-500/25 bg-black/40 backdrop-blur-md">
+                <Sparkles size={10} className="text-[#FF7A00]" />
                 <span>NSEC (2024–2028)</span>
               </div>
 
               {/* Cinematic Grand Headline in BN Riley (Pure Stark White) */}
               <h1
                 ref={mobileTitleRef}
-                className="font-riley text-5xl xs:text-6xl text-white tracking-tight uppercase leading-[0.92] mb-5 select-none drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]"
+                className="font-riley text-5xl xs:text-6xl text-white tracking-tight uppercase leading-[0.92] mb-5 select-none drop-shadow-[0_4px_30px_rgba(0,0,0,0.85)]"
               >
                 Soham <br />
                 <span className="text-white">
@@ -296,7 +285,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               </h1>
 
               {/* Editorial Subtitle in Athelas Italic */}
-              <p className="font-athelas italic font-normal text-sm xs:text-base text-slate-300 leading-relaxed mb-8 max-w-xs px-1">
+              <p className="font-athelas italic font-normal text-sm xs:text-base text-orange-100/90 leading-relaxed mb-8 max-w-xs px-1 drop-shadow-md">
                 Artificial Intelligence &amp; Machine Learning · Frontend Architect · Digital Operations
               </p>
 
@@ -304,7 +293,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               <div className="flex items-center justify-center gap-3 w-full max-w-xs">
                 <button
                   onClick={onExplore}
-                  className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-white text-black hover:bg-slate-200 transition-all duration-200 font-sans font-bold text-xs uppercase tracking-wider cursor-pointer shadow-lg active:scale-95"
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-white text-black hover:bg-orange-100 transition-all duration-200 font-sans font-bold text-xs uppercase tracking-wider cursor-pointer shadow-xl active:scale-95"
                 >
                   <span>Explore</span>
                   <ArrowDown size={13} />
@@ -312,16 +301,16 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
 
                 <button
                   onClick={handleConnectClick}
-                  className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-black hover:bg-white/10 text-white border border-white/20 transition-all duration-200 font-sans font-bold text-xs uppercase tracking-wider cursor-pointer backdrop-blur-md active:scale-95"
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-black/50 hover:bg-black/75 text-white border border-white/25 transition-all duration-200 font-sans font-bold text-xs uppercase tracking-wider cursor-pointer backdrop-blur-md active:scale-95 shadow-lg"
                 >
                   <span>Contact</span>
-                  <ArrowUpRight size={13} className="text-slate-300" />
+                  <ArrowUpRight size={13} className="text-orange-300" />
                 </button>
               </div>
             </div>
 
             {/* Bottom Coordinates & Location Bar */}
-            <div className="relative z-10 w-full flex items-center justify-between pt-3 border-t border-white/10 text-[9px] font-sans font-bold text-slate-400 uppercase tracking-widest">
+            <div className="relative z-10 w-full flex items-center justify-between pt-3 border-t border-white/15 text-[9px] font-sans font-bold text-orange-200/70 uppercase tracking-widest">
               <span>KOLKATA // LAT 22.5726° N</span>
               <span>ARCHIVE 2026</span>
             </div>

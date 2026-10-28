@@ -30,7 +30,7 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
         {/* Bento 1: Live Code Telemetry (7 cols) */}
         <div 
-          className="lg:col-span-7 p-5 sm:p-8 rounded-2xl sm:rounded-3xl bg-white/75 max-md:bg-[#09090B] border border-slate-200/80 max-md:border-white/10 backdrop-blur-2xl shadow-sm flex flex-col justify-between"
+          className="lg:col-span-7 p-5 sm:p-8 rounded-2xl sm:rounded-3xl bg-white/75 max-md:bg-[#0A0502]/70 border border-slate-200/80 max-md:border-white/15 backdrop-blur-2xl shadow-sm flex flex-col justify-between"
           data-cursor="pointer"
           data-cursor-text="CODE"
         >
@@ -115,7 +115,7 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
 
         {/* Bento 2: Toolkit (5 cols) */}
         <div 
-          className="lg:col-span-5 p-5 sm:p-8 rounded-2xl sm:rounded-3xl bg-white/75 max-md:bg-[#09090B] border border-slate-200/80 max-md:border-white/10 backdrop-blur-2xl shadow-sm flex flex-col justify-between"
+          className="lg:col-span-5 p-5 sm:p-8 rounded-2xl sm:rounded-3xl bg-white/75 max-md:bg-[#0A0502]/70 border border-slate-200/80 max-md:border-white/15 backdrop-blur-2xl shadow-sm flex flex-col justify-between"
           data-cursor="pointer"
           data-cursor-text="STACK"
         >

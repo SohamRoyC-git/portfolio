@@ -376,7 +376,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                   cardsRef.current[idx] = el;
                 }}
                 /* Responsive Frosted Glassmorphism Card with Generous Margins & No Overflow Collisions */
-                className="w-[86vw] max-w-[880px] shrink-0 p-5 sm:p-8 lg:p-9 rounded-[2rem] sm:rounded-[2.25rem] bg-white/80 max-md:bg-[#09090B] border-2 border-white/95 max-md:border-white/15 backdrop-blur-md shadow-[0_25px_60px_-15px_rgba(15,23,42,0.12),0_10px_25px_-5px_rgba(16,185,129,0.08),inset_0_1px_2px_rgba(255,255,255,0.95)] max-md:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] hover:border-[#10B981]/50 transition-all duration-200 grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-center will-change-transform max-h-[calc(100svh-175px)] overflow-y-auto sm:overflow-visible"
+                className="w-[86vw] max-w-[880px] shrink-0 p-5 sm:p-8 lg:p-9 rounded-[2rem] sm:rounded-[2.25rem] bg-white/80 max-md:bg-[#0A0502]/85 border-2 border-white/95 max-md:border-white/15 backdrop-blur-md shadow-[0_25px_60px_-15px_rgba(15,23,42,0.12),0_10px_25px_-5px_rgba(16,185,129,0.08),inset_0_1px_2px_rgba(255,255,255,0.95)] max-md:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] hover:border-[#10B981]/50 transition-all duration-200 grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-center will-change-transform max-h-[calc(100svh-175px)] overflow-y-auto sm:overflow-visible"
                 style={{ transformStyle: "preserve-3d" }}
               >
                 {/* Left Card Editorial Metadata (7 Cols on desktop, full on mobile) */}

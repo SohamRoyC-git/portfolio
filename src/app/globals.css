@@ -24,9 +24,37 @@
   --color-muted: #64748B;
   --color-border-subtle: rgba(15, 23, 42, 0.08);
 
-  /* Strictly two font families */
+  /* Typography: Inter + Athelas + Optizither */
   --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-serif: "Apple Garamond", var(--font-garamond), "EB Garamond", Garamond, serif;
+  --font-serif: "Athelas", Athelas, "Iowan Old Style", "Apple Garamond", var(--font-garamond), "EB Garamond", Garamond, serif;
+  --font-optizither: "Optizither", "OPTIZither", "Snell Roundhand", "Bickham Script Pro", "Playfair Display", serif;
+}
+
+@font-face {
+  font-family: "Optizither";
+  src: url("/fonts/OPTIZither.woff2") format("woff2"),
+       url("/fonts/OPTIZither.woff") format("woff"),
+       url("/fonts/OPTIZither.ttf") format("truetype"),
+       url("/fonts/Optizither.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Athelas";
+  src: local("Athelas"), local("Athelas-Regular");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Athelas";
+  src: local("Athelas Italic"), local("Athelas-Italic");
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
 }
 
 /* Strictly Two Font Utility Helpers */
@@ -36,10 +64,14 @@
   letter-spacing: -0.03em;
 }
 
-.font-garamond-italic {
-  font-family: var(--font-serif);
+.font-garamond-italic,
+.font-athelas {
+  font-family: "Athelas", Athelas, var(--font-serif);
   font-style: italic;
-  font-weight: 300;
+}
+
+.font-optizither {
+  font-family: "Optizither", "OPTIZither", var(--font-optizither);
 }
 
 /* Custom Light Minimal Scrollbar with Emerald Accent */

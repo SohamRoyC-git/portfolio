@@ -36,7 +36,6 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
   }, []);
 
   // GSAP Smooth Scroll Parallax & Organic Dissolve into Movement 01
-  // Stays fully visible through the initial scroll, dissolving only when exiting
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion || !sectionRef.current || !videoWrapperRef.current) return;
@@ -48,7 +47,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         ease: "power1.out",
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: "45% top", // Video stays completely visible for longer
+          start: "45% top", // Video stays visible longer before dissolving
           end: "bottom top",
           scrub: 0.6,
         },
@@ -97,35 +96,35 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
           <source src="/assets/Animate_pixel_art_environment_loop_03a9505a.mp4" type="video/mp4" />
         </video>
 
-        {/* Subtle Ambient Sky Vignette on Right for Crisp Text Contrast */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-white/40 pointer-events-none z-10" />
-        <div className="absolute inset-0 bg-gradient-to-b from-white/25 via-transparent to-transparent pointer-events-none z-10" />
+        {/* Ambient Contrast Balance Vignettes for Razor-Sharp Whitish Text Readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-transparent to-black/35 pointer-events-none z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-transparent pointer-events-none z-10" />
 
         {/* Soft, Lowered Multi-Stop Bleed Gradient at the Very Bottom Edge */}
         <div className="absolute inset-x-0 bottom-0 h-32 sm:h-44 bg-gradient-to-t from-[#FAFAF9] via-[#FAFAF9]/85 to-transparent pointer-events-none z-10" />
       </div>
 
-      {/* Top Telemetry Header Bar */}
+      {/* Top Telemetry Header Bar (Whitish High-Contrast Glass Pills) */}
       <div className="relative z-20 flex items-center justify-between w-full max-w-7xl mx-auto">
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/70 border border-white/80 shadow-xs backdrop-blur-md">
+        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/40 border border-white/20 shadow-md backdrop-blur-md">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#10B981] opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-[#10B981]" />
           </span>
-          <span className="font-sans font-black text-[10px] sm:text-[11px] text-[#0F172A] tracking-wider uppercase">
+          <span className="font-sans font-black text-[10px] sm:text-[11px] text-white tracking-wider uppercase drop-shadow-xs">
             PORTFOLIO // 2026
           </span>
         </div>
 
         {/* Live Kolkata Clock & Availability Pill */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/70 border border-white/80 shadow-xs backdrop-blur-md">
+          <div className="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/40 border border-white/20 shadow-md backdrop-blur-md">
             <Compass size={12} className="text-[#10B981]" />
-            <span className="font-sans font-black text-[10px] sm:text-[11px] text-[#0F172A] uppercase tracking-wider">
+            <span className="font-sans font-black text-[10px] sm:text-[11px] text-white uppercase tracking-wider drop-shadow-xs">
               KOLKATA {timeStr || "00:00:00"} IST
             </span>
           </div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[#059669] font-sans font-black text-[10px] sm:text-[11px] uppercase tracking-wider shadow-xs backdrop-blur-sm">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-sans font-black text-[10px] sm:text-[11px] uppercase tracking-wider shadow-sm backdrop-blur-md">
             <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
             <span>OPEN FOR ROLES</span>
           </div>
@@ -137,24 +136,24 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         {/* Left Column (Open & Uncluttered so the pixel art animation shines through) */}
         <div className="hidden lg:block lg:col-span-6 xl:col-span-7 pointer-events-none" />
 
-        {/* Right Column: Direct Cinematic Typography (No Card Wrapper, Pure Film Title Look) */}
+        {/* Right Column: Direct Cinematic Typography on Background (Whitish, 100% Readable) */}
         <div className="col-span-12 lg:col-span-6 xl:col-span-5 flex flex-col justify-center text-left py-4">
           {/* Subtle Institutional Eyebrow */}
-          <div className="inline-flex items-center gap-2 text-[10px] sm:text-xs font-sans font-black uppercase tracking-wider text-[#059669] mb-3">
+          <div className="inline-flex items-center gap-2 text-[10px] sm:text-xs font-sans font-bold uppercase tracking-wider text-emerald-300 mb-3 px-3.5 py-1.5 rounded-full bg-black/40 border border-white/20 backdrop-blur-md w-fit shadow-md">
             <Sparkles size={13} className="text-[#10B981]" />
             <span>Netaji Subhash Engineering College (2024–2028)</span>
           </div>
 
-          {/* Cinematic Headline sitting directly on the landscape */}
-          <h1 className="font-sans font-black text-3xl xs:text-4xl sm:text-5xl lg:text-[3.1rem] text-[#0F172A] uppercase tracking-[0.05em] leading-[1.05] mb-4 drop-shadow-[0_2px_14px_rgba(255,255,255,0.7)]">
-            SOHAM <br />
-            <span className="bg-gradient-to-r from-[#0F172A] via-slate-800 to-[#10B981] bg-clip-text text-transparent">
-              ROYCHOUDHURY
+          {/* Cinematic Headline in Optizither with Luminous Whitish Aesthetic */}
+          <h1 className="font-optizither text-4xl xs:text-5xl sm:text-6xl lg:text-[4.2rem] text-white tracking-[0.02em] leading-[1.08] mb-4 drop-shadow-[0_4px_24px_rgba(0,0,0,0.85)]">
+            Soham <br />
+            <span className="bg-gradient-to-r from-white via-slate-100 to-emerald-200 bg-clip-text text-transparent">
+              Roychoudhury
             </span>
           </h1>
 
-          {/* Editorial Subtitle sitting directly on background */}
-          <p className="font-serif italic font-normal text-lg sm:text-xl text-slate-900 leading-relaxed mb-6 drop-shadow-[0_1px_8px_rgba(255,255,255,0.6)]">
+          {/* Editorial Subtitle in Athelas Italic (Whitish, High Legibility) */}
+          <p className="font-athelas italic font-normal text-lg sm:text-xl md:text-2xl text-slate-100 leading-relaxed mb-6 max-w-lg drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
             Artificial Intelligence &amp; Machine Learning · Frontend Architect · Digital Operations
           </p>
 
@@ -162,7 +161,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={onExplore}
-              className="group inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-[#0F172A] text-white hover:bg-[#10B981] transition-all duration-300 font-sans font-black text-[11px] sm:text-xs uppercase tracking-wider cursor-pointer shadow-md active:scale-98"
+              className="group inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-white text-[#0F172A] hover:bg-[#10B981] hover:text-white transition-all duration-300 font-sans font-black text-[11px] sm:text-xs uppercase tracking-wider cursor-pointer shadow-lg active:scale-98"
             >
               <span>Explore Work</span>
               <ArrowDown size={13} className="group-hover:translate-y-0.5 transition-transform" />
@@ -170,7 +169,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
 
             <button
               onClick={handleConnectClick}
-              className="group inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-white/90 hover:bg-white text-[#0F172A] border border-slate-200/90 transition-all duration-300 font-sans font-black text-[11px] sm:text-xs uppercase tracking-wider cursor-pointer shadow-xs backdrop-blur-md active:scale-98"
+              className="group inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-black/45 hover:bg-black/65 text-white border border-white/30 transition-all duration-300 font-sans font-black text-[11px] sm:text-xs uppercase tracking-wider cursor-pointer shadow-md backdrop-blur-md active:scale-98"
             >
               <span>Get In Touch</span>
               <ArrowUpRight size={13} className="text-[#10B981] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
@@ -179,8 +178,8 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         </div>
       </div>
 
-      {/* Bottom Coordinates Bar (Clean & Subtle) */}
-      <div className="relative z-20 w-full max-w-7xl mx-auto flex items-center justify-between pt-3 border-t border-slate-300/40 text-[10px] sm:text-[11px] font-sans font-black text-slate-600 uppercase tracking-widest">
+      {/* Bottom Coordinates Bar (Whitish & Subtle) */}
+      <div className="relative z-20 w-full max-w-7xl mx-auto flex items-center justify-between pt-3 border-t border-white/20 text-[10px] sm:text-[11px] font-sans font-bold text-white/85 uppercase tracking-widest drop-shadow-[0_1px_8px_rgba(0,0,0,0.85)]">
         <span>KOLKATA // LAT 22.5726° N · LON 88.3639° E</span>
         <span className="hidden sm:inline">CYBER-PASTORAL TERRACE</span>
       </div>

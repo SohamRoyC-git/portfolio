@@ -13,6 +13,10 @@ import {
   Building2,
   Ship,
   Activity,
+  ArrowUpRight,
+  Globe,
+  Shield,
+  X,
 } from "lucide-react";
 import { LocalizationDemo } from "@/components/LocalizationDemo";
 
@@ -32,6 +36,7 @@ interface ProjectItem {
   stack: string[];
   visualType: "izieat" | "cricket" | "india_center" | "varti";
   logo: string;
+  displayDomain: string;
   previewImage?: string;
   hasDemo?: boolean;
   socials?: { name: string; svgPath: string; viewBox?: string }[];
@@ -57,6 +62,7 @@ const PROJECTS: ProjectItem[] = [
     stack: ["Next.js", "TypeScript", "Tailwind CSS", "i18n Engine", "Client Cache"],
     visualType: "izieat",
     logo: "/assets/logos/izieat.png",
+    displayDomain: "IZIEAT.COM",
     previewImage: "/assets/izieat_preview.png",
     hasDemo: true,
   },
@@ -79,6 +85,7 @@ const PROJECTS: ProjectItem[] = [
     stack: ["TypeScript", "Node.js", "PostgreSQL", "Redis", "Cloudflare Workers"],
     visualType: "cricket",
     logo: "/assets/logos/latvia_cricket.png",
+    displayDomain: "CRICLV.COM",
     socials: [
       {
         name: "Instagram",
@@ -131,6 +138,7 @@ const PROJECTS: ProjectItem[] = [
     stack: ["Next.js", "React", "Tailwind CSS", "Edge CDN", "TypeScript"],
     visualType: "india_center",
     logo: "/assets/logos/india_center.png",
+    displayDomain: "INDIJASCENTRS.LV",
   },
   {
     id: "varti-international",
@@ -151,6 +159,7 @@ const PROJECTS: ProjectItem[] = [
     stack: ["Next.js", "TypeScript", "Node.js", "PostgreSQL", "Cloud Architecture"],
     visualType: "varti",
     logo: "/assets/logos/varti_international.png",
+    displayDomain: "VARTIINTERNATIONAL.COM",
   },
 ];
 
@@ -383,22 +392,22 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                       </span>
                     </div>
 
-                    {/* Official Client Logo & Metadata Header */}
-                    <div className="flex items-center gap-3 mb-2.5">
-                      <div className="h-11 px-2.5 py-1 rounded-xl bg-white shadow-sm border border-slate-200/80 flex items-center justify-center shrink-0">
+                    {/* Official Client Logo & Metadata Header - Bold, High-Contrast & Prominent (~56px-64px) */}
+                    <div className="flex items-center gap-3.5 mb-3.5">
+                      <div className="h-16 sm:h-20 px-4 py-2 rounded-2xl bg-white shadow-md border-2 border-slate-200/90 flex items-center justify-center shrink-0 hover:border-[#10B981]/60 transition-colors">
                         <Image
                           src={project.logo}
                           alt={project.client}
-                          width={75}
-                          height={36}
-                          className="object-contain max-h-8 w-auto"
+                          width={140}
+                          height={64}
+                          className="object-contain max-h-12 sm:max-h-16 w-auto"
                         />
                       </div>
                       <div>
-                        <div className="font-sans font-black text-xs sm:text-sm text-[#0F172A] leading-tight">
+                        <div className="font-sans font-black text-sm sm:text-base text-[#0F172A] leading-tight">
                           {project.client}
                         </div>
-                        <div className="font-sans font-medium text-[11px] text-slate-400">
+                        <div className="font-sans font-medium text-xs text-slate-500">
                           Production Commission • {project.year}
                         </div>
                       </div>
@@ -473,277 +482,350 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                   </div>
                 </div>
 
-                {/* Right Card Visual Artifact (5 Cols on desktop, full on mobile) */}
+                {/* Right Card Visual Artifact (5 Cols on desktop, full on mobile) - Editorial Glass Showcase */}
                 <div className="lg:col-span-5 flex items-center justify-center relative">
-                  {/* Visual 1: Clickable Homepage Preview Card with IZIEAT Logo (IZIEAT) */}
-                  {project.visualType === "izieat" && project.previewImage && (
+                  {/* Visual 1: IZIEAT - Interactive Browser Preview + Editorial Glass Showcase */}
+                  {project.visualType === "izieat" && (
                     <a
                       href={project.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group/izieat block w-full max-w-xs sm:max-w-sm rounded-3xl bg-white/85 border-2 border-white/95 p-3 sm:p-3.5 shadow-xl backdrop-blur-xl transition-all duration-300 hover:scale-[1.03] hover:border-[#10B981]/50 hover:shadow-2xl relative overflow-hidden"
+                      className="group/showcase block w-full max-w-sm rounded-[2rem] bg-gradient-to-b from-white/95 to-emerald-50/40 border-2 border-white/95 p-4 sm:p-5 shadow-xl backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:border-[#10B981]/60 hover:shadow-2xl relative overflow-hidden"
                     >
-                      {/* Browser window top bar */}
-                      <div className="flex items-center justify-between pb-2 px-1 border-b border-slate-200/80 mb-2.5">
+                      {/* Signature Emerald Ambient Backlight */}
+                      <div
+                        className="absolute -top-12 -right-12 w-44 h-44 rounded-full pointer-events-none opacity-40 blur-2xl group-hover/showcase:opacity-70 transition-opacity duration-500"
+                        style={{ background: "radial-gradient(circle, rgba(16,185,129,0.8) 0%, transparent 70%)" }}
+                      />
+
+                      {/* Top Header: Traffic Lights + Verified Domain Badge */}
+                      <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 mb-3.5 relative z-10">
                         <div className="flex items-center gap-1.5">
                           <span className="w-2.5 h-2.5 rounded-full bg-red-400/80" />
                           <span className="w-2.5 h-2.5 rounded-full bg-amber-400/80" />
                           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400/80" />
-                          <span className="ml-2 px-2.5 py-0.5 rounded-full bg-slate-100 font-sans font-bold text-[10px] text-slate-500 border border-slate-200/60 flex items-center gap-1">
+                          <span className="ml-2 px-2.5 py-0.5 rounded-full bg-white/90 font-sans font-bold text-[10px] text-slate-600 border border-slate-200/80 flex items-center gap-1.5 shadow-xs">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                             izieat.com
                           </span>
                         </div>
-                        <div className="flex items-center gap-1 text-[#10B981] group-hover/izieat:translate-x-0.5 group-hover/izieat:-translate-y-0.5 transition-transform duration-200">
-                          <span className="font-sans font-black text-[9px] uppercase tracking-wider hidden xs:inline">
-                            Visit Site
-                          </span>
-                          <ExternalLink size={12} />
-                        </div>
+                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[#059669] font-sans font-black text-[10px] uppercase tracking-wider">
+                          ACTIVE PROD
+                        </span>
                       </div>
 
-                      {/* Rectangular homepage preview frame */}
-                      <div className="relative aspect-[16/10] w-full rounded-2xl overflow-hidden bg-slate-900 border border-slate-200/60 shadow-inner">
-                        <Image
-                          src={project.previewImage}
-                          alt="IZIEAT Homepage"
-                          fill
-                          className="object-cover object-top group-hover/izieat:scale-105 transition-transform duration-500"
-                        />
-                        {/* Hover overlay indicator */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-transparent to-transparent opacity-0 group-hover/izieat:opacity-100 transition-opacity duration-300 flex items-end p-3">
-                          <div className="flex items-center justify-between w-full">
+                      {/* High-Res Browser Window Preview */}
+                      {project.previewImage && (
+                        <div className="relative aspect-[16/10] w-full rounded-2xl overflow-hidden bg-slate-900 border border-slate-200/80 shadow-inner mb-3.5 relative z-10">
+                          <Image
+                            src={project.previewImage}
+                            alt="IZIEAT Homepage"
+                            fill
+                            className="object-cover object-top group-hover/showcase:scale-105 transition-transform duration-500"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent opacity-0 group-hover/showcase:opacity-100 transition-opacity duration-300 flex items-end p-3">
                             <span className="font-sans font-bold text-xs text-white flex items-center gap-1.5">
                               <ExternalLink size={13} className="text-emerald-400" />
-                              Explore Live Portal
-                            </span>
-                            <span className="px-2 py-0.5 rounded-md bg-emerald-500/90 text-white font-sans font-black text-[9px] uppercase tracking-wider">
-                              Live ↗
+                              Click to Launch Platform
                             </span>
                           </div>
                         </div>
-                      </div>
+                      )}
 
-                      {/* Footer badge with official IZIEAT Logo */}
-                      <div className="mt-2.5 pt-2 border-t border-slate-200/70 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="w-9 h-9 rounded-xl bg-white p-0.5 shadow-sm border border-slate-200/80 flex items-center justify-center shrink-0">
+                      {/* Bold Logo & Brand Sub-stage */}
+                      <div className="flex items-center justify-between py-2 border-t border-slate-200/70 mb-3 relative z-10">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-xl bg-white p-1 shadow-sm border border-slate-200/80 flex items-center justify-center shrink-0">
                             <Image
                               src={project.logo}
                               alt="IZIEAT Logo"
-                              width={32}
-                              height={32}
+                              width={44}
+                              height={44}
                               className="object-contain"
                             />
                           </div>
                           <div>
-                            <div className="font-sans font-black text-xs text-[#0F172A] leading-none mb-0.5">
+                            <div className="font-sans font-black text-xs text-[#0F172A] leading-tight">
                               IZIEAT LLC
                             </div>
-                            <div className="font-sans font-medium text-[10px] text-slate-400">
-                              Natural &amp; Ready To Eat
+                            <div className="font-sans font-medium text-[10px] text-slate-500">
+                              Natural &amp; Ready To Eat • Global Export
                             </div>
                           </div>
                         </div>
-                        <span className="font-sans font-black text-[10px] text-[#059669] px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                          GLOBAL EXPORT
-                        </span>
+                        <div className="text-right font-sans text-[10px]">
+                          <div className="font-black text-[#10B981]">&lt; 5ms i18n</div>
+                          <div className="text-slate-400">Zero API Delay</div>
+                        </div>
+                      </div>
+
+                      {/* Dedicated Interactive Live Status Pill */}
+                      <div className="relative group/pill overflow-hidden rounded-full p-[1.5px] transition-all duration-300 relative z-10">
+                        <span className="absolute inset-0 bg-gradient-to-r from-[#10B981] via-sky-400 to-[#10B981] opacity-0 group-hover/showcase:opacity-100 transition-opacity duration-300 animate-pulse" />
+                        <div className="relative flex items-center justify-between gap-3 px-4 py-2.5 rounded-full bg-[#0F172A] text-white font-sans font-black text-[11px] sm:text-xs uppercase tracking-wider shadow-md group-hover/showcase:bg-[#0F172A]/90 transition-colors">
+                          <span className="flex items-center gap-2">
+                            <span className="relative flex h-2 w-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                            </span>
+                            <span className="tracking-widest">LIVE AT {project.displayDomain}</span>
+                          </span>
+                          <ArrowUpRight size={14} className="text-emerald-400 group-hover/showcase:translate-x-0.5 group-hover/showcase:-translate-y-0.5 transition-transform" />
+                        </div>
                       </div>
                     </a>
                   )}
 
-                  {/* Visual 2: Live Ingest Mesh & Telemetry (Latvian Cricket Federation) */}
+                  {/* Visual 2: Latvian Cricket Federation - Editorial Glass Showcase */}
                   {project.visualType === "cricket" && (
                     <a
                       href={project.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group/cricket block w-full max-w-xs sm:max-w-sm rounded-3xl bg-white/85 border-2 border-white/95 p-4 sm:p-5 flex flex-col justify-between shadow-xl backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] hover:border-[#10B981]/50 hover:shadow-2xl"
+                      className="group/showcase block w-full max-w-sm rounded-[2rem] bg-gradient-to-b from-white/95 to-red-50/40 border-2 border-white/95 p-4 sm:p-5 shadow-xl backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:border-red-500/60 hover:shadow-2xl relative overflow-hidden"
                     >
-                      <div className="flex items-center justify-between pb-3 border-b border-slate-200/80">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-11 h-11 rounded-xl bg-white p-1 shadow-sm border border-slate-200/80 flex items-center justify-center shrink-0">
-                            <Image
-                              src={project.logo}
-                              alt="Latvian Cricket Federation"
-                              width={38}
-                              height={38}
-                              className="object-contain"
-                            />
-                          </div>
-                          <div>
-                            <span className="font-sans font-black text-xs text-[#0F172A] uppercase tracking-wider block">
-                              CRICLV.COM ENGINE
-                            </span>
-                            <span className="font-sans font-medium text-[10px] text-slate-400">
-                              Latvijas Kriketa Federācija
-                            </span>
-                          </div>
+                      {/* Signature Baltic Carmine Crimson Backlight */}
+                      <div
+                        className="absolute -top-12 -right-12 w-48 h-48 rounded-full pointer-events-none opacity-30 blur-2xl group-hover/showcase:opacity-60 transition-opacity duration-500"
+                        style={{ background: "radial-gradient(circle, rgba(185,28,28,0.7) 0%, transparent 70%)" }}
+                      />
+
+                      {/* Top Header: Federation Accreditation Tag */}
+                      <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 mb-3.5 relative z-10">
+                        <div className="flex items-center gap-2">
+                          <span className="px-2.5 py-0.5 rounded-full bg-red-600/10 border border-red-600/20 text-red-700 font-sans font-black text-[10px] uppercase tracking-wider">
+                            LV-FED // OFFICIAL
+                          </span>
+                          <span className="font-sans font-bold text-[10px] text-slate-500">
+                            Latvijas Kriketa Federācija
+                          </span>
                         </div>
-                        <span className="font-sans font-black text-[10px] text-[#059669] px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-1">
+                        <span className="flex items-center gap-1 font-sans font-black text-[10px] text-[#059669] px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                          LIVE
-                        </span>
-                      </div>
-
-                      <div className="space-y-2 my-2.5">
-                        <div className="p-2.5 rounded-2xl bg-white/70 border border-slate-200/80">
-                          <div className="font-sans font-black text-[9px] text-slate-400 uppercase mb-0.5">
-                            TOURNAMENT EVENT BUS
-                          </div>
-                          <div className="font-sans font-black text-xs text-[#0F172A]">
-                            National League Telemetry • Realtime Sync
-                          </div>
-                        </div>
-
-                        <div className="p-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-                          <div className="font-sans font-black text-[9px] text-[#059669] uppercase mb-0.5">
-                            EU REGULATORY COMPLIANCE
-                          </div>
-                          <div className="font-sans font-black text-xs text-[#059669]">
-                            Federation Governance Records • Verified
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-2 border-t border-slate-200/80">
-                        <span className="font-sans font-black text-[10px] text-slate-400 uppercase">
-                          FAILOVER POOL: ACTIVE
-                        </span>
-                        <span className="font-sans font-black text-xs text-[#10B981] flex items-center gap-1">
                           99.98% UPTIME
-                          <ExternalLink size={11} className="opacity-70 group-hover/cricket:translate-x-0.5 transition-transform" />
                         </span>
+                      </div>
+
+                      {/* Hero Logo Stage (56px-64px Emblem) */}
+                      <div className="flex items-center justify-center p-4 rounded-2xl bg-gradient-to-b from-white to-slate-50/80 border border-slate-200/90 shadow-sm mb-3.5 relative z-10 group-hover/showcase:border-red-400/50 transition-colors">
+                        <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
+                          <Image
+                            src={project.logo}
+                            alt="Latvian Cricket Federation Crest"
+                            width={76}
+                            height={76}
+                            className="object-contain max-h-16 sm:max-h-20 w-auto drop-shadow-md group-hover/showcase:scale-105 transition-transform duration-300"
+                          />
+                        </div>
+                        <div className="ml-4 flex-1">
+                          <div className="font-sans font-black text-xs sm:text-sm text-[#0F172A] uppercase tracking-wider mb-0.5">
+                            National Sports Infrastructure
+                          </div>
+                          <div className="font-sans font-medium text-[11px] text-slate-500 leading-tight">
+                            Tournament Event Bus • 4 National Divisions • Realtime Ingestion
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Telemetry Monoliths */}
+                      <div className="space-y-2 mb-3.5 relative z-10">
+                        <div className="p-2.5 rounded-xl bg-white/80 border border-slate-200/80 flex items-center justify-between">
+                          <span className="font-sans font-black text-[9px] text-slate-400 uppercase tracking-wider">
+                            GOVERNANCE ENGINE
+                          </span>
+                          <span className="font-sans font-black text-xs text-[#0F172A]">
+                            EU Compliance &amp; Match Ingest
+                          </span>
+                        </div>
+                        <div className="p-2.5 rounded-xl bg-red-600/10 border border-red-600/20 flex items-center justify-between">
+                          <span className="font-sans font-black text-[9px] text-red-700 uppercase tracking-wider">
+                            LIVE TELEMETRY
+                          </span>
+                          <span className="font-sans font-black text-xs text-red-700">
+                            100k+ Event Ingestion/mo
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Dedicated Interactive Live Status Pill */}
+                      <div className="relative group/pill overflow-hidden rounded-full p-[1.5px] transition-all duration-300 relative z-10">
+                        <span className="absolute inset-0 bg-gradient-to-r from-red-500 via-[#10B981] to-red-500 opacity-0 group-hover/showcase:opacity-100 transition-opacity duration-300 animate-pulse" />
+                        <div className="relative flex items-center justify-between gap-3 px-4 py-2.5 rounded-full bg-[#0F172A] text-white font-sans font-black text-[11px] sm:text-xs uppercase tracking-wider shadow-md group-hover/showcase:bg-[#0F172A]/90 transition-colors">
+                          <span className="flex items-center gap-2">
+                            <span className="relative flex h-2 w-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                            </span>
+                            <span className="tracking-widest">LIVE AT {project.displayDomain}</span>
+                          </span>
+                          <ArrowUpRight size={14} className="text-emerald-400 group-hover/showcase:translate-x-0.5 group-hover/showcase:-translate-y-0.5 transition-transform" />
+                        </div>
                       </div>
                     </a>
                   )}
 
-                  {/* Visual 3: Diplomatic Bilateral Bridge (India Center) */}
+                  {/* Visual 3: Indijas Centrs - Editorial Glass Showcase */}
                   {project.visualType === "india_center" && (
                     <a
                       href={project.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group/india block w-full max-w-xs sm:max-w-sm rounded-3xl bg-white/85 border-2 border-white/95 p-4 sm:p-5 flex flex-col justify-between shadow-xl backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] hover:border-[#10B981]/50 hover:shadow-2xl"
+                      className="group/showcase block w-full max-w-sm rounded-[2rem] bg-gradient-to-b from-white/95 to-amber-50/40 border-2 border-white/95 p-4 sm:p-5 shadow-xl backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:border-amber-500/60 hover:shadow-2xl relative overflow-hidden"
                     >
-                      <div className="flex items-center justify-between pb-3 border-b border-slate-200/80">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-11 h-11 rounded-xl bg-white p-1 shadow-sm border border-slate-200/80 flex items-center justify-center shrink-0">
-                            <Image
-                              src={project.logo}
-                              alt="India Center"
-                              width={38}
-                              height={38}
-                              className="object-contain"
-                            />
-                          </div>
-                          <div>
-                            <span className="font-sans font-black text-xs text-[#0F172A] uppercase tracking-wider block">
-                              INDIJASCENTRS.LV
-                            </span>
-                            <span className="font-sans font-medium text-[10px] text-slate-400">
-                              Indijas Centrs • Latvia
-                            </span>
-                          </div>
+                      {/* Signature Saffron Gold Ambient Backlight */}
+                      <div
+                        className="absolute -top-12 -right-12 w-48 h-48 rounded-full pointer-events-none opacity-35 blur-2xl group-hover/showcase:opacity-65 transition-opacity duration-500"
+                        style={{ background: "radial-gradient(circle, rgba(245,158,11,0.7) 0%, transparent 70%)" }}
+                      />
+
+                      {/* Top Header: Bilateral Liaison Tag */}
+                      <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 mb-3.5 relative z-10">
+                        <div className="flex items-center gap-2">
+                          <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-700 font-sans font-black text-[10px] uppercase tracking-wider">
+                            IN-LV // DIPLOMATIC BRIDGE
+                          </span>
+                          <span className="font-sans font-bold text-[10px] text-slate-500">
+                            Indijas Centrs • Latvia
+                          </span>
                         </div>
-                        <span className="font-sans font-black text-[10px] text-orange-600 px-2.5 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/20">
+                        <span className="font-sans font-black text-[10px] text-amber-700 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20">
                           LV / EN DUAL
                         </span>
                       </div>
 
-                      <div className="space-y-2 my-2.5">
-                        <div className="p-2.5 rounded-2xl bg-white/70 border border-slate-200/80">
-                          <div className="font-sans font-black text-[9px] text-slate-400 uppercase mb-0.5">
-                            BILATERAL DIPLOMATIC BRIDGE
-                          </div>
-                          <div className="font-sans font-black text-xs text-[#0F172A]">
-                            India • Latvia Cultural &amp; Trade Portal
-                          </div>
+                      {/* Hero Logo Stage (56px-64px Emblem) */}
+                      <div className="flex items-center justify-center p-4 rounded-2xl bg-gradient-to-b from-white to-slate-50/80 border border-slate-200/90 shadow-sm mb-3.5 relative z-10 group-hover/showcase:border-amber-400/50 transition-colors">
+                        <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
+                          <Image
+                            src={project.logo}
+                            alt="India Center Peacock Emblem"
+                            width={76}
+                            height={76}
+                            className="object-contain max-h-16 sm:max-h-20 w-auto drop-shadow-md group-hover/showcase:scale-105 transition-transform duration-300"
+                          />
                         </div>
-
-                        <div className="p-2.5 rounded-2xl bg-orange-500/10 border border-orange-500/20">
-                          <div className="font-sans font-black text-[9px] text-orange-700 uppercase mb-0.5">
-                            CONSULAR SCHEDULING BUS
+                        <div className="ml-4 flex-1">
+                          <div className="font-sans font-black text-xs sm:text-sm text-[#0F172A] uppercase tracking-wider mb-0.5">
+                            Bilateral Diplomatic Platform
                           </div>
-                          <div className="font-sans font-black text-xs text-orange-700">
-                            Academic &amp; Cultural Event Dispatch Active
+                          <div className="font-sans font-medium text-[11px] text-slate-500 leading-tight">
+                            India • Latvia Cultural &amp; Trade Portal • Consular Scheduling
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between pt-2 border-t border-slate-200/80">
-                        <span className="font-sans font-black text-[10px] text-slate-400 uppercase">
-                          EDGE DISTRIBUTION
-                        </span>
-                        <span className="font-sans font-black text-xs text-[#10B981] flex items-center gap-1">
-                          &lt; 18ms LATENCY
-                          <ExternalLink size={11} className="opacity-70 group-hover/india:translate-x-0.5 transition-transform" />
-                        </span>
+                      {/* Telemetry Monoliths */}
+                      <div className="space-y-2 mb-3.5 relative z-10">
+                        <div className="p-2.5 rounded-xl bg-white/80 border border-slate-200/80 flex items-center justify-between">
+                          <span className="font-sans font-black text-[9px] text-slate-400 uppercase tracking-wider">
+                            CONSULAR SCHEDULING
+                          </span>
+                          <span className="font-sans font-black text-xs text-[#0F172A]">
+                            Academic &amp; Event Dispatch
+                          </span>
+                        </div>
+                        <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-between">
+                          <span className="font-sans font-black text-[9px] text-amber-700 uppercase tracking-wider">
+                            EDGE LATENCY
+                          </span>
+                          <span className="font-sans font-black text-xs text-amber-700">
+                            &lt; 18ms Baltic Edge
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Dedicated Interactive Live Status Pill */}
+                      <div className="relative group/pill overflow-hidden rounded-full p-[1.5px] transition-all duration-300 relative z-10">
+                        <span className="absolute inset-0 bg-gradient-to-r from-amber-500 via-[#10B981] to-amber-500 opacity-0 group-hover/showcase:opacity-100 transition-opacity duration-300 animate-pulse" />
+                        <div className="relative flex items-center justify-between gap-3 px-4 py-2.5 rounded-full bg-[#0F172A] text-white font-sans font-black text-[11px] sm:text-xs uppercase tracking-wider shadow-md group-hover/showcase:bg-[#0F172A]/90 transition-colors">
+                          <span className="flex items-center gap-2">
+                            <span className="relative flex h-2 w-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                            </span>
+                            <span className="tracking-widest">LIVE AT {project.displayDomain}</span>
+                          </span>
+                          <ArrowUpRight size={14} className="text-emerald-400 group-hover/showcase:translate-x-0.5 group-hover/showcase:-translate-y-0.5 transition-transform" />
+                        </div>
                       </div>
                     </a>
                   )}
 
-                  {/* Visual 4: Global Commodity & Cross-Border Supply (Varti International) */}
+                  {/* Visual 4: Varti International - Editorial Glass Showcase */}
                   {project.visualType === "varti" && (
                     <a
                       href={project.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group/varti block w-full max-w-xs sm:max-w-sm rounded-3xl bg-white/85 border-2 border-white/95 p-4 sm:p-5 flex flex-col justify-between shadow-xl backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] hover:border-[#10B981]/50 hover:shadow-2xl"
+                      className="group/showcase block w-full max-w-sm rounded-[2rem] bg-gradient-to-b from-white/95 to-blue-50/40 border-2 border-white/95 p-4 sm:p-5 shadow-xl backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:border-blue-500/60 hover:shadow-2xl relative overflow-hidden"
                     >
-                      <div className="flex items-center justify-between pb-3 border-b border-slate-200/80">
-                        <div className="flex items-center gap-2.5">
-                          <div className="h-11 px-2.5 rounded-xl bg-white shadow-sm border border-slate-200/80 flex items-center justify-center shrink-0">
-                            <Image
-                              src={project.logo}
-                              alt="Varti International"
-                              width={90}
-                              height={30}
-                              className="object-contain max-h-8 w-auto"
-                            />
-                          </div>
-                          <div>
-                            <span className="font-sans font-black text-xs text-[#0F172A] uppercase tracking-wider block">
-                              VARTI INTERNATIONAL
-                            </span>
-                            <span className="font-sans font-medium text-[10px] text-slate-400">
-                              Global Agro &amp; Commodity
-                            </span>
-                          </div>
+                      {/* Signature Enterprise Sapphire Ambient Backlight */}
+                      <div
+                        className="absolute -top-12 -right-12 w-48 h-48 rounded-full pointer-events-none opacity-35 blur-2xl group-hover/showcase:opacity-65 transition-opacity duration-500"
+                        style={{ background: "radial-gradient(circle, rgba(37,99,235,0.7) 0%, transparent 70%)" }}
+                      />
+
+                      {/* Top Header: Global Export Tag */}
+                      <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 mb-3.5 relative z-10">
+                        <div className="flex items-center gap-2">
+                          <span className="px-2.5 py-0.5 rounded-full bg-blue-600/10 border border-blue-600/20 text-blue-700 font-sans font-black text-[10px] uppercase tracking-wider">
+                            GLOBAL-SUPPLY // AGRO
+                          </span>
+                          <span className="font-sans font-bold text-[10px] text-slate-500">
+                            Varti International Corp
+                          </span>
                         </div>
-                        <span className="font-sans font-black text-[10px] text-[#059669] px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                          EXPORT
+                        <span className="font-sans font-black text-[10px] text-blue-700 px-2.5 py-0.5 rounded-full bg-blue-600/10 border border-blue-600/20">
+                          INSTITUTIONAL
                         </span>
                       </div>
 
-                      <div className="space-y-2 my-2.5">
-                        <div className="p-2.5 rounded-2xl bg-white/70 border border-slate-200/80">
-                          <div className="font-sans font-black text-[9px] text-slate-400 uppercase mb-0.5">
-                            COMMODITY TRADING MATRIX
-                          </div>
-                          <div className="font-sans font-black text-xs text-[#0F172A]">
-                            Automated Multi-Currency Export Pipeline
-                          </div>
-                        </div>
-
-                        <div className="p-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-                          <div className="font-sans font-black text-[9px] text-[#059669] uppercase mb-0.5">
-                            BUYER VERIFICATION ENGINE
-                          </div>
-                          <div className="font-sans font-black text-xs text-[#059669]">
-                            Cross-Border Compliance &amp; Freight Routing
-                          </div>
+                      {/* Hero Logo Stage (56px-64px Emblem) */}
+                      <div className="flex items-center justify-center p-4 rounded-2xl bg-gradient-to-b from-white to-slate-50/80 border border-slate-200/90 shadow-sm mb-3.5 relative z-10 group-hover/showcase:border-blue-400/50 transition-colors">
+                        <div className="relative w-full max-w-[210px] h-16 sm:h-20 flex items-center justify-center">
+                          <Image
+                            src={project.logo}
+                            alt="Varti International Logo"
+                            width={190}
+                            height={64}
+                            className="object-contain max-h-12 sm:max-h-16 w-auto drop-shadow-md group-hover/showcase:scale-105 transition-transform duration-300"
+                          />
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between pt-2 border-t border-slate-200/80">
-                        <span className="font-sans font-black text-[10px] text-slate-400 uppercase">
-                          SETTLEMENT CURRENCY
-                        </span>
-                        <span className="font-sans font-black text-xs text-[#10B981] flex items-center gap-1">
-                          EUR • USD • MULTI
-                          <ExternalLink size={11} className="opacity-70 group-hover/varti:translate-x-0.5 transition-transform" />
-                        </span>
+                      {/* Telemetry Monoliths */}
+                      <div className="space-y-2 mb-3.5 relative z-10">
+                        <div className="p-2.5 rounded-xl bg-white/80 border border-slate-200/80 flex items-center justify-between">
+                          <span className="font-sans font-black text-[9px] text-slate-400 uppercase tracking-wider">
+                            COMMODITY PIPELINE
+                          </span>
+                          <span className="font-sans font-black text-xs text-[#0F172A]">
+                            Multi-Currency Automated Settlement
+                          </span>
+                        </div>
+                        <div className="p-2.5 rounded-xl bg-blue-600/10 border border-blue-600/20 flex items-center justify-between">
+                          <span className="font-sans font-black text-[9px] text-blue-700 uppercase tracking-wider">
+                            BUYER VERIFICATION
+                          </span>
+                          <span className="font-sans font-black text-xs text-blue-700">
+                            Institutional Security Tier
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Dedicated Interactive Live Status Pill */}
+                      <div className="relative group/pill overflow-hidden rounded-full p-[1.5px] transition-all duration-300 relative z-10">
+                        <span className="absolute inset-0 bg-gradient-to-r from-blue-600 via-[#10B981] to-blue-600 opacity-0 group-hover/showcase:opacity-100 transition-opacity duration-300 animate-pulse" />
+                        <div className="relative flex items-center justify-between gap-3 px-4 py-2.5 rounded-full bg-[#0F172A] text-white font-sans font-black text-[11px] sm:text-xs uppercase tracking-wider shadow-md group-hover/showcase:bg-[#0F172A]/90 transition-colors">
+                          <span className="flex items-center gap-2">
+                            <span className="relative flex h-2 w-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                            </span>
+                            <span className="tracking-widest">LIVE AT {project.displayDomain}</span>
+                          </span>
+                          <ArrowUpRight size={14} className="text-emerald-400 group-hover/showcase:translate-x-0.5 group-hover/showcase:-translate-y-0.5 transition-transform" />
+                        </div>
                       </div>
                     </a>
                   )}

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { memo, useState, useEffect, useRef } from "react";
-import { ArrowDown, Compass } from "lucide-react";
+import { ArrowDown, Compass, Zap, Cpu, Layers } from "lucide-react";
 
 interface MonumentalHeroProps {
   onExplore: () => void;
@@ -115,14 +115,17 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore }
 
         {/* Interactive Engineering Capsules */}
         <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 max-w-2xl mx-auto px-2">
-          <div className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/80 border border-slate-200/80 backdrop-blur-md font-sans font-black text-[10px] sm:text-[11px] text-[#0F172A] uppercase tracking-wider shadow-xs">
-            ⚡ 278-Key Instant Translation
+          <div className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/80 border border-slate-200/80 backdrop-blur-md font-sans font-black text-[10px] sm:text-[11px] text-[#0F172A] uppercase tracking-wider shadow-xs">
+            <Zap size={12} className="text-[#10B981] shrink-0" />
+            <span>278-Key Instant Translation</span>
           </div>
-          <div className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/80 border border-slate-200/80 backdrop-blur-md font-sans font-black text-[10px] sm:text-[11px] text-[#0F172A] uppercase tracking-wider shadow-xs">
-            🧠 Real-Time Tensor Pipelines
+          <div className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/80 border border-slate-200/80 backdrop-blur-md font-sans font-black text-[10px] sm:text-[11px] text-[#0F172A] uppercase tracking-wider shadow-xs">
+            <Cpu size={12} className="text-[#10B981] shrink-0" />
+            <span>Real-Time Tensor Pipelines</span>
           </div>
-          <div className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/80 border border-slate-200/80 backdrop-blur-md font-sans font-black text-[10px] sm:text-[11px] text-[#0F172A] uppercase tracking-wider shadow-xs">
-            🌐 60 FPS WebGL Spatial Canvas
+          <div className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/80 border border-slate-200/80 backdrop-blur-md font-sans font-black text-[10px] sm:text-[11px] text-[#0F172A] uppercase tracking-wider shadow-xs">
+            <Layers size={12} className="text-[#10B981] shrink-0" />
+            <span>60 FPS WebGL Spatial Canvas</span>
           </div>
         </div>
       </div>

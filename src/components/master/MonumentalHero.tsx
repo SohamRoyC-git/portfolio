@@ -3,7 +3,7 @@
 import React, { memo, useState, useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
-import { ArrowDown, ArrowUpRight, Compass, Zap, Cpu, Layers, Sparkles } from "lucide-react";
+import { ArrowDown, ArrowUpRight, Compass, Sparkles } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -43,7 +43,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
     const ctx = gsap.context(() => {
       // Parallax-shift and dissolve the living video background seamlessly into Movement 01
       gsap.to(videoWrapperRef.current, {
-        y: 90,
+        y: 80,
         opacity: 0,
         ease: "none",
         scrollTrigger: {
@@ -71,12 +71,12 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
     <section
       id="monument-hero"
       ref={sectionRef}
-      className="relative min-h-[105svh] flex flex-col justify-between pt-24 sm:pt-28 pb-20 sm:pb-28 px-4 sm:px-8 md:px-12 z-10 select-none overflow-visible"
+      className="relative min-h-[100svh] flex flex-col justify-between pt-24 sm:pt-28 pb-12 sm:pb-16 px-4 sm:px-8 md:px-12 z-10 select-none overflow-visible"
     >
       {/* 1. Living Cyber-Pastoral Terrace Video with Feathered Progressive Alpha Bleed */}
       <div
         ref={videoWrapperRef}
-        className="absolute inset-0 -bottom-20 sm:-bottom-28 z-0 pointer-events-none select-none overflow-hidden will-change-transform"
+        className="absolute inset-0 -bottom-16 sm:-bottom-24 z-0 pointer-events-none select-none overflow-hidden will-change-transform"
         style={{
           maskImage:
             "linear-gradient(to bottom, black 0%, black 50%, rgba(0,0,0,0.92) 66%, rgba(0,0,0,0.35) 84%, transparent 100%)",
@@ -97,183 +97,92 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
           <source src="/assets/kling_20261028_VIDEO_Gentle_mor_4625_0.mp4" type="video/mp4" />
         </video>
 
-        {/* Ambient Top Sky Overlay for High-Contrast Heading & Telemetry Readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-white/10 to-transparent pointer-events-none z-10" />
+        {/* Soft Ambient Sky Vignette for High-Contrast Heading Readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-white/40 pointer-events-none z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-transparent pointer-events-none z-10" />
 
         {/* Deep Multi-Stop Bleed Gradient Dissolving the Video into #FAFAF9 */}
-        <div className="absolute inset-x-0 bottom-0 h-72 sm:h-96 bg-gradient-to-t from-[#FAFAF9] via-[#FAFAF9]/95 via-[#FAFAF9]/45 to-transparent pointer-events-none z-10" />
+        <div className="absolute inset-x-0 bottom-0 h-64 sm:h-80 bg-gradient-to-t from-[#FAFAF9] via-[#FAFAF9]/95 via-[#FAFAF9]/45 to-transparent pointer-events-none z-10" />
       </div>
-
-      {/* Embedded High-Performance GPU Keyframe Styles */}
-      <style jsx global>{`
-        @keyframes tagHoverFloat {
-          0%, 100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-6px);
-          }
-        }
-      `}</style>
 
       {/* Top Telemetry Header Bar */}
       <div className="relative z-20 flex items-center justify-between w-full max-w-7xl mx-auto">
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/70 border border-white/80 shadow-xs backdrop-blur-md">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#10B981] opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-[#10B981]" />
           </span>
-          <span className="font-sans font-black text-[11px] sm:text-xs text-[#0F172A] tracking-widest uppercase drop-shadow-xs">
-            PORTFOLIO // 2026 EDITION
+          <span className="font-sans font-black text-[10px] sm:text-[11px] text-[#0F172A] tracking-wider uppercase">
+            PORTFOLIO // 2026
           </span>
         </div>
 
         {/* Live Kolkata Clock & Availability Pill */}
-        <div className="flex items-center gap-3">
-          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/90 border border-slate-200/90 shadow-xs backdrop-blur-md">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/70 border border-white/80 shadow-xs backdrop-blur-md">
             <Compass size={12} className="text-[#10B981]" />
-            <span className="font-sans font-black text-[11px] text-[#0F172A] uppercase tracking-wider">
-              KOLKATA {timeStr || "01:00:00"} IST
+            <span className="font-sans font-black text-[10px] sm:text-[11px] text-[#0F172A] uppercase tracking-wider">
+              KOLKATA {timeStr || "00:00:00"} IST
             </span>
           </div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[#059669] font-sans font-black text-[10px] sm:text-[11px] uppercase tracking-wider shadow-xs backdrop-blur-sm">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[#059669] font-sans font-black text-[10px] sm:text-[11px] uppercase tracking-wider shadow-xs backdrop-blur-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
             <span>OPEN FOR ROLES</span>
           </div>
         </div>
       </div>
 
-      {/* Main 2-Column Asymmetric Content Grid (The Cofounder Composition) */}
-      <div className="relative z-20 my-auto w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center py-6 sm:py-10">
-        {/* Left Column: Bold Typography & Action Controls (7 Cols) */}
-        <div className="lg:col-span-7 flex flex-col justify-center text-left">
-          {/* Institutional Origin Eyebrow */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 border border-slate-200/90 shadow-xs backdrop-blur-md mb-4 sm:mb-5 hover:border-[#10B981]/50 transition-colors w-fit">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] shrink-0" />
-            <span className="font-sans font-black text-[10px] sm:text-xs text-[#0F172A] tracking-wider uppercase truncate">
-              Netaji Subhash Engineering College (2024–2028) · Kolkata, India
-            </span>
+      {/* Main Grid: Left side open for animated desk & scenery; Right side hosts cinematic text */}
+      <div className="relative z-20 my-auto w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center py-6 sm:py-10">
+        {/* Left Column (Empty & Open so the terrace desk, coffee steam & laptop shine through) */}
+        <div className="hidden lg:block lg:col-span-6 xl:col-span-7 pointer-events-none" />
+
+        {/* Right Column: Sleek, Decluttered, Cinematic Typography */}
+        <div className="col-span-12 lg:col-span-6 xl:col-span-5 flex flex-col justify-center text-left bg-white/40 lg:bg-white/55 backdrop-blur-md p-6 sm:p-8 rounded-3xl border border-white/80 shadow-[0_8px_32px_rgba(15,23,42,0.06)]">
+          {/* Subtle Institutional Eyebrow */}
+          <div className="inline-flex items-center gap-2 text-[10px] sm:text-xs font-sans font-black uppercase tracking-wider text-[#059669] mb-3">
+            <Sparkles size={13} className="text-[#10B981]" />
+            <span>Netaji Subhash Engineering College (2024–2028)</span>
           </div>
 
-          {/* Monumental Headline with Crisp Readability */}
-          <h1 className="font-sans font-black text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-[5.4rem] xl:text-[6.4rem] text-[#0F172A] uppercase tracking-tighter leading-[0.92] mb-4 sm:mb-5 drop-shadow-sm">
+          {/* Cinematic Headline (Smaller, refined, high-end film title feel) */}
+          <h1 className="font-sans font-black text-2xl xs:text-3xl sm:text-4xl lg:text-[2.65rem] text-[#0F172A] uppercase tracking-[0.05em] leading-[1.08] mb-3 drop-shadow-xs">
             SOHAM <br />
-            <span className="bg-gradient-to-r from-[#0F172A] via-slate-800 to-slate-700 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#0F172A] via-slate-800 to-[#10B981] bg-clip-text text-transparent">
               ROYCHOUDHURY
             </span>
           </h1>
 
-          {/* Editorial Subtitle in Apple Garamond Light Italic */}
-          <p className="font-serif italic font-light text-xl sm:text-2xl md:text-3xl text-slate-900 tracking-normal leading-relaxed max-w-2xl mb-6 sm:mb-8 drop-shadow-xs">
+          {/* Editorial Subtitle in Elegant Light Italic Serif */}
+          <p className="font-serif italic font-normal text-base sm:text-lg text-slate-800 leading-relaxed mb-6">
             Artificial Intelligence &amp; Machine Learning · Frontend Architect · Digital Operations
           </p>
 
-          {/* Dual Action Buttons (The Cofounder Pill Triggers) */}
-          <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+          {/* Dual Action Controls */}
+          <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={onExplore}
-              className="group inline-flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-full bg-[#0F172A] text-white hover:bg-[#10B981] transition-all duration-300 font-sans font-black text-xs uppercase tracking-wider cursor-pointer shadow-lg active:scale-98"
+              className="group inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-[#0F172A] text-white hover:bg-[#10B981] transition-all duration-300 font-sans font-black text-[11px] sm:text-xs uppercase tracking-wider cursor-pointer shadow-md active:scale-98"
             >
-              <span>Explore Selected Work</span>
-              <ArrowDown size={14} className="group-hover:translate-y-1 transition-transform" />
+              <span>Explore Work</span>
+              <ArrowDown size={13} className="group-hover:translate-y-0.5 transition-transform" />
             </button>
 
             <button
               onClick={handleConnectClick}
-              className="group inline-flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-full bg-white/90 hover:bg-white text-[#0F172A] hover:border-[#10B981]/50 border border-slate-200/90 transition-all duration-300 font-sans font-black text-xs uppercase tracking-wider cursor-pointer shadow-md backdrop-blur-md active:scale-98"
+              className="group inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-white/90 hover:bg-white text-[#0F172A] border border-slate-200/90 transition-all duration-300 font-sans font-black text-[11px] sm:text-xs uppercase tracking-wider cursor-pointer shadow-xs backdrop-blur-md active:scale-98"
             >
               <span>Get In Touch</span>
-              <ArrowUpRight size={14} className="text-[#10B981] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              <ArrowUpRight size={13} className="text-[#10B981] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </button>
-          </div>
-
-          {/* Interactive Engineering Capsules (Clean Vector Icons, Zero Emojis) */}
-          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-            <div className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-white/90 border border-slate-200/90 backdrop-blur-md font-sans font-black text-[10px] sm:text-[11px] text-[#0F172A] uppercase tracking-wider shadow-xs">
-              <Zap size={12} className="text-[#10B981] shrink-0" />
-              <span>278-Key Instant Translation</span>
-            </div>
-            <div className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-white/90 border border-slate-200/90 backdrop-blur-md font-sans font-black text-[10px] sm:text-[11px] text-[#0F172A] uppercase tracking-wider shadow-xs">
-              <Cpu size={12} className="text-[#10B981] shrink-0" />
-              <span>Real-Time Tensor Pipelines</span>
-            </div>
-            <div className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-white/90 border border-slate-200/90 backdrop-blur-md font-sans font-black text-[10px] sm:text-[11px] text-[#0F172A] uppercase tracking-wider shadow-xs">
-              <Layers size={12} className="text-[#10B981] shrink-0" />
-              <span>60 FPS WebGL Spatial Canvas</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column: Spatial Sphere Focal Stage & Floating Status Tags (5 Cols) */}
-        <div className="lg:col-span-5 relative flex flex-col items-center justify-center min-h-[300px] sm:min-h-[380px] lg:min-h-[460px]">
-          {/* Floating Acrylic Status Tags */}
-          <div className="w-full flex flex-col items-end gap-3 z-20 pointer-events-auto">
-            {/* Tag 1: Active Availability */}
-            <div
-              className="px-4 py-2 rounded-2xl bg-white/90 border border-white/95 shadow-md backdrop-blur-xl flex items-center gap-2.5 transition-all duration-300 hover:scale-102 hover:border-[#10B981]/50"
-              style={{ animation: "tagHoverFloat 5s ease-in-out infinite" }}
-            >
-              <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
-              <div className="text-left font-sans">
-                <div className="text-[10px] font-black uppercase text-slate-400 leading-none mb-0.5">
-                  STATUS
-                </div>
-                <div className="text-xs font-black text-[#0F172A]">
-                  Open for Frontend &amp; AI/ML Roles
-                </div>
-              </div>
-            </div>
-
-            {/* Tag 2: Institutional Origin */}
-            <div
-              className="px-4 py-2 rounded-2xl bg-white/90 border border-white/95 shadow-md backdrop-blur-xl flex items-center gap-2.5 transition-all duration-300 hover:scale-102 hover:border-[#10B981]/50"
-              style={{ animation: "tagHoverFloat 6s ease-in-out infinite 1.2s" }}
-            >
-              <Sparkles size={13} className="text-[#10B981]" />
-              <div className="text-left font-sans">
-                <div className="text-[10px] font-black uppercase text-slate-400 leading-none mb-0.5">
-                  ACADEMIC
-                </div>
-                <div className="text-xs font-black text-[#0F172A]">
-                  NSEC Kolkata (2024–2028)
-                </div>
-              </div>
-            </div>
-
-            {/* Tag 3: Interactive Sphere Prompt */}
-            <div
-              className="px-4 py-2 rounded-2xl bg-slate-900/90 border border-slate-700/80 text-white shadow-lg backdrop-blur-xl flex items-center gap-2.5 transition-all duration-300 hover:scale-102 hover:border-[#10B981]/60"
-              style={{ animation: "tagHoverFloat 5.5s ease-in-out infinite 2.5s" }}
-            >
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              <div className="text-left font-sans">
-                <div className="text-[10px] font-black uppercase text-emerald-400 leading-none mb-0.5">
-                  ORBITAL CORE
-                </div>
-                <div className="text-xs font-black text-white">
-                  Double-click Sphere to Orbit
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
 
-      {/* Bottom Architectural Studio Coordinates Bar */}
-      <div className="relative z-20 w-full max-w-7xl mx-auto flex items-center justify-between pt-4 border-t border-slate-300/60">
-        <div className="font-sans font-black text-[11px] text-slate-600 uppercase tracking-widest hidden sm:flex items-center gap-2">
-          <span>LAT 22.5726° N</span>
-          <span>·</span>
-          <span>LON 88.3639° E</span>
-        </div>
-
-        <div className="font-sans font-black text-[11px] text-slate-600 uppercase tracking-widest mx-auto sm:mx-0">
-          CYBER-PASTORAL TERRACE // 2026
-        </div>
-
-        <div className="font-sans font-black text-[11px] text-slate-600 uppercase tracking-widest hidden sm:flex items-center gap-2">
-          <span>STUDIO GHIBLI x CYBERPUNK</span>
-        </div>
+      {/* Bottom Coordinates Bar (Clean & Subtle) */}
+      <div className="relative z-20 w-full max-w-7xl mx-auto flex items-center justify-between pt-3 border-t border-slate-300/40 text-[10px] sm:text-[11px] font-sans font-black text-slate-600 uppercase tracking-widest">
+        <span>KOLKATA // LAT 22.5726° N · LON 88.3639° E</span>
+        <span className="hidden sm:inline">CYBER-PASTORAL TERRACE</span>
       </div>
     </section>
   );

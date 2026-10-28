@@ -73,7 +73,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
       ref={sectionRef}
       className="relative min-h-[100svh] flex flex-col justify-between pt-24 sm:pt-28 pb-12 sm:pb-16 px-4 sm:px-8 md:px-12 z-10 select-none overflow-visible"
     >
-      {/* 1. Living Cyber-Pastoral Terrace Video with Feathered Progressive Alpha Bleed */}
+      {/* 1. Living Pixel-Art Environment Video with Feathered Progressive Alpha Bleed */}
       <div
         ref={videoWrapperRef}
         className="absolute inset-0 -bottom-16 sm:-bottom-24 z-0 pointer-events-none select-none overflow-hidden will-change-transform"
@@ -84,7 +84,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             "linear-gradient(to bottom, black 0%, black 50%, rgba(0,0,0,0.92) 66%, rgba(0,0,0,0.35) 84%, transparent 100%)",
         }}
       >
-        {/* Seamlessly Looping Video Rendered with Native Physics */}
+        {/* Seamlessly Looping Pixel Art Environment Video */}
         <video
           autoPlay
           loop
@@ -93,8 +93,8 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
           preload="auto"
           className="w-full h-full object-cover object-bottom"
         >
-          <source src="/assets/hero_ghibli_loop.mp4" type="video/mp4" />
-          <source src="/assets/kling_20261028_VIDEO_Gentle_mor_4625_0.mp4" type="video/mp4" />
+          <source src="/assets/hero_pixel_art_loop.mp4" type="video/mp4" />
+          <source src="/assets/Animate_pixel_art_environment_loop_03a9505a.mp4" type="video/mp4" />
         </video>
 
         {/* Soft Ambient Sky Vignette for High-Contrast Heading Readability */}
@@ -132,20 +132,20 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         </div>
       </div>
 
-      {/* Main Grid: Left side open for animated desk & scenery; Right side hosts cinematic text */}
+      {/* Main Grid: Left side open for living pixel-art scene; Right side hosts cinematic text */}
       <div className="relative z-20 my-auto w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center py-6 sm:py-10">
-        {/* Left Column (Empty & Open so the terrace desk, coffee steam & laptop shine through) */}
+        {/* Left Column (Open & Uncluttered so the pixel art animation shines through) */}
         <div className="hidden lg:block lg:col-span-6 xl:col-span-7 pointer-events-none" />
 
         {/* Right Column: Sleek, Decluttered, Cinematic Typography */}
-        <div className="col-span-12 lg:col-span-6 xl:col-span-5 flex flex-col justify-center text-left bg-white/40 lg:bg-white/55 backdrop-blur-md p-6 sm:p-8 rounded-3xl border border-white/80 shadow-[0_8px_32px_rgba(15,23,42,0.06)]">
+        <div className="col-span-12 lg:col-span-6 xl:col-span-5 flex flex-col justify-center text-left bg-white/45 lg:bg-white/60 backdrop-blur-md p-6 sm:p-8 rounded-3xl border border-white/85 shadow-[0_8px_32px_rgba(15,23,42,0.06)]">
           {/* Subtle Institutional Eyebrow */}
           <div className="inline-flex items-center gap-2 text-[10px] sm:text-xs font-sans font-black uppercase tracking-wider text-[#059669] mb-3">
             <Sparkles size={13} className="text-[#10B981]" />
             <span>Netaji Subhash Engineering College (2024–2028)</span>
           </div>
 
-          {/* Cinematic Headline (Smaller, refined, high-end film title feel) */}
+          {/* Cinematic Headline (Clean, elegant, film title typography) */}
           <h1 className="font-sans font-black text-2xl xs:text-3xl sm:text-4xl lg:text-[2.65rem] text-[#0F172A] uppercase tracking-[0.05em] leading-[1.08] mb-3 drop-shadow-xs">
             SOHAM <br />
             <span className="bg-gradient-to-r from-[#0F172A] via-slate-800 to-[#10B981] bg-clip-text text-transparent">

@@ -1,9 +1,74 @@
 "use client";
 
-import React, { memo } from "react";
+import React, { memo, useEffect, useRef } from "react";
 import Image from "next/image";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export const SilkyFluidBackdrop: React.FC = memo(() => {
+  const mobileBgWrapperRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) return;
+
+    const mm = gsap.matchMedia();
+
+    // =========================================================================
+    // MOBILE STORYTELLING CHROMATIC TRANSITIONS (< 768px):
+    // Smooth temperature shifts per movement
+    // =========================================================================
+    mm.add("(max-width: 767px)", () => {
+      const hueObj = { val: 0 };
+
+      const setHue = (targetHue: number) => {
+        gsap.to(hueObj, {
+          val: targetHue,
+          duration: 1.1,
+          ease: "power2.out",
+          overwrite: "auto",
+          onUpdate: () => {
+            if (mobileBgWrapperRef.current) {
+              mobileBgWrapperRef.current.style.filter = `hue-rotate(${hueObj.val.toFixed(1)}deg)`;
+            }
+          },
+        });
+      };
+
+      const sections = [
+        { id: "monument-hero", hue: 0 },
+        { id: "monument-statement", hue: 25 },
+        { id: "monument-exhibition", hue: 115 },
+        { id: "monument-matrix", hue: 180 },
+        { id: "monument-terminal", hue: -20 },
+      ];
+
+      const triggers: ScrollTrigger[] = [];
+
+      sections.forEach((sec) => {
+        const el = document.getElementById(sec.id);
+        if (!el) return;
+
+        const st = ScrollTrigger.create({
+          trigger: el,
+          start: "top 60%",
+          end: "bottom 40%",
+          onEnter: () => setHue(sec.hue),
+          onEnterBack: () => setHue(sec.hue),
+        });
+        triggers.push(st);
+      });
+
+      return () => {
+        triggers.forEach((t) => t.kill());
+      };
+    });
+
+    return () => mm.revert();
+  }, []);
+
   return (
     <div
       className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none bg-[#FAFAF9] max-md:bg-[#0C0C0E]"
@@ -16,9 +81,13 @@ export const SilkyFluidBackdrop: React.FC = memo(() => {
     >
       {/* ========================================================================= */}
       {/* MOBILE EXPERIENCE (< 768px): REFERENCE-MATCHED SMOKY EMBER FLUID WAVE    */}
-      {/* (Direct visual match to user reference: deep matte charcoal + organic ribbon)*/}
+      {/* (Option 2: Chromatic Section Storytelling across movements)               */}
       {/* ========================================================================= */}
-      <div className="md:hidden absolute inset-0 overflow-hidden bg-[#0C0C0E]">
+      <div
+        ref={mobileBgWrapperRef}
+        className="md:hidden absolute inset-0 overflow-hidden bg-[#0C0C0E] will-change-[filter]"
+        style={{ filter: "hue-rotate(0deg)" }}
+      >
         <Image
           src="/assets/mobile_fluid_ember_reference.jpg"
           alt=""

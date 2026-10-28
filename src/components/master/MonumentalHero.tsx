@@ -35,24 +35,30 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
 
     // =========================================================================
     // MOBILE TIMELINE (< 768px):
-    // 100% GPU-Composited Silky Smooth Lens Iris & Kinetic Materialization
+    // Organic Ellipse Eclipse Dissolve & Kinetic Identity Materialization
     // =========================================================================
     mm.add("(max-width: 767px)", () => {
       if (!mobileContainerRef.current) return;
 
-      // 1. Initial GPU-Composited States
-      if (irisOverlayRef.current) {
-        gsap.set(irisOverlayRef.current, {
-          scale: 1,
-          transformOrigin: "50% 50%",
-        });
-      }
+      // 1. Initial State: Photographic Elliptical Aperture (Wide open at 150%)
+      const irisData = { r: 150 };
+
+      const updateIrisMask = (r: number) => {
+        if (!irisOverlayRef.current) return;
+        const inner = Math.max(0, r);
+        const outer = Math.max(0, r + 24);
+        const mask = `radial-gradient(ellipse 70% 60% at 56% 52%, transparent 0%, transparent ${inner.toFixed(1)}%, black ${outer.toFixed(1)}%, black 100%)`;
+        irisOverlayRef.current.style.webkitMaskImage = mask;
+        irisOverlayRef.current.style.maskImage = mask;
+      };
+
+      updateIrisMask(150);
 
       if (mobileIdentityRef.current) {
         gsap.set(mobileIdentityRef.current, {
           opacity: 0,
           y: 35,
-          scale: 0.95,
+          scale: 0.96,
           pointerEvents: "none",
         });
       }
@@ -61,7 +67,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         gsap.set(laptopCueRef.current, { opacity: 1, y: 0 });
       }
 
-      // 2. Idle Levitation for the Laptop Micro-Cue
+      // 2. Continuous Idle Levitation on Laptop Micro-Cue
       let cueTween: gsap.core.Tween | null = null;
       if (laptopCueRef.current) {
         cueTween = gsap.to(laptopCueRef.current, {
@@ -73,13 +79,13 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         });
       }
 
-      // 3. Silky 1:1 Responsive Scrub Timeline (zero rubber-band lag, 120 FPS compositor)
+      // 3. Silky Continuous Scroll Scrub Timeline (Aesthetic, organic & fluid)
       const masterTl = gsap.timeline({
         scrollTrigger: {
           trigger: mobileContainerRef.current,
           start: "top top",
           end: "bottom bottom",
-          scrub: 0.2, // Ultra-responsive tactile tracking with user touch momentum
+          scrub: 0.35, // Buttery smooth touch momentum tracking
           onUpdate: (self) => {
             if (mobileIdentityRef.current) {
               mobileIdentityRef.current.style.pointerEvents =
@@ -89,7 +95,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         },
       });
 
-      // Phase 1 (0 -> 25%): Laptop micro-cue & terrace coordinates dissolve
+      // Phase 1 (0 -> 24%): Laptop micro-cue & terrace footer gracefully dissolve
       if (laptopCueRef.current) {
         masterTl.to(
           laptopCueRef.current,
@@ -116,33 +122,35 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         );
       }
 
-      // Phase 2 (0 -> 46%): 100% Hardware GPU-Accelerated Lens Iris Scale Down (Zero CPU/SVG repaint bottleneck)
-      if (irisOverlayRef.current) {
-        masterTl.to(
-          irisOverlayRef.current,
-          {
-            scale: 0,
-            duration: 0.46,
-            ease: "power2.inOut",
+      // Phase 2 (0 -> 50%): Photographic Ellipse Contracts Smoothly to Zero (Zero square edges!)
+      masterTl.to(
+        irisData,
+        {
+          r: -24,
+          duration: 0.50,
+          ease: "power2.inOut",
+          onUpdate: () => {
+            updateIrisMask(irisData.r);
           },
-          0
-        );
-      }
+        },
+        0
+      );
 
+      // Terrace video subtle camera depth and luminance dissolve
       if (mobileVideoWrapperRef.current) {
         masterTl.to(
           mobileVideoWrapperRef.current,
           {
-            scale: 0.96,
-            opacity: 0,
-            duration: 0.46,
+            scale: 0.95,
+            opacity: 0.25,
+            duration: 0.50,
             ease: "power1.inOut",
           },
           0
         );
       }
 
-      // Phase 3 (38% -> 76%): Monumental Header materializes cleanly with GPU opacity & translation
+      // Phase 3 (38% -> 76%): Monumental Header materializes from the deep black frame
       if (mobileIdentityRef.current) {
         masterTl.to(
           mobileIdentityRef.current,
@@ -157,7 +165,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         );
       }
 
-      // Phase 4 (76% -> 100%): Luxury hold period before unpinning smoothly into Movement 01
+      // Phase 4 (76% -> 100%): Luxury hold period before unpinning seamlessly into Movement 01
       masterTl.to({}, { duration: 0.24 });
 
       return () => {
@@ -225,19 +233,10 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             </video>
           </div>
 
-          {/* 2. 100% GPU-Composited Photographic Lens Iris / Eclipse Dissolve Layer */}
+          {/* 2. Full-Screen Photographic Elliptical Aperture Overlay (Always stays a perfect ellipse!) */}
           <div
             ref={irisOverlayRef}
-            className="absolute pointer-events-none z-10 will-change-transform"
-            style={{
-              left: "56%",
-              top: "52%",
-              width: "360vmax",
-              height: "360vmax",
-              transform: "translate3d(-50%, -50%, 0) scale(1)",
-              background:
-                "radial-gradient(circle at 50% 50%, transparent 0%, transparent 20%, rgba(0,0,0,0.45) 28%, rgba(0,0,0,0.92) 38%, #000000 48%, #000000 100%)",
-            }}
+            className="absolute inset-0 z-10 pointer-events-none bg-[#000000] will-change-[mask-image]"
           />
 
           {/* 3. Understated Editorial Swiss Laptop Micro-Cue (Anchored above laptop) */}
@@ -250,17 +249,18 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               transform: "translate(-50%, -100%)",
             }}
           >
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/80 border border-white/20 backdrop-blur-md shadow-2xl">
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/85 border border-white/20 backdrop-blur-md shadow-2xl">
               <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-              <span className="font-sans font-bold text-[9px] tracking-[0.22em] text-white/95 uppercase">
-                TERRACE 01
+              <span className="font-sans font-bold text-[9px] tracking-[0.2em] text-white/95 uppercase">
+                TERRACE
               </span>
               <span className="text-white/30 text-[8px]">•</span>
-              <span className="font-sans font-medium text-[9px] tracking-widest text-slate-300 uppercase flex items-center gap-1">
-                SCROLL
-                <ArrowDown size={9} className="text-white/80 animate-bounce" />
+              <span className="font-sans font-medium text-[9px] tracking-wider text-slate-200 uppercase flex items-center gap-1.5">
+                <span>Scroll to see portfolio</span>
+                <ArrowDown size={10} className="text-white/90 animate-bounce" />
               </span>
             </div>
+            {/* Minimalist hairline pointer stem */}
             <div className="w-[1px] h-3.5 bg-gradient-to-b from-white/40 to-transparent mx-auto" />
             <div className="w-1 h-1 rounded-full bg-white/60 mx-auto -mt-0.5" />
           </div>

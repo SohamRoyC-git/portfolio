@@ -1,6 +1,7 @@
 "use client";
 
 import React, { memo, useEffect, useRef } from "react";
+import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { ArrowDown, ArrowUpRight, Sparkles } from "lucide-react";
@@ -16,6 +17,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
   // Mobile Refs
   const mobileContainerRef = useRef<HTMLDivElement | null>(null);
   const mobileVideoWrapperRef = useRef<HTMLDivElement | null>(null);
+  const mobileFluidBackdropRef = useRef<HTMLDivElement | null>(null);
   const irisOverlayRef = useRef<HTMLDivElement | null>(null);
   const laptopCueRef = useRef<HTMLDivElement | null>(null);
   const mobileIdentityRef = useRef<HTMLDivElement | null>(null);
@@ -63,6 +65,10 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         gsap.set(mobileVideoWrapperRef.current, { opacity: 1, scale: 1 });
       }
 
+      if (mobileFluidBackdropRef.current) {
+        gsap.set(mobileFluidBackdropRef.current, { opacity: 0 });
+      }
+
       if (mobileIdentityRef.current) {
         gsap.set(mobileIdentityRef.current, {
           opacity: 0,
@@ -89,6 +95,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
       }
 
       // 3. Silky Continuous Scroll Scrub Timeline (Aesthetic, organic & fluid)
+      // Generous scroll distance ensures ellipse finishes completely with 0% of next section visible
       const masterTl = gsap.timeline({
         scrollTrigger: {
           trigger: mobileContainerRef.current,
@@ -104,7 +111,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         },
       });
 
-      // Phase 1 (0 -> 22%): Laptop micro-cue & terrace footer dissolve
+      // Phase 1 (0 -> 15%): Laptop micro-cue & terrace footer dissolve early
       if (laptopCueRef.current) {
         masterTl.to(
           laptopCueRef.current,
@@ -112,7 +119,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             opacity: 0,
             y: -18,
             scale: 0.92,
-            duration: 0.22,
+            duration: 0.15,
             ease: "power2.out",
           },
           0
@@ -124,20 +131,21 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
           mobileTerraceFooterRef.current,
           {
             opacity: 0,
-            duration: 0.18,
+            duration: 0.12,
             ease: "power2.out",
           },
           0
         );
       }
 
-      // Phase 2 (0 -> 48%): Black Photographic Ellipse contracts smoothly into the laptop
+      // Phase 2 (0 -> 35%): Black Photographic Ellipse contracts smoothly into the laptop
       // Pure deep black (#0C0C0E) closes in on the laptop at 56% 52% (Never becomes a square!)
+      // By 35% scroll, the ellipse has fully closed, while the next section is still 160vh below!
       masterTl.to(
         irisData,
         {
           r: -24,
-          duration: 0.48,
+          duration: 0.35,
           ease: "power2.inOut",
           onUpdate: () => {
             updateIrisMask(irisData.r);
@@ -146,22 +154,33 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         0
       );
 
-      // Terrace video subtle camera scale for optical depth
+      // Terrace video subtle camera scale for optical depth (stays 100% solid, zero premature transparency)
       if (mobileVideoWrapperRef.current) {
         masterTl.to(
           mobileVideoWrapperRef.current,
           {
-            scale: 0.95,
-            opacity: 0.2,
-            duration: 0.48,
+            scale: 0.96,
+            duration: 0.35,
             ease: "power1.inOut",
           },
           0
         );
       }
 
-      // Phase 2b (42% -> 60%): Once the black aperture has enclosed the scene,
-      // dissolve the black overlay to unveil the subtle smoky orange fluid ribbon backdrop
+      // Phase 2b (32% -> 50%): As the black aperture finishes swallowing the scene,
+      // reveal the reference-matched smoky fluid artwork while hiding the video underneath
+      if (mobileFluidBackdropRef.current) {
+        masterTl.to(
+          mobileFluidBackdropRef.current,
+          {
+            opacity: 1,
+            duration: 0.18,
+            ease: "power1.inOut",
+          },
+          0.32
+        );
+      }
+
       if (irisOverlayRef.current) {
         masterTl.to(
           irisOverlayRef.current,
@@ -170,11 +189,23 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             duration: 0.18,
             ease: "power1.inOut",
           },
-          0.42
+          0.32
         );
       }
 
-      // Phase 3 (40% -> 76%): Monumental Header materializes on the subtle smoky fluid canvas
+      if (mobileVideoWrapperRef.current) {
+        masterTl.to(
+          mobileVideoWrapperRef.current,
+          {
+            opacity: 0,
+            duration: 0.10,
+            ease: "power1.inOut",
+          },
+          0.36
+        );
+      }
+
+      // Phase 3 (42% -> 72%): Monumental Header materializes cleanly on the reference fluid canvas
       if (mobileIdentityRef.current) {
         masterTl.to(
           mobileIdentityRef.current,
@@ -182,15 +213,15 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             opacity: 1,
             y: 0,
             scale: 1,
-            duration: 0.36,
+            duration: 0.30,
             ease: "power2.out",
           },
-          0.40
+          0.42
         );
       }
 
-      // Phase 4 (76% -> 100%): Luxury hold period before unpinning smoothly into Movement 01
-      masterTl.to({}, { duration: 0.24 });
+      // Phase 4 (72% -> 100%): Dedicated luxury hold period before unpinning smoothly into Movement 01
+      masterTl.to({}, { duration: 0.28 });
 
       return () => {
         if (cueTween) cueTween.kill();
@@ -236,9 +267,9 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
       {/* ========================================================================= */}
       <div
         ref={mobileContainerRef}
-        className="md:hidden relative w-full h-[220vh] bg-transparent"
+        className="md:hidden relative w-full h-[360vh] bg-[#0C0C0E]"
       >
-        <div className="sticky top-0 h-[100svh] w-full overflow-hidden bg-transparent flex flex-col justify-between">
+        <div className="sticky top-0 h-[100svh] w-full overflow-hidden bg-[#0C0C0E] flex flex-col justify-between">
           {/* 1. Living Pixel-Art Terrace Video Layer */}
           <div
             ref={mobileVideoWrapperRef}
@@ -257,13 +288,29 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             </video>
           </div>
 
-          {/* 2. Full-Screen Black Elliptical Aperture Overlay (Deep black #0C0C0E lens eclipse) */}
+          {/* 2. Reference-Matched Smoky Orange Fluid Artwork (Unveiled as black aperture completes) */}
+          <div
+            ref={mobileFluidBackdropRef}
+            className="absolute inset-0 z-5 pointer-events-none select-none overflow-hidden opacity-0 will-change-[opacity]"
+          >
+            <Image
+              src="/assets/mobile_fluid_ember_reference.jpg"
+              alt=""
+              fill
+              priority
+              className="object-cover object-top select-none pointer-events-none opacity-90"
+            />
+            {/* Seamless dark vignette at bottom to guarantee pure black base */}
+            <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#0C0C0E] to-transparent pointer-events-none" />
+          </div>
+
+          {/* 3. Full-Screen Black Elliptical Aperture Overlay (Deep black #0C0C0E lens eclipse) */}
           <div
             ref={irisOverlayRef}
             className="absolute inset-0 z-10 pointer-events-none bg-[#0C0C0E] will-change-[mask-image,opacity]"
           />
 
-          {/* 3. Understated Editorial Swiss Laptop Micro-Cue (Anchored above laptop) */}
+          {/* 4. Understated Editorial Swiss Laptop Micro-Cue (Anchored above laptop) */}
           <div
             ref={laptopCueRef}
             className="absolute pointer-events-none z-20 flex flex-col items-center will-change-[transform,opacity]"

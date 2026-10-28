@@ -1,6 +1,7 @@
 "use client";
 
 import React, { memo } from "react";
+import Image from "next/image";
 
 export const SilkyFluidBackdrop: React.FC = memo(() => {
   return (
@@ -14,50 +15,19 @@ export const SilkyFluidBackdrop: React.FC = memo(() => {
       aria-hidden="true"
     >
       {/* ========================================================================= */}
-      {/* MOBILE EXPERIENCE (< 768px): UNDERSTATED SMOKY EMBER FLUID RIBBON        */}
-      {/* (Directly matched to user reference: deep matte charcoal + organic ribbon)*/}
+      {/* MOBILE EXPERIENCE (< 768px): REFERENCE-MATCHED SMOKY EMBER FLUID WAVE    */}
+      {/* (Direct visual match to user reference: deep matte charcoal + organic ribbon)*/}
       {/* ========================================================================= */}
-      <div
-        className="md:hidden absolute inset-0 overflow-hidden"
-        style={{
-          background: "radial-gradient(ellipse at 85% 15%, #180C08 0%, #0C0C0E 70%)",
-        }}
-      >
-        {/* Upper-Right Molten Ember Bloom (Primary focal light from reference) */}
-        <div
-          className="absolute -top-[8%] -right-[15%] w-[115vw] h-[115vw] rounded-full blur-[85px] opacity-75 animate-aurora-one will-change-transform"
-          style={{
-            background:
-              "radial-gradient(ellipse 60% 60% at 55% 45%, #E63B08 0%, #C42D05 35%, #7A1705 60%, transparent 75%)",
-          }}
+      <div className="md:hidden absolute inset-0 overflow-hidden bg-[#0C0C0E]">
+        <Image
+          src="/assets/mobile_fluid_ember_reference.jpg"
+          alt=""
+          fill
+          priority
+          className="object-cover object-top select-none pointer-events-none opacity-90"
         />
-
-        {/* Diagonal S-Curve Smoky Fluid Stream (Organic ribbon body) */}
-        <div
-          className="absolute top-[28%] -right-[10%] w-[100vw] h-[110vw] rounded-full blur-[95px] opacity-65 animate-aurora-two will-change-transform"
-          style={{
-            background:
-              "radial-gradient(ellipse 55% 65% at 60% 50%, #D83A08 0%, #8E1F06 42%, #420C04 68%, transparent 80%)",
-          }}
-        />
-
-        {/* Subtle Smoky Shadow Crevice (Creates the 3D ribbon depth from reference) */}
-        <div
-          className="absolute top-[38%] right-[18%] w-[65vw] h-[75vw] rounded-full blur-[80px] opacity-45 will-change-transform"
-          style={{
-            background:
-              "radial-gradient(circle, #080D11 0%, rgba(12,12,14,0.6) 50%, transparent 75%)",
-          }}
-        />
-
-        {/* Lower-Right Soft Residual Ember Horizon */}
-        <div
-          className="absolute -bottom-[8%] right-[0%] w-[105vw] h-[105vw] rounded-full blur-[90px] opacity-55 animate-aurora-one will-change-transform"
-          style={{
-            background:
-              "radial-gradient(circle, #B83006 0%, #631404 45%, transparent 75%)",
-          }}
-        />
+        {/* Subtle vignette darkening at bottom to guarantee clean seamless black bleed */}
+        <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#0C0C0E] to-transparent pointer-events-none" />
       </div>
 
       {/* ========================================================================= */}

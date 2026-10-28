@@ -36,21 +36,21 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
   }, []);
 
   // GSAP Smooth Scroll Parallax & Organic Dissolve into Movement 01
+  // Stays fully visible through the initial scroll, dissolving only when exiting
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion || !sectionRef.current || !videoWrapperRef.current) return;
 
     const ctx = gsap.context(() => {
-      // Parallax-shift and dissolve the living video background seamlessly into Movement 01
       gsap.to(videoWrapperRef.current, {
-        y: 80,
+        y: 60,
         opacity: 0,
-        ease: "none",
+        ease: "power1.out",
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: "top top",
+          start: "45% top", // Video stays completely visible for longer
           end: "bottom top",
-          scrub: 0.5,
+          scrub: 0.6,
         },
       });
     }, sectionRef);
@@ -71,17 +71,17 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
     <section
       id="monument-hero"
       ref={sectionRef}
-      className="relative min-h-[100svh] flex flex-col justify-between pt-24 sm:pt-28 pb-12 sm:pb-16 px-4 sm:px-8 md:px-12 z-10 select-none overflow-visible"
+      className="relative min-h-[100svh] flex flex-col justify-between pt-24 sm:pt-28 pb-10 sm:pb-14 px-4 sm:px-8 md:px-12 z-10 select-none overflow-visible"
     >
-      {/* 1. Living Pixel-Art Environment Video with Feathered Progressive Alpha Bleed */}
+      {/* 1. Living Pixel-Art Environment Video with Feathered Progressive Alpha Bleed at the Very Bottom */}
       <div
         ref={videoWrapperRef}
-        className="absolute inset-0 -bottom-16 sm:-bottom-24 z-0 pointer-events-none select-none overflow-hidden will-change-transform"
+        className="absolute inset-0 -bottom-10 sm:-bottom-14 z-0 pointer-events-none select-none overflow-hidden will-change-transform"
         style={{
           maskImage:
-            "linear-gradient(to bottom, black 0%, black 50%, rgba(0,0,0,0.92) 66%, rgba(0,0,0,0.35) 84%, transparent 100%)",
+            "linear-gradient(to bottom, black 0%, black 82%, rgba(0,0,0,0.92) 90%, rgba(0,0,0,0.3) 97%, transparent 100%)",
           WebkitMaskImage:
-            "linear-gradient(to bottom, black 0%, black 50%, rgba(0,0,0,0.92) 66%, rgba(0,0,0,0.35) 84%, transparent 100%)",
+            "linear-gradient(to bottom, black 0%, black 82%, rgba(0,0,0,0.92) 90%, rgba(0,0,0,0.3) 97%, transparent 100%)",
         }}
       >
         {/* Seamlessly Looping Pixel Art Environment Video */}
@@ -97,12 +97,12 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
           <source src="/assets/Animate_pixel_art_environment_loop_03a9505a.mp4" type="video/mp4" />
         </video>
 
-        {/* Soft Ambient Sky Vignette for High-Contrast Heading Readability */}
+        {/* Subtle Ambient Sky Vignette on Right for Crisp Text Contrast */}
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-white/40 pointer-events-none z-10" />
-        <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-transparent pointer-events-none z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/25 via-transparent to-transparent pointer-events-none z-10" />
 
-        {/* Deep Multi-Stop Bleed Gradient Dissolving the Video into #FAFAF9 */}
-        <div className="absolute inset-x-0 bottom-0 h-64 sm:h-80 bg-gradient-to-t from-[#FAFAF9] via-[#FAFAF9]/95 via-[#FAFAF9]/45 to-transparent pointer-events-none z-10" />
+        {/* Soft, Lowered Multi-Stop Bleed Gradient at the Very Bottom Edge */}
+        <div className="absolute inset-x-0 bottom-0 h-32 sm:h-44 bg-gradient-to-t from-[#FAFAF9] via-[#FAFAF9]/85 to-transparent pointer-events-none z-10" />
       </div>
 
       {/* Top Telemetry Header Bar */}

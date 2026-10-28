@@ -108,30 +108,10 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               }
             }
 
-            // 2. Behavior 1: Luminance Ember Flare on the molten flame core
-            const velocity = Math.abs(self.getVelocity());
-            const flareEl = document.getElementById("mobile-ember-flare");
-            if (flareEl && self.progress > 0.30) {
-              const targetGlow = Math.min(0.55, velocity / 2800);
-              gsap.to(flareEl, {
-                opacity: targetGlow,
-                duration: 0.15,
-                ease: "power1.out",
-                overwrite: "auto",
-              });
-              gsap.to(flareEl, {
-                opacity: 0,
-                duration: 0.55,
-                delay: 0.15,
-                ease: "power2.out",
-                overwrite: false,
-              });
-            }
-
-            // 3. Interactive pointer events
+            // 2. Interactive pointer events
             if (mobileIdentityRef.current) {
               mobileIdentityRef.current.style.pointerEvents =
-                self.progress > 0.45 && self.progress < 0.85 ? "auto" : "none";
+                self.progress > 0.45 ? "auto" : "none";
             }
           },
         },
@@ -206,7 +186,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         );
       }
 
-      // Phase 3 (0.38 -> 0.68): Monumental Header materializes with cinematic optical de-blur & kinetic float
+      // Phase 3 (0.38 -> 0.65): Monumental Header materializes with cinematic optical focus pull into razor-sharp clarity
       if (mobileIdentityRef.current) {
         masterTl.to(
           mobileIdentityRef.current,
@@ -215,28 +195,15 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             y: 0,
             scale: 1,
             filter: "blur(0px)",
-            duration: 0.30,
+            duration: 0.27,
             ease: "power2.out",
           },
           0.38
         );
-
-        // Subtle cinematic exit de-focus as user scrolls further into Movement 01
-        masterTl.to(
-          mobileIdentityRef.current,
-          {
-            y: -40,
-            opacity: 0.15,
-            filter: "blur(6px)",
-            duration: 0.22,
-            ease: "power1.in",
-          },
-          0.78
-        );
       }
 
-      // Phase 4 (0.78 -> 1.00): Luxury hold period before unpinning smoothly into Movement 01
-      masterTl.to({}, { duration: 0.22 });
+      // Phase 4 (0.65 -> 1.00): Dedicated luxury hold period where header remains 100% crisp and readable
+      masterTl.to({}, { duration: 0.35 });
 
       return () => {
         if (cueTween) cueTween.kill();

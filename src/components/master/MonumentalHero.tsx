@@ -1,8 +1,12 @@
 "use client";
 
-import React, { memo, useState, useEffect } from "react";
+import React, { memo, useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { ArrowDown, ArrowUpRight, Compass, Zap, Cpu, Layers, Sparkles } from "lucide-react";
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface MonumentalHeroProps {
   onExplore: () => void;
@@ -11,6 +15,8 @@ interface MonumentalHeroProps {
 
 export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, onConnect }) => {
   const [timeStr, setTimeStr] = useState<string>("");
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const backdropRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const updateTime = () => {
@@ -30,6 +36,29 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
     return () => clearInterval(interval);
   }, []);
 
+  // GSAP Smooth Scroll Parallax Bleed into Movement 01
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion || !sectionRef.current || !backdropRef.current) return;
+
+    const ctx = gsap.context(() => {
+      // Parallax-shift and dissolve the terrace deck softly into Movement 01
+      gsap.to(backdropRef.current, {
+        y: 100,
+        opacity: 0.15,
+        ease: "none",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: 0.5,
+        },
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
   const handleConnectClick = () => {
     if (onConnect) {
       onConnect();
@@ -42,132 +71,254 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
   return (
     <section
       id="monument-hero"
-      className="relative min-h-[100svh] flex flex-col justify-between pt-24 sm:pt-28 pb-8 sm:pb-12 px-4 sm:px-8 md:px-12 z-10 overflow-hidden select-none"
+      ref={sectionRef}
+      className="relative min-h-[105svh] flex flex-col justify-between pt-24 sm:pt-28 pb-20 sm:pb-28 px-4 sm:px-8 md:px-12 z-10 select-none overflow-visible"
     >
-      {/* 1. Cyber-Pastoral Terrace Backdrop Image (Pixel Art Studio Ghibli Aesthetic) */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none">
+      {/* 1. Cyber-Pastoral Terrace Backdrop with Progressive Feathered Bleed & Parallax */}
+      <div
+        ref={backdropRef}
+        className="absolute inset-0 -bottom-20 sm:-bottom-28 z-0 pointer-events-none select-none overflow-hidden will-change-transform"
+        style={{
+          maskImage:
+            "linear-gradient(to bottom, black 0%, black 50%, rgba(0,0,0,0.92) 68%, rgba(0,0,0,0.38) 84%, transparent 100%)",
+          WebkitMaskImage:
+            "linear-gradient(to bottom, black 0%, black 50%, rgba(0,0,0,0.92) 68%, rgba(0,0,0,0.38) 84%, transparent 100%)",
+        }}
+      >
         <Image
           src="/assets/terrace_laptop_desk.jpg"
           alt="Cyber-Pastoral Terrace Workspace"
           fill
           priority
-          quality={90}
+          quality={92}
           className="object-cover object-bottom"
         />
 
-        {/* Ambient Top Sky Overlay for Crisp Heading Contrast */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/35 via-transparent to-transparent pointer-events-none" />
+        {/* Ambient Top Sky Overlay for High-Contrast Heading Readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/35 via-white/10 to-transparent pointer-events-none" />
 
         {/* Dynamic Sunlight Beams (God-Rays Gleam Animation) */}
-        <div
-          className="absolute -top-10 -left-10 w-[70vw] h-[75vh] pointer-events-none opacity-45 mix-blend-screen"
-          style={{
-            background:
-              "radial-gradient(ellipse at 10% 10%, rgba(255, 255, 230, 0.75) 0%, rgba(254, 240, 138, 0.35) 30%, transparent 70%)",
-            animation: "sunbeamPulse 7s ease-in-out infinite",
-          }}
-        />
+        <div className="absolute -top-16 -left-16 w-[90vw] h-[90vh] pointer-events-none opacity-60 mix-blend-screen overflow-hidden">
+          <div className="sunbeam-ray ray-1" />
+          <div className="sunbeam-ray ray-2" />
+          <div className="sunbeam-ray ray-3" />
+        </div>
 
-        {/* Sunbeam Dust Motes / Golden Pollen Particles (Pure GPU CSS, Zero CPU overhead) */}
+        {/* Floating Golden Pollen / Sunbeam Motes (GPU CSS) */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <span className="hero-dust-mote" style={{ top: "18%", left: "12%", animationDelay: "0s" }} />
-          <span className="hero-dust-mote" style={{ top: "28%", left: "22%", animationDelay: "2.2s" }} />
-          <span className="hero-dust-mote" style={{ top: "35%", left: "16%", animationDelay: "4.5s" }} />
-          <span className="hero-dust-mote" style={{ top: "22%", left: "32%", animationDelay: "1.2s" }} />
-          <span className="hero-dust-mote" style={{ top: "42%", left: "28%", animationDelay: "3.4s" }} />
+          <span className="hero-pollen p-1" style={{ top: "14%", left: "12%", animationDelay: "0s" }} />
+          <span className="hero-pollen p-2" style={{ top: "22%", left: "20%", animationDelay: "1.8s" }} />
+          <span className="hero-pollen p-3" style={{ top: "30%", left: "16%", animationDelay: "3.5s" }} />
+          <span className="hero-pollen p-4" style={{ top: "18%", left: "32%", animationDelay: "0.8s" }} />
+          <span className="hero-pollen p-5" style={{ top: "36%", left: "26%", animationDelay: "2.6s" }} />
+          <span className="hero-pollen p-6" style={{ top: "26%", left: "40%", animationDelay: "4.2s" }} />
+          <span className="hero-pollen p-7" style={{ top: "42%", left: "34%", animationDelay: "1.4s" }} />
+          <span className="hero-pollen p-8" style={{ top: "16%", left: "52%", animationDelay: "3.1s" }} />
+          <span className="hero-pollen p-9" style={{ top: "48%", left: "22%", animationDelay: "5.0s" }} />
+          <span className="hero-pollen p-10" style={{ top: "24%", left: "62%", animationDelay: "2.1s" }} />
         </div>
 
-        {/* Delicate Steaming Coffee Mug Vapor on the Right Desk */}
+        {/* Fluttering Green Leaves & Pink Sakura Petals Drifting Across the Scene */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="drifting-leaf leaf-1" style={{ top: "10%", right: "22%", animationDelay: "0s" }}>
+            <svg viewBox="0 0 24 24" className="w-full h-full fill-emerald-500/80 drop-shadow-sm">
+              <path d="M12 2C6.5 2 2 6.5 2 12c0 5 4 9 9.5 9.8.5.1 1-.3 1-.8v-3.5c4.5-1 8-5 8-9.5 0-4.4-3.8-8-8.5-8z" />
+            </svg>
+          </div>
+          <div className="drifting-leaf leaf-2" style={{ top: "18%", right: "15%", animationDelay: "2.5s" }}>
+            <svg viewBox="0 0 24 24" className="w-full h-full fill-pink-400/80 drop-shadow-sm">
+              <path d="M12 2C8 2 4 6 4 11c0 4 3 8 8 11 5-3 8-7 8-11 0-5-4-9-8-9z" />
+            </svg>
+          </div>
+          <div className="drifting-leaf leaf-3" style={{ top: "28%", right: "32%", animationDelay: "4.8s" }}>
+            <svg viewBox="0 0 24 24" className="w-full h-full fill-emerald-400/85 drop-shadow-sm">
+              <path d="M12 2C6.5 2 2 6.5 2 12c0 5 4 9 9.5 9.8.5.1 1-.3 1-.8v-3.5c4.5-1 8-5 8-9.5 0-4.4-3.8-8-8.5-8z" />
+            </svg>
+          </div>
+          <div className="drifting-leaf leaf-4" style={{ top: "14%", right: "10%", animationDelay: "1.2s" }}>
+            <svg viewBox="0 0 24 24" className="w-full h-full fill-pink-300/85 drop-shadow-sm">
+              <path d="M12 2C8 2 4 6 4 11c0 4 3 8 8 11 5-3 8-7 8-11 0-5-4-9-8-9z" />
+            </svg>
+          </div>
+          <div className="drifting-leaf leaf-5" style={{ top: "34%", right: "25%", animationDelay: "3.7s" }}>
+            <svg viewBox="0 0 24 24" className="w-full h-full fill-teal-400/80 drop-shadow-sm">
+              <path d="M12 2C6.5 2 2 6.5 2 12c0 5 4 9 9.5 9.8.5.1 1-.3 1-.8v-3.5c4.5-1 8-5 8-9.5 0-4.4-3.8-8-8.5-8z" />
+            </svg>
+          </div>
+          <div className="drifting-leaf leaf-6" style={{ top: "22%", right: "42%", animationDelay: "5.6s" }}>
+            <svg viewBox="0 0 24 24" className="w-full h-full fill-emerald-500/75 drop-shadow-sm">
+              <path d="M12 2C6.5 2 2 6.5 2 12c0 5 4 9 9.5 9.8.5.1 1-.3 1-.8v-3.5c4.5-1 8-5 8-9.5 0-4.4-3.8-8-8.5-8z" />
+            </svg>
+          </div>
+        </div>
+
+        {/* Delicate Steaming Coffee Mug Vapor on the Desk (Visible on all devices) */}
         <div
-          className="hidden lg:block absolute pointer-events-none"
-          style={{ right: "18%", bottom: "28%" }}
+          className="absolute pointer-events-none"
+          style={{ right: "19%", bottom: "27%" }}
         >
-          <div className="coffee-steam-vapor" />
+          <div className="coffee-steam steam-1" />
+          <div className="coffee-steam steam-2" />
         </div>
 
-        {/* Subtle Ambient Terminal Glow on the Laptop Display */}
+        {/* Ambient Active Terminal Code Glow on Laptop Screen */}
         <div
-          className="hidden lg:block absolute w-24 h-16 rounded-md pointer-events-none"
+          className="absolute w-28 h-20 rounded-md pointer-events-none"
           style={{
             right: "24.5%",
             bottom: "26.5%",
-            animation: "screenCodeGlow 4s ease-in-out infinite",
+            animation: "screenCodeGlow 3.5s ease-in-out infinite",
           }}
         />
 
-        {/* Painterly Torn Grass / Horizon Bottom Mask Dissolving Smoothly into #FAFAF9 */}
-        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#FAFAF9] via-[#FAFAF9]/85 to-transparent pointer-events-none z-10" />
+        {/* Deep Multi-Stop Bleed Gradient Dissolving the Terrace Deck into #FAFAF9 */}
+        <div className="absolute inset-x-0 bottom-0 h-72 sm:h-96 bg-gradient-to-t from-[#FAFAF9] via-[#FAFAF9]/95 via-[#FAFAF9]/50 to-transparent pointer-events-none z-10" />
       </div>
 
       {/* Embedded High-Performance GPU Keyframe Styles */}
       <style jsx global>{`
-        @keyframes sunbeamPulse {
-          0%, 100% {
+        /* 1. Shimmering God-Ray Light Shafts */
+        .sunbeam-ray {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 150%;
+          height: 100px;
+          transform-origin: top left;
+          background: linear-gradient(
+            90deg,
+            rgba(254, 240, 138, 0.55) 0%,
+            rgba(255, 255, 255, 0.35) 35%,
+            transparent 85%
+          );
+          filter: blur(14px);
+          pointer-events: none;
+        }
+        .ray-1 {
+          transform: rotate(32deg);
+          animation: rayPulse 6s ease-in-out infinite alternate;
+        }
+        .ray-2 {
+          transform: rotate(45deg);
+          animation: rayPulse 8s ease-in-out infinite alternate 1.5s;
+          height: 130px;
+        }
+        .ray-3 {
+          transform: rotate(58deg);
+          animation: rayPulse 7s ease-in-out infinite alternate 3s;
+          height: 110px;
+        }
+        @keyframes rayPulse {
+          0% {
             opacity: 0.35;
-            transform: scale(1);
+            transform: scaleY(0.92) rotate(var(--rot, 35deg));
           }
-          50% {
-            opacity: 0.60;
-            transform: scale(1.03);
+          100% {
+            opacity: 0.75;
+            transform: scaleY(1.12) rotate(var(--rot, 35deg));
           }
         }
-        @keyframes dustMoteFloat {
+
+        /* 2. Golden Sun Pollen / Motes */
+        .hero-pollen {
+          position: absolute;
+          width: 4.5px;
+          height: 4.5px;
+          border-radius: 50%;
+          background: #FEF08A;
+          box-shadow: 0 0 10px rgba(254, 240, 138, 0.95), 0 0 18px rgba(254, 240, 138, 0.6);
+          animation: pollenDrift 7.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+        @keyframes pollenDrift {
           0% {
             transform: translate3d(0, 0, 0);
             opacity: 0;
           }
-          25% {
-            opacity: 0.85;
+          20% {
+            opacity: 1;
           }
-          75% {
-            opacity: 0.85;
+          80% {
+            opacity: 0.9;
           }
           100% {
-            transform: translate3d(55px, 75px, 0);
+            transform: translate3d(85px, 110px, 0);
             opacity: 0;
           }
         }
-        .hero-dust-mote {
+
+        /* 3. Fluttering Leaves & Petals */
+        .drifting-leaf {
           position: absolute;
-          width: 3.5px;
-          height: 3.5px;
-          border-radius: 50%;
-          background: rgba(254, 240, 138, 0.95);
-          box-shadow: 0 0 6px rgba(254, 240, 138, 0.8);
-          animation: dustMoteFloat 8s linear infinite;
+          width: 18px;
+          height: 18px;
+          animation: leafFlutter 10s ease-in-out infinite;
+          transform-origin: center center;
         }
-        @keyframes coffeeSteamCurl {
+        @keyframes leafFlutter {
+          0% {
+            transform: translate3d(0, 0, 0) rotate(0deg) scale(0.8);
+            opacity: 0;
+          }
+          15% {
+            opacity: 0.95;
+            transform: translate3d(-35px, 35px, 0) rotate(70deg) scale(1);
+          }
+          50% {
+            transform: translate3d(-110px, 120px, 0) rotate(190deg) scale(1.05);
+            opacity: 0.9;
+          }
+          85% {
+            opacity: 0.75;
+            transform: translate3d(-190px, 220px, 0) rotate(310deg) scale(0.95);
+          }
+          100% {
+            transform: translate3d(-260px, 310px, 0) rotate(420deg) scale(0.8);
+            opacity: 0;
+          }
+        }
+
+        /* 4. Steaming Coffee Vapor */
+        .coffee-steam {
+          position: absolute;
+          width: 10px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(to top, rgba(255, 255, 255, 0.75), transparent);
+          filter: blur(2px);
+          animation: coffeeVapor 3.2s ease-out infinite;
+        }
+        .coffee-steam.steam-2 {
+          animation-delay: 1.6s;
+          transform: scaleX(0.8);
+        }
+        @keyframes coffeeVapor {
           0% {
             transform: translateY(0) scaleX(1);
             opacity: 0;
           }
-          30% {
-            opacity: 0.55;
+          25% {
+            opacity: 0.7;
           }
-          70% {
-            opacity: 0.35;
+          65% {
+            opacity: 0.4;
           }
           100% {
-            transform: translateY(-24px) scaleX(1.4);
+            transform: translateY(-38px) scaleX(1.8);
             opacity: 0;
           }
         }
-        .coffee-steam-vapor {
-          width: 6px;
-          height: 16px;
-          border-radius: 50%;
-          background: linear-gradient(to top, rgba(255, 255, 255, 0.6), transparent);
-          filter: blur(1.5px);
-          animation: coffeeSteamCurl 3s ease-out infinite;
-        }
+
+        /* 5. Ambient Active Code Glow */
         @keyframes screenCodeGlow {
           0%, 100% {
-            background: radial-gradient(circle, rgba(16, 185, 129, 0.18) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.22) 0%, transparent 70%);
           }
           50% {
-            background: radial-gradient(circle, rgba(16, 185, 129, 0.42) 0%, transparent 75%);
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.50) 0%, transparent 75%);
           }
         }
+
+        /* 6. Floating Status Pill Micro-Drift */
         @keyframes tagHoverFloat {
           0%, 100% {
             transform: translateY(0px);
@@ -192,7 +343,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
 
         {/* Live Kolkata Clock & Availability Pill */}
         <div className="flex items-center gap-3">
-          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 border border-slate-200/90 shadow-xs backdrop-blur-md">
+          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/90 border border-slate-200/90 shadow-xs backdrop-blur-md">
             <Compass size={12} className="text-[#10B981]" />
             <span className="font-sans font-black text-[11px] text-[#0F172A] uppercase tracking-wider">
               KOLKATA {timeStr || "01:00:00"} IST
@@ -213,11 +364,11 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 border border-slate-200/90 shadow-xs backdrop-blur-md mb-4 sm:mb-5 hover:border-[#10B981]/50 transition-colors w-fit">
             <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] shrink-0" />
             <span className="font-sans font-black text-[10px] sm:text-xs text-[#0F172A] tracking-wider uppercase truncate">
-              Netaji Subhash Engineering College (2024-2028) · Kolkata, India
+              Netaji Subhash Engineering College (2024–2028) · Kolkata, India
             </span>
           </div>
 
-          {/* Monumental Headline */}
+          {/* Monumental Headline with Crisp Readability */}
           <h1 className="font-sans font-black text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-[5.4rem] xl:text-[6.4rem] text-[#0F172A] uppercase tracking-tighter leading-[0.92] mb-4 sm:mb-5 drop-shadow-sm">
             SOHAM <br />
             <span className="bg-gradient-to-r from-[#0F172A] via-slate-800 to-slate-700 bg-clip-text text-transparent">
@@ -251,15 +402,15 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
 
           {/* Interactive Engineering Capsules (Clean Vector Icons, Zero Emojis) */}
           <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-            <div className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-white/85 border border-slate-200/90 backdrop-blur-md font-sans font-black text-[10px] sm:text-[11px] text-[#0F172A] uppercase tracking-wider shadow-xs">
+            <div className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-white/90 border border-slate-200/90 backdrop-blur-md font-sans font-black text-[10px] sm:text-[11px] text-[#0F172A] uppercase tracking-wider shadow-xs">
               <Zap size={12} className="text-[#10B981] shrink-0" />
               <span>278-Key Instant Translation</span>
             </div>
-            <div className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-white/85 border border-slate-200/90 backdrop-blur-md font-sans font-black text-[10px] sm:text-[11px] text-[#0F172A] uppercase tracking-wider shadow-xs">
+            <div className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-white/90 border border-slate-200/90 backdrop-blur-md font-sans font-black text-[10px] sm:text-[11px] text-[#0F172A] uppercase tracking-wider shadow-xs">
               <Cpu size={12} className="text-[#10B981] shrink-0" />
               <span>Real-Time Tensor Pipelines</span>
             </div>
-            <div className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-white/85 border border-slate-200/90 backdrop-blur-md font-sans font-black text-[10px] sm:text-[11px] text-[#0F172A] uppercase tracking-wider shadow-xs">
+            <div className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-white/90 border border-slate-200/90 backdrop-blur-md font-sans font-black text-[10px] sm:text-[11px] text-[#0F172A] uppercase tracking-wider shadow-xs">
               <Layers size={12} className="text-[#10B981] shrink-0" />
               <span>60 FPS WebGL Spatial Canvas</span>
             </div>
@@ -268,16 +419,11 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
 
         {/* Right Column: Spatial Sphere Focal Stage & Floating Status Tags (5 Cols) */}
         <div className="lg:col-span-5 relative flex flex-col items-center justify-center min-h-[300px] sm:min-h-[380px] lg:min-h-[460px]">
-          {/* 
-            The Autonomous Emerald Prismatic Sphere is rendered via TravelingPrismaticSphere
-            and anchors directly into the open sky stage above this terrace deck!
-          */}
-
-          {/* Floating Acrylic Status Tags (Inspired by Cofounder's Task Pills) */}
+          {/* Floating Acrylic Status Tags */}
           <div className="w-full flex flex-col items-end gap-3 z-20 pointer-events-auto">
             {/* Tag 1: Active Availability */}
             <div
-              className="px-4 py-2 rounded-2xl bg-white/85 border border-white/95 shadow-md backdrop-blur-xl flex items-center gap-2.5 transition-all duration-300 hover:scale-102 hover:border-[#10B981]/50"
+              className="px-4 py-2 rounded-2xl bg-white/90 border border-white/95 shadow-md backdrop-blur-xl flex items-center gap-2.5 transition-all duration-300 hover:scale-102 hover:border-[#10B981]/50"
               style={{ animation: "tagHoverFloat 5s ease-in-out infinite" }}
             >
               <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
@@ -293,7 +439,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
 
             {/* Tag 2: Institutional Origin */}
             <div
-              className="px-4 py-2 rounded-2xl bg-white/85 border border-white/95 shadow-md backdrop-blur-xl flex items-center gap-2.5 transition-all duration-300 hover:scale-102 hover:border-[#10B981]/50"
+              className="px-4 py-2 rounded-2xl bg-white/90 border border-white/95 shadow-md backdrop-blur-xl flex items-center gap-2.5 transition-all duration-300 hover:scale-102 hover:border-[#10B981]/50"
               style={{ animation: "tagHoverFloat 6s ease-in-out infinite 1.2s" }}
             >
               <Sparkles size={13} className="text-[#10B981]" />
@@ -338,8 +484,8 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
           CYBER-PASTORAL TERRACE // 2026
         </div>
 
-        <div className="font-sans font-black text-[11px] text-slate-600 uppercase tracking-widest hidden md:block">
-          SCROLL TO ORBIT // 360°
+        <div className="font-sans font-black text-[11px] text-slate-600 uppercase tracking-widest hidden sm:flex items-center gap-2">
+          <span>STUDIO GHIBLI x CYBERPUNK</span>
         </div>
       </div>
     </section>

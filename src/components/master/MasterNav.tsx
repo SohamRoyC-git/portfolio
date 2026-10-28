@@ -17,7 +17,12 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(() => {
     if (typeof window !== "undefined") {
-      return window.scrollY > 70;
+      const nextSection = document.getElementById("monument-statement");
+      if (nextSection) {
+        const rect = nextSection.getBoundingClientRect();
+        return rect.top <= window.innerHeight * 0.82;
+      }
+      return window.scrollY > window.innerHeight * 0.7;
     }
     return false;
   });
@@ -44,17 +49,20 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
     return () => clearInterval(interval);
   }, []);
 
-  // GSAP ScrollTrigger to detect when leaving hero into next sections
+  // GSAP ScrollTrigger: Stays edge-to-edge transparent through the entire Hero,
+  // and morphs into the compact glass dock ONLY when the next section is entering the screen
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) return;
 
+    const nextSection = document.getElementById("monument-statement");
+
     const trigger = ScrollTrigger.create({
-      start: "top -70",
+      trigger: nextSection || "#monument-hero",
+      start: nextSection ? "top 82%" : "bottom 250px",
       end: 99999,
-      onUpdate: (self) => {
-        const scrolled = self.scroll() > 70;
-        setIsScrolled((prev) => (prev !== scrolled ? scrolled : prev));
+      onToggle: (self) => {
+        setIsScrolled(self.isActive);
       },
     });
 

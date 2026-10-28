@@ -255,7 +255,7 @@ export const TravelingPrismaticSphere: React.FC = () => {
       }
 
       const p = scrollRef.current.progress;
-      const isMobile = width < 640;
+      const isMobile = width < 768;
 
       // --- Alternating Trajectory (Left <-> Right for every section) ---
       let targetX = width * 0.5;
@@ -569,8 +569,7 @@ export const TravelingPrismaticSphere: React.FC = () => {
           // Radiant 4-pointed diamond twinkle star
           ctx.fillStyle = s.color;
           ctx.globalAlpha = currentAlpha;
-          ctx.shadowColor = s.color;
-          ctx.shadowBlur = 8;
+          if (!isMobile) { ctx.shadowColor = s.color; ctx.shadowBlur = 8; }
           drawSparkleStar(ctx, s.x, s.y, s.size * ratio, s.rot);
         } else {
           // Prismatic ember particle

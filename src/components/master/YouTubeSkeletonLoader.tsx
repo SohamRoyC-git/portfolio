@@ -7,14 +7,14 @@ export const YouTubeSkeletonLoader: React.FC = () => {
   const [fading, setFading] = useState(false);
 
   useEffect(() => {
-    // Show authentic YouTube-style skeleton during initial asset & WebGL initialization
+    // 1.1s warm-up window: allows video textures, fonts, and GSAP contexts to initialize smoothly
     const timer = setTimeout(() => {
       setFading(true);
       const removeTimer = setTimeout(() => {
         setVisible(false);
-      }, 700);
+      }, 650);
       return () => clearTimeout(removeTimer);
-    }, 1200);
+    }, 1100);
 
     return () => clearTimeout(timer);
   }, []);
@@ -23,23 +23,27 @@ export const YouTubeSkeletonLoader: React.FC = () => {
 
   return (
     <div
-      className={`fixed inset-0 z-50 bg-[#FAFAF9] overflow-hidden select-none transition-opacity duration-700 ease-out ${
+      className={`fixed inset-0 z-50 bg-[#FAFAF9] overflow-hidden select-none transition-opacity duration-650 ease-out will-change-[opacity] ${
         fading ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
+      style={{
+        transform: "translate3d(0, 0, 0)",
+      }}
       aria-label="Loading portfolio wireframe"
     >
-      {/* YouTube Shimmer CSS Style */}
+      {/* 100% GPU-Composited YouTube Shimmer CSS Style */}
       <style jsx>{`
         .yt-shimmer {
           position: relative;
           overflow: hidden;
           background-color: #e2e8f0;
+          will-change: transform;
         }
         .yt-shimmer::after {
           content: "";
           position: absolute;
           inset: 0;
-          transform: translateX(-100%);
+          transform: translate3d(-100%, 0, 0);
           background: linear-gradient(
             90deg,
             rgba(255, 255, 255, 0) 0%,
@@ -47,13 +51,14 @@ export const YouTubeSkeletonLoader: React.FC = () => {
             rgba(255, 255, 255, 0) 100%
           );
           animation: ytShimmerSweep 1.5s infinite;
+          will-change: transform;
         }
         @keyframes ytShimmerSweep {
           0% {
-            transform: translateX(-100%);
+            transform: translate3d(-100%, 0, 0);
           }
           100% {
-            transform: translateX(100%);
+            transform: translate3d(100%, 0, 0);
           }
         }
       `}</style>
@@ -90,36 +95,34 @@ export const YouTubeSkeletonLoader: React.FC = () => {
           <div className="w-28 sm:w-36 h-6 rounded-full yt-shimmer" />
         </div>
 
-        {/* Central Massive Title & Subtitle Skeleton */}
+        {/* Central Title & Subtitle Skeleton */}
         <div className="flex flex-col items-center justify-center text-center my-auto w-full max-w-4xl mx-auto space-y-4 sm:space-y-6">
-          {/* Institution Eyebrow Pill */}
-          <div className="w-64 sm:w-80 h-7 rounded-full yt-shimmer" />
+          {/* Eyebrow Pill */}
+          <div className="w-56 sm:w-80 h-7 rounded-full yt-shimmer" />
 
           {/* SOHAM Title Line 1 */}
-          <div className="w-3/5 sm:w-1/2 h-14 sm:h-24 md:h-28 rounded-2xl yt-shimmer" />
+          <div className="w-3/5 sm:w-1/2 h-12 sm:h-24 md:h-28 rounded-2xl yt-shimmer" />
 
           {/* ROYCHOUDHURY Title Line 2 */}
-          <div className="w-4/5 sm:w-3/4 h-14 sm:h-24 md:h-28 rounded-2xl yt-shimmer" />
+          <div className="w-4/5 sm:w-3/4 h-12 sm:h-24 md:h-28 rounded-2xl yt-shimmer" />
 
           {/* Editorial Subtitle Lines */}
           <div className="space-y-2.5 w-full max-w-xl mx-auto pt-2">
-            <div className="w-full h-4 sm:h-5 rounded-md yt-shimmer mx-auto" />
-            <div className="w-4/5 h-4 sm:h-5 rounded-md yt-shimmer mx-auto" />
+            <div className="w-full h-3.5 sm:h-5 rounded-md yt-shimmer mx-auto" />
+            <div className="w-4/5 h-3.5 sm:h-5 rounded-md yt-shimmer mx-auto" />
           </div>
 
-          {/* 3 Tech Capsules Skeleton */}
-          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 pt-3">
-            <div className="w-36 sm:w-44 h-8 rounded-full yt-shimmer" />
-            <div className="w-40 sm:w-48 h-8 rounded-full yt-shimmer" />
-            <div className="w-44 sm:w-52 h-8 rounded-full yt-shimmer" />
+          {/* Dual Action Buttons Skeleton */}
+          <div className="flex items-center justify-center gap-3 pt-3">
+            <div className="w-32 sm:w-40 h-10 rounded-full yt-shimmer" />
+            <div className="w-32 sm:w-40 h-10 rounded-full yt-shimmer" />
           </div>
         </div>
 
         {/* Bottom Bar: Action Button Skeleton */}
         <div className="flex items-center justify-center sm:justify-between pt-4 border-t border-slate-200/60">
           <div className="hidden md:block w-48 h-3.5 rounded-md yt-shimmer" />
-          <div className="w-full sm:w-60 h-11 rounded-full yt-shimmer" />
-          <div className="hidden sm:block w-40 h-3.5 rounded-md yt-shimmer" />
+          <div className="w-36 h-3 rounded-md yt-shimmer" />
         </div>
       </div>
     </div>

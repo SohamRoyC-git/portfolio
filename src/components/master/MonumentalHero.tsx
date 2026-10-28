@@ -1,7 +1,6 @@
 "use client";
 
 import React, { memo, useEffect, useRef } from "react";
-import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { ArrowDown, ArrowUpRight, Sparkles } from "lucide-react";
@@ -17,7 +16,6 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
   // Mobile Refs
   const mobileContainerRef = useRef<HTMLDivElement | null>(null);
   const mobileVideoWrapperRef = useRef<HTMLDivElement | null>(null);
-  const mobileFluidBackdropRef = useRef<HTMLDivElement | null>(null);
   const irisOverlayRef = useRef<HTMLDivElement | null>(null);
   const laptopCueRef = useRef<HTMLDivElement | null>(null);
   const mobileIdentityRef = useRef<HTMLDivElement | null>(null);
@@ -35,7 +33,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
 
     // =========================================================================
     // MOBILE TIMELINE (< 768px):
-    // Black Lens Ellipse Aperture Transition & Smoky Orange Fluid Reveal
+    // Black Lens Ellipse Aperture Transition & Cinematic Header Blur Reveal
     // =========================================================================
     mm.add("(max-width: 767px)", () => {
       if (!mobileContainerRef.current) return;
@@ -64,15 +62,13 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         gsap.set(mobileVideoWrapperRef.current, { opacity: 1, scale: 1, display: "block" });
       }
 
-      if (mobileFluidBackdropRef.current) {
-        gsap.set(mobileFluidBackdropRef.current, { opacity: 0, scale: 1, y: 0 });
-      }
-
+      // Initial Cinematic Blur & Depth State for Monumental Headline
       if (mobileIdentityRef.current) {
         gsap.set(mobileIdentityRef.current, {
           opacity: 0,
-          y: 35,
-          scale: 0.96,
+          y: 45,
+          scale: 0.94,
+          filter: "blur(18px)",
           pointerEvents: "none",
         });
       }
@@ -102,7 +98,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
           end: "bottom bottom",
           scrub: 0.35, // Smooth touch momentum tracking
           onUpdate: (self) => {
-            // Instantly stop and freeze video when aperture has closed
+            // 1. Instantly stop and freeze video when aperture has closed
             const videoEl = mobileVideoWrapperRef.current?.querySelector("video");
             if (videoEl) {
               if (self.progress >= 0.35 && !videoEl.paused) {
@@ -111,9 +107,31 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
                 videoEl.play().catch(() => {});
               }
             }
+
+            // 2. Behavior 1: Luminance Ember Flare on the molten flame core
+            const velocity = Math.abs(self.getVelocity());
+            const flareEl = document.getElementById("mobile-ember-flare");
+            if (flareEl && self.progress > 0.30) {
+              const targetGlow = Math.min(0.55, velocity / 2800);
+              gsap.to(flareEl, {
+                opacity: targetGlow,
+                duration: 0.15,
+                ease: "power1.out",
+                overwrite: "auto",
+              });
+              gsap.to(flareEl, {
+                opacity: 0,
+                duration: 0.55,
+                delay: 0.15,
+                ease: "power2.out",
+                overwrite: false,
+              });
+            }
+
+            // 3. Interactive pointer events
             if (mobileIdentityRef.current) {
               mobileIdentityRef.current.style.pointerEvents =
-                self.progress > 0.45 ? "auto" : "none";
+                self.progress > 0.45 && self.progress < 0.85 ? "auto" : "none";
             }
           },
         },
@@ -174,45 +192,21 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         );
       }
 
-      // Phase 2b (0.35 -> 0.52): With video completely gone behind solid black,
-      // the black overlay dissolves to unveil the reference smoky fluid artwork
-      if (mobileFluidBackdropRef.current) {
-        masterTl.to(
-          mobileFluidBackdropRef.current,
-          {
-            opacity: 1,
-            duration: 0.17,
-            ease: "power1.inOut",
-          },
-          0.35
-        );
-
-        // Fluid ribbon reactive scroll movement: gently drifts and scales as user scrolls down
-        masterTl.to(
-          mobileFluidBackdropRef.current,
-          {
-            y: -36,
-            scale: 1.05,
-            duration: 0.65,
-            ease: "none",
-          },
-          0.35
-        );
-      }
-
+      // Phase 2b (0.35 -> 0.50): With video completely gone behind solid black,
+      // the black overlay dissolves to unveil the continuous global smoky fluid artwork
       if (irisOverlayRef.current) {
         masterTl.to(
           irisOverlayRef.current,
           {
             opacity: 0,
-            duration: 0.17,
+            duration: 0.15,
             ease: "power1.inOut",
           },
           0.35
         );
       }
 
-      // Phase 3 (0.44 -> 0.72): Monumental Header materializes cleanly on the reference fluid canvas
+      // Phase 3 (0.38 -> 0.68): Monumental Header materializes with cinematic optical de-blur & kinetic float
       if (mobileIdentityRef.current) {
         masterTl.to(
           mobileIdentityRef.current,
@@ -220,15 +214,29 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             opacity: 1,
             y: 0,
             scale: 1,
-            duration: 0.28,
+            filter: "blur(0px)",
+            duration: 0.30,
             ease: "power2.out",
           },
-          0.44
+          0.38
+        );
+
+        // Subtle cinematic exit de-focus as user scrolls further into Movement 01
+        masterTl.to(
+          mobileIdentityRef.current,
+          {
+            y: -40,
+            opacity: 0.15,
+            filter: "blur(6px)",
+            duration: 0.22,
+            ease: "power1.in",
+          },
+          0.78
         );
       }
 
-      // Phase 4 (0.72 -> 1.00): Dedicated luxury hold period before unpinning smoothly into Movement 01
-      masterTl.to({}, { duration: 0.28 });
+      // Phase 4 (0.78 -> 1.00): Luxury hold period before unpinning smoothly into Movement 01
+      masterTl.to({}, { duration: 0.22 });
 
       return () => {
         if (cueTween) cueTween.kill();
@@ -274,9 +282,9 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
       {/* ========================================================================= */}
       <div
         ref={mobileContainerRef}
-        className="md:hidden relative w-full h-[360vh] bg-[#0C0C0E] overflow-clip"
+        className="md:hidden relative w-full h-[360vh] bg-transparent overflow-clip"
       >
-        <div className="sticky top-0 h-[100dvh] min-h-[100dvh] min-h-screen w-full overflow-hidden bg-[#0C0C0E] flex flex-col justify-between">
+        <div className="sticky top-0 h-[100dvh] min-h-[100dvh] min-h-screen w-full overflow-hidden bg-transparent flex flex-col justify-between">
           {/* 1. Living Pixel-Art Terrace Video Layer */}
           <div
             ref={mobileVideoWrapperRef}
@@ -295,29 +303,13 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             </video>
           </div>
 
-          {/* 2. Reference-Matched Smoky Orange Fluid Artwork (Unveiled as black aperture completes) */}
-          <div
-            ref={mobileFluidBackdropRef}
-            className="absolute inset-0 z-5 pointer-events-none select-none overflow-hidden opacity-0 will-change-[opacity,transform]"
-          >
-            <Image
-              src="/assets/mobile_fluid_ember_reference.jpg"
-              alt=""
-              fill
-              priority
-              className="object-cover object-top select-none pointer-events-none opacity-90"
-            />
-            {/* Seamless dark vignette at bottom to guarantee pure black base */}
-            <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#0C0C0E] to-transparent pointer-events-none" />
-          </div>
-
-          {/* 3. Full-Screen Black Elliptical Aperture Overlay (Deep black #0C0C0E lens eclipse) */}
+          {/* 2. Full-Screen Black Elliptical Aperture Overlay (Deep black #0C0C0E lens eclipse) */}
           <div
             ref={irisOverlayRef}
             className="absolute inset-0 z-10 pointer-events-none bg-[#0C0C0E] will-change-[mask-image,opacity]"
           />
 
-          {/* 4. Understated Editorial Swiss Laptop Micro-Cue (Anchored above laptop) */}
+          {/* 3. Understated Editorial Swiss Laptop Micro-Cue (Anchored above laptop) */}
           <div
             ref={laptopCueRef}
             className="absolute pointer-events-none z-20 flex flex-col items-center will-change-[transform,opacity]"
@@ -395,8 +387,8 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               </div>
             </div>
 
-            {/* Bottom Coordinates & Location Bar */}
-            <div className="relative z-10 w-full flex items-center justify-between pt-3 border-t border-white/15 text-[9px] font-sans font-bold text-orange-200/70 uppercase tracking-widest">
+            {/* Bottom Coordinates & Location Bar (Clean floating typography without card border) */}
+            <div className="relative z-10 w-full flex items-center justify-between pt-3 text-[9px] font-sans font-bold text-orange-200/70 uppercase tracking-widest">
               <span>KOLKATA // LAT 22.5726° N</span>
               <span>ARCHIVE 2026</span>
             </div>

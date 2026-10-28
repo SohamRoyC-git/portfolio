@@ -26,6 +26,16 @@ export const SilkyFluidBackdrop: React.FC = memo(() => {
           priority
           className="object-cover object-top select-none pointer-events-none opacity-90"
         />
+        {/* Luminance Ember Flare Overlay Layer (Reacts dynamically to scroll velocity on mobile) */}
+        <div
+          id="mobile-ember-flare"
+          className="absolute inset-0 pointer-events-none opacity-0 will-change-[opacity]"
+          style={{
+            background:
+              "radial-gradient(ellipse 65% 55% at 82% 16%, rgba(255, 110, 35, 0.85) 0%, rgba(230, 50, 15, 0.50) 40%, rgba(130, 20, 5, 0.15) 65%, transparent 80%)",
+            mixBlendMode: "screen",
+          }}
+        />
         {/* Subtle vignette darkening at bottom to guarantee clean seamless black bleed */}
         <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#0C0C0E] to-transparent pointer-events-none" />
       </div>

@@ -25,7 +25,26 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
     if (prefersReducedMotion || !sectionRef.current) return;
 
     const ctx = gsap.context(() => {
-      // 1. Entrance & Reveal Timeline as Movement 03 locks into place
+      // 1. Geometric Rectangular Iris Expansion Entrance (Blueprint Aperture)
+      // Unfolds cleanly from the center of the screen outward!
+      if (stageRef.current) {
+        gsap.fromTo(
+          stageRef.current,
+          { clipPath: "inset(45% 45% round 24px)" },
+          {
+            clipPath: "inset(0% 0% round 0px)",
+            ease: "none",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top bottom",
+              end: "top top",
+              scrub: true,
+            },
+          }
+        );
+      }
+
+      // 2. Entrance & Reveal Timeline as Movement 03 locks into place
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
@@ -62,8 +81,7 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
         );
       }
 
-      // 2. Dynamic Shrink & Dismissal into Movement 04 (Forge Monolithic Shutter Wipe)
-      // As Movement 04 rises over Movement 03, the code matrix scales down and shifts up with ZERO blur
+      // 3. Dynamic Shrink & Dismissal as Section finishes (ZERO blur, pure self-contained trigger)
       if (contentWrapperRef.current) {
         gsap.to(contentWrapperRef.current, {
           scale: 0.92,
@@ -71,9 +89,9 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
           opacity: 0.15,
           ease: "power2.inOut",
           scrollTrigger: {
-            trigger: "#monument-terminal",
-            start: "top bottom",
-            end: "top top",
+            trigger: sectionRef.current,
+            start: "bottom bottom",
+            end: "bottom top",
             scrub: true,
           },
         });
@@ -180,10 +198,10 @@ export async function ingestMatchTelemetry(
       {/* Sticky 100svh Architectural Stage */}
       <section
         ref={stageRef}
-        className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-center pt-20 sm:pt-24 pb-4 sm:pb-8 px-4 sm:px-8 md:px-12 overflow-hidden bg-[#060709] border-t border-white/15 shadow-[0_-40px_100px_rgba(0,0,0,0.98)]"
+        className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-center pt-20 sm:pt-24 pb-4 sm:pb-8 px-4 sm:px-8 md:px-12 overflow-hidden bg-[#060709] border-t border-white/10 will-change-[clip-path]"
       >
-        {/* Leading Architectural Hairline Edge (Forge Automotive Style) */}
-        <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#FF7A00] to-transparent shadow-[0_0_20px_rgba(255,122,0,0.6)]" />
+        {/* Leading Architectural Razor Hairline (Zero AI glows) */}
+        <div className="absolute top-0 inset-x-0 h-[1px] bg-white/20" />
 
         <div
           ref={contentWrapperRef}

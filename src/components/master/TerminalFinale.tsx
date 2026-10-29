@@ -88,10 +88,10 @@ export const TerminalFinale: React.FC = memo(() => {
     <footer
       id="monument-terminal"
       ref={sectionRef}
-      className="relative w-full z-50 h-[100svh] min-h-[100svh] flex flex-col justify-between pt-20 sm:pt-28 pb-12 px-4 sm:px-8 md:px-12 overflow-hidden bg-[#060709] border-t border-white/15 shadow-[0_-40px_100px_rgba(0,0,0,0.98)]"
+      className="relative w-full z-50 h-[100svh] min-h-[100svh] flex flex-col justify-between pt-20 sm:pt-28 pb-12 px-4 sm:px-8 md:px-12 overflow-hidden bg-[#060709] border-t border-white/10"
     >
-      {/* Leading Architectural Hairline Edge (Forge Automotive Style) */}
-      <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#FF7A00] to-transparent shadow-[0_0_20px_rgba(255,122,0,0.6)]" />
+      {/* Leading Architectural Razor Hairline (Zero AI glows) */}
+      <div className="absolute top-0 inset-x-0 h-[1px] bg-white/20" />
 
       <div className="w-full max-w-7xl mx-auto flex flex-col justify-between h-full">
         {/* Chapter Marker */}

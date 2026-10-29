@@ -32,7 +32,26 @@ export const KineticStatement: React.FC = memo(() => {
       const statementLines = headlineRef.current?.querySelectorAll(".statement-line");
       const plinthCards = plinthsRef.current?.querySelectorAll(".plinth-cell");
 
-      // 1. Entrance & Reveal Timeline (Triggers cleanly as stage locks at top)
+      // 1. Center Ellipse Aperture Zoom Out Reveal Entrance (Heron AI / Camera Iris)
+      // Section blooms outward from the center like a cinematic lens aperture!
+      if (stageRef.current) {
+        gsap.fromTo(
+          stageRef.current,
+          { clipPath: "ellipse(0% 0% at 50% 50%)" },
+          {
+            clipPath: "ellipse(130% 130% at 50% 50%)",
+            ease: "none",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top bottom",
+              end: "top top",
+              scrub: true,
+            },
+          }
+        );
+      }
+
+      // 2. Entrance & Reveal Timeline (Triggers cleanly as stage locks at top)
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
@@ -94,9 +113,7 @@ export const KineticStatement: React.FC = memo(() => {
         );
       }
 
-      // 2. Dynamic Shrink & Dismissal into Movement 02 (Forge Monolithic Shutter Wipe)
-      // As Movement 02 rises from the bottom of the viewport to the top,
-      // Movement 01's content smoothly shifts up and scales down with ZERO blur
+      // 3. Dynamic Shrink & Dismissal as Section finishes (ZERO blur, pure self-contained trigger)
       if (containerRef.current) {
         gsap.to(containerRef.current, {
           scale: 0.92,
@@ -104,9 +121,9 @@ export const KineticStatement: React.FC = memo(() => {
           opacity: 0.15,
           ease: "power2.inOut",
           scrollTrigger: {
-            trigger: "#monument-exhibition",
-            start: "top bottom",
-            end: "top top",
+            trigger: sectionRef.current,
+            start: "bottom bottom",
+            end: "bottom top",
             scrub: true,
           },
         });
@@ -197,10 +214,10 @@ export const KineticStatement: React.FC = memo(() => {
       {/* Sticky 100svh Architectural Stage */}
       <section
         ref={stageRef}
-        className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-center pt-24 sm:pt-28 pb-8 px-6 sm:px-10 md:px-16 overflow-hidden bg-[#060709] border-t border-white/15 shadow-[0_-40px_100px_rgba(0,0,0,0.98)]"
+        className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-center pt-24 sm:pt-28 pb-8 px-6 sm:px-10 md:px-16 overflow-hidden bg-[#060709] border-t border-white/10 will-change-[clip-path]"
       >
-        {/* Leading Architectural Hairline Edge (Forge Automotive Style) */}
-        <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#FF7A00] to-transparent shadow-[0_0_20px_rgba(255,122,0,0.6)]" />
+        {/* Leading Architectural Razor Hairline (Zero AI glows) */}
+        <div className="absolute top-0 inset-x-0 h-[1px] bg-white/20" />
 
         <div
           ref={containerRef}

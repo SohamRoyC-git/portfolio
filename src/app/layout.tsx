@@ -27,6 +27,20 @@ const bnRiley = localFont({
   display: "swap",
 });
 
+// Header Font: Citadel Script Std
+const citadelScript = localFont({
+  src: "../../public/fonts/CitadelScriptStd.otf",
+  variable: "--font-citadel",
+  display: "swap",
+});
+
+// Subtext Font: Helvetica Compressed
+const helveticaCompressed = localFont({
+  src: "../../public/fonts/helvetica-compressed-5871d14b6903a.otf",
+  variable: "--font-helvetica",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Soham Roychoudhury — Software & Web Development | Digital Operations",
   description:
@@ -41,7 +55,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${cormorantGaramond.variable} ${bnRiley.variable}`}
+      className={`${inter.variable} ${cormorantGaramond.variable} ${bnRiley.variable} ${citadelScript.variable} ${helveticaCompressed.variable}`}
       suppressHydrationWarning
     >
       <body

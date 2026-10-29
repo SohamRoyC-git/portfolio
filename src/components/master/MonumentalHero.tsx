@@ -318,10 +318,10 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
                 <span>NSEC (2024–2028)</span>
               </div>
 
-              {/* Cinematic Grand Headline in BN Riley (Pure Stark White) */}
+              {/* Cinematic Grand Headline in Citadel Script */}
               <h1
                 ref={mobileTitleRef}
-                className="font-riley text-5xl xs:text-6xl text-white tracking-tight uppercase leading-[0.92] mb-5 select-none drop-shadow-[0_4px_30px_rgba(0,0,0,0.85)]"
+                className="font-citadel text-6xl xs:text-7xl text-white normal-case leading-[1.08] mb-5 select-none drop-shadow-[0_4px_30px_rgba(0,0,0,0.85)]"
               >
                 Soham <br />
                 <span className="text-white">
@@ -329,8 +329,8 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
                 </span>
               </h1>
 
-              {/* Editorial Subtitle in Athelas Italic */}
-              <p className="font-athelas italic font-normal text-sm xs:text-base text-orange-100/90 leading-relaxed mb-8 max-w-xs px-1 drop-shadow-md">
+              {/* Editorial Subtitle in Helvetica Compressed */}
+              <p className="font-helvetica uppercase tracking-[0.14em] font-normal text-xs xs:text-sm text-orange-100/90 leading-relaxed mb-8 max-w-xs px-1 drop-shadow-md">
                 Artificial Intelligence &amp; Machine Learning · Frontend Architect · Digital Operations
               </p>
 
@@ -418,16 +418,16 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             <span>Netaji Subhash Engineering College (2024–2028)</span>
           </div>
 
-          {/* Grand Headline in BN Riley */}
-          <h1 className="font-riley text-7xl md:text-8xl lg:text-[6.8rem] xl:text-[8rem] text-white tracking-tight uppercase leading-[0.92] mb-6 drop-shadow-[0_6px_36px_rgba(0,0,0,0.95)] select-none">
+          {/* Grand Headline in Citadel Script */}
+          <h1 className="font-citadel text-7xl md:text-8xl lg:text-[7.2rem] xl:text-[8.5rem] text-white normal-case leading-[1.08] mb-6 drop-shadow-[0_6px_36px_rgba(0,0,0,0.95)] select-none">
             Soham <br />
             <span className="bg-gradient-to-r from-white via-slate-100 to-emerald-200 bg-clip-text text-transparent drop-shadow-[0_0_40px_rgba(16,185,129,0.35)]">
               Roychoudhury
             </span>
           </h1>
 
-          {/* Editorial Subtitle in Athelas Italic */}
-          <p className="font-athelas italic font-normal text-2xl md:text-3xl text-slate-100 leading-relaxed mb-10 max-w-3xl drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] px-2">
+          {/* Editorial Subtitle in Helvetica Compressed */}
+          <p className="font-helvetica uppercase tracking-[0.16em] font-normal text-lg md:text-xl text-slate-100 leading-relaxed mb-10 max-w-3xl drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] px-2">
             Artificial Intelligence &amp; Machine Learning · Frontend Architect · Digital Operations
           </p>
 

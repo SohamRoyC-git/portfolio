@@ -6,7 +6,6 @@ import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import Lenis from "lenis";
 
 import { SilkyFluidBackdrop } from "@/components/master/SilkyFluidBackdrop";
-import { TravelingPrismaticSphere } from "@/components/master/TravelingPrismaticSphere";
 import { MasterNav } from "@/components/master/MasterNav";
 import { MonumentalHero } from "@/components/master/MonumentalHero";
 import { KineticStatement } from "@/components/master/KineticStatement";
@@ -104,15 +103,12 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-[#FAFAF9] max-md:bg-[#0C0C0E] text-[#0F172A] max-md:text-white selection:bg-[#FF5500]/30 selection:text-[#FF5500] overflow-x-clip">
+    <div className="relative min-h-screen bg-[#060709] text-[#F8F5EE] selection:bg-[#FF7A00]/30 selection:text-[#FF7A00] overflow-x-clip">
       {/* 0. Authentic YouTube Shimmer Skeleton Loader (Mounts once on load, dissolves smoothly) */}
       <YouTubeSkeletonLoader />
 
-      {/* 1. Silky Fluid Gradient Backdrop (Direct match to reference screenshot: lightweight, GPU-composited, zero-lag) */}
+      {/* 1. Disciplined Architectural Obsidian Canvas (Zero AI glows) */}
       <SilkyFluidBackdrop />
-
-      {/* Autonomous Emerald Optical Guiding Sphere */}
-      <TravelingPrismaticSphere />
 
       {/* 2. Architectural Minimal Navigation */}
       <MasterNav onNavigate={handleNavigate} activeId={activeId} />

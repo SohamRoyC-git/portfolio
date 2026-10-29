@@ -411,7 +411,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
           </div>
 
           {/* Multi-stop bottom bleed into Movement 01 */}
-          <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#FAFAF9] via-[#FAFAF9]/85 to-transparent pointer-events-none z-10" />
+          <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#060709] via-[#060709]/85 to-transparent pointer-events-none z-10" />
         </div>
 
         {/* Centered Monumental Headline (Matching the 'Soft Light' Reference) */}

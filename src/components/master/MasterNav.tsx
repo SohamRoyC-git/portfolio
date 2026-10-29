@@ -97,7 +97,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
     const isMobile = window.innerWidth < 768;
 
     if (isScrolled) {
-      // 1. Morph to Compact Floating Glass Dock
+      // 1. Morph to Compact Floating Glass Dock (Frosted Obsidian CAD Pill)
       gsap.to(nav, {
         maxWidth: isMobile ? "calc(100% - 24px)" : "860px",
         marginTop: isMobile ? "10px" : "16px",
@@ -106,11 +106,9 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
         paddingLeft: isMobile ? "16px" : "24px",
         paddingRight: isMobile ? "16px" : "24px",
         borderRadius: "9999px",
-        backgroundColor: isMobile ? "rgba(12, 12, 14, 0.88)" : "rgba(255, 255, 255, 0.86)",
-        borderColor: isMobile ? "rgba(255, 255, 255, 0.18)" : "rgba(15, 23, 42, 0.08)",
-        boxShadow: isMobile
-          ? "0 16px 38px -6px rgba(0, 0, 0, 0.9), inset 0 1px 1px rgba(255, 255, 255, 0.1)"
-          : "0 16px 38px -6px rgba(15, 23, 42, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.85)",
+        backgroundColor: "rgba(10, 12, 16, 0.85)",
+        borderColor: "rgba(255, 255, 255, 0.12)",
+        boxShadow: "0 20px 45px -10px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.14)",
         backdropFilter: "blur(20px)",
         duration: 0.48,
         ease: "power3.out",
@@ -184,7 +182,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
           ref={navRef}
           className={`w-full flex items-center justify-between pointer-events-auto border transition-colors duration-400 ${
             isScrolled
-              ? "bg-white/85 border-slate-200/80"
+              ? "bg-[#0A0C10]/85 border-white/12 backdrop-blur-xl"
               : "bg-transparent border-transparent"
           }`}
           style={{
@@ -203,14 +201,14 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
             data-cursor-text="INDEX"
           >
             <span className="relative flex h-2 w-2 shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#10B981] opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#10B981]" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF7A00] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FF7A00]" />
             </span>
             <span
               className={`font-sans font-black text-xs tracking-[0.2em] uppercase transition-colors duration-300 truncate ${
                 isScrolled
-                  ? "text-[#0F172A] max-md:text-white group-hover:text-[#10B981]"
-                  : "text-white group-hover:text-emerald-300 drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]"
+                  ? "text-white group-hover:text-[#FF7A00]"
+                  : "text-white group-hover:text-amber-300 drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]"
               }`}
             >
               {isScrolled ? "SR · SOHAM" : "SR // SOHAM ROYCHOUDHURY"}
@@ -226,13 +224,9 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
                   key={link.id}
                   onClick={() => onNavigate(link.id)}
                   className={`relative cursor-pointer py-1 transition-all duration-300 ${
-                    isScrolled
-                      ? isActive
-                        ? "text-[#10B981] font-black"
-                        : "text-slate-600 hover:text-[#0F172A]"
-                      : isActive
-                      ? "text-[#10B981] font-black drop-shadow-[0_0_12px_rgba(16,185,129,0.7)]"
-                      : "text-white/85 hover:text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]"
+                    isActive
+                      ? "text-[#FF7A00] font-black"
+                      : "text-slate-300/80 hover:text-white"
                   }`}
                   data-cursor="pointer"
                   data-cursor-text="GOTO"
@@ -240,9 +234,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
                   <span>{link.label}</span>
                   {isActive && (
                     <span
-                      className={`absolute -bottom-1 left-0 right-0 h-0.5 rounded-full ${
-                        isScrolled ? "bg-[#10B981]" : "bg-emerald-400 shadow-[0_0_8px_#10B981]"
-                      }`}
+                      className="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full bg-[#FF7A00] shadow-[0_0_8px_rgba(255,122,0,0.6)]"
                     />
                   )}
                 </button>
@@ -257,7 +249,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
               ref={telemetryRef}
               className="hidden xl:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/40 border border-white/20 text-white shadow-sm backdrop-blur-md text-[10px] font-sans font-bold uppercase tracking-wider"
             >
-              <Compass size={12} className="text-[#10B981]" />
+              <Compass size={12} className="text-[#FF7A00]" />
               <span>KOLKATA {time || "00:00:00"} IST</span>
               <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] ml-1" />
               <span className="text-emerald-300">OPEN</span>
@@ -268,8 +260,8 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
               onClick={() => onNavigate("monument-terminal")}
               className={`inline-flex items-center gap-1.5 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full font-sans font-black text-[11px] uppercase tracking-wider cursor-pointer transition-all duration-300 shadow-md active:scale-95 ${
                 isScrolled
-                  ? "bg-[#0F172A] max-md:bg-white text-white max-md:text-[#070A11] hover:bg-[#10B981] max-md:hover:bg-emerald-400"
-                  : "bg-white text-[#0F172A] hover:bg-[#10B981] hover:text-white"
+                  ? "bg-white text-[#0A0C10] hover:bg-[#FF7A00] hover:text-white"
+                  : "bg-white text-[#0F172A] hover:bg-[#FF7A00] hover:text-white"
               }`}
             >
               <span>CONNECT</span>
@@ -279,11 +271,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
             {/* Mobile Menu Toggle Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className={`lg:hidden p-2 rounded-full transition-colors ${
-                isScrolled
-                  ? "text-[#0F172A] max-md:text-white hover:bg-slate-100 max-md:hover:bg-white/10"
-                  : "text-white hover:bg-white/15 drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]"
-              }`}
+              className="lg:hidden p-2 rounded-full text-white hover:bg-white/10 transition-colors"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}

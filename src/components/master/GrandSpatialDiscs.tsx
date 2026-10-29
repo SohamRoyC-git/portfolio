@@ -4,18 +4,14 @@ import React, { useState, useEffect, useRef, memo } from "react";
 import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles,
   ArrowRight,
   ExternalLink,
   Eye,
   Disc3,
-  Building2,
-  Ship,
-  Activity,
   ArrowUpRight,
-  Globe,
-  Shield,
   X,
 } from "lucide-react";
 import { LocalizationDemo } from "@/components/LocalizationDemo";
@@ -39,7 +35,6 @@ interface ProjectItem {
   displayDomain: string;
   previewImage?: string;
   hasDemo?: boolean;
-  socials?: { name: string; svgPath: string; viewBox?: string }[];
 }
 
 const PROJECTS: ProjectItem[] = [
@@ -86,38 +81,6 @@ const PROJECTS: ProjectItem[] = [
     visualType: "cricket",
     logo: "/assets/logos/latvia_cricket.png",
     displayDomain: "CRICLV.COM",
-    socials: [
-      {
-        name: "Instagram",
-        viewBox: "0 0 24 24",
-        svgPath:
-          "M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z",
-      },
-      {
-        name: "X (Twitter)",
-        viewBox: "0 0 24 24",
-        svgPath:
-          "M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z",
-      },
-      {
-        name: "Facebook",
-        viewBox: "0 0 24 24",
-        svgPath:
-          "M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z",
-      },
-      {
-        name: "YouTube",
-        viewBox: "0 0 24 24",
-        svgPath:
-          "M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z",
-      },
-      {
-        name: "LinkedIn",
-        viewBox: "0 0 24 24",
-        svgPath:
-          "M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z",
-      },
-    ],
   },
   {
     id: "india-center",
@@ -169,6 +132,10 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
   const [isDossierOpen, setIsDossierOpen] = useState(false);
   const [selectedDossier, setSelectedDossier] = useState<ProjectItem | null>(null);
 
+  // In-card interactive language switcher for IZIEAT
+  const [inCardLang, setInCardLang] = useState<"en" | "ru">("en");
+  const [sampleIdx, setSampleIdx] = useState(0);
+
   const activeIdxRef = useRef(0);
   const progressBarRef = useRef<HTMLDivElement | null>(null);
   const counterRef = useRef<HTMLSpanElement | null>(null);
@@ -177,6 +144,27 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
   const pinRef = useRef<HTMLDivElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+
+  const sampleSnippets = [
+    {
+      en: "IQF Frozen Sweet Corn Cobs (Super Sweet Variety)",
+      ru: "Замороженная сахарная кукуруза в початках IQF",
+      specEn: "Brix Sweetness: 12°–14° • Blast Frozen at -38°C",
+      specRu: "Сладость Брикс: 12°–14° • Шоковая заморозка при -38°C",
+    },
+    {
+      en: "Export Specifications & Phytosanitary Compliance",
+      ru: "Экспортные спецификации и фитосанитарный контроль",
+      specEn: "ISO 22000 & HACCP Certified • Global Cold Chain",
+      specRu: "Сертификация ISO 22000 и HACCP • Международная логистика",
+    },
+    {
+      en: "Multi-Port Container Logistics (Hamburg, Rotterdam, Riga)",
+      ru: "Контейнерная логистика (Гамбург, Роттердам, Рига)",
+      specEn: "Direct Vessel Booking • CIF & FOB Incoterms 2020",
+      specRu: "Прямой букинг судов • Условия CIF и FOB Incoterms 2020",
+    },
+  ];
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -237,10 +225,10 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
           const sign = distFromCenter > 0 ? 1 : -1;
           const t = Math.min(Math.max(excess, 0), 1.6);
 
-          const maxTilt = isMobile ? 10 : 16;
+          const maxTilt = isMobile ? 8 : 14;
           rotateY = sign * -maxTilt * Math.min(t, 1);
-          translateZ = -Math.pow(t, 1.2) * (isMobile ? 50 : 100);
-          scale = 1 - Math.min(t * (isMobile ? 0.04 : 0.07), 0.12);
+          translateZ = -Math.pow(t, 1.2) * (isMobile ? 50 : 90);
+          scale = 1 - Math.min(t * (isMobile ? 0.04 : 0.06), 0.10);
           opacity = 1 - Math.min(t * 0.25, 0.45);
         }
 
@@ -277,24 +265,42 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
               progressBarRef.current.style.width = `${Math.round(self.progress * 100)}%`;
             }
             const totalScroll = getExactScrollAmount();
-            const tProgress = Math.min(self.progress / 0.80, 1.0);
+            const tProgress = Math.min(self.progress / 0.82, 1.0);
             const currentTrackX = totalScroll * tProgress;
             updateOrbitalCards(currentTrackX);
+
+            // Cinematic exit: subtle camera depth recession at the end of the scroll
+            if (self.progress > 0.88) {
+              const exitT = (self.progress - 0.88) / 0.12;
+              gsap.set(pin, {
+                scale: 1 - exitT * 0.05,
+                opacity: 1 - exitT * 0.55,
+                yPercent: -exitT * 4,
+              });
+            } else {
+              gsap.set(pin, {
+                scale: 1,
+                opacity: 1,
+                yPercent: 0,
+              });
+            }
           },
         },
       });
 
+      // Horizontal track travel
       tl.to(
         track,
         {
           x: getExactScrollAmount,
           ease: "none",
-          duration: 0.80,
+          duration: 0.82,
         },
         0
       );
 
-      tl.to({}, { duration: 0.20 }, 0.80);
+      // Dedicated hold period at end
+      tl.to({}, { duration: 0.18 }, 0.82);
     }, section);
 
     measureCards();
@@ -321,49 +327,53 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
     <section
       id="monument-exhibition"
       ref={sectionRef}
-      className="relative w-full overflow-hidden z-10"
+      className="relative w-full overflow-hidden z-10 bg-[#060709]"
     >
       <span id="work" className="sr-only" aria-hidden="true" />
-      {/* Pinned Fullscreen Stage with Generous Top/Bottom Clearance */}
+
+      {/* Pinned Fullscreen Stage */}
       <div
         ref={pinRef}
-        className="h-[100svh] w-full flex flex-col justify-between pt-16 sm:pt-24 pb-4 sm:pb-8 px-4 sm:px-8 md:px-12 relative overflow-hidden bg-transparent z-20"
+        className="h-[100svh] w-full flex flex-col justify-between pt-16 sm:pt-24 pb-4 sm:pb-8 px-4 sm:px-8 md:px-12 relative overflow-hidden bg-transparent z-20 will-change-transform"
       >
-        {/* Pinned Top HUD Header - Plenty of breathing room */}
+        {/* Pinned Top HUD Header */}
         <div className="relative z-20 flex items-center justify-between w-full max-w-7xl mx-auto px-2 mb-2 sm:mb-4">
-          <div className="font-sans font-black text-xs text-[#10B981] tracking-widest uppercase flex items-center gap-2 sm:gap-3">
-            <span className="w-5 sm:w-8 h-[2px] bg-[#10B981]" />
-            <span className="truncate">02 / SELECTED COMMISSIONS</span>
+          <div className="font-sans font-bold text-[11px] sm:text-xs text-[#FF7A00] tracking-[0.2em] uppercase flex items-center gap-2 sm:gap-3">
+            <span className="w-5 sm:w-8 h-[1px] bg-[#FF7A00]" />
+            <span className="truncate">02 // SELECTED COMMISSIONS</span>
           </div>
 
           {/* Interactive Progress Scrub Indicator */}
           <div className="hidden md:flex items-center gap-4">
-            <span className="font-sans font-black text-[11px] text-slate-400 uppercase tracking-wider">
-              360° ORBITAL CAROUSEL
+            <span className="font-sans font-medium text-[10px] text-slate-400 uppercase tracking-widest">
+              360° SPATIAL PROJECTION
             </span>
-            <div className="w-44 h-2 rounded-full bg-slate-200/80 p-0.5 overflow-hidden">
+            <div className="w-44 h-1.5 rounded-full bg-white/10 p-0.5 overflow-hidden">
               <div
                 ref={progressBarRef}
-                className="h-full bg-gradient-to-r from-[#10B981] via-[#00FF87] to-[#10B981] rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                className="h-full bg-gradient-to-r from-[#FF7A00] via-[#FFA347] to-[#10B981] rounded-full"
                 style={{ width: "0%" }}
               />
             </div>
-            <span ref={counterRef} className="font-sans font-black text-xs text-[#0F172A]">
+            <span
+              ref={counterRef}
+              className="font-helvetica font-normal text-sm text-[#FFFDF9] tracking-wider"
+            >
               01 / 0{PROJECTS.length}
             </span>
           </div>
 
-          <div className="font-sans font-black text-[11px] sm:text-xs text-slate-500 uppercase tracking-wider flex items-center gap-1.5 sm:gap-2">
+          <div className="font-sans font-bold text-[10px] sm:text-xs text-slate-400 uppercase tracking-widest flex items-center gap-1.5 sm:gap-2">
             <span>SCROLL</span>
-            <ArrowRight size={13} className="text-[#10B981] animate-pulse" />
+            <ArrowRight size={13} className="text-[#FF7A00] animate-pulse" />
           </div>
         </div>
 
-        {/* Horizontal Orbital 3D Track - Centered with plenty of margin */}
+        {/* Horizontal Orbital 3D Track */}
         <div className="relative z-10 my-auto w-full overflow-visible py-2 sm:py-4">
           <div
             ref={trackRef}
-            className="flex gap-6 sm:gap-14 items-center will-change-transform"
+            className="flex gap-6 sm:gap-12 items-center will-change-transform"
             style={{
               transformStyle: "preserve-3d",
               paddingLeft: "calc((100vw - min(880px, 86vw)) / 2)",
@@ -376,71 +386,75 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                 ref={(el) => {
                   cardsRef.current[idx] = el;
                 }}
-                /* Responsive Frosted Glassmorphism Card with Generous Margins & No Overflow Collisions */
-                className="w-[86vw] max-w-[880px] shrink-0 p-5 sm:p-8 lg:p-9 rounded-[2rem] sm:rounded-[2.25rem] bg-white/80 max-md:bg-[#0C0C0E]/85 border-2 border-white/95 max-md:border-white/15 backdrop-blur-md shadow-[0_25px_60px_-15px_rgba(15,23,42,0.12),0_10px_25px_-5px_rgba(16,185,129,0.08),inset_0_1px_2px_rgba(255,255,255,0.95)] max-md:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] hover:border-[#10B981]/50 transition-all duration-200 grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-center will-change-transform max-h-[calc(100svh-175px)] overflow-y-auto sm:overflow-visible"
+                /* Frosted Obsidian CAD Plinth Card */
+                className="w-[86vw] max-w-[880px] shrink-0 p-5 sm:p-8 lg:p-9 rounded-[2rem] bg-[#0C0E14]/92 border border-white/12 backdrop-blur-xl shadow-[0_30px_70px_-20px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.12)] hover:border-white/25 transition-colors duration-300 grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-center will-change-transform max-h-[calc(100svh-170px)] overflow-y-auto sm:overflow-visible"
                 style={{ transformStyle: "preserve-3d" }}
               >
                 {/* Left Card Editorial Metadata (7 Cols on desktop, full on mobile) */}
                 <div className="lg:col-span-7 flex flex-col justify-between z-10">
                   <div>
                     {/* Catalogue Badge & Category */}
-                    <div className="inline-flex items-center gap-1.5 sm:gap-2 font-sans font-black text-[10px] sm:text-xs text-[#10B981] uppercase tracking-wider mb-2">
-                      <Disc3 size={14} className="animate-spin" />
+                    <div className="inline-flex items-center gap-2 font-sans font-bold text-[10px] sm:text-xs text-[#FF7A00] uppercase tracking-wider mb-2.5">
+                      <Disc3 size={13} className="animate-spin text-[#FF7A00]" />
                       <span>{project.catalogueNo}</span>
-                      <span className="text-slate-300">•</span>
-                      <span className="text-slate-500 truncate max-w-[150px] sm:max-w-none">
+                      <span className="text-white/20">•</span>
+                      <span className="text-slate-400 truncate max-w-[170px] sm:max-w-none">
                         {project.category}
                       </span>
                     </div>
 
-                    {/* Official Client Logo & Metadata Header - Bold, High-Contrast & Prominent (~56px-64px) */}
+                    {/* Official Client Logo & Metadata Header */}
                     <div className="flex items-center gap-3.5 mb-3.5">
-                      <div className="h-16 sm:h-20 px-4 py-2 rounded-2xl bg-white shadow-md border-2 border-slate-200/90 flex items-center justify-center shrink-0 hover:border-[#10B981]/60 transition-colors">
+                      <div className="h-14 sm:h-16 px-3.5 py-1.5 rounded-xl bg-white/[0.06] border border-white/15 flex items-center justify-center shrink-0">
                         <Image
                           src={project.logo}
                           alt={project.client}
-                          width={140}
-                          height={64}
-                          className="object-contain max-h-12 sm:max-h-16 w-auto"
+                          width={130}
+                          height={56}
+                          className="object-contain max-h-10 sm:max-h-12 w-auto"
                         />
                       </div>
                       <div>
-                        <div className="font-sans font-black text-sm sm:text-base text-[#0F172A] max-md:text-white leading-tight">
+                        <div className="font-sans font-bold text-sm sm:text-base text-[#FFFDF9] leading-tight">
                           {project.client}
                         </div>
-                        <div className="font-sans font-medium text-xs text-slate-500">
-                          Production Commission • {project.year}
+                        <div className="font-sans font-medium text-xs text-slate-400">
+                          Production System • {project.year}
                         </div>
                       </div>
                     </div>
 
                     {/* Headline */}
-                    <h3 className="font-sans font-black text-2xl sm:text-3xl lg:text-4xl text-[#0F172A] max-md:text-white tracking-tight leading-[1.08] mb-2.5">
+                    <h3 className="font-sans font-black text-2xl sm:text-3xl lg:text-4xl text-[#FFFDF9] tracking-tight leading-[1.08] mb-2.5">
                       {project.title}
                     </h3>
 
-                    {/* Editorial Summary in Apple Garamond Light Italic - Concise 2-line brief */}
-                    <p className="font-serif italic font-light text-sm sm:text-base text-slate-700 max-md:text-slate-300 leading-relaxed mb-3.5 line-clamp-2 sm:line-clamp-3">
+                    {/* Summary */}
+                    <p className="font-serif italic font-light text-sm sm:text-base text-slate-300/90 leading-relaxed mb-3.5 line-clamp-2 sm:line-clamp-3">
                       {project.summary}
                     </p>
 
-                    {/* Curated High-Impact System Benchmarks (Clean horizontal badge row, zero visual clutter) */}
+                    {/* System Benchmarks */}
                     <div className="flex flex-wrap items-center gap-2 mb-3.5">
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 max-md:bg-white/10 border border-emerald-500/20 max-md:border-white/10 text-[#059669] max-md:text-emerald-400 font-sans font-black text-[10px] sm:text-[11px] uppercase tracking-wider shadow-xs">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
-                        <span>{project.metrics[0].label}: {project.metrics[0].value}</span>
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.05] border border-white/12 text-[#FF7A00] font-sans font-bold text-[10px] sm:text-[11px] uppercase tracking-wider">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#FF7A00] animate-pulse" />
+                        <span>
+                          {project.metrics[0].label}: {project.metrics[0].value}
+                        </span>
                       </div>
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 max-md:bg-[#161F30] border border-slate-200/90 max-md:border-white/10 text-slate-700 max-md:text-slate-200 font-sans font-black text-[10px] sm:text-[11px] uppercase tracking-wider shadow-xs">
-                        <span>{project.metrics[1].label}: {project.metrics[1].value}</span>
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-slate-300 font-sans font-bold text-[10px] sm:text-[11px] uppercase tracking-wider">
+                        <span>
+                          {project.metrics[1].label}: {project.metrics[1].value}
+                        </span>
                       </div>
                     </div>
 
-                    {/* Essential Tech Stack */}
-                    <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4">
+                    {/* Tech Stack Pills */}
+                    <div className="flex flex-wrap gap-1.5 mb-4">
                       {project.stack.slice(0, 4).map((tech) => (
                         <span
                           key={tech}
-                          className="px-2.5 py-1 rounded-lg bg-slate-100 max-md:bg-white/5 font-sans font-bold text-[10px] sm:text-[11px] text-slate-600 max-md:text-slate-300 border border-slate-200/60 max-md:border-white/10"
+                          className="px-2.5 py-1 rounded-md bg-white/[0.03] border border-white/10 font-sans font-medium text-[10px] sm:text-[11px] text-slate-400 uppercase tracking-wider"
                         >
                           {tech}
                         </span>
@@ -449,12 +463,12 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                   </div>
 
                   {/* Project Controls: View Site & Technical Dossier */}
-                  <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 pt-2 border-t border-slate-200/80">
+                  <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 pt-3 border-t border-white/10">
                     <a
                       href={project.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0F172A] text-white font-sans font-black text-xs tracking-wider uppercase hover:bg-[#10B981] transition-colors shadow-sm"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white text-[#060709] font-sans font-bold text-xs tracking-wider uppercase hover:bg-[#FF7A00] hover:text-white transition-colors duration-200 shadow-md cursor-pointer"
                     >
                       <span>Visit Live Site</span>
                       <ExternalLink size={13} />
@@ -463,16 +477,16 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                     {project.hasDemo && (
                       <button
                         onClick={() => setIsDemoOpen(true)}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-50 text-[#059669] border border-emerald-500/30 font-sans font-black text-xs tracking-wider uppercase hover:bg-emerald-100 transition-colors"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#FF7A00]/15 text-[#FFA347] border border-[#FF7A00]/30 font-sans font-bold text-xs tracking-wider uppercase hover:bg-[#FF7A00]/25 transition-colors duration-200 cursor-pointer"
                       >
                         <Sparkles size={13} />
-                        <span>Interactive Demo</span>
+                        <span>278-Key Sandbox</span>
                       </button>
                     )}
 
                     <button
                       onClick={() => openDossier(project)}
-                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white max-md:bg-[#161F30] border border-slate-200 max-md:border-white/10 text-slate-600 max-md:text-slate-200 font-sans font-black text-xs tracking-wider uppercase hover:text-[#0F172A] max-md:hover:text-white hover:border-slate-400 transition-colors"
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.05] border border-white/12 text-slate-300 font-sans font-bold text-xs tracking-wider uppercase hover:text-white hover:border-white/30 transition-colors duration-200 cursor-pointer"
                     >
                       <Eye size={13} />
                       <span>Dossier</span>
@@ -480,352 +494,342 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                   </div>
                 </div>
 
-                {/* Right Card Visual Artifact (5 Cols on desktop, full on mobile) - Editorial Glass Showcase */}
+                {/* Right Card Visual Artifact (5 Cols on desktop, full on mobile) */}
                 <div className="lg:col-span-5 flex items-center justify-center relative">
-                  {/* Visual 1: IZIEAT - Interactive Browser Preview + Editorial Glass Showcase */}
+                  {/* Visual 1: IZIEAT - Interactive In-Card Framer Motion Language Sandbox */}
                   {project.visualType === "izieat" && (
-                    <a
-                      href={project.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group/showcase block w-full max-w-sm rounded-[2rem] bg-gradient-to-b from-white/95 to-emerald-50/40 max-md:from-[#121318]/90 max-md:to-[#121318]/90 border-2 border-white/95 max-md:border-white/10 p-4 sm:p-5 shadow-xl backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:border-[#10B981]/60 hover:shadow-2xl relative overflow-hidden"
-                    >
-                      {/* Signature Emerald Ambient Backlight (Desktop only; on mobile ambient glow is provided by the section backdrop) */}
-                      <div
-                        className="hidden md:block absolute -top-12 -right-12 w-44 h-44 rounded-full pointer-events-none opacity-40 blur-2xl group-hover/showcase:opacity-70 transition-opacity duration-500"
-                        style={{ background: "radial-gradient(circle, rgba(16,185,129,0.8) 0%, transparent 70%)" }}
-                      />
-
+                    <div className="w-full max-w-sm rounded-2xl bg-[#08090D] border border-white/12 p-4 sm:p-5 relative overflow-hidden flex flex-col justify-between shadow-xl">
                       {/* Top Header: Traffic Lights + Verified Domain Badge */}
-                      <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 mb-3.5 relative z-10">
+                      <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3.5">
                         <div className="flex items-center gap-1.5">
-                          <span className="w-2.5 h-2.5 rounded-full bg-red-400/80" />
-                          <span className="w-2.5 h-2.5 rounded-full bg-amber-400/80" />
-                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400/80" />
-                          <span className="ml-2 px-2.5 py-0.5 rounded-full bg-white/90 max-md:bg-white/10 font-sans font-bold text-[10px] text-slate-600 max-md:text-slate-300 border border-slate-200/80 max-md:border-white/10 flex items-center gap-1.5 shadow-xs">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                            izieat.com
+                          <span className="w-2.5 h-2.5 rounded-full bg-white/20" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-white/20" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#10B981]" />
+                          <span className="ml-2 font-sans font-bold text-[10px] text-slate-300">
+                            {project.displayDomain}
                           </span>
                         </div>
-                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 max-md:bg-white/10 border border-emerald-500/20 max-md:border-white/10 text-[#059669] max-md:text-slate-200 font-sans font-black text-[10px] uppercase tracking-wider">
-                          ACTIVE PROD
+
+                        {/* Interactive Framer Motion Language Switcher Pill */}
+                        <div className="relative flex items-center bg-white/[0.06] border border-white/10 rounded-full p-0.5">
+                          <button
+                            onClick={() => setInCardLang("en")}
+                            className="relative px-2.5 py-0.5 font-sans font-bold text-[10px] uppercase tracking-wider text-white transition-colors cursor-pointer z-10"
+                          >
+                            {inCardLang === "en" && (
+                              <motion.div
+                                layoutId="card-lang-pill"
+                                className="absolute inset-0 bg-[#FF7A00] rounded-full"
+                                transition={{ type: "spring", stiffness: 450, damping: 30 }}
+                              />
+                            )}
+                            <span className="relative z-20">EN</span>
+                          </button>
+                          <button
+                            onClick={() => setInCardLang("ru")}
+                            className="relative px-2.5 py-0.5 font-sans font-bold text-[10px] uppercase tracking-wider text-white transition-colors cursor-pointer z-10"
+                          >
+                            {inCardLang === "ru" && (
+                              <motion.div
+                                layoutId="card-lang-pill"
+                                className="absolute inset-0 bg-[#FF7A00] rounded-full"
+                                transition={{ type: "spring", stiffness: 450, damping: 30 }}
+                              />
+                            )}
+                            <span className="relative z-20">RU</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Live Reactive Dictionary Translation Stage */}
+                      <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 mb-3.5">
+                        <div className="flex items-center justify-between text-[9px] font-sans font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                          <span>IN-MEMORY DICTIONARY OUTPUT</span>
+                          <span className="text-emerald-400 font-mono">&lt; 2.8ms</span>
+                        </div>
+
+                        <AnimatePresence mode="wait">
+                          <motion.div
+                            key={inCardLang + sampleIdx}
+                            initial={{ opacity: 0, y: 3 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -3 }}
+                            transition={{ duration: 0.15 }}
+                            className="space-y-1.5"
+                          >
+                            <div className="font-sans font-bold text-xs sm:text-sm text-[#FFFDF9] leading-snug">
+                              {inCardLang === "en"
+                                ? sampleSnippets[sampleIdx].en
+                                : sampleSnippets[sampleIdx].ru}
+                            </div>
+                            <div className="font-mono text-[10px] text-slate-400">
+                              {inCardLang === "en"
+                                ? sampleSnippets[sampleIdx].specEn
+                                : sampleSnippets[sampleIdx].specRu}
+                            </div>
+                          </motion.div>
+                        </AnimatePresence>
+
+                        {/* Interactive Sample Stepper */}
+                        <div className="flex items-center justify-between pt-2.5 mt-2.5 border-t border-white/10 text-[9px]">
+                          <span className="text-slate-400 uppercase font-mono">
+                            KEY {sampleIdx + 1} OF {sampleSnippets.length}
+                          </span>
+                          <button
+                            onClick={() =>
+                              setSampleIdx((prev) => (prev + 1) % sampleSnippets.length)
+                            }
+                            className="text-[#FF7A00] hover:text-[#FFA347] font-bold uppercase tracking-wider cursor-pointer"
+                          >
+                            CYCLE STRING →
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Telemetry Architecture Bar */}
+                      <div className="grid grid-cols-2 gap-2 text-[10px] mb-3.5">
+                        <div className="p-2 rounded-lg bg-white/[0.02] border border-white/8">
+                          <div className="text-slate-400 uppercase font-mono text-[9px]">
+                            EXTERNAL API DELAY
+                          </div>
+                          <div className="font-bold text-emerald-400">0.00ms (0 calls)</div>
+                        </div>
+                        <div className="p-2 rounded-lg bg-white/[0.02] border border-white/8">
+                          <div className="text-slate-400 uppercase font-mono text-[9px]">
+                            DICTIONARY CACHE
+                          </div>
+                          <div className="font-bold text-[#FFFDF9]">278 Key Pairs</div>
+                        </div>
+                      </div>
+
+                      {/* Direct Link Capsule */}
+                      <a
+                        href={project.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-white font-sans font-bold text-xs uppercase tracking-wider transition-colors"
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          <span>LIVE AT {project.displayDomain}</span>
                         </span>
-                      </div>
-
-                      {/* High-Res Browser Window Preview */}
-                      {project.previewImage && (
-                        <div className="relative aspect-[16/10] w-full rounded-2xl overflow-hidden bg-slate-900 border border-slate-200/80 shadow-inner mb-3.5 relative z-10">
-                          <Image
-                            src={project.previewImage}
-                            alt="IZIEAT Homepage"
-                            fill
-                            className="object-cover object-top group-hover/showcase:scale-105 transition-transform duration-500"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent opacity-0 group-hover/showcase:opacity-100 transition-opacity duration-300 flex items-end p-3">
-                            <span className="font-sans font-bold text-xs text-white flex items-center gap-1.5">
-                              <ExternalLink size={13} className="text-emerald-400" />
-                              Click to Launch Platform
-                            </span>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Bold Logo & Brand Sub-stage */}
-                      <div className="flex items-center justify-between py-2 border-t border-slate-200/70 mb-3 relative z-10">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-xl bg-white p-1 shadow-sm border border-slate-200/80 flex items-center justify-center shrink-0">
-                            <Image
-                              src={project.logo}
-                              alt="IZIEAT Logo"
-                              width={44}
-                              height={44}
-                              className="object-contain"
-                            />
-                          </div>
-                          <div>
-                            <div className="font-sans font-black text-xs text-[#0F172A] leading-tight">
-                              IZIEAT LLC
-                            </div>
-                            <div className="font-sans font-medium text-[10px] text-slate-500">
-                              Natural &amp; Ready To Eat • Global Export
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-right font-sans text-[10px]">
-                          <div className="font-black text-[#10B981]">&lt; 5ms i18n</div>
-                          <div className="text-slate-400">Zero API Delay</div>
-                        </div>
-                      </div>
-
-                      {/* Dedicated Interactive Live Status Pill */}
-                      <div className="relative group/pill overflow-hidden rounded-full p-[1.5px] transition-all duration-300 relative z-10">
-                        <span className="absolute inset-0 bg-gradient-to-r from-[#10B981] via-sky-400 to-[#10B981] opacity-0 group-hover/showcase:opacity-100 transition-opacity duration-300 animate-pulse" />
-                        <div className="relative flex items-center justify-between gap-3 px-4 py-2.5 rounded-full bg-[#0F172A] text-white font-sans font-black text-[11px] sm:text-xs uppercase tracking-wider shadow-md group-hover/showcase:bg-[#0F172A]/90 transition-colors">
-                          <span className="flex items-center gap-2">
-                            <span className="relative flex h-2 w-2">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                            </span>
-                            <span className="tracking-widest">LIVE AT {project.displayDomain}</span>
-                          </span>
-                          <ArrowUpRight size={14} className="text-emerald-400 group-hover/showcase:translate-x-0.5 group-hover/showcase:-translate-y-0.5 transition-transform" />
-                        </div>
-                      </div>
-                    </a>
+                        <ArrowUpRight size={13} className="text-emerald-400" />
+                      </a>
+                    </div>
                   )}
 
-                  {/* Visual 2: Latvian Cricket Federation - Editorial Glass Showcase */}
+                  {/* Visual 2: Latvian Cricket Federation */}
                   {project.visualType === "cricket" && (
-                    <a
-                      href={project.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group/showcase block w-full max-w-sm rounded-[2rem] bg-gradient-to-b from-white/95 to-red-50/40 max-md:from-[#121318]/90 max-md:to-[#121318]/90 border-2 border-white/95 max-md:border-white/10 p-4 sm:p-5 shadow-xl backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:border-red-500/60 hover:shadow-2xl relative overflow-hidden"
-                    >
-                      {/* Signature Baltic Carmine Crimson Backlight (Desktop only) */}
-                      <div
-                        className="hidden md:block absolute -top-12 -right-12 w-48 h-48 rounded-full pointer-events-none opacity-30 blur-2xl group-hover/showcase:opacity-60 transition-opacity duration-500"
-                        style={{ background: "radial-gradient(circle, rgba(185,28,28,0.7) 0%, transparent 70%)" }}
-                      />
-
-                      {/* Top Header: Federation Accreditation Tag */}
-                      <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 mb-3.5 relative z-10">
+                    <div className="w-full max-w-sm rounded-2xl bg-[#08090D] border border-white/12 p-4 sm:p-5 relative overflow-hidden flex flex-col justify-between shadow-xl">
+                      <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3.5">
                         <div className="flex items-center gap-2">
-                          <span className="px-2.5 py-0.5 rounded-full bg-red-600/10 max-md:bg-white/10 border border-red-600/20 max-md:border-white/10 text-red-700 max-md:text-slate-200 font-sans font-black text-[10px] uppercase tracking-wider">
+                          <span className="px-2 py-0.5 rounded-md bg-red-500/15 border border-red-500/30 text-red-400 font-sans font-bold text-[9px] uppercase tracking-wider">
                             LV-FED // OFFICIAL
                           </span>
-                          <span className="font-sans font-bold text-[10px] text-slate-500 max-md:text-slate-400">
+                          <span className="font-sans font-medium text-[10px] text-slate-300">
                             Latvijas Kriketa Federācija
                           </span>
                         </div>
-                        <span className="flex items-center gap-1 font-sans font-black text-[10px] text-[#059669] max-md:text-emerald-400 px-2.5 py-0.5 rounded-full bg-emerald-500/10 max-md:bg-white/10 border border-emerald-500/20 max-md:border-white/10">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="font-mono text-[10px] text-emerald-400 font-bold">
                           99.98% UPTIME
                         </span>
                       </div>
 
-                      {/* Hero Logo Stage (56px-64px Emblem) */}
-                      <div className="flex items-center justify-center p-4 rounded-2xl bg-gradient-to-b from-white to-slate-50/80 border border-slate-200/90 shadow-sm mb-3.5 relative z-10 group-hover/showcase:border-red-400/50 transition-colors">
-                        <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
+                      {/* Logo & Federation Emblem Stage */}
+                      <div className="flex items-center p-3.5 rounded-xl bg-white/[0.03] border border-white/10 mb-3.5">
+                        <div className="relative w-14 h-14 shrink-0 flex items-center justify-center p-1 rounded-lg bg-white/[0.05]">
                           <Image
                             src={project.logo}
-                            alt="Latvian Cricket Federation Crest"
-                            width={76}
-                            height={76}
-                            className="object-contain max-h-16 sm:max-h-20 w-auto drop-shadow-md group-hover/showcase:scale-105 transition-transform duration-300"
+                            alt="Latvian Cricket Federation"
+                            width={56}
+                            height={56}
+                            className="object-contain max-h-12 w-auto"
                           />
                         </div>
-                        <div className="ml-4 flex-1">
-                          <div className="font-sans font-black text-xs sm:text-sm text-[#0F172A] uppercase tracking-wider mb-0.5">
+                        <div className="ml-3 flex-1">
+                          <div className="font-sans font-bold text-xs text-[#FFFDF9] uppercase tracking-wider mb-0.5">
                             National Sports Infrastructure
                           </div>
-                          <div className="font-sans font-medium text-[11px] text-slate-500 leading-tight">
-                            Tournament Event Bus • 4 National Divisions • Realtime Ingestion
+                          <div className="font-sans text-[11px] text-slate-400 leading-tight">
+                            Tournament Event Bus • 4 Divisions • Realtime Ingestion
                           </div>
                         </div>
                       </div>
 
-                      {/* Telemetry Monoliths */}
-                      <div className="space-y-2 mb-3.5 relative z-10">
-                        <div className="p-2.5 rounded-xl bg-white/80 max-md:bg-white/5 border border-slate-200/80 max-md:border-white/10 flex items-center justify-between">
-                          <span className="font-sans font-black text-[9px] text-slate-400 uppercase tracking-wider">
+                      {/* Telemetry Architecture Monoliths */}
+                      <div className="space-y-2 mb-3.5">
+                        <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/8 flex items-center justify-between">
+                          <span className="font-sans font-bold text-[9px] text-slate-400 uppercase tracking-wider">
                             GOVERNANCE ENGINE
                           </span>
-                          <span className="font-sans font-black text-xs text-[#0F172A] max-md:text-white">
+                          <span className="font-sans font-bold text-xs text-[#FFFDF9]">
                             EU Compliance &amp; Match Ingest
                           </span>
                         </div>
-                        <div className="p-2.5 rounded-xl bg-red-600/10 max-md:bg-white/5 border border-red-600/20 max-md:border-white/10 flex items-center justify-between">
-                          <span className="font-sans font-black text-[9px] text-red-700 max-md:text-slate-300 uppercase tracking-wider">
-                            LIVE TELEMETRY
+                        <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/8 flex items-center justify-between">
+                          <span className="font-sans font-bold text-[9px] text-slate-400 uppercase tracking-wider">
+                            EVENT INGESTION BUS
                           </span>
-                          <span className="font-sans font-black text-xs text-red-700 max-md:text-white">
-                            100k+ Event Ingestion/mo
+                          <span className="font-sans font-bold text-xs text-[#FF7A00]">
+                            100k+ Telemetry Events / mo
                           </span>
                         </div>
                       </div>
 
-                      {/* Dedicated Interactive Live Status Pill */}
-                      <div className="relative group/pill overflow-hidden rounded-full p-[1.5px] transition-all duration-300 relative z-10">
-                        <span className="absolute inset-0 bg-gradient-to-r from-red-500 via-[#10B981] to-red-500 max-md:from-white/20 max-md:via-white/40 max-md:to-white/20 opacity-0 group-hover/showcase:opacity-100 transition-opacity duration-300 animate-pulse" />
-                        <div className="relative flex items-center justify-between gap-3 px-4 py-2.5 rounded-full bg-[#0F172A] text-white font-sans font-black text-[11px] sm:text-xs uppercase tracking-wider shadow-md group-hover/showcase:bg-[#0F172A]/90 transition-colors">
-                          <span className="flex items-center gap-2">
-                            <span className="relative flex h-2 w-2">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                            </span>
-                            <span className="tracking-widest">LIVE AT {project.displayDomain}</span>
-                          </span>
-                          <ArrowUpRight size={14} className="text-emerald-400 group-hover/showcase:translate-x-0.5 group-hover/showcase:-translate-y-0.5 transition-transform" />
-                        </div>
-                      </div>
-                    </a>
+                      {/* Direct Link Capsule */}
+                      <a
+                        href={project.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-white font-sans font-bold text-xs uppercase tracking-wider transition-colors"
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          <span>LIVE AT {project.displayDomain}</span>
+                        </span>
+                        <ArrowUpRight size={13} className="text-emerald-400" />
+                      </a>
+                    </div>
                   )}
 
-                  {/* Visual 3: Indijas Centrs - Editorial Glass Showcase */}
+                  {/* Visual 3: India Center */}
                   {project.visualType === "india_center" && (
-                    <a
-                      href={project.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group/showcase block w-full max-w-sm rounded-[2rem] bg-gradient-to-b from-white/95 to-amber-50/40 max-md:from-[#121318]/90 max-md:to-[#121318]/90 border-2 border-white/95 max-md:border-white/10 p-4 sm:p-5 shadow-xl backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:border-amber-500/60 hover:shadow-2xl relative overflow-hidden"
-                    >
-                      {/* Signature Saffron Gold Ambient Backlight (Desktop only) */}
-                      <div
-                        className="hidden md:block absolute -top-12 -right-12 w-48 h-48 rounded-full pointer-events-none opacity-35 blur-2xl group-hover/showcase:opacity-65 transition-opacity duration-500"
-                        style={{ background: "radial-gradient(circle, rgba(245,158,11,0.7) 0%, transparent 70%)" }}
-                      />
-
-                      {/* Top Header: Bilateral Liaison Tag */}
-                      <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 mb-3.5 relative z-10">
+                    <div className="w-full max-w-sm rounded-2xl bg-[#08090D] border border-white/12 p-4 sm:p-5 relative overflow-hidden flex flex-col justify-between shadow-xl">
+                      <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3.5">
                         <div className="flex items-center gap-2">
-                          <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 max-md:bg-white/10 border border-amber-500/20 max-md:border-white/10 text-amber-700 max-md:text-slate-200 font-sans font-black text-[10px] uppercase tracking-wider">
-                            IN-LV // DIPLOMATIC BRIDGE
+                          <span className="px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-400 font-sans font-bold text-[9px] uppercase tracking-wider">
+                            IN-LV // DIPLOMATIC
                           </span>
-                          <span className="font-sans font-bold text-[10px] text-slate-500 max-md:text-slate-400">
+                          <span className="font-sans font-medium text-[10px] text-slate-300">
                             Indijas Centrs • Latvia
                           </span>
                         </div>
-                        <span className="font-sans font-black text-[10px] text-amber-700 max-md:text-slate-200 px-2.5 py-0.5 rounded-full bg-amber-500/10 max-md:bg-white/10 border border-amber-500/20 max-md:border-white/10">
+                        <span className="font-mono text-[10px] text-amber-400 font-bold">
                           LV / EN DUAL
                         </span>
                       </div>
 
-                      {/* Hero Logo Stage (56px-64px Emblem) */}
-                      <div className="flex items-center justify-center p-4 rounded-2xl bg-gradient-to-b from-white to-slate-50/80 border border-slate-200/90 shadow-sm mb-3.5 relative z-10 group-hover/showcase:border-amber-400/50 transition-colors">
-                        <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
+                      {/* Emblem Stage */}
+                      <div className="flex items-center p-3.5 rounded-xl bg-white/[0.03] border border-white/10 mb-3.5">
+                        <div className="relative w-14 h-14 shrink-0 flex items-center justify-center p-1 rounded-lg bg-white/[0.05]">
                           <Image
                             src={project.logo}
                             alt="India Center Peacock Emblem"
-                            width={76}
-                            height={76}
-                            className="object-contain max-h-16 sm:max-h-20 w-auto drop-shadow-md group-hover/showcase:scale-105 transition-transform duration-300"
+                            width={56}
+                            height={56}
+                            className="object-contain max-h-12 w-auto"
                           />
                         </div>
-                        <div className="ml-4 flex-1">
-                          <div className="font-sans font-black text-xs sm:text-sm text-[#0F172A] uppercase tracking-wider mb-0.5">
-                            Bilateral Diplomatic Platform
+                        <div className="ml-3 flex-1">
+                          <div className="font-sans font-bold text-xs text-[#FFFDF9] uppercase tracking-wider mb-0.5">
+                            Bilateral Cultural &amp; Trade Bridge
                           </div>
-                          <div className="font-sans font-medium text-[11px] text-slate-500 leading-tight">
-                            India • Latvia Cultural &amp; Trade Portal • Consular Scheduling
+                          <div className="font-sans text-[11px] text-slate-400 leading-tight">
+                            Consular Dispatch • High-Throughput Baltic Edge
                           </div>
                         </div>
                       </div>
 
                       {/* Telemetry Monoliths */}
-                      <div className="space-y-2 mb-3.5 relative z-10">
-                        <div className="p-2.5 rounded-xl bg-white/80 max-md:bg-white/5 border border-slate-200/80 max-md:border-white/10 flex items-center justify-between">
-                          <span className="font-sans font-black text-[9px] text-slate-400 uppercase tracking-wider">
+                      <div className="space-y-2 mb-3.5">
+                        <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/8 flex items-center justify-between">
+                          <span className="font-sans font-bold text-[9px] text-slate-400 uppercase tracking-wider">
                             CONSULAR SCHEDULING
                           </span>
-                          <span className="font-sans font-black text-xs text-[#0F172A] max-md:text-white">
+                          <span className="font-sans font-bold text-xs text-[#FFFDF9]">
                             Academic &amp; Event Dispatch
                           </span>
                         </div>
-                        <div className="p-2.5 rounded-xl bg-amber-500/10 max-md:bg-white/5 border border-amber-500/20 max-md:border-white/10 flex items-center justify-between">
-                          <span className="font-sans font-black text-[9px] text-amber-700 max-md:text-slate-300 uppercase tracking-wider">
-                            EDGE LATENCY
+                        <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/8 flex items-center justify-between">
+                          <span className="font-sans font-bold text-[9px] text-slate-400 uppercase tracking-wider">
+                            BALTIC EDGE LATENCY
                           </span>
-                          <span className="font-sans font-black text-xs text-amber-700 max-md:text-white">
-                            &lt; 18ms Baltic Edge
+                          <span className="font-sans font-bold text-xs text-amber-400 font-mono">
+                            &lt; 18ms Edge CDN
                           </span>
                         </div>
                       </div>
 
-                      {/* Dedicated Interactive Live Status Pill */}
-                      <div className="relative group/pill overflow-hidden rounded-full p-[1.5px] transition-all duration-300 relative z-10">
-                        <span className="absolute inset-0 bg-gradient-to-r from-amber-500 via-[#10B981] to-amber-500 max-md:from-white/20 max-md:via-white/40 max-md:to-white/20 opacity-0 group-hover/showcase:opacity-100 transition-opacity duration-300 animate-pulse" />
-                        <div className="relative flex items-center justify-between gap-3 px-4 py-2.5 rounded-full bg-[#0F172A] text-white font-sans font-black text-[11px] sm:text-xs uppercase tracking-wider shadow-md group-hover/showcase:bg-[#0F172A]/90 transition-colors">
-                          <span className="flex items-center gap-2">
-                            <span className="relative flex h-2 w-2">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                            </span>
-                            <span className="tracking-widest">LIVE AT {project.displayDomain}</span>
-                          </span>
-                          <ArrowUpRight size={14} className="text-emerald-400 group-hover/showcase:translate-x-0.5 group-hover/showcase:-translate-y-0.5 transition-transform" />
-                        </div>
-                      </div>
-                    </a>
+                      {/* Direct Link Capsule */}
+                      <a
+                        href={project.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-white font-sans font-bold text-xs uppercase tracking-wider transition-colors"
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          <span>LIVE AT {project.displayDomain}</span>
+                        </span>
+                        <ArrowUpRight size={13} className="text-emerald-400" />
+                      </a>
+                    </div>
                   )}
 
-                  {/* Visual 4: Varti International - Editorial Glass Showcase */}
+                  {/* Visual 4: Varti International */}
                   {project.visualType === "varti" && (
-                    <a
-                      href={project.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group/showcase block w-full max-w-sm rounded-[2rem] bg-gradient-to-b from-white/95 to-blue-50/40 max-md:from-[#121318]/90 max-md:to-[#121318]/90 border-2 border-white/95 max-md:border-white/10 p-4 sm:p-5 shadow-xl backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:border-blue-500/60 hover:shadow-2xl relative overflow-hidden"
-                    >
-                      {/* Signature Enterprise Sapphire Ambient Backlight (Desktop only) */}
-                      <div
-                        className="hidden md:block absolute -top-12 -right-12 w-48 h-48 rounded-full pointer-events-none opacity-35 blur-2xl group-hover/showcase:opacity-65 transition-opacity duration-500"
-                        style={{ background: "radial-gradient(circle, rgba(37,99,235,0.7) 0%, transparent 70%)" }}
-                      />
-
-                      {/* Top Header: Global Export Tag */}
-                      <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 mb-3.5 relative z-10">
+                    <div className="w-full max-w-sm rounded-2xl bg-[#08090D] border border-white/12 p-4 sm:p-5 relative overflow-hidden flex flex-col justify-between shadow-xl">
+                      <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3.5">
                         <div className="flex items-center gap-2">
-                          <span className="px-2.5 py-0.5 rounded-full bg-blue-600/10 max-md:bg-white/10 border border-blue-600/20 max-md:border-white/10 text-blue-700 max-md:text-slate-200 font-sans font-black text-[10px] uppercase tracking-wider">
+                          <span className="px-2 py-0.5 rounded-md bg-blue-500/15 border border-blue-500/30 text-blue-400 font-sans font-bold text-[9px] uppercase tracking-wider">
                             GLOBAL-SUPPLY // AGRO
                           </span>
-                          <span className="font-sans font-bold text-[10px] text-slate-500 max-md:text-slate-400">
+                          <span className="font-sans font-medium text-[10px] text-slate-300">
                             Varti International Corp
                           </span>
                         </div>
-                        <span className="font-sans font-black text-[10px] text-blue-700 max-md:text-slate-200 px-2.5 py-0.5 rounded-full bg-blue-600/10 max-md:bg-white/10 border border-blue-600/20 max-md:border-white/10">
+                        <span className="font-mono text-[10px] text-blue-400 font-bold">
                           INSTITUTIONAL
                         </span>
                       </div>
 
-                      {/* Hero Logo Stage (56px-64px Emblem) */}
-                      <div className="flex items-center justify-center p-4 rounded-2xl bg-gradient-to-b from-white to-slate-50/80 border border-slate-200/90 shadow-sm mb-3.5 relative z-10 group-hover/showcase:border-blue-400/50 transition-colors">
-                        <div className="relative w-full max-w-[210px] h-16 sm:h-20 flex items-center justify-center">
+                      {/* Logo Stage */}
+                      <div className="flex items-center p-3.5 rounded-xl bg-white/[0.03] border border-white/10 mb-3.5">
+                        <div className="relative w-full h-12 flex items-center justify-center p-1 rounded-lg bg-white/[0.05]">
                           <Image
                             src={project.logo}
                             alt="Varti International Logo"
-                            width={190}
-                            height={64}
-                            className="object-contain max-h-12 sm:max-h-16 w-auto drop-shadow-md group-hover/showcase:scale-105 transition-transform duration-300"
+                            width={160}
+                            height={48}
+                            className="object-contain max-h-10 w-auto"
                           />
                         </div>
                       </div>
 
                       {/* Telemetry Monoliths */}
-                      <div className="space-y-2 mb-3.5 relative z-10">
-                        <div className="p-2.5 rounded-xl bg-white/80 max-md:bg-white/5 border border-slate-200/80 max-md:border-white/10 flex items-center justify-between">
-                          <span className="font-sans font-black text-[9px] text-slate-400 uppercase tracking-wider">
-                            COMMODITY PIPELINE
+                      <div className="space-y-2 mb-3.5">
+                        <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/8 flex items-center justify-between">
+                          <span className="font-sans font-bold text-[9px] text-slate-400 uppercase tracking-wider">
+                            COMMODITY SETTLEMENT
                           </span>
-                          <span className="font-sans font-black text-xs text-[#0F172A] max-md:text-white">
-                            Multi-Currency Automated Settlement
+                          <span className="font-sans font-bold text-xs text-[#FFFDF9]">
+                            Multi-Currency Clearing
                           </span>
                         </div>
-                        <div className="p-2.5 rounded-xl bg-blue-600/10 max-md:bg-white/5 border border-blue-600/20 max-md:border-white/10 flex items-center justify-between">
-                          <span className="font-sans font-black text-[9px] text-blue-700 max-md:text-slate-300 uppercase tracking-wider">
+                        <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/8 flex items-center justify-between">
+                          <span className="font-sans font-bold text-[9px] text-slate-400 uppercase tracking-wider">
                             BUYER VERIFICATION
                           </span>
-                          <span className="font-sans font-black text-xs text-blue-700 max-md:text-white">
-                            Institutional Security Tier
+                          <span className="font-sans font-bold text-xs text-blue-400">
+                            Institutional Security
                           </span>
                         </div>
                       </div>
 
-                      {/* Dedicated Interactive Live Status Pill */}
-                      <div className="relative group/pill overflow-hidden rounded-full p-[1.5px] transition-all duration-300 relative z-10">
-                        <span className="absolute inset-0 bg-gradient-to-r from-blue-600 via-[#10B981] to-blue-600 max-md:from-white/20 max-md:via-white/40 max-md:to-white/20 opacity-0 group-hover/showcase:opacity-100 transition-opacity duration-300 animate-pulse" />
-                        <div className="relative flex items-center justify-between gap-3 px-4 py-2.5 rounded-full bg-[#0F172A] text-white font-sans font-black text-[11px] sm:text-xs uppercase tracking-wider shadow-md group-hover/showcase:bg-[#0F172A]/90 transition-colors">
-                          <span className="flex items-center gap-2">
-                            <span className="relative flex h-2 w-2">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                            </span>
-                            <span className="tracking-widest">LIVE AT {project.displayDomain}</span>
-                          </span>
-                          <ArrowUpRight size={14} className="text-emerald-400 group-hover/showcase:translate-x-0.5 group-hover/showcase:-translate-y-0.5 transition-transform" />
-                        </div>
-                      </div>
-                    </a>
+                      {/* Direct Link Capsule */}
+                      <a
+                        href={project.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-white font-sans font-bold text-xs uppercase tracking-wider transition-colors"
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          <span>LIVE AT {project.displayDomain}</span>
+                        </span>
+                        <ArrowUpRight size={13} className="text-emerald-400" />
+                      </a>
+                    </div>
                   )}
                 </div>
               </div>
@@ -834,20 +838,18 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
         </div>
 
         {/* Pinned Bottom HUD Bar with card navigation indicators */}
-        <div className="relative z-20 flex items-center justify-between w-full max-w-7xl mx-auto pt-1 sm:pt-2 px-2 border-t border-slate-200/80">
+        <div className="relative z-20 flex items-center justify-between w-full max-w-7xl mx-auto pt-2 px-2 border-t border-white/10">
           <div className="flex items-center gap-2 sm:gap-4">
             {PROJECTS.map((p, i) => (
               <span
                 key={p.id}
                 className={`transition-all duration-300 font-sans text-[10px] sm:text-[11px] uppercase tracking-wider flex items-center gap-1.5 ${
-                  activeIdx === i
-                    ? "text-[#10B981] font-black"
-                    : "text-slate-400 font-medium"
+                  activeIdx === i ? "text-[#FF7A00] font-bold" : "text-slate-500 font-medium"
                 }`}
               >
                 <span
                   className={`w-1.5 h-1.5 rounded-full transition-all ${
-                    activeIdx === i ? "bg-[#10B981] scale-125" : "bg-slate-300"
+                    activeIdx === i ? "bg-[#FF7A00] scale-125" : "bg-white/20"
                   }`}
                 />
                 <span className="hidden sm:inline">{p.title.split(" ")[0]}</span>
@@ -855,29 +857,29 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
             ))}
           </div>
 
-          <div className="font-sans font-black text-[9px] sm:text-[11px] text-slate-500 uppercase tracking-wider">
-            SCROLL TO EXPLORE 360°
+          <div className="font-sans font-bold text-[9px] sm:text-[11px] text-slate-400 uppercase tracking-widest">
+            360° ORBITAL PROJECTION
           </div>
         </div>
       </div>
 
-      {/* Interactive 278-Key Instant Translation Dictionary Demo Modal */}
+      {/* Interactive 278-Key Translation Engine Modal (Frosted Obsidian CAD) */}
       {isDemoOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-md animate-fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-xl animate-fade-in"
           onClick={() => setIsDemoOpen(false)}
         >
           <div
-            className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white border border-slate-200 shadow-2xl p-4 sm:p-6"
+            className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#0C0E14] border border-white/15 shadow-2xl p-4 sm:p-6"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-              <span className="font-sans font-black text-xs text-[#10B981] uppercase tracking-wider">
-                IZIEAT • Instant 278-Key Translation Engine
+            <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
+              <span className="font-sans font-bold text-xs text-[#FF7A00] uppercase tracking-wider">
+                IZIEAT // 278-KEY IN-MEMORY LOCALIZATION ENGINE
               </span>
               <button
                 onClick={() => setIsDemoOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-[#0F172A] hover:bg-slate-200 flex items-center justify-center font-bold text-sm transition-colors"
+                className="w-8 h-8 rounded-full bg-white/10 text-slate-300 hover:text-white hover:bg-white/20 flex items-center justify-center font-bold text-sm transition-colors cursor-pointer"
               >
                 ✕
               </button>
@@ -887,20 +889,20 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
         </div>
       )}
 
-      {/* Technical Architecture Dossier Modal - Zero text clipping with flex scroll bounds */}
+      {/* Technical Architecture Dossier Modal (Frosted Obsidian CAD) */}
       {isDossierOpen && selectedDossier && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-xl animate-fade-in"
           onClick={() => setIsDossierOpen(false)}
         >
           <div
-            className="w-full max-w-2xl max-h-[85vh] bg-white rounded-[2rem] p-5 sm:p-8 border border-slate-200 shadow-2xl relative flex flex-col overflow-hidden"
+            className="w-full max-w-2xl max-h-[85vh] bg-[#0C0E14] rounded-3xl p-5 sm:p-8 border border-white/15 shadow-2xl relative flex flex-col overflow-hidden text-white"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4 shrink-0">
+            <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4 shrink-0">
               <div className="flex items-center gap-3">
-                <div className="h-12 w-12 px-2 rounded-xl bg-white shadow-sm border border-slate-200 flex items-center justify-center shrink-0">
+                <div className="h-12 w-12 px-2 rounded-xl bg-white/[0.06] border border-white/15 flex items-center justify-center shrink-0">
                   <Image
                     src={selectedDossier.logo}
                     alt={selectedDossier.client}
@@ -910,48 +912,48 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                   />
                 </div>
                 <div>
-                  <span className="font-sans font-black text-[10px] text-[#10B981] uppercase tracking-wider block">
+                  <span className="font-sans font-bold text-[10px] text-[#FF7A00] uppercase tracking-wider block">
                     {selectedDossier.catalogueNo}
                   </span>
-                  <h4 className="font-sans font-black text-lg sm:text-xl text-[#0F172A]">
+                  <h4 className="font-sans font-bold text-lg sm:text-xl text-[#FFFDF9]">
                     {selectedDossier.title}
                   </h4>
                 </div>
               </div>
               <button
                 onClick={() => setIsDossierOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-[#0F172A] hover:bg-slate-200 flex items-center justify-center transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full bg-white/10 text-slate-300 hover:text-white hover:bg-white/20 flex items-center justify-center transition-colors cursor-pointer"
                 aria-label="Close Dossier"
               >
                 <X size={16} />
               </button>
             </div>
 
-            {/* Scrollable Modal Content (Guarantees zero text overflow) */}
+            {/* Scrollable Modal Content */}
             <div className="space-y-4 text-left overflow-y-auto pr-2 flex-1 overscroll-contain">
               <div>
-                <h5 className="font-sans font-black text-[11px] text-slate-400 uppercase tracking-wider mb-1.5">
+                <h5 className="font-sans font-bold text-[11px] text-slate-400 uppercase tracking-wider mb-1.5">
                   Executive Brief &amp; Architecture
                 </h5>
-                <p className="font-serif italic font-light text-slate-700 leading-relaxed text-sm sm:text-base break-words">
+                <p className="font-serif italic font-light text-slate-300 leading-relaxed text-sm sm:text-base break-words">
                   {selectedDossier.summary}
                 </p>
               </div>
 
               <div>
-                <h5 className="font-sans font-black text-[11px] text-slate-400 uppercase tracking-wider mb-2">
+                <h5 className="font-sans font-bold text-[11px] text-slate-400 uppercase tracking-wider mb-2">
                   System Benchmarks
                 </h5>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                   {selectedDossier.metrics.map((m, i) => (
                     <div
                       key={i}
-                      className="p-3 rounded-2xl bg-slate-50 border border-slate-200/70"
+                      className="p-3 rounded-xl bg-white/[0.04] border border-white/10"
                     >
-                      <div className="font-sans font-black text-[9px] text-slate-400 uppercase mb-0.5">
+                      <div className="font-sans font-medium text-[9px] text-slate-400 uppercase mb-0.5">
                         {m.label}
                       </div>
-                      <div className="font-sans font-black text-sm text-[#0F172A]">
+                      <div className="font-sans font-bold text-sm text-[#FFFDF9]">
                         {m.value}
                       </div>
                     </div>
@@ -960,14 +962,14 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
               </div>
 
               <div>
-                <h5 className="font-sans font-black text-[11px] text-slate-400 uppercase tracking-wider mb-2">
+                <h5 className="font-sans font-bold text-[11px] text-slate-400 uppercase tracking-wider mb-2">
                   Production Engineering Stack
                 </h5>
                 <div className="flex flex-wrap gap-1.5">
                   {selectedDossier.stack.map((t) => (
                     <span
                       key={t}
-                      className="px-3 py-1 rounded-xl bg-slate-100 text-slate-700 font-sans font-black text-xs border border-slate-200/80"
+                      className="px-3 py-1 rounded-lg bg-white/[0.05] text-slate-300 font-sans font-medium text-xs border border-white/10 uppercase"
                     >
                       {t}
                     </span>
@@ -977,12 +979,12 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
             </div>
 
             {/* Modal Footer */}
-            <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-end gap-3 shrink-0">
+            <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-end gap-3 shrink-0">
               <a
                 href={selectedDossier.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#0F172A] text-white font-sans font-black text-xs uppercase tracking-wider hover:bg-[#10B981] transition-colors shadow-sm"
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-white text-[#060709] font-sans font-bold text-xs uppercase tracking-wider hover:bg-[#FF7A00] hover:text-white transition-colors duration-200 shadow-sm"
               >
                 <span>Launch Live Site</span>
                 <ExternalLink size={13} />

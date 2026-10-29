@@ -318,22 +318,17 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
                 <span>NSEC (2024–2028)</span>
               </div>
 
-              {/* Signature Aesthetic Font Pairing (Citadel Script tightly interlocking over Helvetica like 'Soft Light') */}
+              {/* Signature Aesthetic Font Pairing (Citadel Script on Line 1, Helvetica on Line 2 - matching 'Soft Light') */}
               <h1
                 ref={mobileTitleRef}
-                className="relative flex flex-col items-center justify-center select-none mb-5"
+                className="flex flex-col items-center justify-center text-center select-none mb-5"
               >
-                {/* Line 1: Soham in Citadel Script (grand, sweeping calligraphy overlapping Line 2) */}
-                <span
-                  className="font-citadel text-8xl xs:text-9xl text-[#FFFDF8] normal-case leading-[0.68] tracking-[0.02em] relative z-20 -mb-6 xs:-mb-8 -translate-x-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.98)] drop-shadow-[0_8px_18px_rgba(0,0,0,0.9)] drop-shadow-[0_16px_36px_rgba(0,0,0,0.7)]"
-                  style={{
-                    WebkitTextStroke: "0.4px rgba(255, 255, 255, 0.95)",
-                  }}
-                >
+                {/* Line 1: Soham in Citadel Script */}
+                <span className="font-citadel text-6xl xs:text-7xl text-white normal-case leading-[0.92] drop-shadow-[0_4px_20px_rgba(0,0,0,0.85)]">
                   Soham
                 </span>
                 {/* Line 2: Roychoudhury in Architectural Helvetica */}
-                <span className="font-helvetica font-normal text-5xl xs:text-6xl text-white/95 normal-case tracking-[0.02em] leading-[0.85] relative z-10 drop-shadow-[0_8px_35px_rgba(0,0,0,0.95)]">
+                <span className="font-helvetica font-normal text-4xl xs:text-5xl text-white normal-case tracking-[0.03em] leading-[0.92] drop-shadow-[0_6px_30px_rgba(0,0,0,0.9)]">
                   Roychoudhury
                 </span>
               </h1>
@@ -427,19 +422,14 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             <span>Netaji Subhash Engineering College (2024–2028)</span>
           </div>
 
-          {/* Signature Aesthetic Font Pairing (Citadel Script tightly interlocking over Helvetica like 'Soft Light') */}
-          <h1 className="relative flex flex-col items-center justify-center select-none mb-6">
-            {/* Line 1: Soham in Citadel Script (grand, sweeping calligraphy overlapping Line 2) */}
-            <span
-              className="font-citadel text-[9.5rem] md:text-[11rem] lg:text-[13rem] xl:text-[14.5rem] text-[#FFFDF8] normal-case leading-[0.65] tracking-[0.02em] relative z-20 -mb-12 md:-mb-16 lg:-mb-20 xl:-mb-24 -translate-x-6 drop-shadow-[0_3px_6px_rgba(0,0,0,0.98)] drop-shadow-[0_10px_25px_rgba(0,0,0,0.9)] drop-shadow-[0_20px_45px_rgba(0,0,0,0.7)]"
-              style={{
-                WebkitTextStroke: "0.5px rgba(255, 255, 255, 0.95)",
-              }}
-            >
+          {/* Signature Aesthetic Font Pairing (Citadel Script on Line 1, Helvetica on Line 2 - matching 'Soft Light') */}
+          <h1 className="flex flex-col items-center justify-center text-center select-none mb-6">
+            {/* Line 1: Soham in Citadel Script */}
+            <span className="font-citadel text-7xl md:text-8xl lg:text-9xl xl:text-[8.5rem] text-white normal-case leading-[0.92] drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
               Soham
             </span>
             {/* Line 2: Roychoudhury in Architectural Helvetica */}
-            <span className="font-helvetica font-normal text-6xl md:text-7xl lg:text-[7.2rem] xl:text-[8.2rem] text-white/95 normal-case tracking-[0.02em] leading-[0.84] relative z-10 drop-shadow-[0_10px_45px_rgba(0,0,0,0.95)]">
+            <span className="font-helvetica font-normal text-5xl md:text-6xl lg:text-7xl xl:text-[5.5rem] text-white normal-case tracking-[0.03em] leading-[0.92] drop-shadow-[0_6px_36px_rgba(0,0,0,0.95)]">
               Roychoudhury
             </span>
           </h1>

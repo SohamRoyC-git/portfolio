@@ -36,7 +36,7 @@
 @font-face {
   font-family: "Citadel Script Std";
   src: url("/fonts/CitadelScriptStd.otf") format("opentype");
-  font-weight: normal;
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
@@ -44,7 +44,7 @@
 @font-face {
   font-family: "Helvetica Compressed";
   src: url("/fonts/helvetica-compressed-5871d14b6903a.otf") format("opentype");
-  font-weight: normal;
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }

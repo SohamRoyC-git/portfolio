@@ -318,19 +318,23 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
                 <span>NSEC (2024–2028)</span>
               </div>
 
-              {/* Cinematic Grand Headline in Citadel Script */}
+              {/* Signature Aesthetic Font Pairing (Citadel Script draped over Helvetica) */}
               <h1
                 ref={mobileTitleRef}
-                className="font-citadel text-6xl xs:text-7xl text-white normal-case leading-[1.08] mb-5 select-none drop-shadow-[0_4px_30px_rgba(0,0,0,0.85)]"
+                className="relative flex flex-col items-center justify-center select-none mb-4"
               >
-                Soham <br />
-                <span className="text-white">
+                {/* Line 1: Soham in Citadel Script (flowing, flourished calligraphy) */}
+                <span className="font-citadel text-7xl xs:text-8xl text-white normal-case leading-[0.74] relative z-20 drop-shadow-[0_4px_25px_rgba(0,0,0,0.9)] -mb-2 xs:-mb-3.5 -rotate-1 -translate-x-2">
+                  Soham
+                </span>
+                {/* Line 2: Roychoudhury in Bold Architectural Helvetica */}
+                <span className="font-helvetica font-normal text-5xl xs:text-6xl text-white normal-case tracking-[0.02em] leading-[0.88] relative z-10 drop-shadow-[0_6px_35px_rgba(0,0,0,0.95)]">
                   Roychoudhury
                 </span>
               </h1>
 
               {/* Editorial Subtitle in Helvetica Compressed */}
-              <p className="font-helvetica uppercase tracking-[0.14em] font-normal text-xs xs:text-sm text-orange-100/90 leading-relaxed mb-8 max-w-xs px-1 drop-shadow-md">
+              <p className="font-helvetica uppercase tracking-[0.16em] font-normal text-xs xs:text-sm text-orange-100/90 leading-relaxed mb-8 max-w-xs px-1 drop-shadow-md">
                 Artificial Intelligence &amp; Machine Learning · Frontend Architect · Digital Operations
               </p>
 
@@ -418,16 +422,20 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             <span>Netaji Subhash Engineering College (2024–2028)</span>
           </div>
 
-          {/* Grand Headline in Citadel Script */}
-          <h1 className="font-citadel text-7xl md:text-8xl lg:text-[7.2rem] xl:text-[8.5rem] text-white normal-case leading-[1.08] mb-6 drop-shadow-[0_6px_36px_rgba(0,0,0,0.95)] select-none">
-            Soham <br />
-            <span className="bg-gradient-to-r from-white via-slate-100 to-emerald-200 bg-clip-text text-transparent drop-shadow-[0_0_40px_rgba(16,185,129,0.35)]">
+          {/* Signature Aesthetic Font Pairing (Citadel Script draped over Helvetica) */}
+          <h1 className="relative flex flex-col items-center justify-center select-none mb-6">
+            {/* Line 1: Soham in Citadel Script (flowing, flourished calligraphy draped on top) */}
+            <span className="font-citadel text-8xl md:text-9xl lg:text-[9.5rem] xl:text-[11rem] text-white normal-case leading-[0.72] relative z-20 drop-shadow-[0_6px_30px_rgba(0,0,0,0.95)] -mb-5 md:-mb-8 lg:-mb-10 -rotate-1 -translate-x-4">
+              Soham
+            </span>
+            {/* Line 2: Roychoudhury in Bold Architectural Helvetica */}
+            <span className="font-helvetica font-normal text-6xl md:text-7xl lg:text-[6.8rem] xl:text-[7.8rem] text-white normal-case tracking-[0.02em] leading-[0.85] relative z-10 drop-shadow-[0_8px_40px_rgba(0,0,0,0.95)]">
               Roychoudhury
             </span>
           </h1>
 
-          {/* Editorial Subtitle in Helvetica Compressed */}
-          <p className="font-helvetica uppercase tracking-[0.16em] font-normal text-lg md:text-xl text-slate-100 leading-relaxed mb-10 max-w-3xl drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] px-2">
+          {/* Editorial Subtitle in Helvetica Compressed (like 'Some moments glow in silence') */}
+          <p className="font-helvetica uppercase tracking-[0.18em] font-normal text-sm md:text-base text-slate-200/90 leading-relaxed mb-10 max-w-2xl drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] px-2">
             Artificial Intelligence &amp; Machine Learning · Frontend Architect · Digital Operations
           </p>
 

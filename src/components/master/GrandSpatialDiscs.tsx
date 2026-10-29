@@ -1,14 +1,15 @@
 "use client";
 
 import React, { useState, useEffect, useRef, memo } from "react";
+import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import {
   ExternalLink,
-  ShieldCheck,
-  Globe2,
   Terminal,
   Activity,
+  Layers,
+  ArrowRight,
 } from "lucide-react";
 import { LocalizationDemo } from "@/components/LocalizationDemo";
 
@@ -28,7 +29,6 @@ interface ProjectItem {
   stack: string[];
   logo: string;
   displayDomain: string;
-  previewImage?: string;
   hasDemo?: boolean;
 }
 
@@ -36,7 +36,7 @@ const PROJECTS: ProjectItem[] = [
   {
     id: "izieat-export",
     num: "01",
-    catalogueNo: "CAT.01 // B2B-EXPORT",
+    catalogueNo: "COMMISSION 01 // B2B-EXPORT",
     category: "GLOBAL TRADE INFRASTRUCTURE",
     title: "IZIEAT Export Portal",
     client: "IZIEAT LLC",
@@ -47,18 +47,17 @@ const PROJECTS: ProjectItem[] = [
     metrics: [
       { label: "TRANSLATION KEYS", value: "278 Keys" },
       { label: "SWITCH LATENCY", value: "< 5ms" },
-      { label: "TRADING FOCUS", value: "EU & CIS" },
+      { label: "TRADING REGION", value: "EU & CIS" },
     ],
     stack: ["Next.js", "TypeScript", "Tailwind CSS", "i18n Engine", "Client Cache"],
     logo: "/assets/logos/izieat.png",
     displayDomain: "IZIEAT.COM",
-    previewImage: "/assets/izieat_preview.png",
     hasDemo: true,
   },
   {
     id: "latvia-cricket",
     num: "02",
-    catalogueNo: "CAT.02 // SPORTS-GOVERNANCE",
+    catalogueNo: "COMMISSION 02 // SPORTS-GOVERNANCE",
     category: "NATIONAL DIGITAL INFRASTRUCTURE",
     title: "Latvian Cricket Federation",
     client: "Latvijas Kriketa Federācija",
@@ -78,7 +77,7 @@ const PROJECTS: ProjectItem[] = [
   {
     id: "india-center",
     num: "03",
-    catalogueNo: "CAT.03 // DIPLOMATIC-PORTAL",
+    catalogueNo: "COMMISSION 03 // DIPLOMATIC-PORTAL",
     category: "BILATERAL CULTURAL & TRADE PLATFORM",
     title: "India Center (Indijas Centrs)",
     client: "Indijas Centrs • Latvia",
@@ -98,7 +97,7 @@ const PROJECTS: ProjectItem[] = [
   {
     id: "varti-international",
     num: "04",
-    catalogueNo: "CAT.04 // GLOBAL-SUPPLY-CHAIN",
+    catalogueNo: "COMMISSION 04 // GLOBAL-SUPPLY-CHAIN",
     category: "CROSS-BORDER COMMODITY & EXPORT",
     title: "Varti International",
     client: "Varti International Corp",
@@ -123,835 +122,461 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
   const [isDossierOpen, setIsDossierOpen] = useState(false);
   const [selectedDossier, setSelectedDossier] = useState<ProjectItem | null>(null);
 
-  // In-card interactive language switcher for IZIEAT
-  const [inCardLang, setInCardLang] = useState<"en" | "ru">("en");
-  const [sampleIdx, setSampleIdx] = useState(0);
-
-  const progressBarRef = useRef<HTMLDivElement | null>(null);
-  const counterRef = useRef<HTMLSpanElement | null>(null);
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLElement | null>(null);
+  const progressBarRef = useRef<HTMLDivElement | null>(null);
+  const counterRef = useRef<HTMLSpanElement | null>(null);
 
-  const sampleSnippets = [
-    {
-      en: "IQF Frozen Sweet Corn Cobs (Super Sweet Variety)",
-      ru: "Замороженная сахарная кукуруза в початках IQF",
-      specEn: "Brix Sweetness: 12°–14° • Blast Frozen at -38°C",
-      specRu: "Сладость Брикс: 12°–14° • Шоковая заморозка при -38°C",
-    },
-    {
-      en: "Export Specifications & Phytosanitary Compliance",
-      ru: "Экспортные спецификации и фитосанитарный контроль",
-      specEn: "ISO 22000 & HACCP Certified • Global Cold Chain",
-      specRu: "Сертификация ISO 22000 и HACCP • Международная логистика",
-    },
-    {
-      en: "Multi-Port Container Logistics (Hamburg, Rotterdam, Riga)",
-      ru: "Контейнерная логистика (Гамбург, Роттердам, Рига)",
-      specEn: "Direct Vessel Booking • CIF & FOB Incoterms 2020",
-      specRu: "Прямой букинг судов • Условия CIF и FOB Incoterms 2020",
-    },
-  ];
+  const logoContainersRef = useRef<(HTMLDivElement | null)[]>([]);
+  const editorialBlocksRef = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReducedMotion || !sectionRef.current || !stageRef.current) return;
+    if (prefersReducedMotion || !sectionRef.current) return;
 
-    const ctx = gsap.context(() => {
-      // =======================================================================
-      // 1. HORIZONTAL ARCHITECTURAL CURTAIN SWEEP ENTRANCE (Left to Right)
-      // Section wipes smoothly across the screen horizontally from left to right!
-      // =======================================================================
-      gsap.fromTo(
-        stageRef.current,
-        { clipPath: "polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)" },
-        {
-          clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
-          ease: "none",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top bottom",
-            end: "top top",
-            scrub: true,
-          },
-        }
-      );
+    const mm = gsap.matchMedia();
 
-      // =======================================================================
-      // 2. INSIDE-OUT PROJECT CARD REVEAL TIMELINE
-      // Each next project card expands and zooms outward from the center portal
-      // of the previous card as you scroll!
-      // =======================================================================
-      const projTL = gsap.timeline({
+    // =========================================================================
+    // DESKTOP & TABLET EXPERIENCE (>= 768px):
+    // Forge Automotive Style Split Showcase:
+    // Left: Framed Logo with Inside-Out Zoom Unmasking
+    // Right: Downward Flowing Editorial Narrative
+    // =========================================================================
+    mm.add("(min-width: 768px)", () => {
+      // 1. Entrance: Horizontal Architectural Blade Sweep
+      if (stageRef.current) {
+        gsap.fromTo(
+          stageRef.current,
+          { clipPath: "polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)" },
+          {
+            clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+            ease: "none",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top bottom",
+              end: "top top",
+              scrub: true,
+            },
+          }
+        );
+      }
+
+      // 2. Master Scrub Timeline for Project Transitions
+      const masterTl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top top",
           end: "bottom bottom",
           scrub: 0.5,
           onUpdate: (self) => {
+            const p = self.progress;
             if (progressBarRef.current) {
-              progressBarRef.current.style.width = `${Math.round(self.progress * 100)}%`;
+              progressBarRef.current.style.transform = `scaleX(${p})`;
+            }
+            const idx = Math.min(PROJECTS.length - 1, Math.floor(p * PROJECTS.length));
+            setActiveIdx(idx);
+            if (counterRef.current) {
+              counterRef.current.textContent = PROJECTS[idx].num;
             }
           },
         },
       });
 
-      // Segment 1: Card 0 -> Card 1 expands outward from Card 0's portal
-      projTL.to(
-        "#proj-card-0",
-        {
-          scale: 1.12,
-          opacity: 0,
-          pointerEvents: "none",
-          duration: 1,
-          ease: "power2.inOut",
-        },
-        0
-      );
+      // Initialize initial states
+      logoContainersRef.current.forEach((el, i) => {
+        if (!el) return;
+        if (i === 0) {
+          gsap.set(el, { scale: 1, autoAlpha: 1, zIndex: 10 });
+        } else {
+          gsap.set(el, { scale: 0.15, autoAlpha: 0, zIndex: 10 + i });
+        }
+      });
 
-      projTL.fromTo(
-        "#proj-card-1",
-        { scale: 0.45, opacity: 0, pointerEvents: "none" },
-        {
-          scale: 1,
-          opacity: 1,
-          pointerEvents: "auto",
-          duration: 1,
-          ease: "power2.inOut",
-          onStart: () => {
-            setActiveIdx(1);
-            if (counterRef.current) counterRef.current.textContent = "02 / 04";
-          },
-          onReverseComplete: () => {
-            setActiveIdx(0);
-            if (counterRef.current) counterRef.current.textContent = "01 / 04";
-          },
-        },
-        0
-      );
+      editorialBlocksRef.current.forEach((el, i) => {
+        if (!el) return;
+        if (i === 0) {
+          gsap.set(el, { yPercent: 0, autoAlpha: 1, pointerEvents: "auto" });
+        } else {
+          gsap.set(el, { yPercent: -50, autoAlpha: 0, pointerEvents: "none" });
+        }
+      });
 
-      // Segment 2: Card 1 -> Card 2 expands outward from Card 1's portal
-      projTL.to(
-        "#proj-card-1",
-        {
-          scale: 1.12,
-          opacity: 0,
-          pointerEvents: "none",
-          duration: 1,
-          ease: "power2.inOut",
-        },
-        1.2
-      );
+      // Build transition sequence between consecutive projects:
+      // Project 0 -> Project 1 -> Project 2 -> Project 3
+      const numSteps = PROJECTS.length - 1;
+      const stepDuration = 1 / numSteps;
 
-      projTL.fromTo(
-        "#proj-card-2",
-        { scale: 0.45, opacity: 0, pointerEvents: "none" },
-        {
-          scale: 1,
-          opacity: 1,
-          pointerEvents: "auto",
-          duration: 1,
-          ease: "power2.inOut",
-          onStart: () => {
-            setActiveIdx(2);
-            if (counterRef.current) counterRef.current.textContent = "03 / 04";
-          },
-          onReverseComplete: () => {
-            setActiveIdx(1);
-            if (counterRef.current) counterRef.current.textContent = "02 / 04";
-          },
-        },
-        1.2
-      );
+      for (let i = 0; i < numSteps; i++) {
+        const startTime = i * stepDuration;
+        const curLogo = logoContainersRef.current[i];
+        const nextLogo = logoContainersRef.current[i + 1];
+        const curEditorial = editorialBlocksRef.current[i];
+        const nextEditorial = editorialBlocksRef.current[i + 1];
 
-      // Segment 3: Card 2 -> Card 3 expands outward from Card 2's portal
-      projTL.to(
-        "#proj-card-2",
-        {
-          scale: 1.12,
-          opacity: 0,
-          pointerEvents: "none",
-          duration: 1,
-          ease: "power2.inOut",
-        },
-        2.4
-      );
+        // --- Left Framed Visual: Inside-Out Zoom Reveal ---
+        if (curLogo && nextLogo) {
+          // Current logo expands out and fades away cleanly and rapidly
+          masterTl.to(
+            curLogo,
+            {
+              scale: 1.35,
+              autoAlpha: 0,
+              ease: "power2.out",
+              duration: stepDuration * 0.45,
+            },
+            startTime
+          );
 
-      projTL.fromTo(
-        "#proj-card-3",
-        { scale: 0.45, opacity: 0, pointerEvents: "none" },
-        {
-          scale: 1,
-          opacity: 1,
-          pointerEvents: "auto",
-          duration: 1,
-          ease: "power2.inOut",
-          onStart: () => {
-            setActiveIdx(3);
-            if (counterRef.current) counterRef.current.textContent = "04 / 04";
-          },
-          onReverseComplete: () => {
-            setActiveIdx(2);
-            if (counterRef.current) counterRef.current.textContent = "03 / 04";
-          },
-        },
-        2.4
-      );
-    }, sectionRef);
+          // Next logo blooms outward from within center (0.15 -> 1.0)
+          masterTl.fromTo(
+            nextLogo,
+            { scale: 0.15, autoAlpha: 0 },
+            {
+              scale: 1.0,
+              autoAlpha: 1,
+              ease: "power2.out",
+              duration: stepDuration * 0.65,
+            },
+            startTime + stepDuration * 0.15
+          );
+        }
 
-    return () => ctx.revert();
+        // --- Right Editorial Narrative: Downward Flowing Motion ---
+        if (curEditorial && nextEditorial) {
+          // Current editorial block slides downward and fades out
+          masterTl.to(
+            curEditorial,
+            {
+              yPercent: 40,
+              autoAlpha: 0,
+              pointerEvents: "none",
+              ease: "power2.inOut",
+              duration: stepDuration * 0.65,
+            },
+            startTime
+          );
+
+          // Next editorial block slides in downwards from top into center position
+          masterTl.fromTo(
+            nextEditorial,
+            { yPercent: -40, autoAlpha: 0, pointerEvents: "none" },
+            {
+              yPercent: 0,
+              autoAlpha: 1,
+              pointerEvents: "auto",
+              ease: "power2.out",
+              duration: stepDuration * 0.7,
+            },
+            startTime + stepDuration * 0.25
+          );
+        }
+      }
+
+      // 3. Exit Dismissal: Smooth shrink as next section wipes up
+      const containerEl = stageRef.current?.querySelector(".showcase-container");
+      if (containerEl) {
+        gsap.to(containerEl, {
+          scale: 0.94,
+          yPercent: -14,
+          opacity: 0.15,
+          ease: "power2.inOut",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "bottom bottom",
+            end: "bottom top",
+            scrub: true,
+          },
+        });
+      }
+    });
+
+    // Mobile fallback (clean scrollable list)
+    mm.add("(max-width: 767px)", () => {
+      // Mobile displays as a clean vertical feed
+    });
+
+    return () => mm.revert();
   }, []);
-
-  const openDossier = (project: ProjectItem) => {
-    setSelectedDossier(project);
-    setIsDossierOpen(true);
-  };
 
   return (
     <div
       id="monument-exhibition"
       ref={sectionRef}
       className="relative w-full z-30"
-      style={{ height: "calc(100svh + 3400px)" }}
+      style={{ height: "calc(100svh + 2400px)" }}
     >
-      <span id="work" className="sr-only" aria-hidden="true" />
-
       {/* Sticky 100svh Architectural Stage */}
       <section
         ref={stageRef}
-        className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-between pt-20 sm:pt-24 pb-6 px-4 sm:px-8 md:px-12 overflow-hidden bg-[#060709] border-t border-white/10 will-change-[clip-path]"
+        className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-between pt-20 sm:pt-24 pb-8 px-6 sm:px-12 md:px-16 lg:px-20 overflow-hidden bg-[#060709] border-t border-white/10 will-change-[clip-path]"
       >
-        {/* Leading Razor Hairline Edge (Clean architectural rule, ZERO glows) */}
+        {/* Leading Architectural Razor Hairline */}
         <div className="absolute top-0 inset-x-0 h-[1px] bg-white/20" />
 
-        {/* Top Editorial HUD Header */}
-        <div className="relative z-30 flex items-center justify-between w-full max-w-6xl mx-auto px-2 mb-2 sm:mb-4 border-b border-white/10 pb-3">
-          <div className="font-sans font-bold text-[11px] sm:text-xs text-[#FF7A00] tracking-[0.2em] uppercase flex items-center gap-2 sm:gap-3">
-            <span className="w-5 sm:w-8 h-[1px] bg-[#FF7A00]" />
-            <span>SELECTED COMMISSIONS</span>
-            <span className="text-slate-500 hidden sm:inline">· INSIDE-OUT EXPANSION</span>
+        {/* Top Section Header & Telemetry */}
+        <div className="w-full max-w-7xl mx-auto flex items-center justify-between text-[11px] font-sans font-bold uppercase tracking-[0.22em] text-slate-400 pb-3 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <span className="w-2 h-2 rounded-full bg-[#FF7A00]" />
+            <span className="text-white">SELECTED COMMISSIONS // ARCHITECTURAL SHOWCASE</span>
           </div>
-
-          {/* Interactive Progress Indicator */}
-          <div className="flex items-center gap-4">
-            <span className="hidden md:inline font-sans font-medium text-[10px] text-slate-400 uppercase tracking-widest">
-              COMMISSION ARCHIVE
-            </span>
-            <div className="w-28 sm:w-36 h-1 rounded-full bg-white/10 overflow-hidden">
-              <div
-                ref={progressBarRef}
-                className="h-full bg-[#FF7A00] transition-all duration-75"
-                style={{ width: "0%" }}
-              />
-            </div>
-            <span
-              ref={counterRef}
-              className="font-mono text-xs text-[#FFFDF9] tracking-wider"
-            >
-              01 / 04
-            </span>
-          </div>
-        </div>
-
-        {/* =================================================================== */}
-        {/* INSIDE-OUT CARD ARENA                                               */}
-        {/* =================================================================== */}
-        <div className="relative w-full max-w-6xl h-[560px] sm:h-[590px] mx-auto flex items-center justify-center my-auto">
-          {/* ----------------------------------------------------------------- */}
-          {/* CARD 0: IZIEAT EXPORT PORTAL                                      */}
-          {/* ----------------------------------------------------------------- */}
-          <div
-            id="proj-card-0"
-            className="absolute inset-0 rounded-2xl bg-[#0C0E14] border border-white/12 p-6 sm:p-8 flex flex-col justify-between shadow-2xl overflow-hidden will-change-[transform,opacity]"
-          >
-            {/* Card Header */}
-            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-4 border-b border-white/10">
-              <div>
-                <div className="flex items-center gap-3">
-                  <span className="text-[10px] font-mono text-[#FF7A00] tracking-widest uppercase">
-                    CAT.01 // B2B EXPORT
-                  </span>
-                  <span className="text-[10px] font-mono text-slate-500">2024</span>
-                </div>
-                <h3 className="font-sans font-black text-2xl sm:text-4xl text-[#FFFDF9] uppercase tracking-tight mt-1">
-                  IZIEAT Export Portal
-                </h3>
-                <p className="font-sans text-xs sm:text-sm text-slate-400 max-w-xl mt-1 leading-relaxed">
-                  Global wholesale portal with an in-memory 278-key instant English-Russian dictionary (&lt;5ms latency), eliminating external translation API roundtrips.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {PROJECTS[0].stack.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/10 text-[10px] font-mono text-slate-300"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Interior Two-Column: Interactive Engine on Left + Portal for Next Project on Right */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-5 my-auto py-2">
-              {/* Left Column: Live In-Memory Translation Tester */}
-              <div className="md:col-span-7 rounded-xl bg-[#08090C] border border-white/10 p-5 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
-                    <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      IN-MEMORY ENGINE TELEMETRY
-                    </span>
-                    <span className="text-[10px] font-mono text-slate-400">LATENCY &lt; 2.8ms</span>
-                  </div>
-
-                  {/* Snippet Display */}
-                  <div className="min-h-[70px] mb-3">
-                    <div className="text-xs font-mono text-slate-500 mb-1">
-                      {inCardLang === "en" ? "[EN] COMMODITY KEY" : "[RU] ТОВАРНАЯ ПОЗИЦИЯ"}
-                    </div>
-                    <div className="text-sm sm:text-base font-bold text-white transition-all duration-150">
-                      {inCardLang === "en"
-                        ? sampleSnippets[sampleIdx].en
-                        : sampleSnippets[sampleIdx].ru}
-                    </div>
-                    <div className="text-[11px] text-slate-400 mt-1">
-                      {inCardLang === "en"
-                        ? sampleSnippets[sampleIdx].specEn
-                        : sampleSnippets[sampleIdx].specRu}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Controls */}
-                <div className="flex items-center justify-between pt-3 border-t border-white/10">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setInCardLang("en")}
-                      className={`px-3 py-1 rounded text-xs font-mono font-bold transition-colors ${
-                        inCardLang === "en"
-                          ? "bg-[#FF7A00] text-black"
-                          : "bg-white/5 text-slate-400 hover:text-white"
-                      }`}
-                    >
-                      EN
-                    </button>
-                    <button
-                      onClick={() => setInCardLang("ru")}
-                      className={`px-3 py-1 rounded text-xs font-mono font-bold transition-colors ${
-                        inCardLang === "ru"
-                          ? "bg-[#FF7A00] text-black"
-                          : "bg-white/5 text-slate-400 hover:text-white"
-                      }`}
-                    >
-                      RU
-                    </button>
-                  </div>
-
-                  <button
-                    onClick={() => setSampleIdx((prev) => (prev + 1) % sampleSnippets.length)}
-                    className="text-[11px] font-mono text-[#FF7A00] hover:text-[#FFA347] transition-colors"
-                  >
-                    CYCLE STRING ⟳
-                  </button>
-                </div>
-              </div>
-
-              {/* Right Column: Inset Next Project Portal (Latvian Cricket) */}
-              <div
-                id="portal-seed-1"
-                className="md:col-span-5 rounded-xl bg-[#0A0D14] border border-white/10 p-5 flex flex-col justify-between relative overflow-hidden"
-              >
-                <div>
-                  <div className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mb-1">
-                    NESTED REVELATION
-                  </div>
-                  <div className="text-[10px] font-mono text-[#FF7A00] uppercase tracking-wider">
-                    CAT.02 // SPORTS GOVERNANCE
-                  </div>
-                  <h4 className="font-sans font-bold text-lg sm:text-xl text-white mt-1">
-                    Latvian Cricket Federation
-                  </h4>
-                  <p className="text-[11px] text-slate-400 mt-2 leading-relaxed">
-                    National sports infrastructure, automated tournament reporting, and live telemetry streams.
-                  </p>
-                </div>
-
-                <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[10px] font-mono text-[#FF7A00]">
-                  <span>SCROLL TO EXPAND FROM WITHIN</span>
-                  <span>↓</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Actions */}
-            <div className="flex items-center justify-between pt-4 border-t border-white/10">
-              <div className="flex items-center gap-3">
-                <a
-                  href={PROJECTS[0].url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/10 hover:bg-[#FF7A00] hover:text-black text-white text-xs font-sans font-bold uppercase tracking-wider transition-colors"
-                >
-                  <span>Launch Live Site</span>
-                  <ExternalLink size={12} />
-                </a>
-
-                <button
-                  onClick={() => setIsDemoOpen(true)}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-sans font-bold uppercase tracking-wider transition-colors cursor-pointer"
-                >
-                  <Terminal size={12} className="text-[#FF7A00]" />
-                  <span>278-Key Sandbox</span>
-                </button>
-              </div>
-
-              <button
-                onClick={() => openDossier(PROJECTS[0])}
-                className="text-xs font-mono text-slate-400 hover:text-white transition-colors cursor-pointer"
-              >
-                VIEW ARCHITECTURAL DOSSIER →
-              </button>
-            </div>
-          </div>
-
-          {/* ----------------------------------------------------------------- */}
-          {/* CARD 1: LATVIAN CRICKET FEDERATION (Reveals from inside Card 0)   */}
-          {/* ----------------------------------------------------------------- */}
-          <div
-            id="proj-card-1"
-            className="absolute inset-0 rounded-2xl bg-[#0C0E14] border border-white/12 p-6 sm:p-8 flex flex-col justify-between shadow-2xl overflow-hidden will-change-[transform,opacity] pointer-events-none"
-            style={{ opacity: 0, transform: "scale(0.45)" }}
-          >
-            {/* Card Header */}
-            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-4 border-b border-white/10">
-              <div>
-                <div className="flex items-center gap-3">
-                  <span className="text-[10px] font-mono text-[#FF7A00] tracking-widest uppercase">
-                    CAT.02 // SPORTS GOVERNANCE
-                  </span>
-                  <span className="text-[10px] font-mono text-slate-500">2024</span>
-                </div>
-                <h3 className="font-sans font-black text-2xl sm:text-4xl text-[#FFFDF9] uppercase tracking-tight mt-1">
-                  Latvian Cricket Federation
-                </h3>
-                <p className="font-sans text-xs sm:text-sm text-slate-400 max-w-xl mt-1 leading-relaxed">
-                  Modernized national governing infrastructure and digital communication channels, orchestrating automated tournament reporting and EU regulatory compliance.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {PROJECTS[1].stack.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/10 text-[10px] font-mono text-slate-300"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Interior Two-Column: Telemetry Metrics + Portal for Project 03 */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-5 my-auto py-2">
-              <div className="md:col-span-7 rounded-xl bg-[#08090C] border border-white/10 p-5 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
-                    <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
-                      <Activity size={12} className="text-emerald-400" />
-                      EVENT INGESTION TELEMETRY
-                    </span>
-                    <span className="text-[10px] font-mono text-slate-400">STATUS: NOMINAL</span>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="p-3 bg-white/[0.02] border border-white/10 rounded-lg text-center">
-                      <div className="text-xl sm:text-2xl font-mono font-bold text-white">99.98%</div>
-                      <div className="text-[9px] font-mono text-slate-400 uppercase mt-1">System Uptime</div>
-                    </div>
-                    <div className="p-3 bg-white/[0.02] border border-white/10 rounded-lg text-center">
-                      <div className="text-xl sm:text-2xl font-mono font-bold text-[#FF7A00]">100k+</div>
-                      <div className="text-[9px] font-mono text-slate-400 uppercase mt-1">Events / mo</div>
-                    </div>
-                    <div className="p-3 bg-white/[0.02] border border-white/10 rounded-lg text-center">
-                      <div className="text-xl sm:text-2xl font-mono font-bold text-emerald-400">0.00%</div>
-                      <div className="text-[9px] font-mono text-slate-400 uppercase mt-1">Data Loss</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs text-slate-400 font-mono">
-                  <span>EU Compliance: Verified</span>
-                  <span>Cloudflare Workers: Edge Native</span>
-                </div>
-              </div>
-
-              {/* Inset Portal for Project 03 */}
-              <div
-                id="portal-seed-2"
-                className="md:col-span-5 rounded-xl bg-[#0A0D14] border border-white/10 p-5 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mb-1">
-                    NESTED REVELATION
-                  </div>
-                  <div className="text-[10px] font-mono text-[#FF7A00] uppercase tracking-wider">
-                    CAT.03 // DIPLOMATIC PORTAL
-                  </div>
-                  <h4 className="font-sans font-bold text-lg sm:text-xl text-white mt-1">
-                    India Center (Indijas Centrs)
-                  </h4>
-                  <p className="text-[11px] text-slate-400 mt-2 leading-relaxed">
-                    Official Indo-Baltic cultural, academic, and economic bilateral platform connecting India and Latvia.
-                  </p>
-                </div>
-
-                <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[10px] font-mono text-[#FF7A00]">
-                  <span>SCROLL TO EXPAND FROM WITHIN</span>
-                  <span>↓</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Actions */}
-            <div className="flex items-center justify-between pt-4 border-t border-white/10">
-              <a
-                href={PROJECTS[1].url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/10 hover:bg-[#FF7A00] hover:text-black text-white text-xs font-sans font-bold uppercase tracking-wider transition-colors"
-              >
-                <span>Launch Live Site</span>
-                <ExternalLink size={12} />
-              </a>
-
-              <button
-                onClick={() => openDossier(PROJECTS[1])}
-                className="text-xs font-mono text-slate-400 hover:text-white transition-colors cursor-pointer"
-              >
-                VIEW ARCHITECTURAL DOSSIER →
-              </button>
-            </div>
-          </div>
-
-          {/* ----------------------------------------------------------------- */}
-          {/* CARD 2: INDIA CENTER (Reveals from inside Card 1)                  */}
-          {/* ----------------------------------------------------------------- */}
-          <div
-            id="proj-card-2"
-            className="absolute inset-0 rounded-2xl bg-[#0C0E14] border border-white/12 p-6 sm:p-8 flex flex-col justify-between shadow-2xl overflow-hidden will-change-[transform,opacity] pointer-events-none"
-            style={{ opacity: 0, transform: "scale(0.45)" }}
-          >
-            {/* Card Header */}
-            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-4 border-b border-white/10">
-              <div>
-                <div className="flex items-center gap-3">
-                  <span className="text-[10px] font-mono text-[#FF7A00] tracking-widest uppercase">
-                    CAT.03 // DIPLOMATIC PORTAL
-                  </span>
-                  <span className="text-[10px] font-mono text-slate-500">2024–2025</span>
-                </div>
-                <h3 className="font-sans font-black text-2xl sm:text-4xl text-[#FFFDF9] uppercase tracking-tight mt-1">
-                  India Center (Indijas Centrs)
-                </h3>
-                <p className="font-sans text-xs sm:text-sm text-slate-400 max-w-xl mt-1 leading-relaxed">
-                  Official Indo-Baltic cultural, academic, and economic bilateral platform connecting India and Latvia with consular event scheduling.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {PROJECTS[2].stack.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/10 text-[10px] font-mono text-slate-300"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Interior Two-Column */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-5 my-auto py-2">
-              <div className="md:col-span-7 rounded-xl bg-[#08090C] border border-white/10 p-5 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
-                    <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
-                      <Globe2 size={12} className="text-emerald-400" />
-                      BILATERAL PLATFORM TELEMETRY
-                    </span>
-                    <span className="text-[10px] font-mono text-slate-400">EDGE NATIVE</span>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="p-3 bg-white/[0.02] border border-white/10 rounded-lg text-center">
-                      <div className="text-xl sm:text-2xl font-mono font-bold text-white">&lt; 18ms</div>
-                      <div className="text-[9px] font-mono text-slate-400 uppercase mt-1">Edge Latency</div>
-                    </div>
-                    <div className="p-3 bg-white/[0.02] border border-white/10 rounded-lg text-center">
-                      <div className="text-xl sm:text-2xl font-mono font-bold text-[#FF7A00]">LV / EN</div>
-                      <div className="text-[9px] font-mono text-slate-400 uppercase mt-1">Bilingual</div>
-                    </div>
-                    <div className="p-3 bg-white/[0.02] border border-white/10 rounded-lg text-center">
-                      <div className="text-xl sm:text-2xl font-mono font-bold text-emerald-400">100%</div>
-                      <div className="text-[9px] font-mono text-slate-400 uppercase mt-1">Edge Availability</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs text-slate-400 font-mono">
-                  <span>Consular Integration: Online</span>
-                  <span>Bilateral Portal: Indo-Baltic</span>
-                </div>
-              </div>
-
-              {/* Inset Portal for Project 04 */}
-              <div
-                id="portal-seed-3"
-                className="md:col-span-5 rounded-xl bg-[#0A0D14] border border-white/10 p-5 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mb-1">
-                    NESTED REVELATION
-                  </div>
-                  <div className="text-[10px] font-mono text-[#FF7A00] uppercase tracking-wider">
-                    CAT.04 // GLOBAL SUPPLY CHAIN
-                  </div>
-                  <h4 className="font-sans font-bold text-lg sm:text-xl text-white mt-1">
-                    Varti International
-                  </h4>
-                  <p className="text-[11px] text-slate-400 mt-2 leading-relaxed">
-                    Enterprise international commodity trading and cross-border supply chain platform.
-                  </p>
-                </div>
-
-                <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[10px] font-mono text-[#FF7A00]">
-                  <span>SCROLL TO EXPAND FROM WITHIN</span>
-                  <span>↓</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Actions */}
-            <div className="flex items-center justify-between pt-4 border-t border-white/10">
-              <a
-                href={PROJECTS[2].url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/10 hover:bg-[#FF7A00] hover:text-black text-white text-xs font-sans font-bold uppercase tracking-wider transition-colors"
-              >
-                <span>Launch Live Site</span>
-                <ExternalLink size={12} />
-              </a>
-
-              <button
-                onClick={() => openDossier(PROJECTS[2])}
-                className="text-xs font-mono text-slate-400 hover:text-white transition-colors cursor-pointer"
-              >
-                VIEW ARCHITECTURAL DOSSIER →
-              </button>
-            </div>
-          </div>
-
-          {/* ----------------------------------------------------------------- */}
-          {/* CARD 3: VARTI INTERNATIONAL (Reveals from inside Card 2)          */}
-          {/* ----------------------------------------------------------------- */}
-          <div
-            id="proj-card-3"
-            className="absolute inset-0 rounded-2xl bg-[#0C0E14] border border-white/12 p-6 sm:p-8 flex flex-col justify-between shadow-2xl overflow-hidden will-change-[transform,opacity] pointer-events-none"
-            style={{ opacity: 0, transform: "scale(0.45)" }}
-          >
-            {/* Card Header */}
-            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-4 border-b border-white/10">
-              <div>
-                <div className="flex items-center gap-3">
-                  <span className="text-[10px] font-mono text-[#FF7A00] tracking-widest uppercase">
-                    CAT.04 // GLOBAL SUPPLY CHAIN
-                  </span>
-                  <span className="text-[10px] font-mono text-slate-500">2024–2025</span>
-                </div>
-                <h3 className="font-sans font-black text-2xl sm:text-4xl text-[#FFFDF9] uppercase tracking-tight mt-1">
-                  Varti International
-                </h3>
-                <p className="font-sans text-xs sm:text-sm text-slate-400 max-w-xl mt-1 leading-relaxed">
-                  Enterprise international commodity trading and cross-border supply chain platform with multi-currency pricing models and logistics tracking.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {PROJECTS[3].stack.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/10 text-[10px] font-mono text-slate-300"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Interior Two-Column */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-5 my-auto py-2">
-              <div className="md:col-span-12 rounded-xl bg-[#08090C] border border-white/10 p-6 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
-                    <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
-                      <ShieldCheck size={14} className="text-emerald-400" />
-                      INSTITUTIONAL TIER VERIFICATION
-                    </span>
-                    <span className="text-[10px] font-mono text-slate-400">GLOBAL AGRO PORTFOLIO</span>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="p-4 bg-white/[0.02] border border-white/10 rounded-lg">
-                      <div className="text-xl sm:text-2xl font-mono font-bold text-white">Multi-Port</div>
-                      <div className="text-[10px] font-mono text-slate-400 uppercase mt-1">Hamburg · Rotterdam · Riga</div>
-                    </div>
-                    <div className="p-4 bg-white/[0.02] border border-white/10 rounded-lg">
-                      <div className="text-xl sm:text-2xl font-mono font-bold text-[#FF7A00]">Multi-Currency</div>
-                      <div className="text-[10px] font-mono text-slate-400 uppercase mt-1">Realtime FX Settlement</div>
-                    </div>
-                    <div className="p-4 bg-white/[0.02] border border-white/10 rounded-lg">
-                      <div className="text-xl sm:text-2xl font-mono font-bold text-emerald-400">Verified</div>
-                      <div className="text-[10px] font-mono text-slate-400 uppercase mt-1">Institutional B2B Network</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-white/10 mt-4 flex items-center justify-between text-xs text-slate-400 font-mono">
-                  <span>Logistics Pipeline: Automated Cargo Tracking</span>
-                  <span>Compliance Tier: Institutional</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Actions */}
-            <div className="flex items-center justify-between pt-4 border-t border-white/10">
-              <a
-                href={PROJECTS[3].url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/10 hover:bg-[#FF7A00] hover:text-black text-white text-xs font-sans font-bold uppercase tracking-wider transition-colors"
-              >
-                <span>Launch Live Site</span>
-                <ExternalLink size={12} />
-              </a>
-
-              <button
-                onClick={() => openDossier(PROJECTS[3])}
-                className="text-xs font-mono text-slate-400 hover:text-white transition-colors cursor-pointer"
-              >
-                VIEW ARCHITECTURAL DOSSIER →
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Status Ticker */}
-        <div className="relative z-20 flex items-center justify-between w-full max-w-6xl mx-auto px-2 pt-2 border-t border-white/10 text-[10px] font-mono text-slate-500 uppercase">
-          <div className="flex items-center gap-4">
-            {PROJECTS.map((p, i) => (
-              <span
-                key={p.id}
-                className={`flex items-center gap-1.5 transition-colors ${
-                  activeIdx === i ? "text-[#FF7A00] font-bold" : "text-slate-600"
-                }`}
-              >
+          <div className="flex items-center gap-4 text-xs font-mono">
+            <div className="hidden sm:flex items-center gap-1.5">
+              {PROJECTS.map((_, dotIdx) => (
                 <span
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    activeIdx === i ? "bg-[#FF7A00]" : "bg-white/20"
+                  key={dotIdx}
+                  className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${
+                    dotIdx === activeIdx ? "bg-[#FF7A00]" : "bg-white/20"
                   }`}
                 />
-                <span>{p.title.split(" ")[0]}</span>
-              </span>
-            ))}
-          </div>
-
-          <div className="tracking-widest">
-            ENGINEERED WITH ARCHITECTURAL DISCIPLINE
-          </div>
-        </div>
-      </section>
-
-      {/* Interactive 278-Key Translation Engine Modal (Frosted Obsidian CAD) */}
-      {isDemoOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-xl animate-fade-in"
-          onClick={() => setIsDemoOpen(false)}
-        >
-          <div
-            className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl bg-[#0C0E14] border border-white/15 shadow-2xl p-4 sm:p-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
-              <span className="font-mono font-bold text-xs text-[#FF7A00] uppercase tracking-wider">
-                IZIEAT // 278-KEY IN-MEMORY LOCALIZATION ENGINE
-              </span>
-              <button
-                onClick={() => setIsDemoOpen(false)}
-                className="w-8 h-8 rounded-full bg-white/10 text-slate-300 hover:text-white hover:bg-white/20 flex items-center justify-center font-bold text-sm transition-colors cursor-pointer"
-              >
-                ✕
-              </button>
+              ))}
             </div>
-            <LocalizationDemo />
+            <span className="text-slate-400">DEPTH:</span>
+            <span className="text-[#FF7A00] font-bold">
+              <span ref={counterRef}>01</span> / 04
+            </span>
           </div>
         </div>
-      )}
 
-      {/* Project Architectural Dossier Modal */}
-      {isDossierOpen && selectedDossier && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-xl animate-fade-in"
-          onClick={() => setIsDossierOpen(false)}
-        >
-          <div
-            className="relative w-full max-w-2xl rounded-2xl bg-[#0C0E14] border border-white/15 p-6 sm:p-8"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-6">
-              <div>
-                <span className="font-mono text-xs text-[#FF7A00] uppercase tracking-wider">
-                  {selectedDossier.catalogueNo}
-                </span>
-                <h4 className="font-sans font-black text-2xl text-white uppercase mt-1">
-                  {selectedDossier.title}
-                </h4>
+        {/* Main Split Screen Container */}
+        <div className="showcase-container w-full max-w-7xl mx-auto flex-1 flex items-center my-auto will-change-[transform,opacity]">
+          <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-16 items-center">
+            
+            {/* ================================================================= */}
+            {/* LEFT COLUMN: Framed Logo Portal with Inside-Out Zoom Reveal        */}
+            {/* ================================================================= */}
+            <div className="md:col-span-6 lg:col-span-5 flex justify-center items-center">
+              <div className="relative w-full max-w-[380px] sm:max-w-[440px] lg:max-w-[480px] aspect-square rounded-2xl bg-[#090B10] border border-white/15 p-10 sm:p-14 flex items-center justify-center overflow-hidden shadow-[0_30px_90px_rgba(0,0,0,0.9)]">
+                
+                {/* Architectural Corner Reticle Accents */}
+                <div className="absolute top-3 left-3 w-3 h-3 border-t border-l border-white/40 pointer-events-none" />
+                <div className="absolute top-3 right-3 w-3 h-3 border-t border-r border-white/40 pointer-events-none" />
+                <div className="absolute bottom-3 left-3 w-3 h-3 border-b border-l border-white/40 pointer-events-none" />
+                <div className="absolute bottom-3 right-3 w-3 h-3 border-b border-r border-white/40 pointer-events-none" />
+                
+                {/* Viewfinder Center Crosshair */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10">
+                  <div className="w-12 h-[1px] bg-white" />
+                  <div className="h-12 w-[1px] bg-white absolute" />
+                </div>
+
+                {/* 4 Inside-Out Layered Logo Containers */}
+                {PROJECTS.map((proj, idx) => (
+                  <div
+                    key={proj.id}
+                    ref={(el) => {
+                      logoContainersRef.current[idx] = el;
+                    }}
+                    className="absolute inset-0 flex items-center justify-center p-12 sm:p-16 bg-[#090B10] will-change-[transform,opacity]"
+                  >
+                    <div className="relative w-full h-full flex items-center justify-center rounded-2xl overflow-hidden">
+                      <Image
+                        src={proj.logo}
+                        alt={`${proj.title} Monogram Logo`}
+                        fill
+                        className="object-contain filter drop-shadow-[0_15px_35px_rgba(0,0,0,0.85)] select-none p-3"
+                        sizes="(max-width: 768px) 280px, 420px"
+                        priority={idx === 0}
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
-              <button
-                onClick={() => setIsDossierOpen(false)}
-                className="w-8 h-8 rounded-full bg-white/10 text-slate-300 hover:text-white hover:bg-white/20 flex items-center justify-center font-bold text-sm transition-colors cursor-pointer"
-              >
-                ✕
-              </button>
             </div>
 
-            <p className="font-sans text-sm text-slate-300 leading-relaxed mb-6">
-              {selectedDossier.summary}
-            </p>
+            {/* ================================================================= */}
+            {/* RIGHT COLUMN: Editorial Narrative (Downward Flow on Scroll)       */}
+            {/* ================================================================= */}
+            <div className="md:col-span-6 lg:col-span-7 relative min-h-[360px] sm:min-h-[420px] flex items-center">
+              {PROJECTS.map((proj, idx) => (
+                <div
+                  key={proj.id}
+                  ref={(el) => {
+                    editorialBlocksRef.current[idx] = el;
+                  }}
+                  className="absolute inset-0 flex flex-col justify-center will-change-[transform,opacity]"
+                >
+                  {/* Project Index & Category */}
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="font-serif italic text-3xl sm:text-4xl text-[#FF7A00] font-normal leading-none">
+                      {proj.num}
+                    </span>
+                    <span className="text-white/20 font-sans text-xl">/</span>
+                    <span className="text-white/40 font-mono text-sm">04</span>
+                    <span className="w-[1px] h-4 bg-white/15 mx-1" />
+                    <span className="text-[10px] sm:text-[11px] font-sans font-extrabold uppercase tracking-[0.2em] text-[#FF7A00]">
+                      {proj.category}
+                    </span>
+                  </div>
 
-            <div className="grid grid-cols-3 gap-3 mb-6">
-              {selectedDossier.metrics.map((m, idx) => (
-                <div key={idx} className="p-3 bg-white/[0.02] border border-white/10 rounded-lg text-center">
-                  <div className="font-mono text-base font-bold text-[#FF7A00]">{m.value}</div>
-                  <div className="font-mono text-[9px] text-slate-500 uppercase mt-1">{m.label}</div>
+                  {/* Monumental Editorial Heading */}
+                  <h3 className="font-sans font-black text-2xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-white mb-4 leading-[1.05]">
+                    {proj.title}
+                  </h3>
+
+                  {/* Narrative Subtext */}
+                  <p className="font-sans font-normal text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl mb-6">
+                    {proj.summary}
+                  </p>
+
+                  {/* Micro-Spec Hairline Metrics */}
+                  <div className="grid grid-cols-3 gap-3 border-t border-b border-white/10 py-3.5 mb-6 max-w-xl">
+                    {proj.metrics.map((m, mIdx) => (
+                      <div key={mIdx}>
+                        <div className="text-[9px] font-mono uppercase text-slate-500 tracking-wider mb-0.5">
+                          {m.label}
+                        </div>
+                        <div className="text-xs sm:text-sm font-sans font-bold text-white tracking-tight">
+                          {m.value}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Action Link Stack */}
+                  <div className="flex flex-wrap items-center gap-3">
+                    <a
+                      href={proj.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-white text-black font-sans font-bold text-xs uppercase tracking-wider hover:bg-[#FF7A00] hover:text-white transition-all shadow-md group"
+                    >
+                      <span>EXPLORE LIVE PLATFORM</span>
+                      <ExternalLink size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </a>
+
+                    {proj.hasDemo && (
+                      <button
+                        onClick={() => setIsDemoOpen(true)}
+                        className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-[#11141C] border border-white/20 text-white font-sans font-bold text-xs uppercase tracking-wider hover:border-[#FF7A00] hover:text-[#FF7A00] transition-colors"
+                      >
+                        <Activity size={13} className="text-[#FF7A00]" />
+                        <span>TEST &lt;5MS TRANSLATION</span>
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => {
+                        setSelectedDossier(proj);
+                        setIsDossierOpen(true);
+                      }}
+                      className="inline-flex items-center gap-1.5 px-4 py-3 text-slate-400 hover:text-white font-mono text-xs uppercase tracking-wider transition-colors"
+                    >
+                      <Layers size={13} />
+                      <span>VIEW DOSSIER</span>
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
 
-            <div className="flex items-center justify-between pt-4 border-t border-white/10">
-              <span className="font-mono text-xs text-slate-400">
-                DOMAIN: {selectedDossier.displayDomain}
-              </span>
+          </div>
+        </div>
+
+        {/* Bottom Progress Bar & Scrub Indicator */}
+        <div className="w-full max-w-7xl mx-auto flex items-center justify-between pt-4 border-t border-white/10 text-[10px] font-mono text-slate-500">
+          <div className="flex items-center gap-2">
+            <span>SCROLL TO ADVANCE COMMISSIONS</span>
+            <ArrowRight size={11} className="text-slate-400" />
+          </div>
+
+          <div className="w-48 sm:w-64 h-[2px] bg-white/10 rounded-full overflow-hidden">
+            <div
+              ref={progressBarRef}
+              className="h-full bg-[#FF7A00] w-full transform origin-left scale-x-0 transition-transform duration-75"
+            />
+          </div>
+
+          <span className="text-slate-400">01 — 04 PORTFOLIO CORE</span>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* INTERACTIVE MODAL 1: In-Memory 278-Key Localization Engine Sandbox        */}
+      {/* ========================================================================= */}
+      {isDemoOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200">
+          <div className="relative w-full max-w-3xl bg-[#090C12] border border-white/20 rounded-2xl p-6 sm:p-8 shadow-2xl">
+            <div className="flex items-center justify-between pb-4 mb-6 border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <span className="p-2 rounded-lg bg-orange-500/10 text-[#FF7A00] border border-orange-500/20">
+                  <Terminal size={18} />
+                </span>
+                <div>
+                  <h3 className="text-base font-bold text-white tracking-wide">
+                    IZIEAT 278-KEY LOCALIZATION ENGINE
+                  </h3>
+                  <p className="text-xs text-slate-400 font-mono">
+                    Client-side in-memory dictionary test • Latency: &lt; 2.8ms
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsDemoOpen(false)}
+                className="px-3 py-1.5 rounded-lg border border-white/10 text-xs font-mono text-slate-400 hover:text-white hover:border-white/30"
+              >
+                ESC [CLOSE]
+              </button>
+            </div>
+            <div className="max-h-[70vh] overflow-y-auto pr-1">
+              <LocalizationDemo />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* INTERACTIVE MODAL 2: Architectural Deep-Dive Dossier                       */}
+      {/* ========================================================================= */}
+      {isDossierOpen && selectedDossier && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200">
+          <div className="relative w-full max-w-2xl bg-[#090C12] border border-white/20 rounded-2xl p-6 sm:p-8 shadow-2xl">
+            <div className="flex items-center justify-between pb-4 mb-6 border-b border-white/10">
+              <div>
+                <span className="text-[10px] font-mono text-[#FF7A00] tracking-wider uppercase">
+                  {selectedDossier.catalogueNo}
+                </span>
+                <h3 className="text-lg font-bold text-white tracking-wide mt-1">
+                  {selectedDossier.title} — ARCHITECTURAL DOSSIER
+                </h3>
+              </div>
+              <button
+                onClick={() => setIsDossierOpen(false)}
+                className="px-3 py-1.5 rounded-lg border border-white/10 text-xs font-mono text-slate-400 hover:text-white hover:border-white/30"
+              >
+                ESC [CLOSE]
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs font-sans text-slate-300">
+              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10">
+                <span className="text-white font-bold block mb-1">CLIENT & ENGAGEMENT:</span>
+                <span>{selectedDossier.client} ({selectedDossier.year})</span>
+              </div>
+              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10">
+                <span className="text-white font-bold block mb-1">ENGINEERING NARRATIVE:</span>
+                <p className="leading-relaxed text-slate-400">{selectedDossier.summary}</p>
+              </div>
+              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10">
+                <span className="text-white font-bold block mb-1">TECHNOLOGY STACK:</span>
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {selectedDossier.stack.map((st, i) => (
+                    <span key={i} className="px-2.5 py-1 rounded bg-white/5 border border-white/10 text-[11px] font-mono text-slate-300">
+                      {st}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-white/10 flex justify-end">
               <a
                 href={selectedDossier.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/10 hover:bg-[#FF7A00] hover:text-black text-white font-sans font-bold text-xs uppercase tracking-wider transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#FF7A00] text-white font-bold text-xs uppercase tracking-wider hover:bg-orange-600 transition-colors"
               >
-                <span>Launch Live Site</span>
-                <ExternalLink size={12} />
+                <span>OPEN OFFICIAL DOMAIN</span>
+                <ExternalLink size={13} />
               </a>
             </div>
           </div>

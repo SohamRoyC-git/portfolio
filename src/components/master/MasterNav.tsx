@@ -159,6 +159,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
   const links = [
     { id: "monument-hero", label: "INDEX" },
     { id: "monument-statement", label: "STATEMENT" },
+    { id: "monument-creed", label: "CREED" },
     { id: "monument-exhibition", label: "WORK" },
     { id: "monument-matrix", label: "BLUEPRINT" },
     { id: "monument-terminal", label: "CONTACT" },

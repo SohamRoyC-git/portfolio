@@ -9,6 +9,7 @@ import { SilkyFluidBackdrop } from "@/components/master/SilkyFluidBackdrop";
 import { MasterNav } from "@/components/master/MasterNav";
 import { MonumentalHero } from "@/components/master/MonumentalHero";
 import { KineticStatement } from "@/components/master/KineticStatement";
+import { ArchitecturalCreed } from "@/components/master/ArchitecturalCreed";
 import { GrandSpatialDiscs } from "@/components/master/GrandSpatialDiscs";
 import { ArchitecturalMatrix } from "@/components/master/ArchitecturalMatrix";
 import { TerminalFinale } from "@/components/master/TerminalFinale";
@@ -47,13 +48,13 @@ export default function Home() {
     gsap.ticker.add(tickerCallback);
     gsap.ticker.lagSmoothing(0);
 
-    // Hero Monolithic Exit Wipe Parallax (Desktop)
+    // Hero Monolithic Exit: Cleans out the canvas completely before Statement plays
     const mm = gsap.matchMedia();
     mm.add("(min-width: 768px)", () => {
       gsap.to("#hero-wrapper", {
-        scale: 0.93,
+        scale: 0.94,
         yPercent: -12,
-        opacity: 0.25,
+        opacity: 0,
         ease: "power2.inOut",
         scrollTrigger: {
           trigger: "#monument-statement",
@@ -82,6 +83,7 @@ export default function Home() {
     const sectionIds = [
       "monument-hero",
       "monument-statement",
+      "monument-creed",
       "monument-exhibition",
       "monument-matrix",
       "monument-terminal",
@@ -138,10 +140,13 @@ export default function Home() {
           <MonumentalHero onExplore={() => handleNavigate("monument-statement")} onConnect={() => handleNavigate("monument-terminal")} />
         </div>
 
-        {/* Movement 01: Kinetic Pinned Statement & Credentials */}
+        {/* Movement 01: Kinetic Pinned Statement (Quote) */}
         <KineticStatement />
 
-        {/* Movement 02: 360° Cylindrical Horizontal Scroll Exhibition */}
+        {/* Movement 02: Educational & Professional Foundations (Creed Monoliths) */}
+        <ArchitecturalCreed />
+
+        {/* Movement 03: Selected Commissions Showcase (Forge Automotive Split-Screen) */}
         <GrandSpatialDiscs />
 
         {/* Movement 03: Architectural Bento Matrix & Live Code */}

@@ -265,25 +265,9 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
               progressBarRef.current.style.width = `${Math.round(self.progress * 100)}%`;
             }
             const totalScroll = getExactScrollAmount();
-            const tProgress = Math.min(self.progress / 0.82, 1.0);
+            const tProgress = Math.min(self.progress / 0.85, 1.0);
             const currentTrackX = totalScroll * tProgress;
             updateOrbitalCards(currentTrackX);
-
-            // Cinematic exit: subtle camera depth recession at the end of the scroll
-            if (self.progress > 0.88) {
-              const exitT = (self.progress - 0.88) / 0.12;
-              gsap.set(pin, {
-                scale: 1 - exitT * 0.05,
-                opacity: 1 - exitT * 0.55,
-                yPercent: -exitT * 4,
-              });
-            } else {
-              gsap.set(pin, {
-                scale: 1,
-                opacity: 1,
-                yPercent: 0,
-              });
-            }
           },
         },
       });
@@ -327,7 +311,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
     <section
       id="monument-exhibition"
       ref={sectionRef}
-      className="relative w-full overflow-hidden z-10 bg-[#060709]"
+      className="relative w-full overflow-hidden z-20 bg-[#060709] border-t border-white/12 shadow-[0_-35px_100px_rgba(0,0,0,0.95)]"
     >
       <span id="work" className="sr-only" aria-hidden="true" />
 
@@ -340,13 +324,13 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
         <div className="relative z-20 flex items-center justify-between w-full max-w-7xl mx-auto px-2 mb-2 sm:mb-4">
           <div className="font-sans font-bold text-[11px] sm:text-xs text-[#FF7A00] tracking-[0.2em] uppercase flex items-center gap-2 sm:gap-3">
             <span className="w-5 sm:w-8 h-[1px] bg-[#FF7A00]" />
-            <span className="truncate">02 // SELECTED COMMISSIONS</span>
+            <span className="truncate">SELECTED COMMISSIONS</span>
           </div>
 
           {/* Interactive Progress Scrub Indicator */}
           <div className="hidden md:flex items-center gap-4">
             <span className="font-sans font-medium text-[10px] text-slate-400 uppercase tracking-widest">
-              360° SPATIAL PROJECTION
+              ORBITAL EXHIBITION
             </span>
             <div className="w-44 h-1.5 rounded-full bg-white/10 p-0.5 overflow-hidden">
               <div
@@ -858,7 +842,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
           </div>
 
           <div className="font-sans font-bold text-[9px] sm:text-[11px] text-slate-400 uppercase tracking-widest">
-            360° ORBITAL PROJECTION
+            CURATED COMMISSIONS
           </div>
         </div>
       </div>

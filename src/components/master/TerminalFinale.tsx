@@ -37,8 +37,8 @@ export const TerminalFinale: React.FC = memo(() => {
       if (headlineRef.current) {
         tl.fromTo(
           headlineRef.current,
-          { opacity: 0, y: 40, filter: "blur(12px)", scale: 0.96 },
-          { opacity: 1, y: 0, filter: "blur(0px)", scale: 1, ease: "power2.out" },
+          { opacity: 0, y: 40, scale: 0.97 },
+          { opacity: 1, y: 0, scale: 1, ease: "power2.out" },
           0
         );
       }
@@ -88,13 +88,13 @@ export const TerminalFinale: React.FC = memo(() => {
     <footer
       id="monument-terminal"
       ref={sectionRef}
-      className="relative min-h-[100svh] pt-24 sm:pt-32 md:pt-40 pb-16 px-4 sm:px-8 md:px-12 z-10 max-w-7xl mx-auto flex flex-col justify-between bg-[#060709]"
+      className="relative min-h-[100svh] pt-24 sm:pt-32 md:pt-40 pb-16 px-4 sm:px-8 md:px-12 z-40 max-w-7xl mx-auto flex flex-col justify-between bg-[#060709] border-t border-white/12 shadow-[0_-35px_100px_rgba(0,0,0,0.95)]"
     >
       {/* Chapter Marker */}
       <div className="font-sans font-bold text-[11px] sm:text-xs text-[#FF7A00] tracking-[0.2em] uppercase mb-8 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="w-8 h-[1px] bg-[#FF7A00]" />
-          <span>04 // TERMINAL FINALE · COLLABORATION</span>
+          <span>INITIATION &amp; CONTACT</span>
         </div>
         <div className="hidden sm:inline-flex items-center gap-2 text-[10px] text-emerald-400 font-mono">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />

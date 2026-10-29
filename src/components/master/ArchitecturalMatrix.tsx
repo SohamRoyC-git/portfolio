@@ -36,8 +36,8 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
       if (headlineRef.current) {
         tl.fromTo(
           headlineRef.current,
-          { opacity: 0, y: 35, filter: "blur(8px)" },
-          { opacity: 1, y: 0, filter: "blur(0px)", ease: "power2.out" },
+          { opacity: 0, y: 35 },
+          { opacity: 1, y: 0, ease: "power2.out" },
           0
         );
       }
@@ -152,12 +152,12 @@ export async function ingestMatchTelemetry(
     <section
       id="monument-matrix"
       ref={sectionRef}
-      className="relative min-h-[90svh] py-20 sm:py-28 md:py-36 px-4 sm:px-8 md:px-12 z-10 max-w-7xl mx-auto flex flex-col justify-center bg-[#060709]"
+      className="relative min-h-[90svh] py-20 sm:py-28 md:py-36 px-4 sm:px-8 md:px-12 z-30 max-w-7xl mx-auto flex flex-col justify-center bg-[#060709] border-t border-white/12 shadow-[0_-35px_100px_rgba(0,0,0,0.95)]"
     >
       {/* Chapter Marker */}
       <div className="font-sans font-bold text-[11px] sm:text-xs text-[#FF7A00] tracking-[0.2em] uppercase mb-6 sm:mb-10 flex items-center gap-3">
         <span className="w-6 sm:w-8 h-[1px] bg-[#FF7A00]" />
-        <span>03 // ARCHITECTURAL BLUEPRINT</span>
+        <span>TECHNICAL BLUEPRINT &amp; ARCHITECTURE</span>
       </div>
 
       {/* Headline & Description */}

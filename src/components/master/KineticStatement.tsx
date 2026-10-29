@@ -23,8 +23,8 @@ export const KineticStatement: React.FC = memo(() => {
     const mm = gsap.matchMedia();
 
     // =========================================================================
-    // DESKTOP CINEMATIC SCROLL-PINNED EXPERIENCE (>= 768px)
-    // Inspired by Heron AI's slot-mask text rise & Forge Automotive's plinths
+    // CINEMATIC ENTRANCE & ROCK-SOLID READING EXPERIENCE
+    // Unmasks line-by-line with physical inertia and ZERO blur
     // =========================================================================
     mm.add("(min-width: 768px)", () => {
       const statementLines = headlineRef.current?.querySelectorAll(".statement-line");
@@ -33,87 +33,64 @@ export const KineticStatement: React.FC = memo(() => {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: "top top",
-          end: "+=1600",
-          pin: true,
+          start: "top 75%",
+          end: "top 20%",
           scrub: 0.45,
-          anticipatePin: 1,
         },
       });
 
-      // Phase 1 (0 -> 15%): Hairline Dividers draw across the screen
+      // Phase 1: Hairline Dividers draw across
       if (dividerTopRef.current && dividerBottomRef.current) {
         tl.fromTo(
           [dividerTopRef.current, dividerBottomRef.current],
           { scaleX: 0, transformOrigin: "left center" },
-          { scaleX: 1, duration: 0.15, ease: "power2.out" },
+          { scaleX: 1, duration: 0.25, ease: "power2.out" },
           0
         );
       }
 
-      // Phase 1b (0 -> 20%): Meta bar materializes
+      // Phase 1b: Meta bar materializes
       if (metaBarRef.current) {
         tl.fromTo(
           metaBarRef.current,
-          { opacity: 0, y: -12 },
-          { opacity: 1, y: 0, duration: 0.15, ease: "power2.out" },
+          { opacity: 0, y: -10 },
+          { opacity: 1, y: 0, duration: 0.25, ease: "power2.out" },
           0.05
         );
       }
 
-      // Phase 2 (15% -> 45%): Monumental Statement unmasks line-by-line (Heron AI Style)
+      // Phase 2: Monumental Statement unmasks line-by-line (Heron AI Style)
       if (statementLines && statementLines.length > 0) {
         tl.fromTo(
           statementLines,
-          { yPercent: 110, opacity: 0 },
+          { yPercent: 100, opacity: 0 },
           {
             yPercent: 0,
             opacity: 1,
             stagger: 0.08,
-            duration: 0.3,
+            duration: 0.45,
             ease: "power3.out",
           },
-          0.15
+          0.1
         );
       }
 
-      // Phase 3 (35% -> 65%): 4 Architectural Plinths rise with optical focus pull
+      // Phase 3: 4 Architectural Plinths rise cleanly (100% crisp, ZERO blur)
       if (plinthCards && plinthCards.length > 0) {
         tl.fromTo(
           plinthCards,
           {
-            y: 50,
+            y: 35,
             opacity: 0,
-            filter: "blur(8px)",
           },
           {
             y: 0,
             opacity: 1,
-            filter: "blur(0px)",
             stagger: 0.06,
-            duration: 0.3,
+            duration: 0.35,
             ease: "power2.out",
           },
-          0.35
-        );
-      }
-
-      // Phase 4 (65% -> 85%): Dedicated reading plateau
-      tl.to({}, { duration: 0.2 });
-
-      // Phase 5 (85% -> 100%): Cinematic Exit & Camera Depth Pull-Back
-      if (containerRef.current) {
-        tl.to(
-          containerRef.current,
-          {
-            scale: 0.95,
-            opacity: 0.2,
-            filter: "blur(4px)",
-            yPercent: -8,
-            duration: 0.15,
-            ease: "power1.in",
-          },
-          0.85
+          0.25
         );
       }
     });
@@ -204,7 +181,7 @@ export const KineticStatement: React.FC = memo(() => {
           ref={metaBarRef}
           className="flex items-center justify-between text-[11px] font-sans font-bold uppercase tracking-[0.24em] text-slate-400 mb-8 pb-3"
         >
-          <span>01 // ARCHITECTURAL CREED</span>
+          <span>ARCHITECTURAL CREED</span>
           <span className="hidden sm:inline text-slate-500">LAT 22.5726° N · LON 88.3639° E</span>
           <span className="text-[#FF7A00]">TERRACE PERSPECTIVE</span>
         </div>

@@ -318,22 +318,22 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
                 <span>NSEC (2024–2028)</span>
               </div>
 
-              {/* Signature Aesthetic Font Pairing (Citadel Script draped over Helvetica) */}
+              {/* Signature Aesthetic Font Pairing (Citadel Script tightly interlocking over Helvetica like 'Soft Light') */}
               <h1
                 ref={mobileTitleRef}
-                className="relative flex flex-col items-center justify-center select-none mb-4"
+                className="relative flex flex-col items-center justify-center select-none mb-5"
               >
-                {/* Line 1: Soham in Citadel Script (reinforced stroke for crisp legibility) */}
+                {/* Line 1: Soham in Citadel Script (grand, sweeping calligraphy overlapping Line 2) */}
                 <span
-                  className="font-citadel text-7xl xs:text-8xl text-white normal-case leading-[0.85] tracking-[0.025em] relative z-20 drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] drop-shadow-[0_8px_25px_rgba(0,0,0,0.85)] -mb-1 xs:-mb-1.5"
+                  className="font-citadel text-8xl xs:text-9xl text-[#FFFDF8] normal-case leading-[0.68] tracking-[0.02em] relative z-20 -mb-6 xs:-mb-8 -translate-x-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.98)] drop-shadow-[0_8px_18px_rgba(0,0,0,0.9)] drop-shadow-[0_16px_36px_rgba(0,0,0,0.7)]"
                   style={{
-                    WebkitTextStroke: "0.45px rgba(255, 255, 255, 0.9)",
+                    WebkitTextStroke: "0.4px rgba(255, 255, 255, 0.95)",
                   }}
                 >
                   Soham
                 </span>
-                {/* Line 2: Roychoudhury in Bold Architectural Helvetica */}
-                <span className="font-helvetica font-normal text-5xl xs:text-6xl text-white normal-case tracking-[0.02em] leading-[0.9] relative z-10 drop-shadow-[0_6px_35px_rgba(0,0,0,0.95)]">
+                {/* Line 2: Roychoudhury in Architectural Helvetica */}
+                <span className="font-helvetica font-normal text-5xl xs:text-6xl text-white/95 normal-case tracking-[0.02em] leading-[0.85] relative z-10 drop-shadow-[0_8px_35px_rgba(0,0,0,0.95)]">
                   Roychoudhury
                 </span>
               </h1>
@@ -427,19 +427,19 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             <span>Netaji Subhash Engineering College (2024–2028)</span>
           </div>
 
-          {/* Signature Aesthetic Font Pairing (Citadel Script draped over Helvetica) */}
+          {/* Signature Aesthetic Font Pairing (Citadel Script tightly interlocking over Helvetica like 'Soft Light') */}
           <h1 className="relative flex flex-col items-center justify-center select-none mb-6">
-            {/* Line 1: Soham in Citadel Script (reinforced stroke for crisp legibility) */}
+            {/* Line 1: Soham in Citadel Script (grand, sweeping calligraphy overlapping Line 2) */}
             <span
-              className="font-citadel text-8xl md:text-9xl lg:text-[9.5rem] xl:text-[11rem] text-white normal-case leading-[0.84] tracking-[0.025em] relative z-20 drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] drop-shadow-[0_12px_32px_rgba(0,0,0,0.85)] -mb-2 md:-mb-3 lg:-mb-4"
+              className="font-citadel text-[9.5rem] md:text-[11rem] lg:text-[13rem] xl:text-[14.5rem] text-[#FFFDF8] normal-case leading-[0.65] tracking-[0.02em] relative z-20 -mb-12 md:-mb-16 lg:-mb-20 xl:-mb-24 -translate-x-6 drop-shadow-[0_3px_6px_rgba(0,0,0,0.98)] drop-shadow-[0_10px_25px_rgba(0,0,0,0.9)] drop-shadow-[0_20px_45px_rgba(0,0,0,0.7)]"
               style={{
-                WebkitTextStroke: "0.55px rgba(255, 255, 255, 0.95)",
+                WebkitTextStroke: "0.5px rgba(255, 255, 255, 0.95)",
               }}
             >
               Soham
             </span>
-            {/* Line 2: Roychoudhury in Bold Architectural Helvetica */}
-            <span className="font-helvetica font-normal text-6xl md:text-7xl lg:text-[6.8rem] xl:text-[7.8rem] text-white normal-case tracking-[0.02em] leading-[0.88] relative z-10 drop-shadow-[0_8px_40px_rgba(0,0,0,0.95)]">
+            {/* Line 2: Roychoudhury in Architectural Helvetica */}
+            <span className="font-helvetica font-normal text-6xl md:text-7xl lg:text-[7.2rem] xl:text-[8.2rem] text-white/95 normal-case tracking-[0.02em] leading-[0.84] relative z-10 drop-shadow-[0_10px_45px_rgba(0,0,0,0.95)]">
               Roychoudhury
             </span>
           </h1>

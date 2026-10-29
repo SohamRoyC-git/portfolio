@@ -323,12 +323,17 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
                 ref={mobileTitleRef}
                 className="relative flex flex-col items-center justify-center select-none mb-4"
               >
-                {/* Line 1: Soham in Citadel Script (flowing, flourished calligraphy) */}
-                <span className="font-citadel text-7xl xs:text-8xl text-white normal-case leading-[0.74] relative z-20 drop-shadow-[0_4px_25px_rgba(0,0,0,0.9)] -mb-2 xs:-mb-3.5 -rotate-1 -translate-x-2">
+                {/* Line 1: Soham in Citadel Script (reinforced stroke for crisp legibility) */}
+                <span
+                  className="font-citadel text-7xl xs:text-8xl text-white normal-case leading-[0.85] tracking-[0.025em] relative z-20 drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] drop-shadow-[0_8px_25px_rgba(0,0,0,0.85)] -mb-1 xs:-mb-1.5"
+                  style={{
+                    WebkitTextStroke: "0.45px rgba(255, 255, 255, 0.9)",
+                  }}
+                >
                   Soham
                 </span>
                 {/* Line 2: Roychoudhury in Bold Architectural Helvetica */}
-                <span className="font-helvetica font-normal text-5xl xs:text-6xl text-white normal-case tracking-[0.02em] leading-[0.88] relative z-10 drop-shadow-[0_6px_35px_rgba(0,0,0,0.95)]">
+                <span className="font-helvetica font-normal text-5xl xs:text-6xl text-white normal-case tracking-[0.02em] leading-[0.9] relative z-10 drop-shadow-[0_6px_35px_rgba(0,0,0,0.95)]">
                   Roychoudhury
                 </span>
               </h1>
@@ -424,12 +429,17 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
 
           {/* Signature Aesthetic Font Pairing (Citadel Script draped over Helvetica) */}
           <h1 className="relative flex flex-col items-center justify-center select-none mb-6">
-            {/* Line 1: Soham in Citadel Script (flowing, flourished calligraphy draped on top) */}
-            <span className="font-citadel text-8xl md:text-9xl lg:text-[9.5rem] xl:text-[11rem] text-white normal-case leading-[0.72] relative z-20 drop-shadow-[0_6px_30px_rgba(0,0,0,0.95)] -mb-5 md:-mb-8 lg:-mb-10 -rotate-1 -translate-x-4">
+            {/* Line 1: Soham in Citadel Script (reinforced stroke for crisp legibility) */}
+            <span
+              className="font-citadel text-8xl md:text-9xl lg:text-[9.5rem] xl:text-[11rem] text-white normal-case leading-[0.84] tracking-[0.025em] relative z-20 drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] drop-shadow-[0_12px_32px_rgba(0,0,0,0.85)] -mb-2 md:-mb-3 lg:-mb-4"
+              style={{
+                WebkitTextStroke: "0.55px rgba(255, 255, 255, 0.95)",
+              }}
+            >
               Soham
             </span>
             {/* Line 2: Roychoudhury in Bold Architectural Helvetica */}
-            <span className="font-helvetica font-normal text-6xl md:text-7xl lg:text-[6.8rem] xl:text-[7.8rem] text-white normal-case tracking-[0.02em] leading-[0.85] relative z-10 drop-shadow-[0_8px_40px_rgba(0,0,0,0.95)]">
+            <span className="font-helvetica font-normal text-6xl md:text-7xl lg:text-[6.8rem] xl:text-[7.8rem] text-white normal-case tracking-[0.02em] leading-[0.88] relative z-10 drop-shadow-[0_8px_40px_rgba(0,0,0,0.95)]">
               Roychoudhury
             </span>
           </h1>

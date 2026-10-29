@@ -318,23 +318,23 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
                 <span>NSEC (2024–2028)</span>
               </div>
 
-              {/* Signature Aesthetic Font Pairing (Matching the 'Soft Light' Reference) */}
+              {/* Signature Aesthetic Font Pairing (Citadel Script + Helvetica Compressed - Matching 'Soft Light') */}
               <h1
                 ref={mobileTitleRef}
                 className="relative flex flex-col items-center justify-center text-center select-none mb-4"
               >
-                {/* Word 1: Soham in High-Fashion Editorial Serif Italic (matching 'Soft') */}
-                <span className="font-editorial italic font-semibold text-[5.25rem] xs:text-[6rem] text-[#FFFDF8] leading-[0.72] tracking-tight relative z-20 -mb-2.5 xs:-mb-3.5 -translate-x-3 drop-shadow-[0_4px_10px_rgba(0,0,0,0.65)] drop-shadow-[0_10px_24px_rgba(0,0,0,0.45)]">
+                {/* Word 1: Soham in Citadel Script (matching 'Soft') */}
+                <span className="font-citadel font-normal text-[5.8rem] xs:text-[6.8rem] text-[#FFFDF8] leading-[0.74] relative z-20 -mb-3 xs:-mb-4 -translate-x-4 xs:-translate-x-6 drop-shadow-[0_3px_8px_rgba(0,0,0,0.75)] drop-shadow-[0_8px_18px_rgba(0,0,0,0.55)]">
                   Soham
                 </span>
-                {/* Word 2: Roychoudhury in Chunky Architectural Grotesque (matching 'Light') */}
-                <span className="font-sans font-black text-[2.75rem] xs:text-[3.25rem] text-[#F8F5EE] tracking-tight leading-[0.88] relative z-10 drop-shadow-[0_8px_30px_rgba(0,0,0,0.9)]">
+                {/* Word 2: Roychoudhury in Helvetica Compressed (matching 'Light') */}
+                <span className="font-helvetica font-normal text-[4.2rem] xs:text-[4.8rem] text-[#F8F5EE] tracking-[0.025em] leading-[0.85] relative z-10 drop-shadow-[0_6px_25px_rgba(0,0,0,0.9)]">
                   Roychoudhury
                 </span>
               </h1>
 
-              {/* Editorial Subtitle (matching 'Some moments glow in silence.') */}
-              <p className="font-editorial italic font-light text-sm xs:text-base text-orange-100/90 leading-relaxed mb-8 max-w-xs px-1 drop-shadow-md">
+              {/* Editorial Subtitle in Helvetica Compressed (matching 'Some moments glow in silence.') */}
+              <p className="font-helvetica font-normal text-xs xs:text-sm text-orange-100/90 tracking-[0.15em] uppercase leading-relaxed mb-8 max-w-xs px-1 drop-shadow-md">
                 Artificial Intelligence &amp; Machine Learning · Frontend Architect · Digital Operations
               </p>
 
@@ -426,20 +426,20 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             <span>01 / 05</span>
           </div>
 
-          {/* Signature Aesthetic Font Pairing (Matching the 'Soft Light' Reference) */}
+          {/* Signature Aesthetic Font Pairing (Citadel Script + Helvetica Compressed - Matching 'Soft Light') */}
           <h1 className="relative flex flex-col items-center justify-center text-center select-none mb-6">
-            {/* Word 1: Soham in High-Fashion Editorial Serif Italic (matching 'Soft') */}
-            <span className="font-editorial italic font-semibold text-8xl md:text-9xl lg:text-[10.5rem] xl:text-[12rem] text-[#FFFDF8] leading-[0.70] tracking-tight relative z-20 -mb-7 md:-mb-9 lg:-mb-11 xl:-mb-13 -translate-x-5 md:-translate-x-7 lg:-translate-x-9 drop-shadow-[0_4px_12px_rgba(0,0,0,0.65)] drop-shadow-[0_12px_30px_rgba(0,0,0,0.5)]">
+            {/* Word 1: Soham in Citadel Script (matching 'Soft') */}
+            <span className="font-citadel font-normal text-[8.5rem] md:text-[10rem] lg:text-[11.5rem] xl:text-[13rem] text-[#FFFDF8] leading-[0.76] relative z-20 -mb-6 md:-mb-8 lg:-mb-10 xl:-mb-12 -translate-x-7 md:-translate-x-11 lg:-translate-x-14 drop-shadow-[0_4px_8px_rgba(0,0,0,0.75)] drop-shadow-[0_12px_24px_rgba(0,0,0,0.55)]">
               Soham
             </span>
-            {/* Word 2: Roychoudhury in Chunky Architectural Grotesque (matching 'Light') */}
-            <span className="font-sans font-black text-6xl md:text-7xl lg:text-[6.8rem] xl:text-[8rem] text-[#F8F5EE] tracking-tight leading-[0.88] relative z-10 drop-shadow-[0_10px_45px_rgba(0,0,0,0.95)]">
+            {/* Word 2: Roychoudhury in Helvetica Compressed (matching 'Light') */}
+            <span className="font-helvetica font-normal text-[6.5rem] md:text-[7.5rem] lg:text-[8.5rem] xl:text-[9.5rem] text-[#F8F5EE] tracking-[0.03em] leading-[0.84] relative z-10 drop-shadow-[0_8px_30px_rgba(0,0,0,0.9)]">
               Roychoudhury
             </span>
           </h1>
 
-          {/* Editorial Subtitle (matching 'Some moments glow in silence.') */}
-          <p className="font-editorial italic font-light text-xl md:text-2xl text-slate-200/90 leading-relaxed mb-10 max-w-2xl drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] px-2">
+          {/* Editorial Subtitle in Helvetica Compressed (matching 'Some moments glow in silence.') */}
+          <p className="font-helvetica font-normal text-sm md:text-base lg:text-lg text-slate-200/90 tracking-[0.16em] uppercase leading-relaxed mb-10 max-w-2xl drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] px-2">
             Artificial Intelligence &amp; Machine Learning · Frontend Architect · Digital Operations
           </p>
 

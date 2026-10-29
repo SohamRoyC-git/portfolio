@@ -11,11 +11,11 @@ const inter = Inter({
   display: "swap",
 });
 
-// Strictly Font 2: Apple Garamond equivalent (Light Italic 300 for narrative/quotes)
+// Strictly Font 2: Apple Garamond equivalent (Light Italic 300 for narrative/quotes, 500-700 for editorial display)
 const cormorantGaramond = Cormorant_Garamond({
   variable: "--font-garamond",
   subsets: ["latin"],
-  weight: ["300", "400"],
+  weight: ["300", "400", "500", "600", "700"],
   style: ["italic"],
   display: "swap",
 });

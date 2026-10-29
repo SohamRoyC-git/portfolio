@@ -24,13 +24,18 @@
   --color-muted: #64748B;
   --color-border-subtle: rgba(15, 23, 42, 0.08);
 
-  /* Typography: Inter + Athelas + BN Riley + Citadel + Helvetica */
+  /* Typography: Inter + Athelas + BN Riley + Citadel + Helvetica + Editorial Garamond */
   --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-serif: "Athelas", Athelas, "Iowan Old Style", "Apple Garamond", var(--font-garamond), "EB Garamond", Garamond, serif;
+  --font-editorial: var(--font-garamond), "Cormorant Garamond", Georgia, serif;
   --font-riley: var(--font-riley), "BN Riley", "BNRiley", sans-serif;
   --font-optizither: var(--font-riley), "BN Riley", "Optizither", serif;
   --font-citadel: var(--font-citadel), "Citadel Script Std", cursive;
   --font-helvetica: var(--font-helvetica), "Helvetica Compressed", sans-serif;
+}
+
+.font-editorial {
+  font-family: var(--font-editorial);
 }
 
 @font-face {

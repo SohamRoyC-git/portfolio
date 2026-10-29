@@ -144,6 +144,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
   const pinRef = useRef<HTMLDivElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const contentWrapperRef = useRef<HTMLDivElement | null>(null);
 
   const sampleSnippets = [
     {
@@ -251,11 +252,9 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
-          pin: pin,
           start: "top top",
-          end: "+=3200",
+          end: "bottom bottom",
           scrub: 0.45,
-          anticipatePin: 1,
           invalidateOnRefresh: true,
           onRefresh: () => {
             measureCards();
@@ -265,26 +264,38 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
               progressBarRef.current.style.width = `${Math.round(self.progress * 100)}%`;
             }
             const totalScroll = getExactScrollAmount();
-            const tProgress = Math.min(self.progress / 0.85, 1.0);
-            const currentTrackX = totalScroll * tProgress;
+            const currentTrackX = totalScroll * self.progress;
             updateOrbitalCards(currentTrackX);
           },
         },
       });
 
-      // Horizontal track travel
+      // Horizontal track travel through the 4 projects
       tl.to(
         track,
         {
           x: getExactScrollAmount,
           ease: "none",
-          duration: 0.82,
         },
         0
       );
 
-      // Dedicated hold period at end
-      tl.to({}, { duration: 0.18 }, 0.82);
+      // Dynamic Shrink & Dismissal into Movement 03 (Forge Monolithic Shutter Wipe)
+      // As Movement 03 rises over Movement 02, the cards scale down and shift up with ZERO blur
+      if (contentWrapperRef.current) {
+        gsap.to(contentWrapperRef.current, {
+          scale: 0.92,
+          yPercent: -16,
+          opacity: 0.15,
+          ease: "power2.inOut",
+          scrollTrigger: {
+            trigger: "#monument-matrix",
+            start: "top bottom",
+            end: "top top",
+            scrub: true,
+          },
+        });
+      }
     }, section);
 
     measureCards();
@@ -308,20 +319,28 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
   };
 
   return (
-    <section
+    <div
       id="monument-exhibition"
       ref={sectionRef}
-      className="relative w-full overflow-hidden z-20 bg-[#060709] border-t border-white/12 shadow-[0_-35px_100px_rgba(0,0,0,0.95)]"
+      className="relative w-full z-30"
+      style={{ height: "calc(100svh + 3200px)" }}
     >
       <span id="work" className="sr-only" aria-hidden="true" />
 
-      {/* Pinned Fullscreen Stage */}
-      <div
+      {/* Sticky 100svh Architectural Stage */}
+      <section
         ref={pinRef}
-        className="h-[100svh] w-full flex flex-col justify-between pt-16 sm:pt-24 pb-4 sm:pb-8 px-4 sm:px-8 md:px-12 relative overflow-hidden bg-transparent z-20 will-change-transform"
+        className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-between overflow-hidden bg-[#060709] border-t border-white/15 shadow-[0_-40px_100px_rgba(0,0,0,0.98)]"
       >
-        {/* Pinned Top HUD Header */}
-        <div className="relative z-20 flex items-center justify-between w-full max-w-7xl mx-auto px-2 mb-2 sm:mb-4">
+        {/* Leading Architectural Hairline Edge (Forge Automotive Style) */}
+        <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#FF7A00] to-transparent shadow-[0_0_20px_rgba(255,122,0,0.6)]" />
+
+        <div
+          ref={contentWrapperRef}
+          className="h-full w-full flex flex-col justify-between pt-16 sm:pt-24 pb-4 sm:pb-8 px-4 sm:px-8 md:px-12 will-change-[transform,opacity]"
+        >
+          {/* Pinned Top HUD Header */}
+          <div className="relative z-20 flex items-center justify-between w-full max-w-7xl mx-auto px-2 mb-2 sm:mb-4">
           <div className="font-sans font-bold text-[11px] sm:text-xs text-[#FF7A00] tracking-[0.2em] uppercase flex items-center gap-2 sm:gap-3">
             <span className="w-5 sm:w-8 h-[1px] bg-[#FF7A00]" />
             <span className="truncate">SELECTED COMMISSIONS</span>
@@ -847,6 +866,8 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
         </div>
       </div>
 
+      </section>
+
       {/* Interactive 278-Key Translation Engine Modal (Frosted Obsidian CAD) */}
       {isDemoOpen && (
         <div
@@ -977,7 +998,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
           </div>
         </div>
       )}
-    </section>
+    </div>
   );
 });
 

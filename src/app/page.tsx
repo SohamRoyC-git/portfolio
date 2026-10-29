@@ -47,12 +47,30 @@ export default function Home() {
     gsap.ticker.add(tickerCallback);
     gsap.ticker.lagSmoothing(0);
 
+    // Hero Monolithic Exit Wipe Parallax (Desktop)
+    const mm = gsap.matchMedia();
+    mm.add("(min-width: 768px)", () => {
+      gsap.to("#hero-wrapper", {
+        scale: 0.93,
+        yPercent: -12,
+        opacity: 0.25,
+        ease: "power2.inOut",
+        scrollTrigger: {
+          trigger: "#monument-statement",
+          start: "top bottom",
+          end: "top top",
+          scrub: true,
+        },
+      });
+    });
+
     const timeout = setTimeout(() => {
       ScrollTrigger.refresh();
     }, 250);
 
     return () => {
       clearTimeout(timeout);
+      mm.revert();
       gsap.ticker.remove(tickerCallback);
       lenis.destroy();
       ScrollTrigger.getAll().forEach((t) => t.kill());
@@ -115,8 +133,10 @@ export default function Home() {
 
       {/* 3. Cohesive Spatial Storytelling Sequence */}
       <main className="relative z-10">
-        {/* Movement 00: Monumental Hero */}
-        <MonumentalHero onExplore={() => handleNavigate("monument-statement")} onConnect={() => handleNavigate("monument-terminal")} />
+        {/* Movement 00: Monumental Hero (Sticky at top on desktop so Movement 01 wipes over it) */}
+        <div id="hero-wrapper" className="relative w-full z-10 md:sticky md:top-0 md:h-[100svh] will-change-[transform,opacity]">
+          <MonumentalHero onExplore={() => handleNavigate("monument-statement")} onConnect={() => handleNavigate("monument-terminal")} />
+        </div>
 
         {/* Movement 01: Kinetic Pinned Statement & Credentials */}
         <KineticStatement />

@@ -28,9 +28,9 @@ export const TerminalFinale: React.FC = memo(() => {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: "top 75%",
-          end: "top 25%",
-          scrub: 0.5,
+          start: "top 65%",
+          end: "top top",
+          scrub: 0.4,
         },
       });
 
@@ -88,9 +88,13 @@ export const TerminalFinale: React.FC = memo(() => {
     <footer
       id="monument-terminal"
       ref={sectionRef}
-      className="relative min-h-[100svh] pt-24 sm:pt-32 md:pt-40 pb-16 px-4 sm:px-8 md:px-12 z-40 max-w-7xl mx-auto flex flex-col justify-between bg-[#060709] border-t border-white/12 shadow-[0_-35px_100px_rgba(0,0,0,0.95)]"
+      className="relative w-full z-50 h-[100svh] min-h-[100svh] flex flex-col justify-between pt-20 sm:pt-28 pb-12 px-4 sm:px-8 md:px-12 overflow-hidden bg-[#060709] border-t border-white/15 shadow-[0_-40px_100px_rgba(0,0,0,0.98)]"
     >
-      {/* Chapter Marker */}
+      {/* Leading Architectural Hairline Edge (Forge Automotive Style) */}
+      <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#FF7A00] to-transparent shadow-[0_0_20px_rgba(255,122,0,0.6)]" />
+
+      <div className="w-full max-w-7xl mx-auto flex flex-col justify-between h-full">
+        {/* Chapter Marker */}
       <div className="font-sans font-bold text-[11px] sm:text-xs text-[#FF7A00] tracking-[0.2em] uppercase mb-8 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="w-8 h-[1px] bg-[#FF7A00]" />
@@ -226,6 +230,7 @@ export const TerminalFinale: React.FC = memo(() => {
           <span>RETURN TO TERRACE</span>
           <ArrowUp size={12} className="text-[#FF7A00]" />
         </button>
+      </div>
       </div>
     </footer>
   );

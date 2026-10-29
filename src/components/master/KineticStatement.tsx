@@ -8,7 +8,8 @@ import { motion } from "framer-motion";
 gsap.registerPlugin(ScrollTrigger);
 
 export const KineticStatement: React.FC = memo(() => {
-  const sectionRef = useRef<HTMLElement | null>(null);
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const metaBarRef = useRef<HTMLDivElement | null>(null);
   const dividerTopRef = useRef<HTMLDivElement | null>(null);
@@ -23,23 +24,25 @@ export const KineticStatement: React.FC = memo(() => {
     const mm = gsap.matchMedia();
 
     // =========================================================================
-    // CINEMATIC ENTRANCE & ROCK-SOLID READING EXPERIENCE
-    // Unmasks line-by-line with physical inertia and ZERO blur
+    // DESKTOP & TABLET EXPERIENCE (>= 768px):
+    // Monolithic Sticky Stage, Immediate Razor-Sharp Entrance, Extended Reading Hold,
+    // and Dynamic Parallax Dismissal into Movement 02 Wipe
     // =========================================================================
     mm.add("(min-width: 768px)", () => {
       const statementLines = headlineRef.current?.querySelectorAll(".statement-line");
       const plinthCards = plinthsRef.current?.querySelectorAll(".plinth-cell");
 
+      // 1. Entrance & Reveal Timeline (Triggers cleanly as stage locks at top)
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: "top 75%",
-          end: "top 20%",
-          scrub: 0.45,
+          start: "top 60%",
+          end: "top top",
+          scrub: 0.4,
         },
       });
 
-      // Phase 1: Hairline Dividers draw across
+      // Hairline Dividers draw across
       if (dividerTopRef.current && dividerBottomRef.current) {
         tl.fromTo(
           [dividerTopRef.current, dividerBottomRef.current],
@@ -49,17 +52,17 @@ export const KineticStatement: React.FC = memo(() => {
         );
       }
 
-      // Phase 1b: Meta bar materializes
+      // Meta bar materializes
       if (metaBarRef.current) {
         tl.fromTo(
           metaBarRef.current,
-          { opacity: 0, y: -10 },
+          { opacity: 0, y: -8 },
           { opacity: 1, y: 0, duration: 0.25, ease: "power2.out" },
           0.05
         );
       }
 
-      // Phase 2: Monumental Statement unmasks line-by-line (Heron AI Style)
+      // Monumental Statement unmasks line-by-line (ZERO blur, immediate crispness)
       if (statementLines && statementLines.length > 0) {
         tl.fromTo(
           statementLines,
@@ -75,14 +78,11 @@ export const KineticStatement: React.FC = memo(() => {
         );
       }
 
-      // Phase 3: 4 Architectural Plinths rise cleanly (100% crisp, ZERO blur)
+      // 4 Architectural Plinths rise cleanly (100% crisp, ZERO blur)
       if (plinthCards && plinthCards.length > 0) {
         tl.fromTo(
           plinthCards,
-          {
-            y: 35,
-            opacity: 0,
-          },
+          { y: 30, opacity: 0 },
           {
             y: 0,
             opacity: 1,
@@ -93,10 +93,28 @@ export const KineticStatement: React.FC = memo(() => {
           0.25
         );
       }
+
+      // 2. Dynamic Shrink & Dismissal into Movement 02 (Forge Monolithic Shutter Wipe)
+      // As Movement 02 rises from the bottom of the viewport to the top,
+      // Movement 01's content smoothly shifts up and scales down with ZERO blur
+      if (containerRef.current) {
+        gsap.to(containerRef.current, {
+          scale: 0.92,
+          yPercent: -16,
+          opacity: 0.15,
+          ease: "power2.inOut",
+          scrollTrigger: {
+            trigger: "#monument-exhibition",
+            start: "top bottom",
+            end: "top top",
+            scrub: true,
+          },
+        });
+      }
     });
 
     // =========================================================================
-    // MOBILE SCROLL EXPERIENCE (< 768px): Responsive, smooth entrance
+    // MOBILE SCROLL EXPERIENCE (< 768px): Smooth upward reveal
     // =========================================================================
     mm.add("(max-width: 767px)", () => {
       const statementLines = headlineRef.current?.querySelectorAll(".statement-line");
@@ -105,16 +123,16 @@ export const KineticStatement: React.FC = memo(() => {
       if (statementLines && statementLines.length > 0) {
         gsap.fromTo(
           statementLines,
-          { yPercent: 80, opacity: 0 },
+          { yPercent: 60, opacity: 0 },
           {
             yPercent: 0,
             opacity: 1,
             stagger: 0.1,
-            duration: 0.8,
+            duration: 0.7,
             ease: "power2.out",
             scrollTrigger: {
               trigger: headlineRef.current,
-              start: "top 80%",
+              start: "top 85%",
             },
           }
         );
@@ -123,16 +141,16 @@ export const KineticStatement: React.FC = memo(() => {
       if (plinthCards && plinthCards.length > 0) {
         gsap.fromTo(
           plinthCards,
-          { y: 30, opacity: 0 },
+          { y: 25, opacity: 0 },
           {
             y: 0,
             opacity: 1,
-            stagger: 0.1,
-            duration: 0.6,
+            stagger: 0.08,
+            duration: 0.5,
             ease: "power2.out",
             scrollTrigger: {
               trigger: plinthsRef.current,
-              start: "top 85%",
+              start: "top 90%",
             },
           }
         );
@@ -170,85 +188,98 @@ export const KineticStatement: React.FC = memo(() => {
   ];
 
   return (
-    <section
+    <div
       id="monument-statement"
       ref={sectionRef}
-      className="relative min-h-screen w-full flex flex-col justify-center py-20 md:py-0 px-6 sm:px-10 md:px-16 z-10 overflow-hidden bg-[#060709]"
+      className="relative w-full z-20"
+      style={{ height: "calc(100svh + 1600px)" }}
     >
-      <div ref={containerRef} className="w-full max-w-7xl mx-auto flex flex-col justify-center will-change-transform">
-        {/* Architectural Meta Bar (Heron AI / Belgrade Arbor Style) */}
+      {/* Sticky 100svh Architectural Stage */}
+      <section
+        ref={stageRef}
+        className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-center pt-24 sm:pt-28 pb-8 px-6 sm:px-10 md:px-16 overflow-hidden bg-[#060709] border-t border-white/15 shadow-[0_-40px_100px_rgba(0,0,0,0.98)]"
+      >
+        {/* Leading Architectural Hairline Edge (Forge Automotive Style) */}
+        <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#FF7A00] to-transparent shadow-[0_0_20px_rgba(255,122,0,0.6)]" />
+
         <div
-          ref={metaBarRef}
-          className="flex items-center justify-between text-[11px] font-sans font-bold uppercase tracking-[0.24em] text-slate-400 mb-8 pb-3"
+          ref={containerRef}
+          className="w-full max-w-7xl mx-auto flex flex-col justify-center will-change-[transform,opacity]"
         >
-          <span>ARCHITECTURAL CREED</span>
-          <span className="hidden sm:inline text-slate-500">LAT 22.5726° N · LON 88.3639° E</span>
-          <span className="text-[#FF7A00]">TERRACE PERSPECTIVE</span>
+          {/* Architectural Meta Bar (Heron AI / Belgrade Arbor Style) */}
+          <div
+            ref={metaBarRef}
+            className="flex items-center justify-between text-[11px] font-sans font-bold uppercase tracking-[0.24em] text-slate-400 mb-6 pb-2"
+          >
+            <span>ARCHITECTURAL CREED</span>
+            <span className="hidden sm:inline text-slate-500">LAT 22.5726° N · LON 88.3639° E</span>
+            <span className="text-[#FF7A00]">TERRACE PERSPECTIVE</span>
+          </div>
+
+          {/* Top Hairline Divider */}
+          <div ref={dividerTopRef} className="w-full h-[1px] bg-white/10 mb-8 will-change-transform" />
+
+          {/* Monumental All-Caps Statement (Heron AI & Forge Automotive Style) */}
+          <h2
+            ref={headlineRef}
+            className="font-sans font-black text-2xl sm:text-4xl md:text-5xl lg:text-[3.6rem] xl:text-[4.2rem] tracking-tighter leading-[0.98] uppercase text-[#FFFDF9] mb-8 sm:mb-12 select-none"
+          >
+            <div className="overflow-hidden pb-1">
+              <span className="statement-line inline-block">
+                WE DO NOT BUILD SOFTWARE TO SIT PASSIVELY ON A SCREEN.
+              </span>
+            </div>
+            <div className="overflow-hidden pb-1">
+              <span className="statement-line inline-block">
+                WE ENGINEER <span className="text-[#FF7A00]">DIGITAL ENVIRONMENTS</span> WITH PHYSICAL WEIGHT,
+              </span>
+            </div>
+            <div className="overflow-hidden pb-1">
+              <span className="statement-line inline-block text-white/50">
+                KINETIC INTENTION, AND INTERNATIONAL SCALE.
+              </span>
+            </div>
+          </h2>
+
+          {/* 4 Architectural Plinths (Forge Automotive / Swiss Architecture Style) */}
+          <div
+            ref={plinthsRef}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-t border-b border-white/10"
+          >
+            {plinths.map((item, idx) => (
+              <motion.div
+                key={idx}
+                whileHover={{ y: -4, transition: { type: "spring", stiffness: 350, damping: 25 } }}
+                className={`plinth-cell p-6 sm:p-8 flex flex-col justify-between min-h-[260px] sm:min-h-[290px] border-b sm:border-b-0 border-white/10 ${
+                  idx !== plinths.length - 1 ? "lg:border-r border-white/10" : ""
+                } ${idx % 2 === 0 ? "sm:border-r sm:border-white/10 lg:border-r" : ""} hover:bg-white/[0.02] transition-colors`}
+              >
+                <div className="flex items-baseline justify-between mb-6">
+                  <span className="font-helvetica font-normal text-5xl sm:text-6xl text-white/25 leading-none group-hover:text-[#FF7A00] transition-colors">
+                    {item.num}
+                  </span>
+                  <span className="text-[9px] font-sans font-extrabold uppercase tracking-[0.2em] text-[#FF7A00]">
+                    {item.tag}
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="font-sans font-black text-base sm:text-lg uppercase tracking-tight text-[#FFFDF9] mb-2 leading-snug">
+                    {item.title}
+                  </h3>
+                  <p className="font-sans font-normal text-xs sm:text-[13px] text-slate-400 leading-relaxed">
+                    {item.desc}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Bottom Hairline Divider */}
+          <div ref={dividerBottomRef} className="w-full h-[1px] bg-white/10 mt-10 will-change-transform" />
         </div>
-
-        {/* Top Hairline Divider */}
-        <div ref={dividerTopRef} className="w-full h-[1px] bg-white/10 mb-10 will-change-transform" />
-
-        {/* Monumental All-Caps Statement (Heron AI & Forge Automotive Style) */}
-        <h2
-          ref={headlineRef}
-          className="font-sans font-black text-3xl sm:text-5xl md:text-6xl lg:text-[4.6rem] xl:text-[5.2rem] tracking-tighter leading-[0.96] uppercase text-[#FFFDF9] mb-12 sm:mb-16 select-none"
-        >
-          <div className="overflow-hidden pb-1">
-            <span className="statement-line inline-block">
-              WE DO NOT BUILD SOFTWARE TO SIT PASSIVELY ON A SCREEN.
-            </span>
-          </div>
-          <div className="overflow-hidden pb-1">
-            <span className="statement-line inline-block">
-              WE ENGINEER <span className="text-[#FF7A00]">DIGITAL ENVIRONMENTS</span> WITH PHYSICAL WEIGHT,
-            </span>
-          </div>
-          <div className="overflow-hidden pb-1">
-            <span className="statement-line inline-block text-white/50">
-              KINETIC INTENTION, AND INTERNATIONAL SCALE.
-            </span>
-          </div>
-        </h2>
-
-        {/* 4 Architectural Plinths (Forge Automotive / Swiss Architecture Style) */}
-        <div
-          ref={plinthsRef}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-t border-b border-white/10"
-        >
-          {plinths.map((item, idx) => (
-            <motion.div
-              key={idx}
-              whileHover={{ y: -4, transition: { type: "spring", stiffness: 350, damping: 25 } }}
-              className={`plinth-cell p-6 sm:p-8 flex flex-col justify-between min-h-[260px] sm:min-h-[290px] border-b sm:border-b-0 border-white/10 ${
-                idx !== plinths.length - 1 ? "lg:border-r border-white/10" : ""
-              } ${idx % 2 === 0 ? "sm:border-r sm:border-white/10 lg:border-r" : ""} hover:bg-white/[0.02] transition-colors`}
-            >
-              <div className="flex items-baseline justify-between mb-6">
-                <span className="font-helvetica font-normal text-5xl sm:text-6xl text-white/25 leading-none group-hover:text-[#FF7A00] transition-colors">
-                  {item.num}
-                </span>
-                <span className="text-[9px] font-sans font-extrabold uppercase tracking-[0.2em] text-[#FF7A00]">
-                  {item.tag}
-                </span>
-              </div>
-
-              <div>
-                <h3 className="font-sans font-black text-base sm:text-lg uppercase tracking-tight text-[#FFFDF9] mb-2 leading-snug">
-                  {item.title}
-                </h3>
-                <p className="font-sans font-normal text-xs sm:text-[13px] text-slate-400 leading-relaxed">
-                  {item.desc}
-                </p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Bottom Hairline Divider */}
-        <div ref={dividerBottomRef} className="w-full h-[1px] bg-white/10 mt-10 will-change-transform" />
-      </div>
-    </section>
+      </section>
+    </div>
   );
 });
 

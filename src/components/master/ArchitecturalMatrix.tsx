@@ -14,7 +14,9 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
   const [activeCodeTab, setActiveCodeTab] = useState<CodeTab>("dictionary");
   const [copiedCode, setCopiedCode] = useState(false);
 
-  const sectionRef = useRef<HTMLElement | null>(null);
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+  const stageRef = useRef<HTMLElement | null>(null);
+  const contentWrapperRef = useRef<HTMLDivElement | null>(null);
   const headlineRef = useRef<HTMLDivElement | null>(null);
   const bentoGridRef = useRef<HTMLDivElement | null>(null);
 
@@ -23,38 +25,58 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
     if (prefersReducedMotion || !sectionRef.current) return;
 
     const ctx = gsap.context(() => {
-      // Cinematic Section Entrance
+      // 1. Entrance & Reveal Timeline as Movement 03 locks into place
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: "top 78%",
-          end: "top 35%",
-          scrub: 0.5,
+          start: "top 60%",
+          end: "top top",
+          scrub: 0.4,
         },
       });
 
+      // Headline & chapter bar reveal
       if (headlineRef.current) {
         tl.fromTo(
           headlineRef.current,
           { opacity: 0, y: 35 },
-          { opacity: 1, y: 0, ease: "power2.out" },
+          { opacity: 1, y: 0, duration: 0.25, ease: "power2.out" },
           0
         );
       }
 
+      // Bento boxes assemble (ZERO blur, immediate crispness)
       if (bentoGridRef.current) {
         tl.fromTo(
           bentoGridRef.current.children,
-          { opacity: 0, y: 40, scale: 0.97 },
+          { opacity: 0, y: 35, scale: 0.97 },
           {
             opacity: 1,
             y: 0,
             scale: 1,
-            stagger: 0.12,
+            stagger: 0.08,
+            duration: 0.35,
             ease: "power2.out",
           },
           0.1
         );
+      }
+
+      // 2. Dynamic Shrink & Dismissal into Movement 04 (Forge Monolithic Shutter Wipe)
+      // As Movement 04 rises over Movement 03, the code matrix scales down and shifts up with ZERO blur
+      if (contentWrapperRef.current) {
+        gsap.to(contentWrapperRef.current, {
+          scale: 0.92,
+          yPercent: -16,
+          opacity: 0.15,
+          ease: "power2.inOut",
+          scrollTrigger: {
+            trigger: "#monument-terminal",
+            start: "top bottom",
+            end: "top top",
+            scrub: true,
+          },
+        });
       }
     }, sectionRef);
 
@@ -149,26 +171,39 @@ export async function ingestMatchTelemetry(
   const currentSnippet = codeSnippets[activeCodeTab];
 
   return (
-    <section
+    <div
       id="monument-matrix"
       ref={sectionRef}
-      className="relative min-h-[90svh] py-20 sm:py-28 md:py-36 px-4 sm:px-8 md:px-12 z-30 max-w-7xl mx-auto flex flex-col justify-center bg-[#060709] border-t border-white/12 shadow-[0_-35px_100px_rgba(0,0,0,0.95)]"
+      className="relative w-full z-40"
+      style={{ height: "calc(100svh + 1600px)" }}
     >
-      {/* Chapter Marker */}
-      <div className="font-sans font-bold text-[11px] sm:text-xs text-[#FF7A00] tracking-[0.2em] uppercase mb-6 sm:mb-10 flex items-center gap-3">
-        <span className="w-6 sm:w-8 h-[1px] bg-[#FF7A00]" />
-        <span>TECHNICAL BLUEPRINT &amp; ARCHITECTURE</span>
-      </div>
+      {/* Sticky 100svh Architectural Stage */}
+      <section
+        ref={stageRef}
+        className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-center pt-20 sm:pt-24 pb-4 sm:pb-8 px-4 sm:px-8 md:px-12 overflow-hidden bg-[#060709] border-t border-white/15 shadow-[0_-40px_100px_rgba(0,0,0,0.98)]"
+      >
+        {/* Leading Architectural Hairline Edge (Forge Automotive Style) */}
+        <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#FF7A00] to-transparent shadow-[0_0_20px_rgba(255,122,0,0.6)]" />
 
-      {/* Headline & Description */}
-      <div ref={headlineRef} className="mb-10 sm:mb-14 will-change-[transform,opacity]">
-        <h2 className="font-sans font-black text-3xl sm:text-5xl lg:text-6xl text-[#FFFDF9] tracking-tight leading-[1.08] mb-3">
-          Technical Matrix &amp; Systems
-        </h2>
-        <p className="font-serif italic font-light text-base sm:text-xl text-slate-300/90 max-w-2xl leading-relaxed">
-          Zero-roundtrip client dictionaries, high-throughput telemetry event streams, and production engineering architectures.
-        </p>
-      </div>
+        <div
+          ref={contentWrapperRef}
+          className="w-full max-w-7xl mx-auto flex flex-col justify-center will-change-[transform,opacity]"
+        >
+        {/* Chapter Marker */}
+        <div className="font-sans font-bold text-[11px] sm:text-xs text-[#FF7A00] tracking-[0.2em] uppercase mb-3 sm:mb-4 flex items-center gap-3">
+          <span className="w-6 sm:w-8 h-[1px] bg-[#FF7A00]" />
+          <span>TECHNICAL BLUEPRINT &amp; ARCHITECTURE</span>
+        </div>
+
+        {/* Headline & Description */}
+        <div ref={headlineRef} className="mb-6 sm:mb-8 will-change-[transform,opacity]">
+          <h2 className="font-sans font-black text-2xl sm:text-4xl lg:text-5xl text-[#FFFDF9] tracking-tight leading-[1.08] mb-2">
+            Technical Matrix &amp; Systems
+          </h2>
+          <p className="font-serif italic font-light text-sm sm:text-lg text-slate-300/90 max-w-2xl leading-relaxed">
+            Zero-roundtrip client dictionaries, high-throughput telemetry event streams, and production engineering architectures.
+          </p>
+        </div>
 
       {/* Bento Grid */}
       <div ref={bentoGridRef} className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
@@ -423,7 +458,9 @@ export async function ingestMatchTelemetry(
           </div>
         </div>
       </div>
-    </section>
+      </div>
+      </section>
+    </div>
   );
 });
 

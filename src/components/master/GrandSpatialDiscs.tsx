@@ -161,13 +161,13 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
         );
       }
 
-      // 2. Master Scrub Timeline for Project Transitions
+      // 2. Master Scrub Timeline for Project Transitions (With Butter-Smooth Inertia)
       const masterTl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top top",
           end: "bottom bottom",
-          scrub: isDesktop ? 0.4 : 0.5,
+          scrub: isDesktop ? 1.0 : 0.8,
           onUpdate: (self) => {
             const p = self.progress;
             if (progressBarRef.current) {
@@ -187,13 +187,13 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
         if (!el) return;
         if (i === 0) {
           gsap.set(el, {
-            clipPath: "inset(0% 0% 0% 0% round 0px)",
+            clipPath: "inset(0% 0% 0% 0%)",
             autoAlpha: 1,
             zIndex: 10,
           });
         } else {
           gsap.set(el, {
-            clipPath: "inset(50% 50% 50% 50% round 16px)",
+            clipPath: "inset(50% 50% 50% 50%)",
             autoAlpha: 0,
             zIndex: 10 + i,
           });
@@ -210,32 +210,35 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
       });
 
       // Build transition sequence between consecutive projects:
-      // Project 0 -> Project 1 -> Project 2 -> Project 3
+      // Includes 40% resting pause on each project so it stays locked and readable,
+      // followed by a 60% smooth solid inside-out bloom transition.
       const numSteps = PROJECTS.length - 1;
       const stepDuration = 1 / numSteps;
 
       for (let i = 0; i < numSteps; i++) {
-        const startTime = i * stepDuration;
+        const stepStart = i * stepDuration;
+        const transitionStart = stepStart + stepDuration * 0.40;
+        const transitionDuration = stepDuration * 0.60;
+
         const nextLogo = logoContainersRef.current[i + 1];
         const curEditorial = editorialBlocksRef.current[i];
         const nextEditorial = editorialBlocksRef.current[i + 1];
 
-        // --- Left Framed Visual: Pure Solid Geometric Inset Aperture Bloom (No Fade In / Fade Away) ---
+        // --- Left Massive Visual: Pure Solid Inside-Out Bloom (Forge style, Zero Fade) ---
         if (nextLogo) {
-          // At startTime, make nextLogo active so it unmasks on top of current logo
-          masterTl.set(nextLogo, { autoAlpha: 1 }, startTime);
+          // At transitionStart, make nextLogo active so it blooms over current logo
+          masterTl.set(nextLogo, { autoAlpha: 1 }, transitionStart);
 
-          // nextLogo physically expands from center outward: inset(50% ... round 16px) -> inset(0% ... round 0px)
-          // Solid opacity throughout! Zero ghosting, zero fade in/fade out!
+          // Bloom from center outward directly on wine canvas
           masterTl.fromTo(
             nextLogo,
-            { clipPath: "inset(50% 50% 50% 50% round 16px)" },
+            { clipPath: "inset(50% 50% 50% 50%)" },
             {
-              clipPath: "inset(0% 0% 0% 0% round 0px)",
+              clipPath: "inset(0% 0% 0% 0%)",
               ease: "power2.inOut",
-              duration: stepDuration,
+              duration: transitionDuration,
             },
-            startTime
+            transitionStart
           );
 
           // Subtle optical zoom on the inner logo image as the portal expands
@@ -243,9 +246,9 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
           if (nextImg) {
             masterTl.fromTo(
               nextImg,
-              { scale: 0.82 },
-              { scale: 1.0, ease: "power2.out", duration: stepDuration },
-              startTime
+              { scale: 0.88 },
+              { scale: 1.0, ease: "power2.out", duration: transitionDuration },
+              transitionStart
             );
           }
         }
@@ -256,27 +259,27 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
           masterTl.to(
             curEditorial,
             {
-              yPercent: 35,
+              yPercent: 40,
               autoAlpha: 0,
               pointerEvents: "none",
               ease: "power2.inOut",
-              duration: stepDuration * 0.6,
+              duration: transitionDuration * 0.55,
             },
-            startTime
+            transitionStart
           );
 
           // Next editorial block slides in downwards from top into center position
           masterTl.fromTo(
             nextEditorial,
-            { yPercent: -35, autoAlpha: 0, pointerEvents: "none" },
+            { yPercent: -40, autoAlpha: 0, pointerEvents: "none" },
             {
               yPercent: 0,
               autoAlpha: 1,
               pointerEvents: "auto",
               ease: "power2.out",
-              duration: stepDuration * 0.65,
+              duration: transitionDuration * 0.65,
             },
-            startTime + stepDuration * 0.25
+            transitionStart + transitionDuration * 0.25
           );
         }
       }
@@ -310,7 +313,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
       id="monument-exhibition"
       ref={sectionRef}
       className="relative w-full z-30"
-      style={{ height: "calc(100svh + 2400px)" }}
+      style={{ height: "calc(100svh + 3800px)" }}
     >
       {/* Sticky 100svh Architectural Stage (Rich Wine Red & Warm Italian Light Sand) */}
       <section
@@ -349,45 +352,30 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
           <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-8 lg:gap-16 items-center">
             
             {/* ================================================================= */}
-            {/* LEFT COLUMN: Large Commanding Logo Portal (Inside-Out Aperture Bloom) */}
+            {/* LEFT COLUMN: Massive Standalone Logo (Frameless Solid Inset Bloom)*/}
+            {/* The logo sits directly on the wine canvas without any bounding box*/}
             {/* ================================================================= */}
-            <div className="md:col-span-6 lg:col-span-6 flex justify-center items-center">
-              <div className="relative w-28 h-28 xs:w-36 xs:h-36 sm:w-48 sm:h-48 md:w-full md:max-w-[480px] lg:max-w-[520px] xl:max-w-[560px] aspect-square rounded-2xl md:rounded-3xl bg-[#1A060B] border border-[#EAD7C0]/20 p-2 xs:p-4 sm:p-8 md:p-10 flex items-center justify-center overflow-hidden shadow-[0_25px_80px_rgba(0,0,0,0.95)]">
-                
-                {/* Architectural Corner Reticle Accents */}
-                <div className="absolute top-2 left-2 sm:top-4 sm:left-4 w-2.5 sm:w-4 h-2.5 sm:h-4 border-t border-l border-[#EAD7C0]/40 pointer-events-none" />
-                <div className="absolute top-2 right-2 sm:top-4 sm:right-4 w-2.5 sm:w-4 h-2.5 sm:h-4 border-t border-r border-[#EAD7C0]/40 pointer-events-none" />
-                <div className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4 w-2.5 sm:w-4 h-2.5 sm:h-4 border-b border-l border-[#EAD7C0]/40 pointer-events-none" />
-                <div className="absolute bottom-2 right-2 sm:bottom-4 sm:right-4 w-2.5 sm:w-4 h-2.5 sm:h-4 border-b border-r border-[#EAD7C0]/40 pointer-events-none" />
-                
-                {/* Viewfinder Center Crosshair */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10">
-                  <div className="w-8 sm:w-14 h-[1px] bg-[#EAD7C0]" />
-                  <div className="h-8 sm:h-14 w-[1px] bg-[#EAD7C0] absolute" />
-                </div>
-
-                {/* 4 Inside-Out Layered Logo Containers (Pure Solid Inset Bloom, Zero Fade) */}
-                {PROJECTS.map((proj, idx) => (
-                  <div
-                    key={proj.id}
-                    ref={(el) => {
-                      logoContainersRef.current[idx] = el;
-                    }}
-                    className="absolute inset-0 flex items-center justify-center p-2 xs:p-3 sm:p-6 md:p-8 bg-[#1A060B] will-change-[clip-path,transform]"
-                  >
-                    <div className="relative w-full h-full flex items-center justify-center rounded-xl sm:rounded-2xl overflow-hidden">
-                      <Image
-                        src={proj.logo}
-                        alt={`${proj.title} Monogram Logo`}
-                        fill
-                        className="object-contain filter drop-shadow-[0_15px_35px_rgba(0,0,0,0.9)] select-none p-1 sm:p-2"
-                        sizes="(max-width: 768px) 160px, 560px"
-                        priority={idx === 0}
-                      />
-                    </div>
+            <div className="md:col-span-6 lg:col-span-6 flex justify-center items-center relative w-full h-[200px] xs:h-[240px] sm:h-[320px] md:h-[420px] lg:h-[480px] xl:h-[540px]">
+              {PROJECTS.map((proj, idx) => (
+                <div
+                  key={proj.id}
+                  ref={(el) => {
+                    logoContainersRef.current[idx] = el;
+                  }}
+                  className="absolute inset-0 flex items-center justify-center will-change-[clip-path,transform]"
+                >
+                  <div className="relative w-full h-full flex items-center justify-center">
+                    <Image
+                      src={proj.logo}
+                      alt={`${proj.title} Monogram Logo`}
+                      fill
+                      className="object-contain filter drop-shadow-[0_25px_60px_rgba(0,0,0,0.85)] select-none pointer-events-none p-2 sm:p-4 md:p-6"
+                      sizes="(max-width: 768px) 320px, (max-width: 1280px) 520px, 640px"
+                      priority={idx === 0}
+                    />
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
 
             {/* ================================================================= */}

@@ -29,30 +29,32 @@ export const KineticStatement: React.FC = memo(() => {
     mm.add("(min-width: 768px)", () => {
       const statementLines = headlineRef.current?.querySelectorAll(".statement-line");
 
-      // 1. Center Ellipse Aperture Zoom Out Reveal Entrance
+      // 1. Rising Convex Horizon Wipe: A massive curved elliptical crest sweeps up from the bottom
+      // over the hero, flattening smoothly into a full edge-to-edge rectangular stage as it reaches top.
       if (stageRef.current) {
         gsap.fromTo(
           stageRef.current,
-          { clipPath: "ellipse(0% 0% at 50% 50%)" },
+          { clipPath: "ellipse(140% 100% at 50% 200%)" },
           {
-            clipPath: "ellipse(135% 135% at 50% 50%)",
-            ease: "power2.out",
+            clipPath: "ellipse(140% 140% at 50% 50%)",
+            ease: "power1.inOut",
             scrollTrigger: {
               trigger: sectionRef.current,
               start: "top bottom",
-              end: "top 15%",
-              scrub: 0.3,
+              end: "top top",
+              scrub: 0.4,
             },
           }
         );
       }
 
-      // 2. Entrance Timeline (Plays crisp unmasking as stage locks at top)
+      // 2. Entrance Timeline: Once the ellipse completes into a rectangle at top top,
+      // continuing to scroll reveals the dividers and text line-by-line in an upwards reveal animation.
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top top",
-          end: "+=350",
+          end: "+=450",
           scrub: 0.3,
         },
       });
@@ -127,30 +129,31 @@ export const KineticStatement: React.FC = memo(() => {
     mm.add("(max-width: 767px)", () => {
       const statementLines = headlineRef.current?.querySelectorAll(".statement-line");
 
-      // 1. Center Ellipse Aperture Zoom Out Reveal Entrance on Mobile
+      // 1. Rising Convex Horizon Wipe on Mobile:
+      // Sweeps up from below with a smooth elliptical dome, flattening at top top into a rectangle.
       if (stageRef.current) {
         gsap.fromTo(
           stageRef.current,
-          { clipPath: "ellipse(0% 0% at 50% 50%)" },
+          { clipPath: "ellipse(150% 80% at 50% 180%)" },
           {
-            clipPath: "ellipse(140% 140% at 50% 50%)",
-            ease: "power2.out",
+            clipPath: "ellipse(150% 150% at 50% 50%)",
+            ease: "power1.inOut",
             scrollTrigger: {
               trigger: sectionRef.current,
               start: "top bottom",
-              end: "top 20%",
+              end: "top top",
               scrub: 0.4,
             },
           }
         );
       }
 
-      // 2. Entrance Timeline: unmasks smoothly as section moves into view
+      // 2. Entrance Timeline: Once the ellipse completes at top top, reveals text upwards smoothly
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: "top 60%",
-          end: "top top",
+          start: "top top",
+          end: "+=350",
           scrub: 0.4,
         },
       });
@@ -221,7 +224,7 @@ export const KineticStatement: React.FC = memo(() => {
       id="monument-statement"
       ref={sectionRef}
       className="relative w-full z-20"
-      style={{ height: "calc(100svh + 500px)" }}
+      style={{ height: "calc(100svh + 800px)" }}
     >
       {/* Sticky 100svh Dedicated Architectural Stage (Rich Wine Red & Warm Italian Light Sand) */}
       <section

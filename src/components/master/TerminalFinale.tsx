@@ -85,10 +85,10 @@ export const TerminalFinale: React.FC = memo(() => {
   };
 
   return (
-    <footer
+    <section
       id="monument-terminal"
       ref={sectionRef}
-      className="relative w-full z-50 min-h-[100svh] flex flex-col justify-between pt-20 sm:pt-24 pb-12 sm:pb-16 px-4 sm:px-8 md:px-12 bg-[#2D0A12] border-t border-[#EAD7C0]/20"
+      className="relative w-full z-40 min-h-[90svh] flex flex-col justify-between pt-20 sm:pt-24 pb-16 sm:pb-20 px-4 sm:px-8 md:px-12 bg-[#2D0A12] border-t border-[#EAD7C0]/20"
     >
       {/* Leading Architectural Razor Hairline */}
       <div className="absolute top-0 inset-x-0 h-[1px] bg-[#EAD7C0]/30" />
@@ -216,23 +216,8 @@ export const TerminalFinale: React.FC = memo(() => {
             </div>
           </motion.div>
         </div>
-
-        {/* Colophon & Back to Top */}
-        <div className="pt-5 sm:pt-10 mt-5 sm:mt-10 border-t border-[#EAD7C0]/20 flex flex-col sm:flex-row items-center justify-between text-xs text-[#CBB59D] gap-4">
-          <div className="font-sans font-bold text-[10px] sm:text-[11px] uppercase tracking-widest text-[#CBB59D] text-center sm:text-left">
-            SOHAM ROYCHOUDHURY // ARCHIVE 2026 · ALL RIGHTS RESERVED
-          </div>
-
-          <button
-            onClick={scrollToTop}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#EAD7C0]/10 hover:bg-[#EAD7C0]/20 border border-[#EAD7C0]/25 text-[#EAD7C0] font-sans font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer"
-          >
-            <span>RETURN TO TERRACE</span>
-            <ArrowUp size={12} className="text-[#FF8C38]" />
-          </button>
-        </div>
       </div>
-    </footer>
+    </section>
   );
 });
 

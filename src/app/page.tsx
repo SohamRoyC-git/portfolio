@@ -13,6 +13,7 @@ import { ArchitecturalCreed } from "@/components/master/ArchitecturalCreed";
 import { GrandSpatialDiscs } from "@/components/master/GrandSpatialDiscs";
 import { ArchitecturalMatrix } from "@/components/master/ArchitecturalMatrix";
 import { TerminalFinale } from "@/components/master/TerminalFinale";
+import { SiteFooter } from "@/components/master/SiteFooter";
 import { YouTubeSkeletonLoader } from "@/components/master/YouTubeSkeletonLoader";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -172,6 +173,9 @@ export default function Home() {
 
         {/* Movement 04: The Initiation Terminal */}
         <TerminalFinale />
+
+        {/* Movement 05: Master Architectural Site Map & Colophon Footer */}
+        <SiteFooter onNavigate={handleNavigate} />
       </main>
     </div>
   );

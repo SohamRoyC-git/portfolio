@@ -128,6 +128,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
   const counterRef = useRef<HTMLSpanElement | null>(null);
 
   const logoContainersRef = useRef<(HTMLDivElement | null)[]>([]);
+  const ambientBackdropsRef = useRef<(HTMLDivElement | null)[]>([]);
   const editorialBlocksRef = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
@@ -200,6 +201,11 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
         }
       });
 
+      ambientBackdropsRef.current.forEach((el, i) => {
+        if (!el) return;
+        gsap.set(el, { autoAlpha: i === 0 ? 1 : 0 });
+      });
+
       editorialBlocksRef.current.forEach((el, i) => {
         if (!el) return;
         if (i === 0) {
@@ -219,17 +225,21 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
         const stepStart = i * stepDuration;
         const transitionStart = stepStart + stepDuration * 0.40;
         const transitionDuration = stepDuration * 0.60;
+        const transitionEnd = transitionStart + transitionDuration;
 
+        const curLogo = logoContainersRef.current[i];
         const nextLogo = logoContainersRef.current[i + 1];
+        const curAmbient = ambientBackdropsRef.current[i];
+        const nextAmbient = ambientBackdropsRef.current[i + 1];
         const curEditorial = editorialBlocksRef.current[i];
         const nextEditorial = editorialBlocksRef.current[i + 1];
 
-        // --- Left Massive Visual: Pure Solid Inside-Out Bloom (Forge style, Zero Fade) ---
+        // --- Left Visual Canvas: Forge Direct Precision Inset Bloom ---
         if (nextLogo) {
-          // At transitionStart, make nextLogo active so it blooms over current logo
+          // At transitionStart, activate nextLogo so it blooms over current logo
           masterTl.set(nextLogo, { autoAlpha: 1 }, transitionStart);
 
-          // Bloom from center outward directly on wine canvas
+          // Direct Precision Inset: Sharp, linear geometric center-out bloom edge-to-edge
           masterTl.fromTo(
             nextLogo,
             { clipPath: "inset(50% 50% 50% 50%)" },
@@ -241,16 +251,29 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
             transitionStart
           );
 
-          // Subtle optical zoom on the inner logo image as the portal expands
-          const nextImg = nextLogo.querySelector("img");
-          if (nextImg) {
-            masterTl.fromTo(
-              nextImg,
-              { scale: 0.88 },
-              { scale: 1.0, ease: "power2.out", duration: transitionDuration },
-              transitionStart
-            );
+          // Instant Complete Dismissal of Previous Logo:
+          // The moment nextLogo finishes its bloom (transitionEnd), immediately hide curLogo
+          // so transparent logos (Varti, India Center) never reveal previous logos behind them!
+          if (curLogo) {
+            masterTl.set(curLogo, { autoAlpha: 0 }, transitionEnd);
           }
+        }
+
+        // --- Atmospheric Depth: Cross-fade Subtle Ambient Reflected Silhouette ---
+        if (curAmbient) {
+          masterTl.to(
+            curAmbient,
+            { autoAlpha: 0, ease: "power2.inOut", duration: transitionDuration },
+            transitionStart
+          );
+        }
+        if (nextAmbient) {
+          masterTl.fromTo(
+            nextAmbient,
+            { autoAlpha: 0 },
+            { autoAlpha: 1, ease: "power2.inOut", duration: transitionDuration },
+            transitionStart
+          );
         }
 
         // --- Right Editorial Narrative: Downward Flowing Motion ---
@@ -320,6 +343,29 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
         ref={stageRef}
         className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-between pt-16 xs:pt-20 sm:pt-24 pb-4 sm:pb-8 px-4 sm:px-12 md:px-16 lg:px-20 overflow-hidden bg-[#2D0A12] border-t border-[#EAD7C0]/20 will-change-[clip-path]"
       >
+        {/* Subtle Ambient Reflected Depth (Forge Automotive Atmospheric Depth) */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
+          {PROJECTS.map((proj, idx) => (
+            <div
+              key={`ambient-${proj.id}`}
+              ref={(el) => {
+                ambientBackdropsRef.current[idx] = el;
+              }}
+              className="absolute -right-16 -top-16 sm:-right-28 sm:-top-28 md:-right-36 md:-top-36 w-[360px] h-[360px] sm:w-[600px] sm:h-[600px] md:w-[750px] md:h-[750px] rounded-full blur-[100px] sm:blur-[140px] md:blur-[180px] will-change-[opacity]"
+            >
+              <div className="relative w-full h-full opacity-20 sm:opacity-25 saturate-150">
+                <Image
+                  src={proj.logo}
+                  alt=""
+                  fill
+                  className="object-contain"
+                  aria-hidden="true"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
         {/* Leading Architectural Razor Hairline */}
         <div className="absolute top-0 inset-x-0 h-[1px] bg-[#EAD7C0]/30" />
 
@@ -352,30 +398,32 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
           <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-8 lg:gap-16 items-center">
             
             {/* ================================================================= */}
-            {/* LEFT COLUMN: Massive Standalone Logo (Frameless Solid Inset Bloom)*/}
-            {/* The logo sits directly on the wine canvas without any bounding box*/}
+            {/* LEFT COLUMN: Dedicated Architectural Canvas Frame (Forge Style)   */}
+            {/* Crisp, borderless square matte canvas with center aperture bloom  */}
             {/* ================================================================= */}
-            <div className="md:col-span-6 lg:col-span-6 flex justify-center items-center relative w-full h-[200px] xs:h-[240px] sm:h-[320px] md:h-[420px] lg:h-[480px] xl:h-[540px]">
-              {PROJECTS.map((proj, idx) => (
-                <div
-                  key={proj.id}
-                  ref={(el) => {
-                    logoContainersRef.current[idx] = el;
-                  }}
-                  className="absolute inset-0 flex items-center justify-center will-change-[clip-path,transform]"
-                >
-                  <div className="relative w-full h-full flex items-center justify-center">
-                    <Image
-                      src={proj.logo}
-                      alt={`${proj.title} Monogram Logo`}
-                      fill
-                      className="object-contain filter drop-shadow-[0_25px_60px_rgba(0,0,0,0.85)] select-none pointer-events-none p-2 sm:p-4 md:p-6"
-                      sizes="(max-width: 768px) 320px, (max-width: 1280px) 520px, 640px"
-                      priority={idx === 0}
-                    />
+            <div className="md:col-span-6 lg:col-span-6 flex justify-center items-center">
+              <div className="relative w-full max-w-[260px] xs:max-w-[300px] sm:max-w-[400px] md:max-w-[450px] lg:max-w-[490px] xl:max-w-[530px] aspect-square rounded-2xl md:rounded-3xl bg-[#160408] border border-[#EAD7C0]/15 shadow-[0_30px_90px_rgba(0,0,0,0.85)] overflow-hidden">
+                {PROJECTS.map((proj, idx) => (
+                  <div
+                    key={proj.id}
+                    ref={(el) => {
+                      logoContainersRef.current[idx] = el;
+                    }}
+                    className="absolute inset-0 flex items-center justify-center bg-[#160408] will-change-[clip-path]"
+                  >
+                    <div className="relative w-full h-full flex items-center justify-center p-6 xs:p-8 sm:p-12 md:p-14">
+                      <Image
+                        src={proj.logo}
+                        alt={`${proj.title} Monogram Logo`}
+                        fill
+                        className="object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)] select-none pointer-events-none p-2 sm:p-4"
+                        sizes="(max-width: 768px) 300px, (max-width: 1280px) 490px, 550px"
+                        priority={idx === 0}
+                      />
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
 
             {/* ================================================================= */}

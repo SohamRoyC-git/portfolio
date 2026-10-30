@@ -241,14 +241,14 @@ export async function ingestMatchTelemetry(
       {/* Sticky Architectural Stage on Desktop, Natural Scrolling on Mobile */}
       <section
         ref={stageRef}
-        className="relative md:sticky md:top-0 min-h-[100svh] md:h-[100svh] w-full flex flex-col justify-center pt-20 sm:pt-24 pb-12 sm:pb-8 px-4 sm:px-8 md:px-12 overflow-visible md:overflow-hidden bg-[#080A0F] border-t border-white/10 will-change-[clip-path]"
+        className="relative md:sticky md:top-0 min-h-[100svh] md:h-[100svh] w-full flex flex-col justify-start md:justify-center pt-24 sm:pt-28 md:pt-0 pb-16 sm:pb-12 md:pb-0 px-4 sm:px-8 md:px-12 overflow-visible md:overflow-hidden bg-[#080A0F] border-t border-white/10 will-change-[clip-path]"
       >
         {/* Leading Architectural Razor Hairline */}
         <div className="absolute top-0 inset-x-0 h-[1px] bg-white/20" />
 
         <div
           ref={contentWrapperRef}
-          className="w-full max-w-7xl mx-auto flex flex-col justify-center will-change-[transform,opacity]"
+          className="w-full max-w-7xl mx-auto flex flex-col justify-start md:justify-center will-change-[transform,opacity]"
         >
         {/* Chapter Marker */}
         <div className="font-sans font-bold text-[11px] sm:text-xs text-[#FF7A00] tracking-[0.2em] uppercase mb-3 sm:mb-4 flex items-center gap-3">
@@ -286,7 +286,7 @@ export async function ingestMatchTelemetry(
               </div>
 
               {/* Framer Motion Spring Code Tabs */}
-              <div className="flex items-center gap-1 bg-white/[0.04] p-1 rounded-full border border-white/10">
+              <div className="flex items-center gap-1 bg-white/[0.04] p-1 rounded-full border border-white/10 overflow-x-auto no-scrollbar">
                 {(
                   [
                     { id: "dictionary", label: "278-Key i18n" },
@@ -337,7 +337,7 @@ export async function ingestMatchTelemetry(
                 )}
               </button>
 
-              <div className="p-4 sm:p-5 rounded-2xl bg-[#08090D] border border-white/10 font-mono text-[11px] sm:text-xs text-slate-200 leading-relaxed overflow-x-auto shadow-inner">
+              <div className="px-4 pb-4 pt-11 sm:p-5 rounded-2xl bg-[#08090D] border border-white/10 font-mono text-[11px] sm:text-xs text-slate-200 leading-relaxed overflow-x-auto shadow-inner">
                 <AnimatePresence mode="wait">
                   <motion.pre
                     key={activeCodeTab}

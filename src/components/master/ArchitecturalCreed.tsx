@@ -102,20 +102,24 @@ export const ArchitecturalCreed: React.FC = memo(() => {
       }
     });
 
-    // Mobile scroll experience: curtain sweep & smooth staggered cards
+    // Mobile scroll experience: unclipped natural flow with smooth staggered cards
     mm.add("(max-width: 767px)", () => {
       if (stageRef.current) {
+        gsap.set(stageRef.current, { clipPath: "none" });
+      }
+
+      if (headerRef.current) {
         gsap.fromTo(
-          stageRef.current,
-          { clipPath: "polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)" },
+          headerRef.current,
+          { y: 20, opacity: 0 },
           {
-            clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+            y: 0,
+            opacity: 1,
+            duration: 0.5,
             ease: "power2.out",
             scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top bottom",
-              end: "top 30%",
-              scrub: 0.25,
+              trigger: headerRef.current,
+              start: "top 85%",
             },
           }
         );
@@ -129,12 +133,12 @@ export const ArchitecturalCreed: React.FC = memo(() => {
           {
             y: 0,
             opacity: 1,
-            stagger: 0.12,
+            stagger: 0.1,
             duration: 0.5,
             ease: "power2.out",
             scrollTrigger: {
               trigger: gridRef.current,
-              start: "top 80%",
+              start: "top 85%",
             },
           }
         );
@@ -192,14 +196,14 @@ export const ArchitecturalCreed: React.FC = memo(() => {
       {/* Sticky 100svh Dedicated Architectural Stage on Desktop, Natural Fluid Stage on Mobile */}
       <section
         ref={stageRef}
-        className="relative md:sticky md:top-0 min-h-[100svh] md:h-[100svh] w-full flex flex-col justify-center pt-20 sm:pt-28 pb-12 sm:pb-10 px-4 sm:px-12 md:px-16 overflow-visible md:overflow-hidden bg-[#060709] border-t border-white/10 will-change-[clip-path]"
+        className="relative md:sticky md:top-0 min-h-[100svh] md:h-[100svh] w-full flex flex-col justify-start md:justify-center pt-32 sm:pt-36 md:pt-0 pb-16 sm:pb-12 md:pb-0 px-4 sm:px-12 md:px-16 overflow-visible md:overflow-hidden bg-[#060709] border-t border-white/10 will-change-[clip-path]"
       >
         {/* Leading Architectural Razor Hairline */}
         <div className="absolute top-0 inset-x-0 h-[1px] bg-white/20" />
 
         <div
           ref={containerRef}
-          className="w-full max-w-7xl mx-auto flex flex-col justify-center will-change-[transform,opacity]"
+          className="w-full max-w-7xl mx-auto flex flex-col justify-start md:justify-center will-change-[transform,opacity]"
         >
           {/* Header Block */}
           <div ref={headerRef} className="mb-6 sm:mb-8">

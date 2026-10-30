@@ -27,13 +27,15 @@ export default function Home() {
 
     let tickerCallback: ((time: number) => void) | null = null;
 
-    // Desktop Lenis Smooth Scroll (bypassed on pure mobile touch for instantaneous native momentum)
-    if (!prefersReducedMotion && !isTouch) {
+    // Unified Lenis Smooth Scroll (Desktop + Mobile with buttery touch interpolation)
+    if (!prefersReducedMotion) {
       const lenis = new Lenis({
-        lerp: 0.1,
-        duration: 1.0,
+        lerp: isTouch ? 0.09 : 0.08,
+        duration: isTouch ? 0.9 : 1.1,
         smoothWheel: true,
         wheelMultiplier: 1.0,
+        syncTouch: true,
+        touchMultiplier: 1.2,
       });
       lenisRef.current = lenis;
 
@@ -46,7 +48,7 @@ export default function Home() {
       gsap.ticker.lagSmoothing(0);
     }
 
-    // Hero Monolithic Exit: Cleans out the canvas completely before Statement plays
+    // Hero Monolithic Exit: Cleans out the canvas completely before Statement plays (Desktop + Mobile)
     const mm = gsap.matchMedia();
     mm.add("(min-width: 768px)", () => {
       gsap.to("#hero-wrapper", {
@@ -58,7 +60,22 @@ export default function Home() {
           trigger: "#monument-statement",
           start: "top bottom",
           end: "top top",
-          scrub: true,
+          scrub: 0.4,
+        },
+      });
+    });
+
+    mm.add("(max-width: 767px)", () => {
+      gsap.to("#hero-wrapper", {
+        scale: 0.96,
+        yPercent: -8,
+        opacity: 0.05,
+        ease: "power2.inOut",
+        scrollTrigger: {
+          trigger: "#monument-statement",
+          start: "top bottom",
+          end: "top top",
+          scrub: 0.5,
         },
       });
     });

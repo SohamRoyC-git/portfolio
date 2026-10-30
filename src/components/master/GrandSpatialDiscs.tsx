@@ -147,7 +147,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
       if (stageRef.current) {
         gsap.fromTo(
           stageRef.current,
-          { clipPath: isDesktop ? "polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)" : "inset(25% 0% round 0px)" },
+          { clipPath: isDesktop ? "polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)" : "inset(20% 0% round 0px)" },
           {
             clipPath: isDesktop ? "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)" : "inset(0% 0% round 0px)",
             ease: "none",
@@ -155,7 +155,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
               trigger: sectionRef.current,
               start: "top bottom",
               end: "top top",
-              scrub: true,
+              scrub: 0.4,
             },
           }
         );
@@ -167,7 +167,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
           trigger: sectionRef.current,
           start: "top top",
           end: "bottom bottom",
-          scrub: isDesktop ? 0.4 : 0.25,
+          scrub: isDesktop ? 0.4 : 0.5,
           onUpdate: (self) => {
             const p = self.progress;
             if (progressBarRef.current) {
@@ -312,32 +312,32 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
       className="relative w-full z-30"
       style={{ height: "calc(100svh + 2400px)" }}
     >
-      {/* Sticky 100svh Architectural Stage (Deep Velvet Burgundy & Italian Light Sand) */}
+      {/* Sticky 100svh Architectural Stage (Rich Wine Red & Warm Italian Light Sand) */}
       <section
         ref={stageRef}
-        className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-between pt-20 sm:pt-24 pb-8 px-6 sm:px-12 md:px-16 lg:px-20 overflow-hidden bg-[#1D090E] border-t border-[#F7EFE8]/15 will-change-[clip-path]"
+        className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-between pt-16 xs:pt-20 sm:pt-24 pb-4 sm:pb-8 px-4 sm:px-12 md:px-16 lg:px-20 overflow-hidden bg-[#2D0A12] border-t border-[#EAD7C0]/20 will-change-[clip-path]"
       >
         {/* Leading Architectural Razor Hairline */}
-        <div className="absolute top-0 inset-x-0 h-[1px] bg-[#F7EFE8]/25" />
+        <div className="absolute top-0 inset-x-0 h-[1px] bg-[#EAD7C0]/30" />
 
         {/* Top Section Header & Telemetry */}
-        <div className="w-full max-w-7xl mx-auto flex items-center justify-between text-[11px] font-sans font-bold uppercase tracking-[0.22em] text-[#E6DCD2]/70 pb-3 border-b border-[#F7EFE8]/15">
-          <div className="flex items-center gap-3">
+        <div className="w-full max-w-7xl mx-auto flex items-center justify-between text-[10px] sm:text-[11px] font-sans font-bold uppercase tracking-[0.22em] text-[#CBB59D] pb-2 sm:pb-3 border-b border-[#EAD7C0]/20">
+          <div className="flex items-center gap-2 sm:gap-3">
             <span className="w-2 h-2 rounded-full bg-[#FF8C38]" />
-            <span className="text-[#F7EFE8]">SELECTED COMMISSIONS // ARCHITECTURAL SHOWCASE</span>
+            <span className="text-[#EAD7C0]">SELECTED COMMISSIONS // ARCHITECTURAL SHOWCASE</span>
           </div>
-          <div className="flex items-center gap-4 text-xs font-mono">
+          <div className="flex items-center gap-3 sm:gap-4 text-xs font-mono">
             <div className="hidden sm:flex items-center gap-1.5">
               {PROJECTS.map((_, dotIdx) => (
                 <span
                   key={dotIdx}
                   className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${
-                    dotIdx === activeIdx ? "bg-[#FF8C38]" : "bg-[#F7EFE8]/20"
+                    dotIdx === activeIdx ? "bg-[#FF8C38]" : "bg-[#EAD7C0]/25"
                   }`}
                 />
               ))}
             </div>
-            <span className="text-[#E6DCD2]/60">DEPTH:</span>
+            <span className="text-[#CBB59D]/70">DEPTH:</span>
             <span className="text-[#FF8C38] font-bold">
               <span ref={counterRef}>01</span> / 04
             </span>
@@ -346,24 +346,24 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
 
         {/* Main Split Screen Container */}
         <div className="showcase-container w-full max-w-7xl mx-auto flex-1 flex items-center my-auto will-change-[transform,opacity]">
-          <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-10 lg:gap-16 items-center">
+          <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-8 lg:gap-16 items-center">
             
             {/* ================================================================= */}
             {/* LEFT COLUMN: Large Commanding Logo Portal (Inside-Out Aperture Bloom) */}
             {/* ================================================================= */}
             <div className="md:col-span-6 lg:col-span-6 flex justify-center items-center">
-              <div className="relative w-full max-w-[280px] xs:max-w-[340px] sm:max-w-[420px] md:max-w-[480px] lg:max-w-[520px] xl:max-w-[560px] aspect-square rounded-3xl bg-[#14080B] border border-[#F7EFE8]/15 p-4 sm:p-8 md:p-10 flex items-center justify-center overflow-hidden shadow-[0_25px_80px_rgba(0,0,0,0.95)]">
+              <div className="relative w-28 h-28 xs:w-36 xs:h-36 sm:w-48 sm:h-48 md:w-full md:max-w-[480px] lg:max-w-[520px] xl:max-w-[560px] aspect-square rounded-2xl md:rounded-3xl bg-[#1A060B] border border-[#EAD7C0]/20 p-2 xs:p-4 sm:p-8 md:p-10 flex items-center justify-center overflow-hidden shadow-[0_25px_80px_rgba(0,0,0,0.95)]">
                 
                 {/* Architectural Corner Reticle Accents */}
-                <div className="absolute top-3 left-3 sm:top-4 sm:left-4 w-3 sm:w-4 h-3 sm:h-4 border-t border-l border-[#F7EFE8]/40 pointer-events-none" />
-                <div className="absolute top-3 right-3 sm:top-4 sm:right-4 w-3 sm:w-4 h-3 sm:h-4 border-t border-r border-[#F7EFE8]/40 pointer-events-none" />
-                <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 w-3 sm:w-4 h-3 sm:h-4 border-b border-l border-[#F7EFE8]/40 pointer-events-none" />
-                <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 w-3 sm:w-4 h-3 sm:h-4 border-b border-r border-[#F7EFE8]/40 pointer-events-none" />
+                <div className="absolute top-2 left-2 sm:top-4 sm:left-4 w-2.5 sm:w-4 h-2.5 sm:h-4 border-t border-l border-[#EAD7C0]/40 pointer-events-none" />
+                <div className="absolute top-2 right-2 sm:top-4 sm:right-4 w-2.5 sm:w-4 h-2.5 sm:h-4 border-t border-r border-[#EAD7C0]/40 pointer-events-none" />
+                <div className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4 w-2.5 sm:w-4 h-2.5 sm:h-4 border-b border-l border-[#EAD7C0]/40 pointer-events-none" />
+                <div className="absolute bottom-2 right-2 sm:bottom-4 sm:right-4 w-2.5 sm:w-4 h-2.5 sm:h-4 border-b border-r border-[#EAD7C0]/40 pointer-events-none" />
                 
                 {/* Viewfinder Center Crosshair */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10">
-                  <div className="w-10 sm:w-14 h-[1px] bg-[#F7EFE8]" />
-                  <div className="h-10 sm:h-14 w-[1px] bg-[#F7EFE8] absolute" />
+                  <div className="w-8 sm:w-14 h-[1px] bg-[#EAD7C0]" />
+                  <div className="h-8 sm:h-14 w-[1px] bg-[#EAD7C0] absolute" />
                 </div>
 
                 {/* 4 Inside-Out Layered Logo Containers (Pure Solid Inset Bloom, Zero Fade) */}
@@ -373,15 +373,15 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                     ref={(el) => {
                       logoContainersRef.current[idx] = el;
                     }}
-                    className="absolute inset-0 flex items-center justify-center p-3 sm:p-6 md:p-8 bg-[#14080B] will-change-[clip-path,transform]"
+                    className="absolute inset-0 flex items-center justify-center p-2 xs:p-3 sm:p-6 md:p-8 bg-[#1A060B] will-change-[clip-path,transform]"
                   >
-                    <div className="relative w-full h-full flex items-center justify-center rounded-2xl overflow-hidden">
+                    <div className="relative w-full h-full flex items-center justify-center rounded-xl sm:rounded-2xl overflow-hidden">
                       <Image
                         src={proj.logo}
                         alt={`${proj.title} Monogram Logo`}
                         fill
                         className="object-contain filter drop-shadow-[0_15px_35px_rgba(0,0,0,0.9)] select-none p-1 sm:p-2"
-                        sizes="(max-width: 768px) 340px, 560px"
+                        sizes="(max-width: 768px) 160px, 560px"
                         priority={idx === 0}
                       />
                     </div>
@@ -393,7 +393,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
             {/* ================================================================= */}
             {/* RIGHT COLUMN: Editorial Narrative (Downward Flow on Scroll)       */}
             {/* ================================================================= */}
-            <div className="md:col-span-6 lg:col-span-6 relative min-h-[300px] xs:min-h-[340px] sm:min-h-[380px] md:min-h-[440px] flex items-center">
+            <div className="md:col-span-6 lg:col-span-6 relative min-h-[220px] xs:min-h-[250px] sm:min-h-[340px] md:min-h-[440px] flex items-center">
               {PROJECTS.map((proj, idx) => (
                 <div
                   key={proj.id}
@@ -403,36 +403,36 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                   className="absolute inset-0 flex flex-col justify-center will-change-[transform,opacity]"
                 >
                   {/* Project Index & Category */}
-                  <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-                    <span className="font-serif italic text-2xl sm:text-4xl text-[#FF8C38] font-normal leading-none">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-3">
+                    <span className="font-serif italic text-xl xs:text-2xl sm:text-4xl text-[#FF8C38] font-normal leading-none">
                       {proj.num}
                     </span>
-                    <span className="text-[#F7EFE8]/25 font-sans text-base sm:text-xl">/</span>
-                    <span className="text-[#F7EFE8]/40 font-mono text-xs sm:text-sm">04</span>
-                    <span className="w-[1px] h-3 sm:h-4 bg-[#F7EFE8]/15 mx-1" />
+                    <span className="text-[#EAD7C0]/30 font-sans text-sm sm:text-xl">/</span>
+                    <span className="text-[#EAD7C0]/50 font-mono text-xs sm:text-sm">04</span>
+                    <span className="w-[1px] h-3 sm:h-4 bg-[#EAD7C0]/20 mx-1" />
                     <span className="text-[9px] sm:text-[11px] font-sans font-extrabold uppercase tracking-[0.2em] text-[#FF8C38]">
                       {proj.category}
                     </span>
                   </div>
 
-                  {/* Monumental Editorial Heading */}
-                  <h3 className="font-sans font-black text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-5xl uppercase tracking-tight text-[#F7EFE8] mb-2 sm:mb-4 leading-[1.05]">
+                  {/* Monumental Editorial Heading in Italian Light Sand */}
+                  <h3 className="font-sans font-black text-lg xs:text-xl sm:text-3xl md:text-4xl lg:text-5xl uppercase tracking-tight text-[#EAD7C0] mb-1 xs:mb-2 sm:mb-4 leading-[1.05]">
                     {proj.title}
                   </h3>
 
-                  {/* Narrative Subtext */}
-                  <p className="font-sans font-normal text-xs sm:text-sm md:text-base text-[#DDD3C7] leading-relaxed max-w-2xl mb-3 sm:mb-6 line-clamp-2 xs:line-clamp-3 sm:line-clamp-none">
+                  {/* Narrative Subtext in Warm Sand */}
+                  <p className="font-sans font-normal text-xs sm:text-sm md:text-base text-[#D8C4AE] leading-relaxed max-w-2xl mb-2 sm:mb-6 line-clamp-2 sm:line-clamp-none">
                     {proj.summary}
                   </p>
 
                   {/* Micro-Spec Hairline Metrics */}
-                  <div className="grid grid-cols-3 gap-2 sm:gap-3 border-t border-b border-[#F7EFE8]/15 py-2.5 sm:py-3.5 mb-3 sm:mb-6 max-w-xl">
+                  <div className="grid grid-cols-3 gap-2 sm:gap-3 border-t border-b border-[#EAD7C0]/20 py-1.5 sm:py-3.5 mb-2 sm:mb-6 max-w-xl">
                     {proj.metrics.map((m, mIdx) => (
                       <div key={mIdx}>
-                        <div className="text-[8px] sm:text-[9px] font-mono uppercase text-[#E6DCD2]/60 tracking-wider mb-0.5">
+                        <div className="text-[8px] sm:text-[9px] font-mono uppercase text-[#CBB59D] tracking-wider mb-0.5">
                           {m.label}
                         </div>
-                        <div className="text-xs sm:text-sm font-sans font-bold text-[#F7EFE8] tracking-tight truncate">
+                        <div className="text-xs sm:text-sm font-sans font-bold text-[#EAD7C0] tracking-tight truncate">
                           {m.value}
                         </div>
                       </div>
@@ -445,16 +445,16 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                       href={proj.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-3 rounded-full bg-[#F7EFE8] text-[#1D090E] font-sans font-bold text-[11px] sm:text-xs uppercase tracking-wider hover:bg-[#FF8C38] hover:text-white transition-all shadow-md group cursor-pointer"
+                      className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 xs:px-4 xs:py-2 sm:px-6 sm:py-3 rounded-full bg-[#EAD7C0] text-[#2D0A12] font-sans font-bold text-[10px] xs:text-[11px] sm:text-xs uppercase tracking-wider hover:bg-[#FF8C38] hover:text-white transition-all shadow-md group cursor-pointer"
                     >
                       <span>EXPLORE LIVE PLATFORM</span>
-                      <ExternalLink size={13} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                      <ExternalLink size={12} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                     </a>
 
                     {proj.hasDemo && (
                       <button
                         onClick={() => setIsDemoOpen(true)}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 sm:px-5 sm:py-3 rounded-full bg-[#14080B] border border-[#F7EFE8]/25 text-[#F7EFE8] font-sans font-bold text-[11px] sm:text-xs uppercase tracking-wider hover:border-[#FF8C38] hover:text-[#FF8C38] transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 xs:px-3.5 xs:py-2 sm:px-5 sm:py-3 rounded-full bg-[#1A060B] border border-[#EAD7C0]/30 text-[#EAD7C0] font-sans font-bold text-[10px] xs:text-[11px] sm:text-xs uppercase tracking-wider hover:border-[#FF8C38] hover:text-[#FF8C38] transition-colors cursor-pointer"
                       >
                         <Activity size={12} className="text-[#FF8C38]" />
                         <span>TEST &lt;5MS</span>
@@ -466,7 +466,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                         setSelectedDossier(proj);
                         setIsDossierOpen(true);
                       }}
-                      className="inline-flex items-center gap-1.5 px-3 py-2 text-[#DDD3C7] hover:text-[#F7EFE8] font-mono text-[11px] sm:text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 xs:px-3 xs:py-2 text-[#D8C4AE] hover:text-[#EAD7C0] font-mono text-[10px] xs:text-[11px] sm:text-xs uppercase tracking-wider transition-colors cursor-pointer"
                     >
                       <Layers size={12} />
                       <span>DOSSIER</span>
@@ -480,20 +480,20 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
         </div>
 
         {/* Bottom Progress Bar & Scrub Indicator */}
-        <div className="w-full max-w-7xl mx-auto flex items-center justify-between pt-4 border-t border-[#F7EFE8]/15 text-[10px] font-mono text-[#E6DCD2]/70">
-          <div className="flex items-center gap-2">
+        <div className="w-full max-w-7xl mx-auto flex items-center justify-between pt-2 sm:pt-4 border-t border-[#EAD7C0]/20 text-[9px] sm:text-[10px] font-mono text-[#CBB59D]">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <span>SCROLL TO ADVANCE COMMISSIONS</span>
             <ArrowRight size={11} className="text-[#FF8C38]" />
           </div>
 
-          <div className="w-48 sm:w-64 h-[2px] bg-[#F7EFE8]/15 rounded-full overflow-hidden">
+          <div className="w-36 xs:w-48 sm:w-64 h-[2px] bg-[#EAD7C0]/20 rounded-full overflow-hidden">
             <div
               ref={progressBarRef}
               className="h-full bg-[#FF8C38] w-full transform origin-left scale-x-0 transition-transform duration-75"
             />
           </div>
 
-          <span className="text-[#E6DCD2]/70">01 — 04 PORTFOLIO CORE</span>
+          <span className="text-[#CBB59D]">01 — 04 PORTFOLIO CORE</span>
         </div>
       </section>
 

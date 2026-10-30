@@ -81,12 +81,12 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
     if (isScrolled) {
       // 1. Morph to Compact Floating Glass Dock (Frosted Obsidian CAD Pill)
       gsap.to(nav, {
-        maxWidth: isMobile ? "calc(100% - 24px)" : "860px",
+        maxWidth: isMobile ? "calc(100% - 24px)" : "1020px",
         marginTop: isMobile ? "10px" : "16px",
         paddingTop: isMobile ? "8px" : "10px",
         paddingBottom: isMobile ? "8px" : "10px",
-        paddingLeft: isMobile ? "16px" : "24px",
-        paddingRight: isMobile ? "16px" : "24px",
+        paddingLeft: isMobile ? "16px" : "28px",
+        paddingRight: isMobile ? "16px" : "28px",
         borderRadius: "9999px",
         backgroundColor: "rgba(10, 12, 16, 0.85)",
         borderColor: "rgba(255, 255, 255, 0.12)",
@@ -110,14 +110,18 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
     } else {
       // 2. Morph to Edge-to-Edge Fully Transparent Cinematic Bar
       if (telemetryRef.current) {
-        telemetryRef.current.style.display = "flex";
-        gsap.to(telemetryRef.current, {
-          opacity: 1,
-          scale: 1,
-          duration: 0.35,
-          delay: 0.1,
-          ease: "power2.out",
-        });
+        if (window.innerWidth >= 1280) {
+          telemetryRef.current.style.display = "flex";
+          gsap.to(telemetryRef.current, {
+            opacity: 1,
+            scale: 1,
+            duration: 0.35,
+            delay: 0.1,
+            ease: "power2.out",
+          });
+        } else {
+          telemetryRef.current.style.display = "none";
+        }
       }
 
       gsap.to(nav, {
@@ -159,7 +163,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
       >
         <div
           ref={navRef}
-          className={`w-full flex items-center justify-between pointer-events-auto border transition-colors duration-400 ${
+          className={`w-full flex items-center justify-between gap-4 sm:gap-6 pointer-events-auto border ${
             isScrolled
               ? "bg-[#0A0C10]/85 border-white/12 backdrop-blur-xl"
               : "bg-transparent border-transparent"
@@ -175,7 +179,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
           {/* Brand Monogram & Name */}
           <div
             onClick={() => onNavigate("monument-hero")}
-            className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group select-none min-w-0"
+            className="flex items-center gap-2 sm:gap-3 cursor-pointer group select-none shrink-0"
             data-cursor="pointer"
             data-cursor-text="INDEX"
           >
@@ -184,14 +188,13 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FF8C38]" />
             </span>
             <span
-              className={`font-sans font-black text-xs tracking-[0.2em] uppercase transition-colors duration-300 truncate ${
+              className={`font-sans font-black text-[10px] xs:text-[11px] sm:text-xs tracking-[0.16em] sm:tracking-[0.2em] uppercase shrink-0 whitespace-nowrap transition-colors duration-200 ${
                 isScrolled
                   ? "text-white group-hover:text-[#FF8C38]"
                   : "text-white group-hover:text-amber-300 drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]"
               }`}
             >
-              <span className="hidden sm:inline">SR // SOHAM ROYCHOUDHURY</span>
-              <span className="sm:hidden">SR // SOHAM</span>
+              SR // SOHAM ROYCHOUDHURY
             </span>
           </div>
 
@@ -223,7 +226,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
           </nav>
 
           {/* Right Action Stack: Live Telemetry (hero only) + Action Button + Mobile Toggle */}
-          <div className="flex items-center gap-2.5 sm:gap-3.5">
+          <div className="flex items-center gap-2 sm:gap-3.5 shrink-0">
             {/* Live IST Telemetry Capsule (Only when stretched in Hero) */}
             <div
               ref={telemetryRef}
@@ -238,7 +241,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
             {/* Connect Action Button */}
             <button
               onClick={() => onNavigate("monument-terminal")}
-              className={`inline-flex items-center gap-1.5 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full font-sans font-black text-[11px] uppercase tracking-wider cursor-pointer transition-all duration-300 shadow-md active:scale-95 ${
+              className={`inline-flex items-center gap-1.5 px-3 xs:px-4 sm:px-5 py-1.5 sm:py-2 rounded-full font-sans font-black text-[10px] xs:text-[11px] uppercase tracking-wider cursor-pointer transition-all duration-300 shadow-md active:scale-95 shrink-0 ${
                 isScrolled
                   ? "bg-white text-[#0A0C10] hover:bg-[#FF7A00] hover:text-white"
                   : "bg-white text-[#0F172A] hover:bg-[#FF7A00] hover:text-white"

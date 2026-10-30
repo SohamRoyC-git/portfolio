@@ -266,3 +266,4 @@ export const SiteFooter: React.FC<SiteFooterProps> = ({ onNavigate }) => {
     </footer>
   );
 };
+

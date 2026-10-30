@@ -4,524 +4,534 @@ import React, { memo, useState, useRef, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { motion, AnimatePresence } from "framer-motion";
-import { Terminal, Layers, ShieldCheck, Check, Copy } from "lucide-react";
+import {
+  Code2,
+  Cpu,
+  Layers,
+  Zap,
+  ShieldCheck,
+  Globe,
+  Terminal,
+  Search,
+  CheckCircle2,
+  Sparkles,
+  ArrowRight,
+  ExternalLink,
+} from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-type CodeTab = "dictionary" | "neural" | "eventbus";
+type TechCategory = "all" | "frontend" | "languages" | "aiml" | "performance" | "systems";
+
+interface TechItem {
+  id: string;
+  name: string;
+  category: "frontend" | "languages" | "aiml" | "performance" | "systems";
+  level: "Architectural" | "Production Ready" | "Core Competency" | "Foundational";
+  role: string;
+  description: string;
+  projectHighlight: string;
+  metrics: string;
+  codeSnippet?: string;
+}
+
+const TECH_STACK: TechItem[] = [
+  // 1. Languages
+  {
+    id: "javascript",
+    name: "JavaScript (ES6+)",
+    category: "languages",
+    level: "Architectural",
+    role: "Core Execution Language",
+    description: "Modern asynchronous JavaScript, DOM manipulation, custom event buses, and client-side state engines.",
+    projectHighlight: "IziEat Custom Localisation Engine (200+ keys)",
+    metrics: "Zero-dependency client execution",
+    codeSnippet: `// Custom zero-dependency event bus
+const EventBus = {
+  events: {},
+  emit(event, data) {
+    (this.events[event] || []).forEach(cb => cb(data));
+  }
+};`,
+  },
+  {
+    id: "typescript",
+    name: "TypeScript",
+    category: "languages",
+    level: "Production Ready",
+    role: "Type-Safe Contracts",
+    description: "Strict compile-time type verification, custom utility types, and robust component props interfaces across Next.js.",
+    projectHighlight: "Portfolio Architecture & Component Libraries",
+    metrics: "100% strict type checking",
+    codeSnippet: `interface ProjectCommission {
+  readonly id: string;
+  title: string;
+  category: 'EU Startup' | 'Global Commerce';
+  metrics: Record<string, string | number>;
+}`,
+  },
+  {
+    id: "python",
+    name: "Python",
+    category: "languages",
+    level: "Core Competency",
+    role: "AI/ML & Automation",
+    description: "Data analysis pipelines, machine learning model foundations, neural concepts, and system scripting.",
+    projectHighlight: "CSE (AI/ML) Academic & Applied Systems",
+    metrics: "Data preprocessing & model pipelines",
+  },
+  {
+    id: "cpp",
+    name: "C++ (Fundamentals)",
+    category: "languages",
+    level: "Foundational",
+    role: "Memory & Algorithms",
+    description: "Core algorithms, data structures, object-oriented concepts, and computational foundations.",
+    projectHighlight: "NSEC Computer Science Fundamentals",
+    metrics: "Low-level computational efficiency",
+  },
+  {
+    id: "html5-css3",
+    name: "HTML5 & Modern CSS",
+    category: "languages",
+    level: "Architectural",
+    role: "Semantic Web Structure",
+    description: "Accessible ARIA markup, semantic layout architecture, modern CSS custom properties, and responsive grid systems.",
+    projectHighlight: "Client Portals & Responsive Mobile Experiences",
+    metrics: "WCAG accessibility & fluid responsive design",
+  },
+
+  // 2. Frontend Architecture
+  {
+    id: "nextjs",
+    name: "Next.js 16 (App Router)",
+    category: "frontend",
+    level: "Architectural",
+    role: "React Full-Stack Framework",
+    description: "Hybrid Server/Client Component paradigms, dynamic route handlers, static generation, and edge deployment.",
+    projectHighlight: "High-Performance Portfolio & Modern Web Apps",
+    metrics: "Turbopack / Webpack hybrid build stability",
+  },
+  {
+    id: "react",
+    name: "React 19",
+    category: "frontend",
+    level: "Architectural",
+    role: "Reactive UI Runtime",
+    description: "Concurrent rendering, fine-grained state hooks (`useCallback`, `useRef`), and component lifecycle orchestration.",
+    projectHighlight: "Interactive Component Hierarchies",
+    metrics: "Zero unnecessary re-renders with memoization",
+  },
+  {
+    id: "tailwind",
+    name: "Tailwind CSS v4",
+    category: "frontend",
+    level: "Architectural",
+    role: "Design Token Engine",
+    description: "CSS theme architecture, CSS variable hooks, dark-mode palettes, and high-performance utility compilation.",
+    projectHighlight: "Custom Italian Sand & Obsidian Aesthetics",
+    metrics: "Sub-10kb critical CSS footprint",
+  },
+  {
+    id: "gsap",
+    name: "GSAP 3.15 & ScrollTrigger",
+    category: "frontend",
+    level: "Architectural",
+    role: "Kinetic Animation Engine",
+    description: "Scrubbed scroll timelines, pinned viewport stages, clip-path reveals, and responsive matchMedia animations.",
+    projectHighlight: "Forge Automotive Spatial Storytelling",
+    metrics: "60fps buttery GPU-accelerated transforms",
+  },
+  {
+    id: "lenis",
+    name: "Lenis 1.3 Smooth Scroll",
+    category: "frontend",
+    level: "Production Ready",
+    role: "Inertial Scroll Synchronization",
+    description: "Smooth wheel and touch momentum scroll synchronized with GSAP ticker loop for unified page momentum.",
+    projectHighlight: "Seamless Global Scroll Experience",
+    metrics: "0.08 lerp buttery damping",
+  },
+  {
+    id: "framer-motion",
+    name: "Framer Motion",
+    category: "frontend",
+    level: "Production Ready",
+    role: "Gestural & Modal Physics",
+    description: "Curtain unmasking reveals, spring physics animations, layout transitions, and staggered kinetic typography.",
+    projectHighlight: "Forge Navigation Drawer & 3D Card Physics",
+    metrics: "Physical spring easing transitions",
+  },
+  {
+    id: "threejs",
+    name: "Three.js",
+    category: "frontend",
+    level: "Core Competency",
+    role: "Spatial 3D Canvas",
+    description: "WebGL 3D scenes, camera perspective control, procedural meshes, and lighting effects for spatial depth.",
+    projectHighlight: "Interactive 3D Viewport Experiences",
+    metrics: "Direct WebGL rendering pipeline",
+  },
+
+  // 3. AI & Machine Learning
+  {
+    id: "ml-fundamentals",
+    name: "Machine Learning Concepts",
+    category: "aiml",
+    level: "Core Competency",
+    role: "Predictive Models & Theory",
+    description: "Supervised and unsupervised learning, regression, classification, clustering, and model validation techniques.",
+    projectHighlight: "B.Tech CSE (AI & ML) Curriculum",
+    metrics: "Mathematical foundations & model evaluation",
+  },
+  {
+    id: "neural-architectures",
+    name: "Neural & Deep Learning",
+    category: "aiml",
+    level: "Foundational",
+    role: "Modern AI Paradigms",
+    description: "Artificial neural network structures, backpropagation, activation functions, and foundational LLM architectures.",
+    projectHighlight: "AI/ML Specialization at NSEC",
+    metrics: "Algorithmic gradient optimization",
+  },
+
+  // 4. Performance & Technical SEO
+  {
+    id: "page-optimization",
+    name: "Page-Load Optimization",
+    category: "performance",
+    level: "Architectural",
+    role: "Speed & Core Web Vitals",
+    description: "Asset preloading, code splitting, script deferral, WebP/AVIF formats, and sub-second initial paint times.",
+    projectHighlight: "IziEat European Export Platform",
+    metrics: "Sub-1s LCP & 100/100 Core Web Vitals",
+  },
+  {
+    id: "seo-infrastructure",
+    name: "Technical SEO Infrastructure",
+    category: "performance",
+    level: "Production Ready",
+    role: "Organic Crawl & Discovery",
+    description: "Automated XML sitemaps, robots.txt directives, OpenGraph meta tags, and Google Search Console indexing monitoring.",
+    projectHighlight: "International Client Discoverability",
+    metrics: "Zero crawl errors in Search Console",
+  },
+  {
+    id: "caching-architecture",
+    name: "Caching & Cache Headers",
+    category: "performance",
+    level: "Production Ready",
+    role: "Latency Reduction",
+    description: "Browser caching policies, Cache-Control headers, stale-while-revalidate, and CDN edge optimization.",
+    projectHighlight: "Global Multi-Region Response Times",
+    metrics: "Repeat visits load in < 200ms",
+  },
+
+  // 5. Systems & Engineering Operations
+  {
+    id: "client-i18n",
+    name: "Client-Side Multilingual i18n",
+    category: "systems",
+    level: "Architectural",
+    role: "Zero-Dependency Localisation",
+    description: "Custom dictionary with 200+ structured translation keys across languages without external API dependencies.",
+    projectHighlight: "IziEat Agricultural Export Business",
+    metrics: "200+ structured keys, 0 external API lag",
+    codeSnippet: `// Client-side instant i18n switcher
+const i18nDict = {
+  en: { hero: 'Agricultural Export Excellence' },
+  fr: { hero: "Excellence de l'exportation agricole" }
+};
+function setLanguage(lang) {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = i18nDict[lang][el.dataset.i18n];
+  });
+}`,
+  },
+  {
+    id: "product-calculator",
+    name: "Product-Load Calculator",
+    category: "systems",
+    level: "Production Ready",
+    role: "Logistics Automation",
+    description: "Custom mathematical calculator for B2B container payload weight, volume distribution, and shipping logistics.",
+    projectHighlight: "IziEat Container Shipment Planner",
+    metrics: "Real-time payload optimization",
+  },
+  {
+    id: "dns-domain-ops",
+    name: "DNS & Domain Operations",
+    category: "systems",
+    level: "Production Ready",
+    role: "Cross-Border Infrastructure",
+    description: "DNS record orchestration (A, CNAME, TXT, MX), domain propagation troubleshooting, and SSL/HTTPS certificate deployment.",
+    projectHighlight: "India Centre & Latvian Cricket Federation",
+    metrics: "Zero-downtime platform maintenance",
+  },
+  {
+    id: "automation-scripting",
+    name: "Workflow Automation",
+    category: "systems",
+    level: "Core Competency",
+    role: "Operations Efficiency",
+    description: "Google Apps Script automation, webhooks, automated form dispatch, and Git/GitHub CI/CD deployment pipelines.",
+    projectHighlight: "Automated Inquiry Routing & Operations",
+    metrics: "Eliminated repetitive manual workflows",
+  },
+];
 
 export const ArchitecturalMatrix: React.FC = memo(() => {
-  const [activeCodeTab, setActiveCodeTab] = useState<CodeTab>("dictionary");
-  const [copiedCode, setCopiedCode] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<TechCategory>("all");
+  const [selectedTech, setSelectedTech] = useState<TechItem>(TECH_STACK[0]);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const sectionRef = useRef<HTMLDivElement | null>(null);
-  const stageRef = useRef<HTMLElement | null>(null);
-  const contentWrapperRef = useRef<HTMLDivElement | null>(null);
-  const headlineRef = useRef<HTMLDivElement | null>(null);
-  const bentoGridRef = useRef<HTMLDivElement | null>(null);
+  const sectionRef = useRef<HTMLElement | null>(null);
 
-  useEffect(() => {
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReducedMotion || !sectionRef.current) return;
+  const categories: { id: TechCategory; label: string; count: number }[] = [
+    { id: "all", label: "ALL CAPABILITIES", count: TECH_STACK.length },
+    { id: "frontend", label: "FRONTEND ARCHITECTURE", count: TECH_STACK.filter((t) => t.category === "frontend").length },
+    { id: "languages", label: "LANGUAGES", count: TECH_STACK.filter((t) => t.category === "languages").length },
+    { id: "aiml", label: "AI / ML CONCEPTS", count: TECH_STACK.filter((t) => t.category === "aiml").length },
+    { id: "performance", label: "PERFORMANCE & SEO", count: TECH_STACK.filter((t) => t.category === "performance").length },
+    { id: "systems", label: "SYSTEMS & OPERATIONS", count: TECH_STACK.filter((t) => t.category === "systems").length },
+  ];
 
-    const mm = gsap.matchMedia();
-
-    // DESKTOP (>= 768px): Pinned 100svh stage with scrubbed iris aperture bloom and scroll scrub assembly
-    mm.add("(min-width: 768px)", () => {
-      // 1. Geometric Rectangular Iris Expansion Entrance (Blueprint Aperture)
-      if (stageRef.current) {
-        gsap.fromTo(
-          stageRef.current,
-          { clipPath: "inset(45% 45% round 24px)" },
-          {
-            clipPath: "inset(0% 0% round 0px)",
-            ease: "none",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top bottom",
-              end: "top top",
-              scrub: true,
-            },
-          }
-        );
-      }
-
-      // 2. Entrance & Reveal Timeline as Movement 04 locks into place
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 60%",
-          end: "top top",
-          scrub: 0.4,
-        },
-      });
-
-      // Headline & chapter bar reveal
-      if (headlineRef.current) {
-        tl.fromTo(
-          headlineRef.current,
-          { opacity: 0, y: 35 },
-          { opacity: 1, y: 0, duration: 0.25, ease: "power2.out" },
-          0
-        );
-      }
-
-      // Bento boxes assemble (ZERO blur, immediate crispness)
-      if (bentoGridRef.current) {
-        tl.fromTo(
-          bentoGridRef.current.children,
-          { opacity: 0, y: 35, scale: 0.97 },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            stagger: 0.08,
-            duration: 0.35,
-            ease: "power2.out",
-          },
-          0.1
-        );
-      }
-
-      // 3. Dynamic Shrink & Dismissal as Section finishes (ZERO blur, pure self-contained trigger)
-      if (contentWrapperRef.current) {
-        gsap.to(contentWrapperRef.current, {
-          scale: 0.92,
-          yPercent: -16,
-          opacity: 0.15,
-          ease: "power2.inOut",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "bottom bottom",
-            end: "bottom top",
-            scrub: true,
-          },
-        });
-      }
-    });
-
-    // MOBILE (< 768px): Natural document flow - all bento boxes and code tabs are fully accessible and visible
-    mm.add("(max-width: 767px)", () => {
-      if (stageRef.current) {
-        gsap.set(stageRef.current, { clipPath: "none" });
-      }
-
-      if (headlineRef.current) {
-        gsap.fromTo(
-          headlineRef.current,
-          { opacity: 0, y: 25 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: headlineRef.current,
-              start: "top 85%",
-            },
-          }
-        );
-      }
-
-      if (bentoGridRef.current) {
-        gsap.fromTo(
-          bentoGridRef.current.children,
-          { opacity: 0, y: 25 },
-          {
-            opacity: 1,
-            y: 0,
-            stagger: 0.12,
-            duration: 0.6,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: bentoGridRef.current,
-              start: "top 85%",
-            },
-          }
-        );
-      }
-    });
-
-    return () => mm.revert();
-  }, []);
-
-  const codeSnippets: Record<CodeTab, { filename: string; language: string; code: string; telemetry: { speed: string; overhead: string; footprint: string } }> = {
-    dictionary: {
-      filename: "DictionaryEngine.ts",
-      language: "TypeScript",
-      code: `// Zero-API In-Memory Localization Dictionary (IZIEAT B2B)
-export const lookupTerm = (
-  key: string,
-  lang: "en" | "ru"
-): string => {
-  const term = DICTIONARY_STORE[key];
-  if (!term) return key;
-
-  // Sub-3ms memory lookup, zero external network requests
-  return term[lang] || term.en;
-};
-
-// Client-side cache hydration with O(1) hash map access
-export const prewarmCache = (dictionary: Record<string, TermPair>): void => {
-  Object.assign(DICTIONARY_STORE, dictionary);
-};`,
-      telemetry: {
-        speed: "< 2.8ms",
-        overhead: "0 API Calls",
-        footprint: "48 KB Gzip",
-      },
-    },
-    neural: {
-      filename: "SpatialExtractor.py",
-      language: "Python",
-      code: `# AI & ML Spatial Representation Pipeline
-import torch
-import torch.nn as nn
-
-class SpatialFeatureExtractor(nn.Module):
-    def __init__(self, in_features=128, out_features=64):
-        super().__init__()
-        self.dense = nn.Linear(in_features, out_features)
-        self.activation = nn.GELU()
-        self.norm = nn.LayerNorm(out_features)
-        
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        # Residual projection with non-linear embedding
-        projected = self.dense(x)
-        return self.norm(self.activation(projected)) + x[:, :64]`,
-      telemetry: {
-        speed: "1.4ms GPU",
-        overhead: "TensorRT INT8",
-        footprint: "18.2 MB Weights",
-      },
-    },
-    eventbus: {
-      filename: "TournamentIngest.ts",
-      language: "TypeScript",
-      code: `// Realtime Sports Telemetry Stream (Latvian Cricket)
-export async function ingestMatchTelemetry(
-  event: MatchEventPayload
-): Promise<IngestResult> {
-  const validated = MatchSchema.parse(event);
-  
-  // High-throughput Redis event broadcast with stream consumer group
-  const streamId = await redis.xadd(
-    \`tournaments:\${validated.tournamentId}:live\`,
-    "*",
-    "payload",
-    JSON.stringify(validated)
-  );
-
-  return { success: true, streamId, latencyMs: 4.1 };
-}`,
-      telemetry: {
-        speed: "< 4.5ms",
-        overhead: "100k+ Evt/mo",
-        footprint: "99.98% Uptime",
-      },
-    },
-  };
-
-  const handleCopyCode = async () => {
-    try {
-      await navigator.clipboard.writeText(codeSnippets[activeCodeTab].code);
-      setCopiedCode(true);
-      setTimeout(() => setCopiedCode(false), 2000);
-    } catch {}
-  };
-
-  const currentSnippet = codeSnippets[activeCodeTab];
+  const filteredTech = TECH_STACK.filter((item) => {
+    const matchesCategory = selectedCategory === "all" || item.category === selectedCategory;
+    const matchesSearch =
+      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   return (
-    <div
+    <section
       id="monument-matrix"
       ref={sectionRef}
-      className="relative w-full z-40 min-h-[100svh] md:h-[calc(100svh+1600px)]"
+      className="relative w-full z-30 min-h-[100svh] py-24 sm:py-32 px-4 sm:px-8 md:px-12 lg:px-16 bg-[#0B0609] text-[#F8F5EE] border-t border-[#EAD7C0]/15 select-none overflow-hidden"
     >
-      {/* Sticky Architectural Stage on Desktop, Natural Scrolling on Mobile */}
-      <section
-        ref={stageRef}
-        className="relative md:sticky md:top-0 min-h-[100svh] md:h-[100svh] w-full flex flex-col justify-start md:justify-center pt-24 sm:pt-28 md:pt-0 pb-16 sm:pb-12 md:pb-0 px-4 sm:px-8 md:px-12 overflow-visible md:overflow-hidden bg-[#080A0F] border-t border-white/10 will-change-[clip-path]"
-      >
-        {/* Leading Architectural Razor Hairline */}
-        <div className="absolute top-0 inset-x-0 h-[1px] bg-white/20" />
+      {/* Background Architectural Grid */}
+      <div className="absolute inset-0 bg-[radial-gradient(#EAD7C0_1px,transparent_1px)] [background-size:28px_28px] opacity-[0.04] pointer-events-none" />
+      <div className="absolute top-1/4 right-0 w-96 h-96 rounded-full bg-[#FF8C38]/5 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-10 left-10 w-96 h-96 rounded-full bg-[#10B981]/5 blur-3xl pointer-events-none" />
 
-        <div
-          ref={contentWrapperRef}
-          className="w-full max-w-7xl mx-auto flex flex-col justify-start md:justify-center will-change-[transform,opacity]"
-        >
-        {/* Chapter Marker */}
-        <div className="font-sans font-bold text-[11px] sm:text-xs text-[#FF7A00] tracking-[0.2em] uppercase mb-3 sm:mb-4 flex items-center gap-3">
-          <span className="w-6 sm:w-8 h-[1px] bg-[#FF7A00]" />
-          <span>TECHNICAL BLUEPRINT &amp; ARCHITECTURE</span>
-        </div>
-
-        {/* Headline & Description */}
-        <div ref={headlineRef} className="mb-6 sm:mb-8 will-change-[transform,opacity]">
-          <h2 className="font-sans font-black text-2xl sm:text-4xl lg:text-5xl text-[#FFFDF9] tracking-tight leading-[1.08] mb-2">
-            Technical Matrix &amp; Systems
-          </h2>
-          <p className="font-serif italic font-light text-sm sm:text-lg text-slate-300/90 max-w-2xl leading-relaxed">
-            Zero-roundtrip client dictionaries, high-throughput telemetry event streams, and production engineering architectures.
-          </p>
-        </div>
-
-      {/* Bento Grid */}
-      <div ref={bentoGridRef} className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
-        {/* Bento 1: Interactive Code Sandbox & Telemetry (7 cols) */}
-        <div
-          className="lg:col-span-7 p-5 sm:p-8 rounded-[2rem] bg-[#0C0E14]/92 border border-white/12 backdrop-blur-xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.12)] flex flex-col justify-between"
-          data-cursor="pointer"
-          data-cursor-text="CODE"
-        >
-          <div>
-            {/* Header with Spring Tabs & Copy Button */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pb-4 sm:pb-5 border-b border-white/10 mb-4 sm:mb-6">
-              <div className="flex items-center gap-2.5">
-                <Terminal size={15} className="text-[#FF7A00]" />
-                <span className="font-sans font-bold text-[11px] sm:text-xs text-[#FFFDF9] uppercase tracking-wider">
-                  {currentSnippet.filename}
-                </span>
-                <span className="text-[10px] text-white/30 font-mono">({currentSnippet.language})</span>
-              </div>
-
-              {/* Framer Motion Spring Code Tabs */}
-              <div className="flex items-center gap-1 bg-white/[0.04] p-1 rounded-full border border-white/10 overflow-x-auto no-scrollbar">
-                {(
-                  [
-                    { id: "dictionary", label: "278-Key i18n" },
-                    { id: "neural", label: "Neural PyTorch" },
-                    { id: "eventbus", label: "Event Bus" },
-                  ] as const
-                ).map((tab) => {
-                  const isActive = activeCodeTab === tab.id;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveCodeTab(tab.id)}
-                      className={`relative px-3 py-1 rounded-full font-sans font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer ${
-                        isActive ? "text-white" : "text-slate-400 hover:text-white"
-                      }`}
-                    >
-                      {isActive && (
-                        <motion.div
-                          layoutId="matrix-code-tab"
-                          className="absolute inset-0 bg-[#FF7A00] rounded-full"
-                          transition={{ type: "spring", stiffness: 450, damping: 30 }}
-                        />
-                      )}
-                      <span className="relative z-10">{tab.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Code Block */}
-            <div className="relative group/code">
-              <button
-                onClick={handleCopyCode}
-                className="absolute top-3 right-3 z-10 px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 text-[10px] font-sans font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors border border-white/10 cursor-pointer"
-                title="Copy code"
-              >
-                {copiedCode ? (
-                  <>
-                    <Check size={11} className="text-emerald-400" />
-                    <span className="text-emerald-400">Copied</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy size={11} />
-                    <span>Copy</span>
-                  </>
-                )}
-              </button>
-
-              <div className="px-4 pb-4 pt-11 sm:p-5 rounded-2xl bg-[#08090D] border border-white/10 font-mono text-[11px] sm:text-xs text-slate-200 leading-relaxed overflow-x-auto shadow-inner">
-                <AnimatePresence mode="wait">
-                  <motion.pre
-                    key={activeCodeTab}
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -4 }}
-                    transition={{ duration: 0.15 }}
-                    className="font-mono text-slate-300 whitespace-pre"
-                  >
-                    {activeCodeTab === "dictionary" && (
-                      <code>
-                        <span className="text-[#FF7A00] font-bold">{"// Zero-API In-Memory Localization Dictionary (IZIEAT B2B)\n"}</span>
-                        <span className="text-amber-300 font-semibold">export const</span> lookupTerm = ({"\n"}
-                        {"  "}key: <span className="text-emerald-400">string</span>,{"\n"}
-                        {"  "}lang: <span className="text-emerald-400">&quot;en&quot; | &quot;ru&quot;</span>{"\n"}
-                        ): <span className="text-emerald-400">string</span> =&gt; &#123;{"\n"}
-                        {"  "}const term = DICTIONARY_STORE[key];{"\n"}
-                        {"  "}<span className="text-amber-300 font-semibold">if</span> (!term) return key;{"\n\n"}
-                        {"  "}<span className="text-slate-500">{"// Sub-3ms memory lookup, zero external network requests\n"}</span>
-                        {"  "}return term[lang] || term.en;{"\n"}
-                        &#125;;
-                      </code>
-                    )}
-                    {activeCodeTab === "neural" && (
-                      <code>
-                        <span className="text-[#FF7A00] font-bold">{"# AI & ML Spatial Representation Pipeline\n"}</span>
-                        <span className="text-amber-300 font-semibold">class</span> SpatialFeatureExtractor(nn.Module):{"\n"}
-                        {"    "}<span className="text-amber-300 font-semibold">def</span> __init__(self, in_features=128, out_features=64):{"\n"}
-                        {"        "}super().__init__(){"\n"}
-                        {"        "}self.dense = nn.Linear(in_features, out_features){"\n"}
-                        {"        "}self.activation = nn.GELU(){"\n"}
-                        {"        "}self.norm = nn.LayerNorm(out_features){"\n\n"}
-                        {"    "}<span className="text-amber-300 font-semibold">def</span> forward(self, x: torch.Tensor) -&gt; torch.Tensor:{"\n"}
-                        {"        "}return self.norm(self.activation(self.dense(x))) + x[:, :64]
-                      </code>
-                    )}
-                    {activeCodeTab === "eventbus" && (
-                      <code>
-                        <span className="text-[#FF7A00] font-bold">{"// Realtime Sports Telemetry Stream (Latvian Cricket)\n"}</span>
-                        <span className="text-amber-300 font-semibold">export async function</span> ingestMatchTelemetry(event: MatchEventPayload) &#123;{"\n"}
-                        {"  "}const validated = MatchSchema.parse(event);{"\n\n"}
-                        {"  "}<span className="text-slate-500">{"// High-throughput Redis event broadcast\n"}</span>
-                        {"  "}const streamId = await redis.xadd(&quot;tournaments:live&quot;, &quot;*&quot;, &quot;payload&quot;, JSON.stringify(validated));{"\n"}
-                        {"  "}return &#123; success: true, streamId, latencyMs: 4.1 &#125;;{"\n"}
-                        &#125;
-                      </code>
-                    )}
-                  </motion.pre>
-                </AnimatePresence>
-              </div>
-            </div>
+      <div className="relative z-10 max-w-7xl mx-auto flex flex-col gap-12 sm:gap-16">
+        
+        {/* Chapter Bar */}
+        <div className="flex items-center justify-between font-sans font-bold text-[11px] sm:text-xs text-[#FF8C38] tracking-[0.24em] uppercase pb-4 border-b border-[#EAD7C0]/15">
+          <div className="flex items-center gap-3">
+            <span className="w-8 h-[1px] bg-[#FF8C38]" />
+            <span className="text-[#EAD7C0]">05 // TECHNICAL MATRIX &amp; CAPABILITIES</span>
           </div>
-
-          {/* Architectural Telemetry Metrics */}
-          <div className="grid grid-cols-3 gap-3 pt-5 border-t border-white/10 mt-5">
-            <div className="p-3 rounded-xl bg-white/[0.03] border border-white/8">
-              <div className="font-sans font-medium text-[9px] text-slate-400 uppercase tracking-widest mb-0.5">
-                SPEED / LATENCY
-              </div>
-              <div className="font-sans font-black text-sm sm:text-base text-[#FFFDF9]">
-                {currentSnippet.telemetry.speed}
-              </div>
-            </div>
-            <div className="p-3 rounded-xl bg-white/[0.03] border border-white/8">
-              <div className="font-sans font-medium text-[9px] text-slate-400 uppercase tracking-widest mb-0.5">
-                OVERHEAD
-              </div>
-              <div className="font-sans font-black text-sm sm:text-base text-emerald-400">
-                {currentSnippet.telemetry.overhead}
-              </div>
-            </div>
-            <div className="p-3 rounded-xl bg-white/[0.03] border border-white/8">
-              <div className="font-sans font-medium text-[9px] text-slate-400 uppercase tracking-widest mb-0.5">
-                BENCHMARK
-              </div>
-              <div className="font-sans font-black text-sm sm:text-base text-[#FFFDF9]">
-                {currentSnippet.telemetry.footprint}
-              </div>
-            </div>
+          <div className="hidden sm:inline-flex items-center gap-2 text-[10px] text-white/50 font-mono">
+            <span>{TECH_STACK.length} VERIFIED STACK MODULES</span>
           </div>
         </div>
 
-        {/* Bento 2: 3-Tier Production Blueprint & Architecture (5 cols) */}
-        <div
-          className="lg:col-span-5 p-5 sm:p-8 rounded-[2rem] bg-[#0C0E14]/92 border border-white/12 backdrop-blur-xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.12)] flex flex-col justify-between"
-          data-cursor="pointer"
-          data-cursor-text="STACK"
-        >
+        {/* Section Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <div className="flex items-center gap-2.5 pb-4 sm:pb-5 border-b border-white/10 mb-5">
-              <Layers size={15} className="text-[#FF7A00]" />
-              <span className="font-sans font-bold text-[11px] sm:text-xs text-[#FFFDF9] uppercase tracking-wider">
-                PRODUCTION TOOLKIT &amp; TOPOLOGY
+            <h2 className="font-helvetica font-normal text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-[#EAD7C0] tracking-tight leading-[0.9] uppercase mb-4">
+              TECHNICAL MATRIX <br />
+              <span className="text-[#EAD7C0]/40 hover:text-[#EAD7C0] transition-colors duration-500">
+                &amp; ENGINEERING STACK.
               </span>
-            </div>
-
-            <div className="space-y-4 sm:space-y-5">
-              {/* Tier 1 */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-sans font-bold text-[10px] text-[#FF7A00] uppercase tracking-widest flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#FF7A00]" />
-                    01 // FRONTEND ARCHITECTURE &amp; MOTION
-                  </span>
-                  <span className="text-[9px] font-mono text-slate-400">REACT 19 CORE</span>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {["React 19", "Next.js 16", "TypeScript", "Tailwind CSS v4", "GSAP 3", "Framer Motion", "Lenis Smooth"].map(
-                    (tech) => (
-                      <motion.span
-                        key={tech}
-                        whileHover={{ y: -2, scale: 1.02 }}
-                        className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/10 font-sans font-medium text-[11px] text-[#FFFDF9] uppercase tracking-wider shadow-xs cursor-default"
-                      >
-                        {tech}
-                      </motion.span>
-                    )
-                  )}
-                </div>
-              </div>
-
-              {/* Tier 2 */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-sans font-bold text-[10px] text-amber-400 uppercase tracking-widest flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                    02 // SYSTEMS, DATA &amp; AI
-                  </span>
-                  <span className="text-[9px] font-mono text-slate-400">POSIX / HIGH SPEED</span>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {["Python", "PyTorch", "JavaScript (ES6+)", "C / C++", "PostgreSQL", "Redis Event Bus"].map(
-                    (tech) => (
-                      <motion.span
-                        key={tech}
-                        whileHover={{ y: -2, scale: 1.02 }}
-                        className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/10 font-sans font-medium text-[11px] text-[#FFFDF9] uppercase tracking-wider shadow-xs cursor-default"
-                      >
-                        {tech}
-                      </motion.span>
-                    )
-                  )}
-                </div>
-              </div>
-
-              {/* Tier 3 */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-sans font-bold text-[10px] text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                    03 // DEPLOYMENT &amp; RESILIENCE
-                  </span>
-                  <span className="text-[9px] font-mono text-slate-400">EDGE NATIVE</span>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {["Cloudflare Workers", "Vercel Edge", "Git & GitHub", "Turbopack", "Linux / POSIX", "REST Endpoints"].map(
-                    (tech) => (
-                      <motion.span
-                        key={tech}
-                        whileHover={{ y: -2, scale: 1.02 }}
-                        className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/10 font-sans font-medium text-[11px] text-[#FFFDF9] uppercase tracking-wider shadow-xs cursor-default"
-                      >
-                        {tech}
-                      </motion.span>
-                    )
-                  )}
-                </div>
-              </div>
-            </div>
+            </h2>
+            <p className="font-serif italic font-light text-base sm:text-lg md:text-xl text-[#D8C4AE] leading-relaxed max-w-2xl">
+              An interactive blueprint of languages, frontend systems, performance tools, and operational workflows deployed in production.
+            </p>
           </div>
 
-          {/* Bottom Reliability Verification Badge */}
-          <div className="pt-4 border-t border-white/10 mt-5 flex items-center justify-between text-[10px]">
-            <span className="font-sans font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-              <ShieldCheck size={14} className="text-emerald-400" />
-              <span>DETERMINISTIC VERIFICATION</span>
-            </span>
-            <span className="text-emerald-400 font-mono font-bold">100% PASS</span>
+          {/* Search Box */}
+          <div className="relative w-full md:w-72">
+            <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Filter technologies..."
+              className="w-full pl-9 pr-4 py-2 rounded-full bg-white/5 border border-white/15 focus:border-[#FF8C38] focus:outline-none text-xs text-white placeholder:text-white/30 transition-colors"
+            />
           </div>
         </div>
+
+        {/* Category Filter Pills */}
+        <div className="flex flex-wrap gap-2 pt-2">
+          {categories.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-sans tracking-wider uppercase transition-all duration-200 cursor-pointer ${
+                selectedCategory === cat.id
+                  ? "bg-[#FF8C38] text-black font-bold shadow-md scale-105"
+                  : "bg-white/5 border border-white/15 text-white/70 hover:text-white hover:border-white/30"
+              }`}
+            >
+              <span>{cat.label}</span>
+              <span className="ml-1.5 opacity-60 text-[10px]">({cat.count})</span>
+            </button>
+          ))}
+        </div>
+
+        {/* ========================================================================= */}
+        {/* INTERACTIVE BENTO STACK: GRID OF SKILLS + LIVE ARCHITECTURAL INSPECTOR    */}
+        {/* ========================================================================= */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Tech Cards Grid (Left 7 Columns) */}
+          <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3.5 max-h-[750px] overflow-y-auto pr-1 select-none">
+            <AnimatePresence>
+              {filteredTech.map((tech) => {
+                const isSelected = selectedTech.id === tech.id;
+                return (
+                  <motion.div
+                    key={tech.id}
+                    layout
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.25 }}
+                    onClick={() => setSelectedTech(tech)}
+                    className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer flex flex-col justify-between gap-3 ${
+                      isSelected
+                        ? "bg-[#2A0C16] border-[#FF8C38] shadow-[0_10px_30px_-10px_rgba(255,140,56,0.3)] scale-[1.02]"
+                        : "bg-white/5 border-white/10 hover:border-white/25 hover:bg-white/[0.08]"
+                    }`}
+                  >
+                    <div>
+                      {/* Top Row: Category tag + Level */}
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[9px] font-mono uppercase tracking-wider text-[#FF8C38]">
+                          {tech.category}
+                        </span>
+                        <span
+                          className={`text-[9px] font-mono px-2 py-0.5 rounded-full border ${
+                            tech.level === "Architectural"
+                              ? "border-emerald-500/40 text-emerald-400 bg-emerald-950/30"
+                              : tech.level === "Production Ready"
+                              ? "border-amber-500/40 text-amber-300 bg-amber-950/30"
+                              : "border-white/20 text-white/60 bg-white/5"
+                          }`}
+                        >
+                          {tech.level}
+                        </span>
+                      </div>
+
+                      {/* Title */}
+                      <h3 className="font-sans font-bold text-sm text-[#FFFDF8] tracking-tight">
+                        {tech.name}
+                      </h3>
+                      <p className="font-sans text-[11px] text-[#D8C4AE]/80 mt-1 line-clamp-2 leading-relaxed">
+                        {tech.description}
+                      </p>
+                    </div>
+
+                    {/* Bottom Status / Selection Cue */}
+                    <div className="flex items-center justify-between pt-2 border-t border-white/5 text-[10px] font-mono">
+                      <span className="text-white/40 truncate max-w-[170px]">
+                        {tech.projectHighlight}
+                      </span>
+                      <span
+                        className={`font-bold transition-colors ${
+                          isSelected ? "text-[#FF8C38]" : "text-white/30"
+                        }`}
+                      >
+                        {isSelected ? "ACTIVE" : "INSPECT →"}
+                      </span>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </div>
+
+          {/* Live Architectural Inspector HUD (Right 5 Columns) */}
+          <div className="lg:col-span-5 sticky top-28 bg-[#1B060F]/90 border border-[#EAD7C0]/25 rounded-2xl p-6 sm:p-7 backdrop-blur-2xl shadow-[0_20px_50px_-15px_rgba(0,0,0,0.9)] flex flex-col justify-between gap-6">
+            
+            {/* Inspector Header */}
+            <div>
+              <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/10">
+                <div className="flex items-center gap-2">
+                  <Terminal size={14} className="text-[#FF8C38]" />
+                  <span className="font-mono text-xs uppercase tracking-wider text-white/70">
+                    MODULE ARCHITECTURE INSPECTOR
+                  </span>
+                </div>
+                <span className="text-[10px] font-mono text-emerald-400 animate-pulse">
+                  ● ACTIVE
+                </span>
+              </div>
+
+              {/* Selected Module Title */}
+              <div className="flex items-baseline gap-2 mb-1">
+                <h3 className="font-sans font-black text-2xl sm:text-3xl text-[#FFFDF8] tracking-tight">
+                  {selectedTech.name}
+                </h3>
+              </div>
+              <div className="text-xs font-mono text-[#FF8C38] uppercase tracking-wider mb-4">
+                {selectedTech.role}
+              </div>
+
+              <p className="font-sans text-xs sm:text-sm text-[#D8C4AE] leading-relaxed mb-6">
+                {selectedTech.description}
+              </p>
+
+              {/* Architectural Highlights Box */}
+              <div className="flex flex-col gap-3 p-4 rounded-xl bg-black/40 border border-white/10 mb-4">
+                <div>
+                  <div className="text-[10px] font-mono text-white/40 uppercase mb-0.5">
+                    KEY IMPLEMENTATION &amp; WORK
+                  </div>
+                  <div className="font-sans font-bold text-xs text-[#EAD7C0] flex items-center gap-1.5">
+                    <CheckCircle2 size={13} className="text-[#FF8C38]" />
+                    <span>{selectedTech.projectHighlight}</span>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-[10px] font-mono text-white/40 uppercase mb-0.5">
+                    ARCHITECTURAL METRIC
+                  </div>
+                  <div className="font-mono text-xs text-emerald-400">
+                    {selectedTech.metrics}
+                  </div>
+                </div>
+              </div>
+
+              {/* Optional Code Snippet / Architecture Spec */}
+              {selectedTech.codeSnippet && (
+                <div>
+                  <div className="text-[10px] font-mono text-white/40 uppercase mb-1.5">
+                    LIVE SYSTEM SIGNATURE
+                  </div>
+                  <pre className="p-3 rounded-lg bg-black/70 border border-white/10 font-mono text-[11px] text-[#EAD7C0]/90 overflow-x-auto leading-relaxed">
+                    <code>{selectedTech.codeSnippet}</code>
+                  </pre>
+                </div>
+              )}
+            </div>
+
+            {/* Quick Action Button */}
+            <div className="pt-4 border-t border-white/10 flex items-center justify-between">
+              <span className="text-[10px] font-mono text-white/40">
+                CSE (AI/ML) · NSEC KOLKATA
+              </span>
+              <a
+                href="#monument-exhibition"
+                className="inline-flex items-center gap-1.5 text-xs font-sans font-bold text-[#FF8C38] hover:text-[#EAD7C0] transition-colors"
+              >
+                <span>VIEW IN COMMISSIONS</span>
+                <ArrowRight size={12} />
+              </a>
+            </div>
+
+          </div>
+
+        </div>
+
       </div>
-      </div>
-      </section>
-    </div>
+    </section>
   );
 });
 

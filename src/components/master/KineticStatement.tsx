@@ -29,62 +29,60 @@ export const KineticStatement: React.FC = memo(() => {
     mm.add("(min-width: 768px)", () => {
       const statementLines = headlineRef.current?.querySelectorAll(".statement-line");
 
-      // 1. Two-Phase Deep Dramatic Dome to Rectangle Entrance (70% Ascend, 30% Corner Fill)
-      // The tall ellipse dome rises all the way up until its apex touches y=0 (corners at y=50%).
-      // Only after touching the top edge do the shoulders expand to complete a 100% full rectangle.
+      // 1. Entrance Ascent: The deep dramatic ellipse rises from below until its apex
+      // touches the absolute top edge of the screen (y = 0) at the exact moment the stage pins at top top.
       if (stageRef.current) {
-        const entranceTl = gsap.timeline({
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top bottom",
-            end: "top top",
-            scrub: 0.5,
-          },
-        });
-
-        // Phase A (0.0 -> 0.70): Tall dramatic ellipse rises up across the screen
-        // At 0.70, apex hits exact top (y=0) while corners remain curved at y=50%
-        entranceTl.fromTo(
+        gsap.fromTo(
           stageRef.current,
           { clipPath: "ellipse(70% 166% at 50% 266%)" },
           {
             clipPath: "ellipse(70% 166% at 50% 166%)",
             ease: "power1.inOut",
-            duration: 0.7,
-          },
-          0
-        );
-
-        // Phase B (0.70 -> 1.00): Apex remains locked at top while shoulders smoothly fill top corners into full rectangle
-        entranceTl.to(
-          stageRef.current,
-          {
-            clipPath: "ellipse(150% 150% at 50% 50%)",
-            ease: "power2.out",
-            duration: 0.3,
-          },
-          0.7
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top bottom",
+              end: "top top",
+              scrub: 0.5,
+            },
+          }
         );
       }
 
-      // 2. Entrance Timeline: Once the ellipse completes into a rectangle at top top,
-      // continuing to scroll reveals the dividers and text line-by-line in an upwards reveal animation.
+      // 2. Pinned Stage Timeline:
+      // While pinned at the top, scrolling first expands the curved shoulders to fill
+      // into a full rectangle, then continues scrolling reveals the statement text upwards!
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top top",
-          end: "+=450",
-          scrub: 0.3,
+          end: "+=650",
+          scrub: 0.4,
         },
       });
 
-      // Dividers draw across
+      // Step 2A (0.0 -> 0.35): Now that the apex has reached the top, continuing to scroll
+      // expands the curved shoulders into the top corners, smoothly transforming into a full rectangle!
+      if (stageRef.current) {
+        tl.fromTo(
+          stageRef.current,
+          { clipPath: "ellipse(70% 166% at 50% 166%)" },
+          {
+            clipPath: "ellipse(150% 150% at 50% 50%)",
+            ease: "power2.inOut",
+            duration: 0.35,
+          },
+          0
+        );
+      }
+
+      // Step 2B (0.35 -> 1.0): With the stage now a 100% full rectangle,
+      // continuing to scroll triggers the upward reveal of dividers and text!
       if (dividerTopRef.current && dividerBottomRef.current) {
         tl.fromTo(
           [dividerTopRef.current, dividerBottomRef.current],
           { scaleX: 0, transformOrigin: "left center" },
-          { scaleX: 1, duration: 0.2, ease: "power2.out" },
-          0
+          { scaleX: 1, duration: 0.20, ease: "power2.out" },
+          0.35
         );
       }
 
@@ -93,8 +91,8 @@ export const KineticStatement: React.FC = memo(() => {
         tl.fromTo(
           metaBarRef.current,
           { opacity: 0, y: -8 },
-          { opacity: 1, y: 0, duration: 0.2, ease: "power2.out" },
-          0.05
+          { opacity: 1, y: 0, duration: 0.20, ease: "power2.out" },
+          0.40
         );
       }
 
@@ -110,7 +108,7 @@ export const KineticStatement: React.FC = memo(() => {
             duration: 0.35,
             ease: "power3.out",
           },
-          0.1
+          0.45
         );
       }
 
@@ -119,8 +117,8 @@ export const KineticStatement: React.FC = memo(() => {
         tl.fromTo(
           attributionRef.current,
           { opacity: 0, y: 10 },
-          { opacity: 1, y: 0, duration: 0.2, ease: "power2.out" },
-          0.3
+          { opacity: 1, y: 0, duration: 0.20, ease: "power2.out" },
+          0.65
         );
       }
 
@@ -148,57 +146,55 @@ export const KineticStatement: React.FC = memo(() => {
     mm.add("(max-width: 767px)", () => {
       const statementLines = headlineRef.current?.querySelectorAll(".statement-line");
 
-      // 1. Two-Phase Deep Dramatic Dome on Mobile (70% Ascend, 30% Corner Fill)
+      // 1. Entrance Ascent on Mobile: Rises until apex reaches the absolute top (y=0) at top top
       if (stageRef.current) {
-        const entranceTl = gsap.timeline({
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top bottom",
-            end: "top top",
-            scrub: 0.5,
-          },
-        });
-
-        // Phase A (0.0 -> 0.70): Ascend until apex reaches y=0
-        entranceTl.fromTo(
+        gsap.fromTo(
           stageRef.current,
           { clipPath: "ellipse(65% 138% at 50% 238%)" },
           {
             clipPath: "ellipse(65% 138% at 50% 138%)",
             ease: "power1.inOut",
-            duration: 0.7,
-          },
-          0
-        );
-
-        // Phase B (0.70 -> 1.00): Fill corners into full rectangle
-        entranceTl.to(
-          stageRef.current,
-          {
-            clipPath: "ellipse(150% 150% at 50% 50%)",
-            ease: "power2.out",
-            duration: 0.3,
-          },
-          0.7
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top bottom",
+              end: "top top",
+              scrub: 0.5,
+            },
+          }
         );
       }
 
-      // 2. Entrance Timeline: Once the ellipse completes at top top, reveals text upwards smoothly
+      // 2. Pinned Stage Timeline on Mobile:
+      // While pinned at the top, scrolling first expands the curved shoulders into a full rectangle,
+      // then continuing to scroll reveals the text upwards!
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top top",
-          end: "+=350",
+          end: "+=550",
           scrub: 0.4,
         },
       });
+
+      if (stageRef.current) {
+        tl.fromTo(
+          stageRef.current,
+          { clipPath: "ellipse(65% 138% at 50% 138%)" },
+          {
+            clipPath: "ellipse(150% 150% at 50% 50%)",
+            ease: "power2.inOut",
+            duration: 0.35,
+          },
+          0
+        );
+      }
 
       if (dividerTopRef.current && dividerBottomRef.current) {
         tl.fromTo(
           [dividerTopRef.current, dividerBottomRef.current],
           { scaleX: 0, transformOrigin: "left center" },
-          { scaleX: 1, duration: 0.25, ease: "power2.out" },
-          0
+          { scaleX: 1, duration: 0.20, ease: "power2.out" },
+          0.35
         );
       }
 
@@ -206,8 +202,8 @@ export const KineticStatement: React.FC = memo(() => {
         tl.fromTo(
           metaBarRef.current,
           { opacity: 0, y: -6 },
-          { opacity: 1, y: 0, duration: 0.25, ease: "power2.out" },
-          0.05
+          { opacity: 1, y: 0, duration: 0.20, ease: "power2.out" },
+          0.40
         );
       }
 
@@ -219,10 +215,10 @@ export const KineticStatement: React.FC = memo(() => {
             yPercent: 0,
             opacity: 1,
             stagger: 0.1,
-            duration: 0.4,
+            duration: 0.35,
             ease: "power3.out",
           },
-          0.1
+          0.45
         );
       }
 
@@ -230,8 +226,8 @@ export const KineticStatement: React.FC = memo(() => {
         tl.fromTo(
           attributionRef.current,
           { opacity: 0, y: 8 },
-          { opacity: 1, y: 0, duration: 0.25, ease: "power2.out" },
-          0.3
+          { opacity: 1, y: 0, duration: 0.20, ease: "power2.out" },
+          0.65
         );
       }
 
@@ -259,7 +255,7 @@ export const KineticStatement: React.FC = memo(() => {
       id="monument-statement"
       ref={sectionRef}
       className="relative w-full z-20"
-      style={{ height: "calc(100svh + 800px)" }}
+      style={{ height: "calc(100svh + 900px)" }}
     >
       {/* Sticky 100svh Dedicated Architectural Stage (Rich Wine Red & Warm Italian Light Sand) */}
       <section

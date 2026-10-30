@@ -88,17 +88,17 @@ export const TerminalFinale: React.FC = memo(() => {
     <footer
       id="monument-terminal"
       ref={sectionRef}
-      className="relative w-full z-50 min-h-[100svh] flex flex-col justify-between pt-16 sm:pt-24 pb-12 sm:pb-16 px-4 sm:px-8 md:px-12 bg-[#060709] border-t border-white/10"
+      className="relative w-full z-50 min-h-[100svh] flex flex-col justify-between pt-16 sm:pt-24 pb-12 sm:pb-16 px-4 sm:px-8 md:px-12 bg-[#1C0B0E] border-t border-[#F7EFE8]/15"
     >
-      {/* Leading Architectural Razor Hairline (Zero AI glows) */}
-      <div className="absolute top-0 inset-x-0 h-[1px] bg-white/20" />
+      {/* Leading Architectural Razor Hairline */}
+      <div className="absolute top-0 inset-x-0 h-[1px] bg-[#F7EFE8]/25" />
 
       <div className="w-full max-w-7xl mx-auto flex flex-col justify-between flex-1">
         {/* Chapter Marker */}
-        <div className="font-sans font-bold text-[11px] sm:text-xs text-[#FF7A00] tracking-[0.2em] uppercase mb-6 sm:mb-8 flex items-center justify-between">
+        <div className="font-sans font-bold text-[11px] sm:text-xs text-[#FF8C38] tracking-[0.2em] uppercase mb-6 sm:mb-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="w-8 h-[1px] bg-[#FF7A00]" />
-            <span>INITIATION &amp; CONTACT</span>
+            <span className="w-8 h-[1px] bg-[#FF8C38]" />
+            <span className="text-[#F7EFE8]">INITIATION &amp; CONTACT</span>
           </div>
           <div className="hidden sm:inline-flex items-center gap-2 text-[10px] text-emerald-400 font-mono">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -110,14 +110,14 @@ export const TerminalFinale: React.FC = memo(() => {
         <div className="my-auto py-4 sm:py-6">
           <h2
             ref={headlineRef}
-            className="font-helvetica font-normal text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-[7.5rem] xl:text-[8.5rem] text-[#FFFDF9] tracking-tight leading-[0.9] uppercase mb-4 sm:mb-6 will-change-[transform,opacity]"
+            className="font-helvetica font-normal text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-[7.5rem] xl:text-[8.5rem] text-[#F7EFE8] tracking-tight leading-[0.9] uppercase mb-4 sm:mb-6 will-change-[transform,opacity]"
           >
             LET&apos;S BUILD <br />
-            <span className="text-white/40 hover:text-white transition-colors duration-500">
+            <span className="text-[#F7EFE8]/40 hover:text-[#F7EFE8] transition-colors duration-500">
               SOMETHING REAL.
             </span>
           </h2>
-          <p className="font-serif italic font-light text-base sm:text-xl md:text-2xl text-slate-300 max-w-2xl leading-relaxed">
+          <p className="font-serif italic font-light text-base sm:text-xl md:text-2xl text-[#DDD3C7] max-w-2xl leading-relaxed">
             Open to software engineering and frontend development internships. Crafting high-performance digital environments with physical weight.
           </p>
         </div>
@@ -125,27 +125,27 @@ export const TerminalFinale: React.FC = memo(() => {
         {/* Direct Contact Monoliths */}
         <div
           ref={monolithsRef}
-          className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 pt-6 sm:pt-10 border-t border-white/10"
+          className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 pt-6 sm:pt-10 border-t border-[#F7EFE8]/15"
         >
           {/* Email Monolith */}
           <motion.div
-            whileHover={{ y: -4, borderColor: "rgba(255, 122, 0, 0.4)" }}
+            whileHover={{ y: -4, borderColor: "rgba(255, 140, 56, 0.5)" }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
             onClick={handleCopyEmail}
-            className="p-5 sm:p-7 rounded-2xl bg-[#0C0E14]/92 border border-white/12 backdrop-blur-xl shadow-[0_20px_50px_-15px_rgba(0,0,0,0.85)] cursor-pointer group flex flex-col justify-between transition-colors duration-300"
+            className="p-5 sm:p-7 rounded-2xl bg-[#14080B]/90 border border-[#F7EFE8]/15 backdrop-blur-xl shadow-[0_20px_50px_-15px_rgba(0,0,0,0.85)] cursor-pointer group flex flex-col justify-between transition-colors duration-300"
           >
             <div>
               <div className="flex items-center justify-between mb-3 sm:mb-5">
-                <span className="font-sans font-bold text-[10px] sm:text-xs text-slate-400 uppercase tracking-widest">
+                <span className="font-sans font-bold text-[10px] sm:text-xs text-[#E6DCD2]/70 uppercase tracking-widest">
                   DIRECT INQUIRY
                 </span>
-                <Mail size={16} className="text-[#FF7A00]" />
+                <Mail size={16} className="text-[#FF8C38]" />
               </div>
-              <div className="font-sans font-bold text-sm sm:text-base md:text-lg text-[#FFFDF9] tracking-tight mb-2 break-all">
+              <div className="font-sans font-bold text-sm sm:text-base md:text-lg text-[#F7EFE8] tracking-tight mb-2 break-all">
                 {email}
               </div>
             </div>
-            <div className="flex items-center gap-2 font-sans font-bold text-xs uppercase tracking-wider text-slate-400 group-hover:text-[#FF7A00] transition-colors mt-4 sm:mt-6">
+            <div className="flex items-center gap-2 font-sans font-bold text-xs uppercase tracking-wider text-[#DDD3C7] group-hover:text-[#FF8C38] transition-colors mt-4 sm:mt-6">
               {copied ? (
                 <>
                   <Check size={14} className="text-emerald-400" />
@@ -164,30 +164,30 @@ export const TerminalFinale: React.FC = memo(() => {
           <motion.div
             whileHover={{ y: -4, borderColor: "rgba(16, 185, 129, 0.4)" }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            className="p-5 sm:p-7 rounded-2xl bg-[#0C0E14]/92 border border-white/12 backdrop-blur-xl shadow-[0_20px_50px_-15px_rgba(0,0,0,0.85)] flex flex-col justify-between transition-colors duration-300"
+            className="p-5 sm:p-7 rounded-2xl bg-[#14080B]/90 border border-[#F7EFE8]/15 backdrop-blur-xl shadow-[0_20px_50px_-15px_rgba(0,0,0,0.85)] flex flex-col justify-between transition-colors duration-300"
           >
             <div>
               <div className="flex items-center justify-between mb-3 sm:mb-5">
-                <span className="font-sans font-bold text-[10px] sm:text-xs text-slate-400 uppercase tracking-widest">
+                <span className="font-sans font-bold text-[10px] sm:text-xs text-[#E6DCD2]/70 uppercase tracking-widest">
                   TELEPHONY &amp; WHATSAPP
                 </span>
                 <Phone size={16} className="text-emerald-400" />
               </div>
-              <div className="font-sans font-bold text-base sm:text-lg md:text-xl text-[#FFFDF9] tracking-tight mb-2">
+              <div className="font-sans font-bold text-base sm:text-lg md:text-xl text-[#F7EFE8] tracking-tight mb-2">
                 {phone}
               </div>
             </div>
-            <div className="flex items-center justify-between pt-3 mt-2 border-t border-white/8">
+            <div className="flex items-center justify-between pt-3 mt-2 border-t border-[#F7EFE8]/10">
               <a
                 href={`tel:${phone.replace(/\s+/g, "")}`}
-                className="inline-flex items-center gap-1.5 font-sans font-bold text-xs uppercase tracking-wider text-slate-400 hover:text-emerald-400 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 font-sans font-bold text-xs uppercase tracking-wider text-[#DDD3C7] hover:text-emerald-400 transition-colors cursor-pointer"
               >
                 <span>CALL</span>
                 <ArrowUpRight size={13} />
               </a>
               <button
                 onClick={handleCopyPhone}
-                className="text-[11px] font-sans font-bold uppercase tracking-wider text-slate-500 hover:text-white transition-colors cursor-pointer"
+                className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#E6DCD2]/60 hover:text-[#F7EFE8] transition-colors cursor-pointer"
               >
                 {copiedPhone ? "COPIED" : "COPY"}
               </button>
@@ -198,37 +198,37 @@ export const TerminalFinale: React.FC = memo(() => {
           <motion.div
             whileHover={{ y: -4 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            className="p-5 sm:p-7 rounded-2xl bg-[#0C0E14]/92 border border-white/12 backdrop-blur-xl shadow-[0_20px_50px_-15px_rgba(0,0,0,0.85)] flex flex-col justify-between"
+            className="p-5 sm:p-7 rounded-2xl bg-[#14080B]/90 border border-[#F7EFE8]/15 backdrop-blur-xl shadow-[0_20px_50px_-15px_rgba(0,0,0,0.85)] flex flex-col justify-between"
           >
             <div>
               <div className="flex items-center justify-between mb-3 sm:mb-5">
-                <span className="font-sans font-bold text-[10px] sm:text-xs text-slate-400 uppercase tracking-widest">
+                <span className="font-sans font-bold text-[10px] sm:text-xs text-[#E6DCD2]/70 uppercase tracking-widest">
                   GEOGRAPHIC ANCHOR
                 </span>
-                <MapPin size={16} className="text-amber-400" />
+                <MapPin size={16} className="text-[#FF8C38]" />
               </div>
-              <div className="font-sans font-bold text-base sm:text-lg md:text-xl text-[#FFFDF9] tracking-tight mb-2">
+              <div className="font-sans font-bold text-base sm:text-lg md:text-xl text-[#F7EFE8] tracking-tight mb-2">
                 Kolkata, India
               </div>
             </div>
-            <div className="font-mono text-[11px] text-slate-400 uppercase tracking-wider mt-4 sm:mt-6">
+            <div className="font-mono text-[11px] text-[#E6DCD2]/70 uppercase tracking-wider mt-4 sm:mt-6">
               LAT 22.5726° N · IST (UTC+05:30)
             </div>
           </motion.div>
         </div>
 
         {/* Colophon & Back to Top */}
-        <div className="pt-6 sm:pt-10 mt-6 sm:mt-10 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-4">
-          <div className="font-sans font-bold text-[10px] sm:text-[11px] uppercase tracking-widest text-slate-400 text-center sm:text-left">
+        <div className="pt-6 sm:pt-10 mt-6 sm:mt-10 border-t border-[#F7EFE8]/15 flex flex-col sm:flex-row items-center justify-between text-xs text-[#E6DCD2]/60 gap-4">
+          <div className="font-sans font-bold text-[10px] sm:text-[11px] uppercase tracking-widest text-[#E6DCD2]/60 text-center sm:text-left">
             SOHAM ROYCHOUDHURY // ARCHIVE 2026 · ALL RIGHTS RESERVED
           </div>
 
           <button
             onClick={scrollToTop}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 text-white font-sans font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#F7EFE8]/10 hover:bg-[#F7EFE8]/20 border border-[#F7EFE8]/20 text-[#F7EFE8] font-sans font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer"
           >
             <span>RETURN TO TERRACE</span>
-            <ArrowUp size={12} className="text-[#FF7A00]" />
+            <ArrowUp size={12} className="text-[#FF8C38]" />
           </button>
         </div>
       </div>

@@ -223,13 +223,13 @@ export const KineticStatement: React.FC = memo(() => {
       className="relative w-full z-20"
       style={{ height: "calc(100svh + 500px)" }}
     >
-      {/* Sticky 100svh Dedicated Architectural Stage */}
+      {/* Sticky 100svh Dedicated Architectural Stage (Wine Red Canvas & Light Sand Typography) */}
       <section
         ref={stageRef}
-        className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-center pt-20 sm:pt-28 pb-8 sm:pb-12 px-4 sm:px-12 md:px-20 overflow-hidden bg-[#060709] border-t border-white/10 will-change-[clip-path]"
+        className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-center pt-20 sm:pt-28 pb-8 sm:pb-12 px-4 sm:px-12 md:px-20 overflow-hidden bg-[#220C11] border-t border-[#F7EFE8]/15 will-change-[clip-path]"
       >
-        {/* Leading Architectural Razor Hairline (Zero AI glows) */}
-        <div className="absolute top-0 inset-x-0 h-[1px] bg-white/20" />
+        {/* Leading Architectural Razor Hairline */}
+        <div className="absolute top-0 inset-x-0 h-[1px] bg-[#F7EFE8]/25" />
 
         <div
           ref={containerRef}
@@ -238,20 +238,20 @@ export const KineticStatement: React.FC = memo(() => {
           {/* Architectural Meta Bar */}
           <div
             ref={metaBarRef}
-            className="flex items-center justify-between text-[10px] sm:text-[11px] font-sans font-bold uppercase tracking-[0.24em] text-slate-400 mb-4 sm:mb-6 pb-2"
+            className="flex items-center justify-between text-[10px] sm:text-[11px] font-sans font-bold uppercase tracking-[0.24em] text-[#E6DCD2]/70 mb-4 sm:mb-6 pb-2"
           >
-            <span>ARCHITECTURAL STATEMENT</span>
-            <span className="hidden sm:inline text-slate-500">LAT 22.5726° N · LON 88.3639° E</span>
-            <span className="text-[#FF7A00]">TERRACE PERSPECTIVE</span>
+            <span className="text-[#F7EFE8]">ARCHITECTURAL STATEMENT</span>
+            <span className="hidden sm:inline text-[#E6DCD2]/50">LAT 22.5726° N · LON 88.3639° E</span>
+            <span className="text-[#FF8C38]">TERRACE PERSPECTIVE</span>
           </div>
 
           {/* Top Hairline Divider */}
-          <div ref={dividerTopRef} className="w-full h-[1px] bg-white/10 mb-5 sm:mb-12 will-change-transform" />
+          <div ref={dividerTopRef} className="w-full h-[1px] bg-[#F7EFE8]/15 mb-5 sm:mb-12 will-change-transform" />
 
-          {/* Monumental All-Caps Statement (Forge Automotive & Heron AI Proportions) */}
+          {/* Monumental All-Caps Statement in Italian Light Sand */}
           <h2
             ref={headlineRef}
-            className="font-sans font-black text-xl xs:text-2xl sm:text-4xl md:text-5xl lg:text-[3.4rem] xl:text-[4rem] tracking-tight leading-[1.06] uppercase text-[#FFFDF9] mb-5 sm:mb-12 select-none"
+            className="font-sans font-black text-xl xs:text-2xl sm:text-4xl md:text-5xl lg:text-[3.4rem] xl:text-[4rem] tracking-tight leading-[1.06] uppercase text-[#F7EFE8] mb-5 sm:mb-12 select-none"
           >
             <div className="overflow-hidden pb-1">
               <span className="statement-line inline-block">
@@ -260,26 +260,26 @@ export const KineticStatement: React.FC = memo(() => {
             </div>
             <div className="overflow-hidden pb-1">
               <span className="statement-line inline-block">
-                WE ENGINEER <span className="text-[#FF7A00]">DIGITAL ENVIRONMENTS</span> WITH PHYSICAL WEIGHT,
+                WE ENGINEER <span className="text-[#FF8C38]">DIGITAL ENVIRONMENTS</span> WITH PHYSICAL WEIGHT,
               </span>
             </div>
             <div className="overflow-hidden pb-1">
-              <span className="statement-line inline-block text-white/50">
+              <span className="statement-line inline-block text-[#F7EFE8]/50">
                 KINETIC INTENTION, AND INTERNATIONAL SCALE.
               </span>
             </div>
           </h2>
 
           {/* Bottom Hairline Divider */}
-          <div ref={dividerBottomRef} className="w-full h-[1px] bg-white/10 mb-4 sm:mb-6 will-change-transform" />
+          <div ref={dividerBottomRef} className="w-full h-[1px] bg-[#F7EFE8]/15 mb-4 sm:mb-6 will-change-transform" />
 
           {/* Attribution Tag */}
           <div
             ref={attributionRef}
-            className="flex items-center justify-between text-[10px] sm:text-xs font-mono text-slate-400 tracking-wider"
+            className="flex items-center justify-between text-[10px] sm:text-xs font-mono text-[#E6DCD2]/70 tracking-wider"
           >
-            <span className="text-white/60">SOHAM ROYCHOUDHURY · ARCHITECTURAL CREED</span>
-            <span className="text-white/30 hidden sm:inline">KOLKATA // LATVIA // GLOBAL</span>
+            <span className="text-[#F7EFE8]/70">SOHAM ROYCHOUDHURY · ARCHITECTURAL CREED</span>
+            <span className="text-[#F7EFE8]/40 hidden sm:inline">KOLKATA // LATVIA // GLOBAL</span>
           </div>
         </div>
       </section>

@@ -24,9 +24,11 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion || !sectionRef.current) return;
 
-    const ctx = gsap.context(() => {
+    const mm = gsap.matchMedia();
+
+    // DESKTOP (>= 768px): Pinned 100svh stage with scrubbed iris aperture bloom and scroll scrub assembly
+    mm.add("(min-width: 768px)", () => {
       // 1. Geometric Rectangular Iris Expansion Entrance (Blueprint Aperture)
-      // Unfolds cleanly from the center of the screen outward!
       if (stageRef.current) {
         gsap.fromTo(
           stageRef.current,
@@ -44,7 +46,7 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
         );
       }
 
-      // 2. Entrance & Reveal Timeline as Movement 03 locks into place
+      // 2. Entrance & Reveal Timeline as Movement 04 locks into place
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
@@ -96,9 +98,51 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
           },
         });
       }
-    }, sectionRef);
+    });
 
-    return () => ctx.revert();
+    // MOBILE (< 768px): Natural document flow - all bento boxes and code tabs are fully accessible and visible
+    mm.add("(max-width: 767px)", () => {
+      if (stageRef.current) {
+        gsap.set(stageRef.current, { clipPath: "none" });
+      }
+
+      if (headlineRef.current) {
+        gsap.fromTo(
+          headlineRef.current,
+          { opacity: 0, y: 25 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: headlineRef.current,
+              start: "top 85%",
+            },
+          }
+        );
+      }
+
+      if (bentoGridRef.current) {
+        gsap.fromTo(
+          bentoGridRef.current.children,
+          { opacity: 0, y: 25 },
+          {
+            opacity: 1,
+            y: 0,
+            stagger: 0.12,
+            duration: 0.6,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: bentoGridRef.current,
+              start: "top 85%",
+            },
+          }
+        );
+      }
+    });
+
+    return () => mm.revert();
   }, []);
 
   const codeSnippets: Record<CodeTab, { filename: string; language: string; code: string; telemetry: { speed: string; overhead: string; footprint: string } }> = {
@@ -192,15 +236,14 @@ export async function ingestMatchTelemetry(
     <div
       id="monument-matrix"
       ref={sectionRef}
-      className="relative w-full z-40"
-      style={{ height: "calc(100svh + 1600px)" }}
+      className="relative w-full z-40 min-h-[100svh] md:h-[calc(100svh+1600px)]"
     >
-      {/* Sticky 100svh Architectural Stage */}
+      {/* Sticky Architectural Stage on Desktop, Natural Scrolling on Mobile */}
       <section
         ref={stageRef}
-        className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-center pt-20 sm:pt-24 pb-4 sm:pb-8 px-4 sm:px-8 md:px-12 overflow-hidden bg-[#060709] border-t border-white/10 will-change-[clip-path]"
+        className="relative md:sticky md:top-0 min-h-[100svh] md:h-[100svh] w-full flex flex-col justify-center pt-20 sm:pt-24 pb-12 sm:pb-8 px-4 sm:px-8 md:px-12 overflow-visible md:overflow-hidden bg-[#080A0F] border-t border-white/10 will-change-[clip-path]"
       >
-        {/* Leading Architectural Razor Hairline (Zero AI glows) */}
+        {/* Leading Architectural Razor Hairline */}
         <div className="absolute top-0 inset-x-0 h-[1px] bg-white/20" />
 
         <div

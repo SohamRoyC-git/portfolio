@@ -312,19 +312,19 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
       className="relative w-full z-30"
       style={{ height: "calc(100svh + 2400px)" }}
     >
-      {/* Sticky 100svh Architectural Stage */}
+      {/* Sticky 100svh Architectural Stage (Deep Velvet Burgundy & Italian Light Sand) */}
       <section
         ref={stageRef}
-        className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-between pt-20 sm:pt-24 pb-8 px-6 sm:px-12 md:px-16 lg:px-20 overflow-hidden bg-[#060709] border-t border-white/10 will-change-[clip-path]"
+        className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-between pt-20 sm:pt-24 pb-8 px-6 sm:px-12 md:px-16 lg:px-20 overflow-hidden bg-[#1D090E] border-t border-[#F7EFE8]/15 will-change-[clip-path]"
       >
         {/* Leading Architectural Razor Hairline */}
-        <div className="absolute top-0 inset-x-0 h-[1px] bg-white/20" />
+        <div className="absolute top-0 inset-x-0 h-[1px] bg-[#F7EFE8]/25" />
 
         {/* Top Section Header & Telemetry */}
-        <div className="w-full max-w-7xl mx-auto flex items-center justify-between text-[11px] font-sans font-bold uppercase tracking-[0.22em] text-slate-400 pb-3 border-b border-white/10">
+        <div className="w-full max-w-7xl mx-auto flex items-center justify-between text-[11px] font-sans font-bold uppercase tracking-[0.22em] text-[#E6DCD2]/70 pb-3 border-b border-[#F7EFE8]/15">
           <div className="flex items-center gap-3">
-            <span className="w-2 h-2 rounded-full bg-[#FF7A00]" />
-            <span className="text-white">SELECTED COMMISSIONS // ARCHITECTURAL SHOWCASE</span>
+            <span className="w-2 h-2 rounded-full bg-[#FF8C38]" />
+            <span className="text-[#F7EFE8]">SELECTED COMMISSIONS // ARCHITECTURAL SHOWCASE</span>
           </div>
           <div className="flex items-center gap-4 text-xs font-mono">
             <div className="hidden sm:flex items-center gap-1.5">
@@ -332,13 +332,13 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                 <span
                   key={dotIdx}
                   className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${
-                    dotIdx === activeIdx ? "bg-[#FF7A00]" : "bg-white/20"
+                    dotIdx === activeIdx ? "bg-[#FF8C38]" : "bg-[#F7EFE8]/20"
                   }`}
                 />
               ))}
             </div>
-            <span className="text-slate-400">DEPTH:</span>
-            <span className="text-[#FF7A00] font-bold">
+            <span className="text-[#E6DCD2]/60">DEPTH:</span>
+            <span className="text-[#FF8C38] font-bold">
               <span ref={counterRef}>01</span> / 04
             </span>
           </div>
@@ -346,24 +346,24 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
 
         {/* Main Split Screen Container */}
         <div className="showcase-container w-full max-w-7xl mx-auto flex-1 flex items-center my-auto will-change-[transform,opacity]">
-          <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-8 lg:gap-16 items-center">
+          <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-10 lg:gap-16 items-center">
             
             {/* ================================================================= */}
-            {/* LEFT COLUMN: Framed Logo Portal with Inside-Out Aperture Reveal   */}
+            {/* LEFT COLUMN: Large Commanding Logo Portal (Inside-Out Aperture Bloom) */}
             {/* ================================================================= */}
-            <div className="md:col-span-6 lg:col-span-5 flex justify-center items-center">
-              <div className="relative w-36 h-36 xs:w-44 xs:h-44 sm:w-64 sm:h-64 md:w-full md:max-w-[400px] lg:max-w-[460px] aspect-square rounded-2xl bg-[#090B10] border border-white/15 p-4 sm:p-10 md:p-12 flex items-center justify-center overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.9)]">
+            <div className="md:col-span-6 lg:col-span-6 flex justify-center items-center">
+              <div className="relative w-full max-w-[280px] xs:max-w-[340px] sm:max-w-[420px] md:max-w-[480px] lg:max-w-[520px] xl:max-w-[560px] aspect-square rounded-3xl bg-[#14080B] border border-[#F7EFE8]/15 p-4 sm:p-8 md:p-10 flex items-center justify-center overflow-hidden shadow-[0_25px_80px_rgba(0,0,0,0.95)]">
                 
                 {/* Architectural Corner Reticle Accents */}
-                <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 w-2.5 sm:w-3 h-2.5 sm:h-3 border-t border-l border-white/40 pointer-events-none" />
-                <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-2.5 sm:w-3 h-2.5 sm:h-3 border-t border-r border-white/40 pointer-events-none" />
-                <div className="absolute bottom-2.5 left-2.5 sm:bottom-3 sm:left-3 w-2.5 sm:w-3 h-2.5 sm:h-3 border-b border-l border-white/40 pointer-events-none" />
-                <div className="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-3 w-2.5 sm:w-3 h-2.5 sm:h-3 border-b border-r border-white/40 pointer-events-none" />
+                <div className="absolute top-3 left-3 sm:top-4 sm:left-4 w-3 sm:w-4 h-3 sm:h-4 border-t border-l border-[#F7EFE8]/40 pointer-events-none" />
+                <div className="absolute top-3 right-3 sm:top-4 sm:right-4 w-3 sm:w-4 h-3 sm:h-4 border-t border-r border-[#F7EFE8]/40 pointer-events-none" />
+                <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 w-3 sm:w-4 h-3 sm:h-4 border-b border-l border-[#F7EFE8]/40 pointer-events-none" />
+                <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 w-3 sm:w-4 h-3 sm:h-4 border-b border-r border-[#F7EFE8]/40 pointer-events-none" />
                 
                 {/* Viewfinder Center Crosshair */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10">
-                  <div className="w-8 sm:w-12 h-[1px] bg-white" />
-                  <div className="h-8 sm:h-12 w-[1px] bg-white absolute" />
+                  <div className="w-10 sm:w-14 h-[1px] bg-[#F7EFE8]" />
+                  <div className="h-10 sm:h-14 w-[1px] bg-[#F7EFE8] absolute" />
                 </div>
 
                 {/* 4 Inside-Out Layered Logo Containers (Pure Solid Inset Bloom, Zero Fade) */}
@@ -373,15 +373,15 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                     ref={(el) => {
                       logoContainersRef.current[idx] = el;
                     }}
-                    className="absolute inset-0 flex items-center justify-center p-3 sm:p-8 md:p-14 bg-[#090B10] will-change-[clip-path,transform]"
+                    className="absolute inset-0 flex items-center justify-center p-3 sm:p-6 md:p-8 bg-[#14080B] will-change-[clip-path,transform]"
                   >
                     <div className="relative w-full h-full flex items-center justify-center rounded-2xl overflow-hidden">
                       <Image
                         src={proj.logo}
                         alt={`${proj.title} Monogram Logo`}
                         fill
-                        className="object-contain filter drop-shadow-[0_15px_35px_rgba(0,0,0,0.85)] select-none p-2 sm:p-3"
-                        sizes="(max-width: 768px) 180px, 420px"
+                        className="object-contain filter drop-shadow-[0_15px_35px_rgba(0,0,0,0.9)] select-none p-1 sm:p-2"
+                        sizes="(max-width: 768px) 340px, 560px"
                         priority={idx === 0}
                       />
                     </div>
@@ -393,7 +393,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
             {/* ================================================================= */}
             {/* RIGHT COLUMN: Editorial Narrative (Downward Flow on Scroll)       */}
             {/* ================================================================= */}
-            <div className="md:col-span-6 lg:col-span-7 relative min-h-[280px] xs:min-h-[320px] sm:min-h-[380px] md:min-h-[420px] flex items-center">
+            <div className="md:col-span-6 lg:col-span-6 relative min-h-[300px] xs:min-h-[340px] sm:min-h-[380px] md:min-h-[440px] flex items-center">
               {PROJECTS.map((proj, idx) => (
                 <div
                   key={proj.id}
@@ -403,36 +403,36 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                   className="absolute inset-0 flex flex-col justify-center will-change-[transform,opacity]"
                 >
                   {/* Project Index & Category */}
-                  <div className="flex items-center gap-2 sm:gap-3 mb-1.5 sm:mb-3">
-                    <span className="font-serif italic text-2xl sm:text-4xl text-[#FF7A00] font-normal leading-none">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                    <span className="font-serif italic text-2xl sm:text-4xl text-[#FF8C38] font-normal leading-none">
                       {proj.num}
                     </span>
-                    <span className="text-white/20 font-sans text-base sm:text-xl">/</span>
-                    <span className="text-white/40 font-mono text-xs sm:text-sm">04</span>
-                    <span className="w-[1px] h-3 sm:h-4 bg-white/15 mx-1" />
-                    <span className="text-[9px] sm:text-[11px] font-sans font-extrabold uppercase tracking-[0.2em] text-[#FF7A00]">
+                    <span className="text-[#F7EFE8]/25 font-sans text-base sm:text-xl">/</span>
+                    <span className="text-[#F7EFE8]/40 font-mono text-xs sm:text-sm">04</span>
+                    <span className="w-[1px] h-3 sm:h-4 bg-[#F7EFE8]/15 mx-1" />
+                    <span className="text-[9px] sm:text-[11px] font-sans font-extrabold uppercase tracking-[0.2em] text-[#FF8C38]">
                       {proj.category}
                     </span>
                   </div>
 
                   {/* Monumental Editorial Heading */}
-                  <h3 className="font-sans font-black text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-5xl uppercase tracking-tight text-white mb-2 sm:mb-4 leading-[1.05]">
+                  <h3 className="font-sans font-black text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-5xl uppercase tracking-tight text-[#F7EFE8] mb-2 sm:mb-4 leading-[1.05]">
                     {proj.title}
                   </h3>
 
                   {/* Narrative Subtext */}
-                  <p className="font-sans font-normal text-xs sm:text-sm md:text-base text-slate-300 leading-relaxed max-w-2xl mb-3 sm:mb-6 line-clamp-2 xs:line-clamp-3 sm:line-clamp-none">
+                  <p className="font-sans font-normal text-xs sm:text-sm md:text-base text-[#DDD3C7] leading-relaxed max-w-2xl mb-3 sm:mb-6 line-clamp-2 xs:line-clamp-3 sm:line-clamp-none">
                     {proj.summary}
                   </p>
 
                   {/* Micro-Spec Hairline Metrics */}
-                  <div className="grid grid-cols-3 gap-2 sm:gap-3 border-t border-b border-white/10 py-2 sm:py-3.5 mb-3 sm:mb-6 max-w-xl">
+                  <div className="grid grid-cols-3 gap-2 sm:gap-3 border-t border-b border-[#F7EFE8]/15 py-2.5 sm:py-3.5 mb-3 sm:mb-6 max-w-xl">
                     {proj.metrics.map((m, mIdx) => (
                       <div key={mIdx}>
-                        <div className="text-[8px] sm:text-[9px] font-mono uppercase text-slate-500 tracking-wider mb-0.5">
+                        <div className="text-[8px] sm:text-[9px] font-mono uppercase text-[#E6DCD2]/60 tracking-wider mb-0.5">
                           {m.label}
                         </div>
-                        <div className="text-xs sm:text-sm font-sans font-bold text-white tracking-tight truncate">
+                        <div className="text-xs sm:text-sm font-sans font-bold text-[#F7EFE8] tracking-tight truncate">
                           {m.value}
                         </div>
                       </div>
@@ -445,7 +445,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                       href={proj.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-3 rounded-full bg-white text-black font-sans font-bold text-[11px] sm:text-xs uppercase tracking-wider hover:bg-[#FF7A00] hover:text-white transition-all shadow-md group"
+                      className="inline-flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-3 rounded-full bg-[#F7EFE8] text-[#1D090E] font-sans font-bold text-[11px] sm:text-xs uppercase tracking-wider hover:bg-[#FF8C38] hover:text-white transition-all shadow-md group cursor-pointer"
                     >
                       <span>EXPLORE LIVE PLATFORM</span>
                       <ExternalLink size={13} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
@@ -454,9 +454,9 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                     {proj.hasDemo && (
                       <button
                         onClick={() => setIsDemoOpen(true)}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 sm:px-5 sm:py-3 rounded-full bg-[#11141C] border border-white/20 text-white font-sans font-bold text-[11px] sm:text-xs uppercase tracking-wider hover:border-[#FF7A00] hover:text-[#FF7A00] transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 sm:px-5 sm:py-3 rounded-full bg-[#14080B] border border-[#F7EFE8]/25 text-[#F7EFE8] font-sans font-bold text-[11px] sm:text-xs uppercase tracking-wider hover:border-[#FF8C38] hover:text-[#FF8C38] transition-colors cursor-pointer"
                       >
-                        <Activity size={12} className="text-[#FF7A00]" />
+                        <Activity size={12} className="text-[#FF8C38]" />
                         <span>TEST &lt;5MS</span>
                       </button>
                     )}
@@ -466,7 +466,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                         setSelectedDossier(proj);
                         setIsDossierOpen(true);
                       }}
-                      className="inline-flex items-center gap-1.5 px-3 py-2 text-slate-400 hover:text-white font-mono text-[11px] sm:text-xs uppercase tracking-wider transition-colors"
+                      className="inline-flex items-center gap-1.5 px-3 py-2 text-[#DDD3C7] hover:text-[#F7EFE8] font-mono text-[11px] sm:text-xs uppercase tracking-wider transition-colors cursor-pointer"
                     >
                       <Layers size={12} />
                       <span>DOSSIER</span>
@@ -480,20 +480,20 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
         </div>
 
         {/* Bottom Progress Bar & Scrub Indicator */}
-        <div className="w-full max-w-7xl mx-auto flex items-center justify-between pt-4 border-t border-white/10 text-[10px] font-mono text-slate-500">
+        <div className="w-full max-w-7xl mx-auto flex items-center justify-between pt-4 border-t border-[#F7EFE8]/15 text-[10px] font-mono text-[#E6DCD2]/70">
           <div className="flex items-center gap-2">
             <span>SCROLL TO ADVANCE COMMISSIONS</span>
-            <ArrowRight size={11} className="text-slate-400" />
+            <ArrowRight size={11} className="text-[#FF8C38]" />
           </div>
 
-          <div className="w-48 sm:w-64 h-[2px] bg-white/10 rounded-full overflow-hidden">
+          <div className="w-48 sm:w-64 h-[2px] bg-[#F7EFE8]/15 rounded-full overflow-hidden">
             <div
               ref={progressBarRef}
-              className="h-full bg-[#FF7A00] w-full transform origin-left scale-x-0 transition-transform duration-75"
+              className="h-full bg-[#FF8C38] w-full transform origin-left scale-x-0 transition-transform duration-75"
             />
           </div>
 
-          <span className="text-slate-400">01 — 04 PORTFOLIO CORE</span>
+          <span className="text-[#E6DCD2]/70">01 — 04 PORTFOLIO CORE</span>
         </div>
       </section>
 
@@ -502,24 +502,24 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
       {/* ========================================================================= */}
       {isDemoOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200">
-          <div className="relative w-full max-w-3xl bg-[#090C12] border border-white/20 rounded-2xl p-6 sm:p-8 shadow-2xl">
-            <div className="flex items-center justify-between pb-4 mb-6 border-b border-white/10">
+          <div className="relative w-full max-w-3xl bg-[#14080B] border border-[#F7EFE8]/20 rounded-2xl p-6 sm:p-8 shadow-2xl">
+            <div className="flex items-center justify-between pb-4 mb-6 border-b border-[#F7EFE8]/15">
               <div className="flex items-center gap-3">
-                <span className="p-2 rounded-lg bg-orange-500/10 text-[#FF7A00] border border-orange-500/20">
+                <span className="p-2 rounded-lg bg-[#FF8C38]/15 text-[#FF8C38] border border-[#FF8C38]/30">
                   <Terminal size={18} />
                 </span>
                 <div>
-                  <h3 className="text-base font-bold text-white tracking-wide">
+                  <h3 className="text-base font-bold text-[#F7EFE8] tracking-wide">
                     IZIEAT 278-KEY LOCALIZATION ENGINE
                   </h3>
-                  <p className="text-xs text-slate-400 font-mono">
+                  <p className="text-xs text-[#E6DCD2]/70 font-mono">
                     Client-side in-memory dictionary test • Latency: &lt; 2.8ms
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setIsDemoOpen(false)}
-                className="px-3 py-1.5 rounded-lg border border-white/10 text-xs font-mono text-slate-400 hover:text-white hover:border-white/30"
+                className="px-3 py-1.5 rounded-lg border border-[#F7EFE8]/15 text-xs font-mono text-[#DDD3C7] hover:text-[#F7EFE8] hover:border-[#F7EFE8]/40"
               >
                 ESC [CLOSE]
               </button>
@@ -536,38 +536,38 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
       {/* ========================================================================= */}
       {isDossierOpen && selectedDossier && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200">
-          <div className="relative w-full max-w-2xl bg-[#090C12] border border-white/20 rounded-2xl p-6 sm:p-8 shadow-2xl">
-            <div className="flex items-center justify-between pb-4 mb-6 border-b border-white/10">
+          <div className="relative w-full max-w-2xl bg-[#14080B] border border-[#F7EFE8]/20 rounded-2xl p-6 sm:p-8 shadow-2xl">
+            <div className="flex items-center justify-between pb-4 mb-6 border-b border-[#F7EFE8]/15">
               <div>
-                <span className="text-[10px] font-mono text-[#FF7A00] tracking-wider uppercase">
+                <span className="text-[10px] font-mono text-[#FF8C38] tracking-wider uppercase">
                   {selectedDossier.catalogueNo}
                 </span>
-                <h3 className="text-lg font-bold text-white tracking-wide mt-1">
+                <h3 className="text-lg font-bold text-[#F7EFE8] tracking-wide mt-1">
                   {selectedDossier.title} — ARCHITECTURAL DOSSIER
                 </h3>
               </div>
               <button
                 onClick={() => setIsDossierOpen(false)}
-                className="px-3 py-1.5 rounded-lg border border-white/10 text-xs font-mono text-slate-400 hover:text-white hover:border-white/30"
+                className="px-3 py-1.5 rounded-lg border border-[#F7EFE8]/15 text-xs font-mono text-[#DDD3C7] hover:text-[#F7EFE8] hover:border-[#F7EFE8]/40"
               >
                 ESC [CLOSE]
               </button>
             </div>
 
-            <div className="space-y-4 text-xs font-sans text-slate-300">
-              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10">
-                <span className="text-white font-bold block mb-1">CLIENT & ENGAGEMENT:</span>
+            <div className="space-y-4 text-xs font-sans text-[#DDD3C7]">
+              <div className="p-4 rounded-xl bg-white/[0.03] border border-[#F7EFE8]/15">
+                <span className="text-[#F7EFE8] font-bold block mb-1">CLIENT & ENGAGEMENT:</span>
                 <span>{selectedDossier.client} ({selectedDossier.year})</span>
               </div>
-              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10">
-                <span className="text-white font-bold block mb-1">ENGINEERING NARRATIVE:</span>
-                <p className="leading-relaxed text-slate-400">{selectedDossier.summary}</p>
+              <div className="p-4 rounded-xl bg-white/[0.03] border border-[#F7EFE8]/15">
+                <span className="text-[#F7EFE8] font-bold block mb-1">ENGINEERING NARRATIVE:</span>
+                <p className="leading-relaxed text-[#DDD3C7]/90">{selectedDossier.summary}</p>
               </div>
-              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10">
-                <span className="text-white font-bold block mb-1">TECHNOLOGY STACK:</span>
+              <div className="p-4 rounded-xl bg-white/[0.03] border border-[#F7EFE8]/15">
+                <span className="text-[#F7EFE8] font-bold block mb-1">TECHNOLOGY STACK:</span>
                 <div className="flex flex-wrap gap-1.5 mt-2">
                   {selectedDossier.stack.map((st, i) => (
-                    <span key={i} className="px-2.5 py-1 rounded bg-white/5 border border-white/10 text-[11px] font-mono text-slate-300">
+                    <span key={i} className="px-2.5 py-1 rounded bg-white/5 border border-[#F7EFE8]/15 text-[11px] font-mono text-[#DDD3C7]">
                       {st}
                     </span>
                   ))}
@@ -575,12 +575,12 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
               </div>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-white/10 flex justify-end">
+            <div className="mt-6 pt-4 border-t border-[#F7EFE8]/15 flex justify-end">
               <a
                 href={selectedDossier.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#FF7A00] text-white font-bold text-xs uppercase tracking-wider hover:bg-orange-600 transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#FF8C38] text-white font-bold text-xs uppercase tracking-wider hover:bg-orange-600 transition-colors"
               >
                 <span>OPEN OFFICIAL DOMAIN</span>
                 <ExternalLink size={13} />

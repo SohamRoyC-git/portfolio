@@ -16,14 +16,6 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
   const [time, setTime] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
-  // On mobile: hidden at initial landing, smoothly reveals as user scrolls
-  const [isNavVisible, setIsNavVisible] = useState(() => {
-    if (typeof window !== "undefined") {
-      return window.scrollY > 35;
-    }
-    return false;
-  });
-
   const [isScrolled, setIsScrolled] = useState(() => {
     if (typeof window !== "undefined") {
       const nextSection = document.getElementById("monument-statement");
@@ -58,16 +50,6 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
     return () => clearInterval(interval);
   }, []);
 
-  // Track scroll on mobile to fade in nav smoothly as user scrolls
-  useEffect(() => {
-    const handleScroll = () => {
-      const visible = window.scrollY > 35;
-      setIsNavVisible((prev) => (prev !== visible ? visible : prev));
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   // GSAP ScrollTrigger: Stays edge-to-edge transparent through the entire Hero,
   // and morphs into the compact glass dock ONLY when the next section is entering the screen
   useEffect(() => {
@@ -78,7 +60,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
 
     const trigger = ScrollTrigger.create({
       trigger: nextSection || "#monument-hero",
-      start: nextSection ? "top 82%" : "bottom 250px",
+      start: nextSection ? "top 80%" : "bottom 250px",
       end: 99999,
       onToggle: (self) => {
         setIsScrolled(self.isActive);
@@ -173,11 +155,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-40 flex justify-center w-full pointer-events-none select-none transition-opacity duration-350 ${
-          isNavVisible
-            ? "opacity-100"
-            : "max-md:opacity-0 max-md:pointer-events-none opacity-100"
-        }`}
+        className="fixed top-0 left-0 right-0 z-40 flex justify-center w-full pointer-events-none select-none"
       >
         <div
           ref={navRef}
@@ -202,17 +180,18 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
             data-cursor-text="INDEX"
           >
             <span className="relative flex h-2 w-2 shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF7A00] opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FF7A00]" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF8C38] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FF8C38]" />
             </span>
             <span
               className={`font-sans font-black text-xs tracking-[0.2em] uppercase transition-colors duration-300 truncate ${
                 isScrolled
-                  ? "text-white group-hover:text-[#FF7A00]"
+                  ? "text-white group-hover:text-[#FF8C38]"
                   : "text-white group-hover:text-amber-300 drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]"
               }`}
             >
-              {isScrolled ? "SR · SOHAM" : "SR // SOHAM ROYCHOUDHURY"}
+              <span className="hidden sm:inline">SR // SOHAM ROYCHOUDHURY</span>
+              <span className="sm:hidden">SR // SOHAM</span>
             </span>
           </div>
 

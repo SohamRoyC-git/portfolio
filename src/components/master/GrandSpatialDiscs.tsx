@@ -137,19 +137,19 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
     const mm = gsap.matchMedia();
 
     // =========================================================================
-    // DESKTOP & TABLET EXPERIENCE (>= 768px):
-    // Forge Automotive Style Split Showcase:
-    // Left: Framed Logo with Inside-Out Zoom Unmasking
+    // UNIFIED SHOWCASE ENGINE (Desktop + Mobile):
+    // Forge Automotive Geometric Inset Reveal: Solid Opacity (Zero Fade In / Fade Away)
+    // Left: Framed Logo Portal blooming inside-out via clipPath inset
     // Right: Downward Flowing Editorial Narrative
     // =========================================================================
-    mm.add("(min-width: 768px)", () => {
-      // 1. Entrance: Horizontal Architectural Blade Sweep
+    const setupShowcase = (isDesktop: boolean) => {
+      // 1. Entrance: Horizontal Blade Sweep on desktop, or smooth iris expansion on mobile
       if (stageRef.current) {
         gsap.fromTo(
           stageRef.current,
-          { clipPath: "polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)" },
+          { clipPath: isDesktop ? "polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)" : "inset(25% 0% round 0px)" },
           {
-            clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+            clipPath: isDesktop ? "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)" : "inset(0% 0% round 0px)",
             ease: "none",
             scrollTrigger: {
               trigger: sectionRef.current,
@@ -167,7 +167,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
           trigger: sectionRef.current,
           start: "top top",
           end: "bottom bottom",
-          scrub: 0.5,
+          scrub: isDesktop ? 0.4 : 0.25,
           onUpdate: (self) => {
             const p = self.progress;
             if (progressBarRef.current) {
@@ -182,13 +182,21 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
         },
       });
 
-      // Initialize initial states
+      // Initialize initial states for Solid Geometric Inset Reveal (Forge Automotive mechanism)
       logoContainersRef.current.forEach((el, i) => {
         if (!el) return;
         if (i === 0) {
-          gsap.set(el, { scale: 1, autoAlpha: 1, zIndex: 10 });
+          gsap.set(el, {
+            clipPath: "inset(0% 0% 0% 0% round 0px)",
+            autoAlpha: 1,
+            zIndex: 10,
+          });
         } else {
-          gsap.set(el, { scale: 0.15, autoAlpha: 0, zIndex: 10 + i });
+          gsap.set(el, {
+            clipPath: "inset(50% 50% 50% 50% round 16px)",
+            autoAlpha: 0,
+            zIndex: 10 + i,
+          });
         }
       });
 
@@ -197,7 +205,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
         if (i === 0) {
           gsap.set(el, { yPercent: 0, autoAlpha: 1, pointerEvents: "auto" });
         } else {
-          gsap.set(el, { yPercent: -50, autoAlpha: 0, pointerEvents: "none" });
+          gsap.set(el, { yPercent: -40, autoAlpha: 0, pointerEvents: "none" });
         }
       });
 
@@ -208,37 +216,38 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
 
       for (let i = 0; i < numSteps; i++) {
         const startTime = i * stepDuration;
-        const curLogo = logoContainersRef.current[i];
         const nextLogo = logoContainersRef.current[i + 1];
         const curEditorial = editorialBlocksRef.current[i];
         const nextEditorial = editorialBlocksRef.current[i + 1];
 
-        // --- Left Framed Visual: Inside-Out Zoom Reveal ---
-        if (curLogo && nextLogo) {
-          // Current logo expands out and fades away cleanly and rapidly
-          masterTl.to(
-            curLogo,
+        // --- Left Framed Visual: Pure Solid Geometric Inset Aperture Bloom (No Fade In / Fade Away) ---
+        if (nextLogo) {
+          // At startTime, make nextLogo active so it unmasks on top of current logo
+          masterTl.set(nextLogo, { autoAlpha: 1 }, startTime);
+
+          // nextLogo physically expands from center outward: inset(50% ... round 16px) -> inset(0% ... round 0px)
+          // Solid opacity throughout! Zero ghosting, zero fade in/fade out!
+          masterTl.fromTo(
+            nextLogo,
+            { clipPath: "inset(50% 50% 50% 50% round 16px)" },
             {
-              scale: 1.35,
-              autoAlpha: 0,
-              ease: "power2.out",
-              duration: stepDuration * 0.45,
+              clipPath: "inset(0% 0% 0% 0% round 0px)",
+              ease: "power2.inOut",
+              duration: stepDuration,
             },
             startTime
           );
 
-          // Next logo blooms outward from within center (0.15 -> 1.0)
-          masterTl.fromTo(
-            nextLogo,
-            { scale: 0.15, autoAlpha: 0 },
-            {
-              scale: 1.0,
-              autoAlpha: 1,
-              ease: "power2.out",
-              duration: stepDuration * 0.65,
-            },
-            startTime + stepDuration * 0.15
-          );
+          // Subtle optical zoom on the inner logo image as the portal expands
+          const nextImg = nextLogo.querySelector("img");
+          if (nextImg) {
+            masterTl.fromTo(
+              nextImg,
+              { scale: 0.82 },
+              { scale: 1.0, ease: "power2.out", duration: stepDuration },
+              startTime
+            );
+          }
         }
 
         // --- Right Editorial Narrative: Downward Flowing Motion ---
@@ -247,11 +256,11 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
           masterTl.to(
             curEditorial,
             {
-              yPercent: 40,
+              yPercent: 35,
               autoAlpha: 0,
               pointerEvents: "none",
               ease: "power2.inOut",
-              duration: stepDuration * 0.65,
+              duration: stepDuration * 0.6,
             },
             startTime
           );
@@ -259,13 +268,13 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
           // Next editorial block slides in downwards from top into center position
           masterTl.fromTo(
             nextEditorial,
-            { yPercent: -40, autoAlpha: 0, pointerEvents: "none" },
+            { yPercent: -35, autoAlpha: 0, pointerEvents: "none" },
             {
               yPercent: 0,
               autoAlpha: 1,
               pointerEvents: "auto",
               ease: "power2.out",
-              duration: stepDuration * 0.7,
+              duration: stepDuration * 0.65,
             },
             startTime + stepDuration * 0.25
           );
@@ -277,7 +286,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
       if (containerEl) {
         gsap.to(containerEl, {
           scale: 0.94,
-          yPercent: -14,
+          yPercent: -12,
           opacity: 0.15,
           ease: "power2.inOut",
           scrollTrigger: {
@@ -288,12 +297,10 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
           },
         });
       }
-    });
+    };
 
-    // Mobile fallback (clean scrollable list)
-    mm.add("(max-width: 767px)", () => {
-      // Mobile displays as a clean vertical feed
-    });
+    mm.add("(min-width: 768px)", () => setupShowcase(true));
+    mm.add("(max-width: 767px)", () => setupShowcase(false));
 
     return () => mm.revert();
   }, []);
@@ -339,42 +346,42 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
 
         {/* Main Split Screen Container */}
         <div className="showcase-container w-full max-w-7xl mx-auto flex-1 flex items-center my-auto will-change-[transform,opacity]">
-          <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-16 items-center">
+          <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-8 lg:gap-16 items-center">
             
             {/* ================================================================= */}
-            {/* LEFT COLUMN: Framed Logo Portal with Inside-Out Zoom Reveal        */}
+            {/* LEFT COLUMN: Framed Logo Portal with Inside-Out Aperture Reveal   */}
             {/* ================================================================= */}
             <div className="md:col-span-6 lg:col-span-5 flex justify-center items-center">
-              <div className="relative w-full max-w-[380px] sm:max-w-[440px] lg:max-w-[480px] aspect-square rounded-2xl bg-[#090B10] border border-white/15 p-10 sm:p-14 flex items-center justify-center overflow-hidden shadow-[0_30px_90px_rgba(0,0,0,0.9)]">
+              <div className="relative w-36 h-36 xs:w-44 xs:h-44 sm:w-64 sm:h-64 md:w-full md:max-w-[400px] lg:max-w-[460px] aspect-square rounded-2xl bg-[#090B10] border border-white/15 p-4 sm:p-10 md:p-12 flex items-center justify-center overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.9)]">
                 
                 {/* Architectural Corner Reticle Accents */}
-                <div className="absolute top-3 left-3 w-3 h-3 border-t border-l border-white/40 pointer-events-none" />
-                <div className="absolute top-3 right-3 w-3 h-3 border-t border-r border-white/40 pointer-events-none" />
-                <div className="absolute bottom-3 left-3 w-3 h-3 border-b border-l border-white/40 pointer-events-none" />
-                <div className="absolute bottom-3 right-3 w-3 h-3 border-b border-r border-white/40 pointer-events-none" />
+                <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 w-2.5 sm:w-3 h-2.5 sm:h-3 border-t border-l border-white/40 pointer-events-none" />
+                <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-2.5 sm:w-3 h-2.5 sm:h-3 border-t border-r border-white/40 pointer-events-none" />
+                <div className="absolute bottom-2.5 left-2.5 sm:bottom-3 sm:left-3 w-2.5 sm:w-3 h-2.5 sm:h-3 border-b border-l border-white/40 pointer-events-none" />
+                <div className="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-3 w-2.5 sm:w-3 h-2.5 sm:h-3 border-b border-r border-white/40 pointer-events-none" />
                 
                 {/* Viewfinder Center Crosshair */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10">
-                  <div className="w-12 h-[1px] bg-white" />
-                  <div className="h-12 w-[1px] bg-white absolute" />
+                  <div className="w-8 sm:w-12 h-[1px] bg-white" />
+                  <div className="h-8 sm:h-12 w-[1px] bg-white absolute" />
                 </div>
 
-                {/* 4 Inside-Out Layered Logo Containers */}
+                {/* 4 Inside-Out Layered Logo Containers (Pure Solid Inset Bloom, Zero Fade) */}
                 {PROJECTS.map((proj, idx) => (
                   <div
                     key={proj.id}
                     ref={(el) => {
                       logoContainersRef.current[idx] = el;
                     }}
-                    className="absolute inset-0 flex items-center justify-center p-12 sm:p-16 bg-[#090B10] will-change-[transform,opacity]"
+                    className="absolute inset-0 flex items-center justify-center p-3 sm:p-8 md:p-14 bg-[#090B10] will-change-[clip-path,transform]"
                   >
                     <div className="relative w-full h-full flex items-center justify-center rounded-2xl overflow-hidden">
                       <Image
                         src={proj.logo}
                         alt={`${proj.title} Monogram Logo`}
                         fill
-                        className="object-contain filter drop-shadow-[0_15px_35px_rgba(0,0,0,0.85)] select-none p-3"
-                        sizes="(max-width: 768px) 280px, 420px"
+                        className="object-contain filter drop-shadow-[0_15px_35px_rgba(0,0,0,0.85)] select-none p-2 sm:p-3"
+                        sizes="(max-width: 768px) 180px, 420px"
                         priority={idx === 0}
                       />
                     </div>
@@ -386,7 +393,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
             {/* ================================================================= */}
             {/* RIGHT COLUMN: Editorial Narrative (Downward Flow on Scroll)       */}
             {/* ================================================================= */}
-            <div className="md:col-span-6 lg:col-span-7 relative min-h-[360px] sm:min-h-[420px] flex items-center">
+            <div className="md:col-span-6 lg:col-span-7 relative min-h-[280px] xs:min-h-[320px] sm:min-h-[380px] md:min-h-[420px] flex items-center">
               {PROJECTS.map((proj, idx) => (
                 <div
                   key={proj.id}
@@ -396,36 +403,36 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                   className="absolute inset-0 flex flex-col justify-center will-change-[transform,opacity]"
                 >
                   {/* Project Index & Category */}
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="font-serif italic text-3xl sm:text-4xl text-[#FF7A00] font-normal leading-none">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-1.5 sm:mb-3">
+                    <span className="font-serif italic text-2xl sm:text-4xl text-[#FF7A00] font-normal leading-none">
                       {proj.num}
                     </span>
-                    <span className="text-white/20 font-sans text-xl">/</span>
-                    <span className="text-white/40 font-mono text-sm">04</span>
-                    <span className="w-[1px] h-4 bg-white/15 mx-1" />
-                    <span className="text-[10px] sm:text-[11px] font-sans font-extrabold uppercase tracking-[0.2em] text-[#FF7A00]">
+                    <span className="text-white/20 font-sans text-base sm:text-xl">/</span>
+                    <span className="text-white/40 font-mono text-xs sm:text-sm">04</span>
+                    <span className="w-[1px] h-3 sm:h-4 bg-white/15 mx-1" />
+                    <span className="text-[9px] sm:text-[11px] font-sans font-extrabold uppercase tracking-[0.2em] text-[#FF7A00]">
                       {proj.category}
                     </span>
                   </div>
 
                   {/* Monumental Editorial Heading */}
-                  <h3 className="font-sans font-black text-2xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-white mb-4 leading-[1.05]">
+                  <h3 className="font-sans font-black text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-5xl uppercase tracking-tight text-white mb-2 sm:mb-4 leading-[1.05]">
                     {proj.title}
                   </h3>
 
                   {/* Narrative Subtext */}
-                  <p className="font-sans font-normal text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl mb-6">
+                  <p className="font-sans font-normal text-xs sm:text-sm md:text-base text-slate-300 leading-relaxed max-w-2xl mb-3 sm:mb-6 line-clamp-2 xs:line-clamp-3 sm:line-clamp-none">
                     {proj.summary}
                   </p>
 
                   {/* Micro-Spec Hairline Metrics */}
-                  <div className="grid grid-cols-3 gap-3 border-t border-b border-white/10 py-3.5 mb-6 max-w-xl">
+                  <div className="grid grid-cols-3 gap-2 sm:gap-3 border-t border-b border-white/10 py-2 sm:py-3.5 mb-3 sm:mb-6 max-w-xl">
                     {proj.metrics.map((m, mIdx) => (
                       <div key={mIdx}>
-                        <div className="text-[9px] font-mono uppercase text-slate-500 tracking-wider mb-0.5">
+                        <div className="text-[8px] sm:text-[9px] font-mono uppercase text-slate-500 tracking-wider mb-0.5">
                           {m.label}
                         </div>
-                        <div className="text-xs sm:text-sm font-sans font-bold text-white tracking-tight">
+                        <div className="text-xs sm:text-sm font-sans font-bold text-white tracking-tight truncate">
                           {m.value}
                         </div>
                       </div>
@@ -433,24 +440,24 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                   </div>
 
                   {/* Action Link Stack */}
-                  <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                     <a
                       href={proj.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-white text-black font-sans font-bold text-xs uppercase tracking-wider hover:bg-[#FF7A00] hover:text-white transition-all shadow-md group"
+                      className="inline-flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-3 rounded-full bg-white text-black font-sans font-bold text-[11px] sm:text-xs uppercase tracking-wider hover:bg-[#FF7A00] hover:text-white transition-all shadow-md group"
                     >
                       <span>EXPLORE LIVE PLATFORM</span>
-                      <ExternalLink size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                      <ExternalLink size={13} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                     </a>
 
                     {proj.hasDemo && (
                       <button
                         onClick={() => setIsDemoOpen(true)}
-                        className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-[#11141C] border border-white/20 text-white font-sans font-bold text-xs uppercase tracking-wider hover:border-[#FF7A00] hover:text-[#FF7A00] transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 sm:px-5 sm:py-3 rounded-full bg-[#11141C] border border-white/20 text-white font-sans font-bold text-[11px] sm:text-xs uppercase tracking-wider hover:border-[#FF7A00] hover:text-[#FF7A00] transition-colors"
                       >
-                        <Activity size={13} className="text-[#FF7A00]" />
-                        <span>TEST &lt;5MS TRANSLATION</span>
+                        <Activity size={12} className="text-[#FF7A00]" />
+                        <span>TEST &lt;5MS</span>
                       </button>
                     )}
 
@@ -459,10 +466,10 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
                         setSelectedDossier(proj);
                         setIsDossierOpen(true);
                       }}
-                      className="inline-flex items-center gap-1.5 px-4 py-3 text-slate-400 hover:text-white font-mono text-xs uppercase tracking-wider transition-colors"
+                      className="inline-flex items-center gap-1.5 px-3 py-2 text-slate-400 hover:text-white font-mono text-[11px] sm:text-xs uppercase tracking-wider transition-colors"
                     >
-                      <Layers size={13} />
-                      <span>VIEW DOSSIER</span>
+                      <Layers size={12} />
+                      <span>DOSSIER</span>
                     </button>
                   </div>
                 </div>

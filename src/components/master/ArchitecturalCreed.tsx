@@ -102,22 +102,39 @@ export const ArchitecturalCreed: React.FC = memo(() => {
       }
     });
 
-    // Mobile fallback
+    // Mobile scroll experience: curtain sweep & smooth staggered cards
     mm.add("(max-width: 767px)", () => {
+      if (stageRef.current) {
+        gsap.fromTo(
+          stageRef.current,
+          { clipPath: "polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)" },
+          {
+            clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top bottom",
+              end: "top 30%",
+              scrub: 0.25,
+            },
+          }
+        );
+      }
+
       const cards = gridRef.current?.querySelectorAll(".creed-card");
       if (cards && cards.length > 0) {
         gsap.fromTo(
           cards,
-          { y: 30, opacity: 0 },
+          { y: 25, opacity: 0 },
           {
             y: 0,
             opacity: 1,
-            stagger: 0.1,
-            duration: 0.6,
+            stagger: 0.12,
+            duration: 0.5,
             ease: "power2.out",
             scrollTrigger: {
               trigger: gridRef.current,
-              start: "top 85%",
+              start: "top 80%",
             },
           }
         );
@@ -170,13 +187,12 @@ export const ArchitecturalCreed: React.FC = memo(() => {
     <div
       id="monument-creed"
       ref={sectionRef}
-      className="relative w-full z-25"
-      style={{ height: "calc(100svh + 500px)" }}
+      className="relative w-full z-25 min-h-[100svh] md:h-[calc(100svh+500px)]"
     >
-      {/* Sticky 100svh Dedicated Architectural Stage */}
+      {/* Sticky 100svh Dedicated Architectural Stage on Desktop, Natural Fluid Stage on Mobile */}
       <section
         ref={stageRef}
-        className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-center pt-24 sm:pt-28 pb-10 px-6 sm:px-12 md:px-16 overflow-hidden bg-[#060709] border-t border-white/10 will-change-[clip-path]"
+        className="relative md:sticky md:top-0 min-h-[100svh] md:h-[100svh] w-full flex flex-col justify-center pt-20 sm:pt-28 pb-12 sm:pb-10 px-4 sm:px-12 md:px-16 overflow-visible md:overflow-hidden bg-[#060709] border-t border-white/10 will-change-[clip-path]"
       >
         {/* Leading Architectural Razor Hairline */}
         <div className="absolute top-0 inset-x-0 h-[1px] bg-white/20" />
@@ -265,3 +281,4 @@ export const ArchitecturalCreed: React.FC = memo(() => {
 });
 
 ArchitecturalCreed.displayName = "ArchitecturalCreed";
+

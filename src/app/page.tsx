@@ -25,28 +25,26 @@ export default function Home() {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const isTouch = window.matchMedia("(pointer: coarse)").matches;
 
-    // On touch mobile devices, use ultra-fast native hardware-accelerated scrolling for zero lag!
-    if (prefersReducedMotion || isTouch) {
-      ScrollTrigger.refresh();
-      return;
+    let tickerCallback: ((time: number) => void) | null = null;
+
+    // Desktop Lenis Smooth Scroll (bypassed on pure mobile touch for instantaneous native momentum)
+    if (!prefersReducedMotion && !isTouch) {
+      const lenis = new Lenis({
+        lerp: 0.1,
+        duration: 1.0,
+        smoothWheel: true,
+        wheelMultiplier: 1.0,
+      });
+      lenisRef.current = lenis;
+
+      lenis.on("scroll", ScrollTrigger.update);
+
+      tickerCallback = (time: number) => {
+        lenis.raf(time * 1000);
+      };
+      gsap.ticker.add(tickerCallback);
+      gsap.ticker.lagSmoothing(0);
     }
-
-    // On desktop, use lightweight, ultra-responsive Lenis synchronization
-    const lenis = new Lenis({
-      lerp: 0.1,
-      duration: 1.0,
-      smoothWheel: true,
-      wheelMultiplier: 1.0,
-    });
-    lenisRef.current = lenis;
-
-    lenis.on("scroll", ScrollTrigger.update);
-
-    const tickerCallback = (time: number) => {
-      lenis.raf(time * 1000);
-    };
-    gsap.ticker.add(tickerCallback);
-    gsap.ticker.lagSmoothing(0);
 
     // Hero Monolithic Exit: Cleans out the canvas completely before Statement plays
     const mm = gsap.matchMedia();
@@ -72,8 +70,11 @@ export default function Home() {
     return () => {
       clearTimeout(timeout);
       mm.revert();
-      gsap.ticker.remove(tickerCallback);
-      lenis.destroy();
+      if (tickerCallback) gsap.ticker.remove(tickerCallback);
+      if (lenisRef.current) {
+        lenisRef.current.destroy();
+        lenisRef.current = null;
+      }
       ScrollTrigger.getAll().forEach((t) => t.kill());
     };
   }, []);

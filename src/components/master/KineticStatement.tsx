@@ -29,22 +29,41 @@ export const KineticStatement: React.FC = memo(() => {
     mm.add("(min-width: 768px)", () => {
       const statementLines = headlineRef.current?.querySelectorAll(".statement-line");
 
-      // 1. Rising Convex Horizon Wipe: A massive curved elliptical crest sweeps up from the bottom
-      // over the hero, flattening smoothly into a full edge-to-edge rectangular stage as it reaches top.
+      // 1. Two-Phase Deep Dramatic Dome to Rectangle Entrance (70% Ascend, 30% Corner Fill)
+      // The tall ellipse dome rises all the way up until its apex touches y=0 (corners at y=50%).
+      // Only after touching the top edge do the shoulders expand to complete a 100% full rectangle.
       if (stageRef.current) {
-        gsap.fromTo(
+        const entranceTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top bottom",
+            end: "top top",
+            scrub: 0.5,
+          },
+        });
+
+        // Phase A (0.0 -> 0.70): Tall dramatic ellipse rises up across the screen
+        // At 0.70, apex hits exact top (y=0) while corners remain curved at y=50%
+        entranceTl.fromTo(
           stageRef.current,
-          { clipPath: "ellipse(140% 100% at 50% 200%)" },
+          { clipPath: "ellipse(70% 166% at 50% 266%)" },
           {
-            clipPath: "ellipse(140% 140% at 50% 50%)",
+            clipPath: "ellipse(70% 166% at 50% 166%)",
             ease: "power1.inOut",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top bottom",
-              end: "top top",
-              scrub: 0.4,
-            },
-          }
+            duration: 0.7,
+          },
+          0
+        );
+
+        // Phase B (0.70 -> 1.00): Apex remains locked at top while shoulders smoothly fill top corners into full rectangle
+        entranceTl.to(
+          stageRef.current,
+          {
+            clipPath: "ellipse(150% 150% at 50% 50%)",
+            ease: "power2.out",
+            duration: 0.3,
+          },
+          0.7
         );
       }
 
@@ -129,22 +148,38 @@ export const KineticStatement: React.FC = memo(() => {
     mm.add("(max-width: 767px)", () => {
       const statementLines = headlineRef.current?.querySelectorAll(".statement-line");
 
-      // 1. Rising Convex Horizon Wipe on Mobile:
-      // Sweeps up from below with a smooth elliptical dome, flattening at top top into a rectangle.
+      // 1. Two-Phase Deep Dramatic Dome on Mobile (70% Ascend, 30% Corner Fill)
       if (stageRef.current) {
-        gsap.fromTo(
+        const entranceTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top bottom",
+            end: "top top",
+            scrub: 0.5,
+          },
+        });
+
+        // Phase A (0.0 -> 0.70): Ascend until apex reaches y=0
+        entranceTl.fromTo(
           stageRef.current,
-          { clipPath: "ellipse(150% 80% at 50% 180%)" },
+          { clipPath: "ellipse(65% 138% at 50% 238%)" },
+          {
+            clipPath: "ellipse(65% 138% at 50% 138%)",
+            ease: "power1.inOut",
+            duration: 0.7,
+          },
+          0
+        );
+
+        // Phase B (0.70 -> 1.00): Fill corners into full rectangle
+        entranceTl.to(
+          stageRef.current,
           {
             clipPath: "ellipse(150% 150% at 50% 50%)",
-            ease: "power1.inOut",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top bottom",
-              end: "top top",
-              scrub: 0.4,
-            },
-          }
+            ease: "power2.out",
+            duration: 0.3,
+          },
+          0.7
         );
       }
 

@@ -162,13 +162,13 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
         );
       }
 
-      // 2. Master Scrub Timeline for Project Transitions (With Butter-Smooth Inertia)
+      // 2. Master Scrub Timeline for Project Transitions (Crisp, Responsive Inertia)
       const masterTl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top top",
           end: "bottom bottom",
-          scrub: isDesktop ? 1.0 : 0.8,
+          scrub: isDesktop ? 0.6 : 0.5,
           onUpdate: (self) => {
             const p = self.progress;
             if (progressBarRef.current) {
@@ -216,15 +216,15 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
       });
 
       // Build transition sequence between consecutive projects:
-      // Includes 40% resting pause on each project so it stays locked and readable,
-      // followed by a 60% smooth solid inside-out bloom transition.
+      // Includes 20% resting pause on each project so it stays locked and readable,
+      // followed by an 80% smooth solid inside-out bloom transition.
       const numSteps = PROJECTS.length - 1;
       const stepDuration = 1 / numSteps;
 
       for (let i = 0; i < numSteps; i++) {
         const stepStart = i * stepDuration;
-        const transitionStart = stepStart + stepDuration * 0.40;
-        const transitionDuration = stepDuration * 0.60;
+        const transitionStart = stepStart + stepDuration * 0.20;
+        const transitionDuration = stepDuration * 0.80;
         const transitionEnd = transitionStart + transitionDuration;
 
         const curLogo = logoContainersRef.current[i];
@@ -336,7 +336,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
       id="monument-exhibition"
       ref={sectionRef}
       className="relative w-full z-30"
-      style={{ height: "calc(100svh + 3800px)" }}
+      style={{ height: "calc(100svh + 2000px)" }}
     >
       {/* Sticky 100svh Architectural Stage (Rich Wine Red & Warm Italian Light Sand) */}
       <section

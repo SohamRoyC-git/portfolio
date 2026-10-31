@@ -20,7 +20,7 @@ import {
   X,
   ArrowRight,
 } from "lucide-react";
-import { CALLIGRAPHY_VIEWBOX, D_LETS, D_BUILD } from "./CalligraphyPaths";
+import { CALLIGRAPHY_VIEWBOX, CALLIGRAPHY_LETTERS } from "./CalligraphyPaths";
 
 export const TerminalFinale: React.FC = memo(() => {
   const [copiedEmail, setCopiedEmail] = useState(false);
@@ -49,12 +49,12 @@ export const TerminalFinale: React.FC = memo(() => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const headlineRef = useRef<HTMLDivElement | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
-  const pathLetsRef = useRef<SVGPathElement | null>(null);
-  const pathBuildRef = useRef<SVGPathElement | null>(null);
+  const letterRefs = useRef<(SVGPathElement | null)[]>([]);
   const subtextRef = useRef<HTMLSpanElement | null>(null);
   const caretRef = useRef<HTMLSpanElement | null>(null);
   const signatureTlRef = useRef<gsap.core.Timeline | null>(null);
   const typingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const pauseTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Live Kolkata IST Clock
   const [time, setTime] = useState("");
@@ -76,31 +76,31 @@ export const TerminalFinale: React.FC = memo(() => {
     return () => clearInterval(interval);
   }, []);
 
-  // Authentic SVG Calligraphy Stroke Handwriting Animation with IntersectionObserver Replay:
-  // "Let's Build" fountain pen stroke flow (~1.35s each + 0.22s pen lift)
-  // followed by "SOMETHING REAL." typewriter execution
-  // Fully decoupled from React state to avoid any re-render jumps or race conditions
+  // Authentic Sequential SVG Calligraphy Letter Stroke Handwriting Animation:
+  // Option 1B: Deliberate calligraphy pace (~2.96s total writing time across 10 letters)
+  // Option 2A: Per-letter ink bloom as each letter finishes its stroke
+  // Option 3B: Rhythmic 0.3s pause before "SOMETHING REAL." typewriter begins
+  // Resilient IntersectionObserver handles entering and bidirectional replay
   useEffect(() => {
-    if (!headlineRef.current || !pathLetsRef.current || !pathBuildRef.current) return;
+    const paths = letterRefs.current.filter(Boolean) as SVGPathElement[];
+    if (!headlineRef.current || paths.length !== CALLIGRAPHY_LETTERS.length) return;
 
-    const pLets = pathLetsRef.current;
-    const pBuild = pathBuildRef.current;
-
-    const lenLets = pLets.getTotalLength();
-    const lenBuild = pBuild.getTotalLength();
+    const lengths = paths.map((p) => p.getTotalLength());
 
     // Initial setup: stroke hidden, fill transparent
-    pLets.style.strokeDasharray = `${lenLets}`;
-    pLets.style.strokeDashoffset = `${lenLets}`;
-    pLets.style.fillOpacity = "0";
-
-    pBuild.style.strokeDasharray = `${lenBuild}`;
-    pBuild.style.strokeDashoffset = `${lenBuild}`;
-    pBuild.style.fillOpacity = "0";
+    paths.forEach((p, i) => {
+      p.style.strokeDasharray = `${lengths[i]}`;
+      p.style.strokeDashoffset = `${lengths[i]}`;
+      p.style.fillOpacity = "0";
+    });
 
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const resetAnimation = () => {
+      if (pauseTimerRef.current) {
+        clearTimeout(pauseTimerRef.current);
+        pauseTimerRef.current = null;
+      }
       if (typingTimerRef.current) {
         clearInterval(typingTimerRef.current);
         typingTimerRef.current = null;
@@ -110,8 +110,9 @@ export const TerminalFinale: React.FC = memo(() => {
         signatureTlRef.current = null;
       }
 
-      gsap.set(pLets, { strokeDashoffset: lenLets, fillOpacity: 0 });
-      gsap.set(pBuild, { strokeDashoffset: lenBuild, fillOpacity: 0 });
+      paths.forEach((p, i) => {
+        gsap.set(p, { strokeDashoffset: lengths[i], fillOpacity: 0 });
+      });
 
       if (subtextRef.current) subtextRef.current.textContent = "\u00A0";
       if (caretRef.current) caretRef.current.style.display = "none";
@@ -121,7 +122,7 @@ export const TerminalFinale: React.FC = memo(() => {
       resetAnimation();
 
       if (prefersReducedMotion) {
-        gsap.set([pLets, pBuild], { strokeDashoffset: 0, fillOpacity: 1 });
+        paths.forEach((p) => gsap.set(p, { strokeDashoffset: 0, fillOpacity: 1 }));
         if (subtextRef.current) subtextRef.current.textContent = "SOMETHING REAL.";
         return;
       }
@@ -129,67 +130,63 @@ export const TerminalFinale: React.FC = memo(() => {
       const fullSubtext = "SOMETHING REAL.";
       const signatureTl = gsap.timeline({
         onComplete: () => {
-          // Phase 2: Typewriter
-          if (subtextRef.current) subtextRef.current.textContent = fullSubtext.slice(0, 1);
-          if (caretRef.current) caretRef.current.style.display = "inline-block";
+          // Option 3B: Rhythmic 0.3s pause before typing begins
+          pauseTimerRef.current = setTimeout(() => {
+            if (subtextRef.current) subtextRef.current.textContent = fullSubtext.slice(0, 1);
+            if (caretRef.current) caretRef.current.style.display = "inline-block";
 
-          let idx = 1;
-          typingTimerRef.current = setInterval(() => {
-            idx++;
-            if (subtextRef.current) {
-              subtextRef.current.textContent = fullSubtext.slice(0, idx);
-            }
-            if (idx >= fullSubtext.length) {
-              if (typingTimerRef.current) {
-                clearInterval(typingTimerRef.current);
-                typingTimerRef.current = null;
+            let idx = 1;
+            typingTimerRef.current = setInterval(() => {
+              idx++;
+              if (subtextRef.current) {
+                subtextRef.current.textContent = fullSubtext.slice(0, idx);
               }
-              if (caretRef.current) {
-                caretRef.current.style.display = "none";
+              if (idx >= fullSubtext.length) {
+                if (typingTimerRef.current) {
+                  clearInterval(typingTimerRef.current);
+                  typingTimerRef.current = null;
+                }
+                if (caretRef.current) {
+                  caretRef.current.style.display = "none";
+                }
               }
-            }
-          }, 70);
+            }, 70);
+          }, 300);
         },
       });
 
       signatureTlRef.current = signatureTl;
 
-      // 1. Slow, deliberate stroke flow for "Let's" (~1.35s)
-      signatureTl.to(pLets, {
-        strokeDashoffset: 0,
-        duration: 1.35,
-        ease: "power1.inOut",
-      });
-      // Soft luxury fill bloom as strokes complete
-      signatureTl.to(
-        pLets,
-        {
-          fillOpacity: 1,
-          duration: 0.35,
-          ease: "power1.out",
-        },
-        "<65%"
-      );
+      // Sequential letter-by-letter handwriting:
+      // Option 1B: Deliberate calligraphy pace
+      // Option 2A: Per-letter ink bloom as each letter completes
+      CALLIGRAPHY_LETTERS.forEach((l, i) => {
+        const pathEl = paths[i];
+        const dur = l.duration; // Paced per letter (L: 0.42s, e: 0.22s, etc.)
+        const isWordBreak = i === 5; // Pen lift between "Let's" and "Build"
 
-      // Natural pen-lift pause between words (~0.22s)
-      signatureTl.to({}, { duration: 0.22 });
+        // 1. Stroke drawing along the curve of this letter
+        signatureTl.to(
+          pathEl,
+          {
+            strokeDashoffset: 0,
+            duration: dur,
+            ease: "power1.inOut",
+          },
+          isWordBreak ? "+=0.26" : ">"
+        );
 
-      // 2. Slow, deliberate stroke flow for "Build" (~1.35s)
-      signatureTl.to(pBuild, {
-        strokeDashoffset: 0,
-        duration: 1.35,
-        ease: "power1.inOut",
+        // 2. Option 2A: Soft solid ivory fill bloom as each letter's stroke finishes
+        signatureTl.to(
+          pathEl,
+          {
+            fillOpacity: 1,
+            duration: 0.16,
+            ease: "power1.out",
+          },
+          "<80%"
+        );
       });
-      // Soft luxury fill bloom as strokes complete
-      signatureTl.to(
-        pBuild,
-        {
-          fillOpacity: 1,
-          duration: 0.35,
-          ease: "power1.out",
-        },
-        "<65%"
-      );
     };
 
     // Dedicated IntersectionObserver: 100% resilient to Lenis, dynamic layout, and window resizes
@@ -214,6 +211,7 @@ export const TerminalFinale: React.FC = memo(() => {
 
     return () => {
       observer.disconnect();
+      if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
       if (typingTimerRef.current) clearInterval(typingTimerRef.current);
       if (signatureTlRef.current) signatureTlRef.current.kill();
     };
@@ -400,33 +398,28 @@ END:VCARD`;
           className="w-full flex flex-col items-center text-center select-none mb-4"
         >
           <div className="relative flex flex-col items-center justify-center w-full max-w-4xl px-2">
-            {/* Word 1: "Let's Build" in Authentic SVG Calligraphy Stroke Paths */}
+            {/* Word 1: "Let's Build" in Sequential SVG Calligraphy Letter Stroke Paths */}
             <div className="w-full max-w-[760px] mx-auto -mb-2 sm:-mb-5">
               <svg
                 viewBox={CALLIGRAPHY_VIEWBOX}
                 className="w-full h-auto overflow-visible drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]"
                 fill="none"
               >
-                <path
-                  ref={pathLetsRef}
-                  d={D_LETS}
-                  fill="#FFFDF8"
-                  stroke="#FFFDF8"
-                  strokeWidth="1.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ fillOpacity: 0 }}
-                />
-                <path
-                  ref={pathBuildRef}
-                  d={D_BUILD}
-                  fill="#FFFDF8"
-                  stroke="#FFFDF8"
-                  strokeWidth="1.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ fillOpacity: 0 }}
-                />
+                {CALLIGRAPHY_LETTERS.map((letter, idx) => (
+                  <path
+                    key={letter.id}
+                    ref={(el) => {
+                      letterRefs.current[idx] = el;
+                    }}
+                    d={letter.d}
+                    fill="#FFFDF8"
+                    stroke="#FFFDF8"
+                    strokeWidth="1.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ fillOpacity: 0 }}
+                  />
+                ))}
               </svg>
             </div>
 

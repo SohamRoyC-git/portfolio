@@ -1,307 +1,301 @@
 "use client";
 
-import React, { memo, useState, useRef, useEffect } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+import React, { memo, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+  Sparkles,
+  ArrowRight,
+  RotateCcw,
+  CheckCircle2,
+  ExternalLink,
   Code2,
   Cpu,
   Layers,
-  Zap,
-  ShieldCheck,
   Globe,
-  Terminal,
   Search,
-  CheckCircle2,
-  Sparkles,
-  ArrowRight,
-  ExternalLink,
 } from "lucide-react";
-
-gsap.registerPlugin(ScrollTrigger);
-
-type TechCategory = "all" | "frontend" | "languages" | "aiml" | "performance" | "systems";
+import { TechIcons } from "./TechIcons";
 
 interface TechItem {
   id: string;
   name: string;
   category: "frontend" | "languages" | "aiml" | "performance" | "systems";
+  categoryLabel: string;
+  icon: keyof typeof TechIcons;
   level: "Architectural" | "Production Ready" | "Core Competency" | "Foundational";
   role: string;
   description: string;
   projectHighlight: string;
   metrics: string;
-  codeSnippet?: string;
 }
 
-const TECH_STACK: TechItem[] = [
-  // 1. Languages
+const TECH_ITEMS: TechItem[] = [
+  // Column 1 Stack
   {
-    id: "javascript",
-    name: "JavaScript (ES6+)",
-    category: "languages",
+    id: "nextjs",
+    name: "Next.js 16",
+    category: "frontend",
+    categoryLabel: "Frontend Architecture",
+    icon: "nextjs",
     level: "Architectural",
-    role: "Core Execution Language",
-    description: "Modern asynchronous JavaScript, DOM manipulation, custom event buses, and client-side state engines.",
-    projectHighlight: "IziEat Custom Localisation Engine (200+ keys)",
-    metrics: "Zero-dependency client execution",
-    codeSnippet: `// Custom zero-dependency event bus
-const EventBus = {
-  events: {},
-  emit(event, data) {
-    (this.events[event] || []).forEach(cb => cb(data));
-  }
-};`,
+    role: "App Router Full-Stack Framework",
+    description: "Server/Client component orchestration, hybrid rendering, static prerendering, and edge deployment.",
+    projectHighlight: "Spatial Developer Portfolio & Next-Gen Web Portals",
+    metrics: "Turbopack / Webpack build optimization",
   },
   {
     id: "typescript",
     name: "TypeScript",
     category: "languages",
+    categoryLabel: "Core Languages",
+    icon: "typescript",
     level: "Production Ready",
-    role: "Type-Safe Contracts",
-    description: "Strict compile-time type verification, custom utility types, and robust component props interfaces across Next.js.",
-    projectHighlight: "Portfolio Architecture & Component Libraries",
-    metrics: "100% strict type checking",
-    codeSnippet: `interface ProjectCommission {
-  readonly id: string;
-  title: string;
-  category: 'EU Startup' | 'Global Commerce';
-  metrics: Record<string, string | number>;
-}`,
+    role: "Type-Safe System Contracts",
+    description: "Strict compile-time verification, utility types, and generic interfaces across application modules.",
+    projectHighlight: "End-to-End Type Safety in React Architectures",
+    metrics: "100% strict type checking with zero runtime overhead",
   },
   {
     id: "python",
     name: "Python",
     category: "languages",
+    categoryLabel: "AI & Scripting",
+    icon: "python",
     level: "Core Competency",
-    role: "AI/ML & Automation",
-    description: "Data analysis pipelines, machine learning model foundations, neural concepts, and system scripting.",
-    projectHighlight: "CSE (AI/ML) Academic & Applied Systems",
-    metrics: "Data preprocessing & model pipelines",
-  },
-  {
-    id: "cpp",
-    name: "C++ (Fundamentals)",
-    category: "languages",
-    level: "Foundational",
-    role: "Memory & Algorithms",
-    description: "Core algorithms, data structures, object-oriented concepts, and computational foundations.",
-    projectHighlight: "NSEC Computer Science Fundamentals",
-    metrics: "Low-level computational efficiency",
-  },
-  {
-    id: "html5-css3",
-    name: "HTML5 & Modern CSS",
-    category: "languages",
-    level: "Architectural",
-    role: "Semantic Web Structure",
-    description: "Accessible ARIA markup, semantic layout architecture, modern CSS custom properties, and responsive grid systems.",
-    projectHighlight: "Client Portals & Responsive Mobile Experiences",
-    metrics: "WCAG accessibility & fluid responsive design",
-  },
-
-  // 2. Frontend Architecture
-  {
-    id: "nextjs",
-    name: "Next.js 16 (App Router)",
-    category: "frontend",
-    level: "Architectural",
-    role: "React Full-Stack Framework",
-    description: "Hybrid Server/Client Component paradigms, dynamic route handlers, static generation, and edge deployment.",
-    projectHighlight: "High-Performance Portfolio & Modern Web Apps",
-    metrics: "Turbopack / Webpack hybrid build stability",
-  },
-  {
-    id: "react",
-    name: "React 19",
-    category: "frontend",
-    level: "Architectural",
-    role: "Reactive UI Runtime",
-    description: "Concurrent rendering, fine-grained state hooks (`useCallback`, `useRef`), and component lifecycle orchestration.",
-    projectHighlight: "Interactive Component Hierarchies",
-    metrics: "Zero unnecessary re-renders with memoization",
+    role: "AI/ML Pipelines & Automation",
+    description: "Data preprocessing, algorithm foundations, neural network modeling, and automation scripts.",
+    projectHighlight: "Academic AI/ML Systems & Scripting Automation",
+    metrics: "Algorithmic data pipelines",
   },
   {
     id: "tailwind",
     name: "Tailwind CSS v4",
     category: "frontend",
+    categoryLabel: "Design Tokens",
+    icon: "tailwind",
     level: "Architectural",
-    role: "Design Token Engine",
-    description: "CSS theme architecture, CSS variable hooks, dark-mode palettes, and high-performance utility compilation.",
-    projectHighlight: "Custom Italian Sand & Obsidian Aesthetics",
+    role: "Utility & Design Token Engine",
+    description: "High-performance CSS compilation, fluid typography scales, and custom Italian Sand theme tokens.",
+    projectHighlight: "Custom Editorial & Obsidian Design Systems",
     metrics: "Sub-10kb critical CSS footprint",
   },
   {
-    id: "gsap",
-    name: "GSAP 3.15 & ScrollTrigger",
+    id: "docker",
+    name: "Docker",
+    category: "systems",
+    categoryLabel: "DevOps & Containers",
+    icon: "docker",
+    level: "Core Competency",
+    role: "Containerized Workflows",
+    description: "Isolated environments, repeatable image builds, and multi-stage container pipelines.",
+    projectHighlight: "Modern Development Containerisation",
+    metrics: "Consistent reproducible environments",
+  },
+
+  // Column 2 Stack
+  {
+    id: "react",
+    name: "React 19",
     category: "frontend",
+    categoryLabel: "Frontend Architecture",
+    icon: "react",
     level: "Architectural",
-    role: "Kinetic Animation Engine",
-    description: "Scrubbed scroll timelines, pinned viewport stages, clip-path reveals, and responsive matchMedia animations.",
-    projectHighlight: "Forge Automotive Spatial Storytelling",
-    metrics: "60fps buttery GPU-accelerated transforms",
+    role: "Concurrent UI Runtime",
+    description: "Fine-grained reactive state hooks (useCallback, useRef), concurrent rendering, and memoized trees.",
+    projectHighlight: "Client-Side Multilingual Engine & Spatial UI",
+    metrics: "Zero unnecessary re-renders",
   },
   {
-    id: "lenis",
-    name: "Lenis 1.3 Smooth Scroll",
+    id: "javascript",
+    name: "JavaScript (ES6+)",
+    category: "languages",
+    categoryLabel: "Core Languages",
+    icon: "javascript",
+    level: "Architectural",
+    role: "Asynchronous Web Runtime",
+    description: "Event-driven asynchronous DOM manipulation, custom event buses, and client-side dictionary stores.",
+    projectHighlight: "IziEat Custom Localisation Engine (200+ keys)",
+    metrics: "Zero-dependency client execution",
+  },
+  {
+    id: "gsap",
+    name: "GSAP 3.15",
     category: "frontend",
-    level: "Production Ready",
-    role: "Inertial Scroll Synchronization",
-    description: "Smooth wheel and touch momentum scroll synchronized with GSAP ticker loop for unified page momentum.",
-    projectHighlight: "Seamless Global Scroll Experience",
-    metrics: "0.08 lerp buttery damping",
+    categoryLabel: "Kinetic Animation",
+    icon: "gsap",
+    level: "Architectural",
+    role: "Kinetic ScrollTrigger Engine",
+    description: "Pinned stages, scrubbed timelines, curtain reveals, and responsive matchMedia animations.",
+    projectHighlight: "Forge Automotive Spatial Storytelling & Domes",
+    metrics: "60fps buttery GPU acceleration",
   },
   {
-    id: "framer-motion",
+    id: "aws",
+    name: "AWS Cloud",
+    category: "systems",
+    categoryLabel: "Cloud Infrastructure",
+    icon: "aws",
+    level: "Foundational",
+    role: "Cloud Services & Storage",
+    description: "S3 storage buckets, edge distribution, cloud hosting, and serverless compute primitives.",
+    projectHighlight: "Cloud Asset Hosting & Deployment",
+    metrics: "High availability & edge delivery",
+  },
+  {
+    id: "i18n",
+    name: "Client i18n",
+    category: "systems",
+    categoryLabel: "Systems & Operations",
+    icon: "i18n",
+    level: "Architectural",
+    role: "Zero-Dependency Localisation",
+    description: "Custom dictionary with 200+ structured translation keys across languages without external API lag.",
+    projectHighlight: "IziEat Agricultural Export Business",
+    metrics: "200+ structured keys, 0 external API lag",
+  },
+
+  // Column 3 Stack
+  {
+    id: "framer",
     name: "Framer Motion",
     category: "frontend",
+    categoryLabel: "Frontend Architecture",
+    icon: "framer",
     level: "Production Ready",
-    role: "Gestural & Modal Physics",
+    role: "Spring Physics & Modals",
     description: "Curtain unmasking reveals, spring physics animations, layout transitions, and staggered kinetic typography.",
     projectHighlight: "Forge Navigation Drawer & 3D Card Physics",
     metrics: "Physical spring easing transitions",
   },
   {
+    id: "cpp",
+    name: "C++",
+    category: "languages",
+    categoryLabel: "Core Languages",
+    icon: "cpp",
+    level: "Foundational",
+    role: "Data Structures & OOP",
+    description: "Core algorithms, data structures, object-oriented concepts, and computational foundations.",
+    projectHighlight: "NSEC Computer Science Fundamentals",
+    metrics: "Low-level computational efficiency",
+  },
+  {
     id: "threejs",
     name: "Three.js",
     category: "frontend",
+    categoryLabel: "3D Spatial Web",
+    icon: "threejs",
     level: "Core Competency",
-    role: "Spatial 3D Canvas",
-    description: "WebGL 3D scenes, camera perspective control, procedural meshes, and lighting effects for spatial depth.",
+    role: "WebGL 3D Scenes",
+    description: "WebGL 3D rendering, camera perspective control, procedural meshes, and lighting effects for spatial depth.",
     projectHighlight: "Interactive 3D Viewport Experiences",
     metrics: "Direct WebGL rendering pipeline",
   },
-
-  // 3. AI & Machine Learning
   {
-    id: "ml-fundamentals",
-    name: "Machine Learning Concepts",
+    id: "git",
+    name: "Git & GitHub",
+    category: "systems",
+    categoryLabel: "Systems & Operations",
+    icon: "git",
+    level: "Production Ready",
+    role: "Version Control & CI/CD",
+    description: "Branching strategies, CI/CD automated deployments, release tagging, and collaborative workflow management.",
+    projectHighlight: "Multi-branch deployment pipelines & GitHub Actions",
+    metrics: "Zero merge conflicts in production",
+  },
+  {
+    id: "aiml",
+    name: "Machine Learning",
     category: "aiml",
+    categoryLabel: "AI / ML Foundations",
+    icon: "aiml",
     level: "Core Competency",
-    role: "Predictive Models & Theory",
-    description: "Supervised and unsupervised learning, regression, classification, clustering, and model validation techniques.",
+    role: "Predictive Models & Neural Nets",
+    description: "Supervised and unsupervised learning, regression, classification, clustering, and neural concepts.",
     projectHighlight: "B.Tech CSE (AI & ML) Curriculum",
-    metrics: "Mathematical foundations & model evaluation",
-  },
-  {
-    id: "neural-architectures",
-    name: "Neural & Deep Learning",
-    category: "aiml",
-    level: "Foundational",
-    role: "Modern AI Paradigms",
-    description: "Artificial neural network structures, backpropagation, activation functions, and foundational LLM architectures.",
-    projectHighlight: "AI/ML Specialization at NSEC",
-    metrics: "Algorithmic gradient optimization",
+    metrics: "Mathematical foundations & model validation",
   },
 
-  // 4. Performance & Technical SEO
+  // Column 4 Stack
   {
-    id: "page-optimization",
-    name: "Page-Load Optimization",
-    category: "performance",
+    id: "html5",
+    name: "HTML5",
+    category: "languages",
+    categoryLabel: "Core Languages",
+    icon: "html5",
     level: "Architectural",
-    role: "Speed & Core Web Vitals",
-    description: "Asset preloading, code splitting, script deferral, WebP/AVIF formats, and sub-second initial paint times.",
-    projectHighlight: "IziEat European Export Platform",
-    metrics: "Sub-1s LCP & 100/100 Core Web Vitals",
+    role: "Semantic Web Structure",
+    description: "Accessible ARIA markup, semantic layout architecture, and DOM hierarchy integrity.",
+    projectHighlight: "Client Portals & Responsive Mobile Experiences",
+    metrics: "100% WCAG semantic compliance",
   },
   {
-    id: "seo-infrastructure",
-    name: "Technical SEO Infrastructure",
+    id: "css3",
+    name: "CSS3 / Modern CSS",
+    category: "languages",
+    categoryLabel: "Core Languages",
+    icon: "css3",
+    level: "Architectural",
+    role: "Cascading Style Sheets",
+    description: "CSS custom properties, modern flexbox/grid layout engines, and hardware-accelerated animations.",
+    projectHighlight: "Cross-browser fluid layouts",
+    metrics: "High-performance CSS rendering",
+  },
+  {
+    id: "node",
+    name: "Node.js",
+    category: "systems",
+    categoryLabel: "Backend & Tooling",
+    icon: "node",
+    level: "Production Ready",
+    role: "JavaScript Server Runtime",
+    description: "Server-side scripts, build orchestration, PostCSS transforms, and tooling automation.",
+    projectHighlight: "Full-Stack Web Deployments & CLI Tooling",
+    metrics: "Asynchronous non-blocking I/O",
+  },
+  {
+    id: "seo",
+    name: "Technical SEO",
     category: "performance",
+    categoryLabel: "Performance & SEO",
+    icon: "seo",
     level: "Production Ready",
     role: "Organic Crawl & Discovery",
-    description: "Automated XML sitemaps, robots.txt directives, OpenGraph meta tags, and Google Search Console indexing monitoring.",
+    description: "Automated XML sitemaps, robots.txt directives, OpenGraph meta tags, and Google Search Console indexing.",
     projectHighlight: "International Client Discoverability",
     metrics: "Zero crawl errors in Search Console",
   },
-  {
-    id: "caching-architecture",
-    name: "Caching & Cache Headers",
-    category: "performance",
-    level: "Production Ready",
-    role: "Latency Reduction",
-    description: "Browser caching policies, Cache-Control headers, stale-while-revalidate, and CDN edge optimization.",
-    projectHighlight: "Global Multi-Region Response Times",
-    metrics: "Repeat visits load in < 200ms",
-  },
-
-  // 5. Systems & Engineering Operations
-  {
-    id: "client-i18n",
-    name: "Client-Side Multilingual i18n",
-    category: "systems",
-    level: "Architectural",
-    role: "Zero-Dependency Localisation",
-    description: "Custom dictionary with 200+ structured translation keys across languages without external API dependencies.",
-    projectHighlight: "IziEat Agricultural Export Business",
-    metrics: "200+ structured keys, 0 external API lag",
-    codeSnippet: `// Client-side instant i18n switcher
-const i18nDict = {
-  en: { hero: 'Agricultural Export Excellence' },
-  fr: { hero: "Excellence de l'exportation agricole" }
-};
-function setLanguage(lang) {
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    el.textContent = i18nDict[lang][el.dataset.i18n];
-  });
-}`,
-  },
-  {
-    id: "product-calculator",
-    name: "Product-Load Calculator",
-    category: "systems",
-    level: "Production Ready",
-    role: "Logistics Automation",
-    description: "Custom mathematical calculator for B2B container payload weight, volume distribution, and shipping logistics.",
-    projectHighlight: "IziEat Container Shipment Planner",
-    metrics: "Real-time payload optimization",
-  },
-  {
-    id: "dns-domain-ops",
-    name: "DNS & Domain Operations",
-    category: "systems",
-    level: "Production Ready",
-    role: "Cross-Border Infrastructure",
-    description: "DNS record orchestration (A, CNAME, TXT, MX), domain propagation troubleshooting, and SSL/HTTPS certificate deployment.",
-    projectHighlight: "India Centre & Latvian Cricket Federation",
-    metrics: "Zero-downtime platform maintenance",
-  },
-  {
-    id: "automation-scripting",
-    name: "Workflow Automation",
-    category: "systems",
-    level: "Core Competency",
-    role: "Operations Efficiency",
-    description: "Google Apps Script automation, webhooks, automated form dispatch, and Git/GitHub CI/CD deployment pipelines.",
-    projectHighlight: "Automated Inquiry Routing & Operations",
-    metrics: "Eliminated repetitive manual workflows",
-  },
 ];
 
+// Split into 4 columns for the alternating vertical marquee
+const COLUMN_1 = [TECH_ITEMS[0], TECH_ITEMS[1], TECH_ITEMS[2], TECH_ITEMS[3], TECH_ITEMS[4]];
+const COLUMN_2 = [TECH_ITEMS[5], TECH_ITEMS[6], TECH_ITEMS[7], TECH_ITEMS[8], TECH_ITEMS[9]];
+const COLUMN_3 = [TECH_ITEMS[10], TECH_ITEMS[11], TECH_ITEMS[12], TECH_ITEMS[13], TECH_ITEMS[14]];
+const COLUMN_4 = [TECH_ITEMS[15], TECH_ITEMS[16], TECH_ITEMS[17], TECH_ITEMS[18], TECH_ITEMS[0]];
+
 export const ArchitecturalMatrix: React.FC = memo(() => {
-  const [selectedCategory, setSelectedCategory] = useState<TechCategory>("all");
-  const [selectedTech, setSelectedTech] = useState<TechItem>(TECH_STACK[0]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [isExplorationMode, setIsExplorationMode] = useState(false);
+  const [selectedTech, setSelectedTech] = useState<TechItem>(TECH_ITEMS[0]);
+  const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>("all");
+  const [searchFilter, setSearchFilter] = useState<string>("");
 
   const sectionRef = useRef<HTMLElement | null>(null);
 
-  const categories: { id: TechCategory; label: string; count: number }[] = [
-    { id: "all", label: "ALL CAPABILITIES", count: TECH_STACK.length },
-    { id: "frontend", label: "FRONTEND ARCHITECTURE", count: TECH_STACK.filter((t) => t.category === "frontend").length },
-    { id: "languages", label: "LANGUAGES", count: TECH_STACK.filter((t) => t.category === "languages").length },
-    { id: "aiml", label: "AI / ML CONCEPTS", count: TECH_STACK.filter((t) => t.category === "aiml").length },
-    { id: "performance", label: "PERFORMANCE & SEO", count: TECH_STACK.filter((t) => t.category === "performance").length },
-    { id: "systems", label: "SYSTEMS & OPERATIONS", count: TECH_STACK.filter((t) => t.category === "systems").length },
+  const categories = [
+    { id: "all", label: "ALL TECHNOLOGIES" },
+    { id: "frontend", label: "FRONTEND & 3D" },
+    { id: "languages", label: "LANGUAGES" },
+    { id: "aiml", label: "AI / ML" },
+    { id: "systems", label: "SYSTEMS & CLOUD" },
+    { id: "performance", label: "PERFORMANCE & SEO" },
   ];
 
-  const filteredTech = TECH_STACK.filter((item) => {
-    const matchesCategory = selectedCategory === "all" || item.category === selectedCategory;
+  const filteredExploreItems = TECH_ITEMS.filter((item) => {
+    const matchesCategory = activeCategoryFilter === "all" || item.category === activeCategoryFilter;
     const matchesSearch =
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchQuery.toLowerCase());
+      item.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
+      item.role.toLowerCase().includes(searchFilter.toLowerCase()) ||
+      item.description.toLowerCase().includes(searchFilter.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -311,226 +305,293 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
       ref={sectionRef}
       className="relative w-full z-30 min-h-[100svh] py-24 sm:py-32 px-4 sm:px-8 md:px-12 lg:px-16 bg-[#0B0609] text-[#F8F5EE] border-t border-[#EAD7C0]/15 select-none overflow-hidden"
     >
-      {/* Background Architectural Grid */}
-      <div className="absolute inset-0 bg-[radial-gradient(#EAD7C0_1px,transparent_1px)] [background-size:28px_28px] opacity-[0.04] pointer-events-none" />
-      <div className="absolute top-1/4 right-0 w-96 h-96 rounded-full bg-[#FF8C38]/5 blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 left-10 w-96 h-96 rounded-full bg-[#10B981]/5 blur-3xl pointer-events-none" />
+      {/* Background Architectural Mesh */}
+      <div className="absolute inset-0 bg-[radial-gradient(#EAD7C0_1px,transparent_1px)] [background-size:28px_28px] opacity-[0.035] pointer-events-none" />
+      <div className="absolute top-1/4 right-0 w-[500px] h-[500px] rounded-full bg-[#FF8C38]/5 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-10 left-10 w-[500px] h-[500px] rounded-full bg-[#10B981]/5 blur-3xl pointer-events-none" />
 
-      <div className="relative z-10 max-w-7xl mx-auto flex flex-col gap-12 sm:gap-16">
+      <div className="relative z-10 max-w-7xl mx-auto flex flex-col justify-between flex-1 gap-12 sm:gap-16">
         
-        {/* Chapter Bar */}
-        <div className="flex items-center justify-between font-sans font-bold text-[11px] sm:text-xs text-[#FF8C38] tracking-[0.24em] uppercase pb-4 border-b border-[#EAD7C0]/15">
-          <div className="flex items-center gap-3">
-            <span className="w-8 h-[1px] bg-[#FF8C38]" />
-            <span className="text-[#EAD7C0]">05 // TECHNICAL MATRIX &amp; CAPABILITIES</span>
-          </div>
-          <div className="hidden sm:inline-flex items-center gap-2 text-[10px] text-white/50 font-mono">
-            <span>{TECH_STACK.length} VERIFIED STACK MODULES</span>
-          </div>
-        </div>
-
-        {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div>
-            <h2 className="font-helvetica font-normal text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-[#EAD7C0] tracking-tight leading-[0.9] uppercase mb-4">
-              TECHNICAL MATRIX <br />
-              <span className="text-[#EAD7C0]/40 hover:text-[#EAD7C0] transition-colors duration-500">
-                &amp; ENGINEERING STACK.
-              </span>
-            </h2>
-            <p className="font-serif italic font-light text-base sm:text-lg md:text-xl text-[#D8C4AE] leading-relaxed max-w-2xl">
-              An interactive blueprint of languages, frontend systems, performance tools, and operational workflows deployed in production.
-            </p>
-          </div>
-
-          {/* Search Box */}
-          <div className="relative w-full md:w-72">
-            <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Filter technologies..."
-              className="w-full pl-9 pr-4 py-2 rounded-full bg-white/5 border border-white/15 focus:border-[#FF8C38] focus:outline-none text-xs text-white placeholder:text-white/30 transition-colors"
-            />
-          </div>
-        </div>
-
-        {/* Category Filter Pills */}
-        <div className="flex flex-wrap gap-2 pt-2">
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-sans tracking-wider uppercase transition-all duration-200 cursor-pointer ${
-                selectedCategory === cat.id
-                  ? "bg-[#FF8C38] text-black font-bold shadow-md scale-105"
-                  : "bg-white/5 border border-white/15 text-white/70 hover:text-white hover:border-white/30"
-              }`}
-            >
-              <span>{cat.label}</span>
-              <span className="ml-1.5 opacity-60 text-[10px]">({cat.count})</span>
-            </button>
-          ))}
-        </div>
-
         {/* ========================================================================= */}
-        {/* INTERACTIVE BENTO STACK: GRID OF SKILLS + LIVE ARCHITECTURAL INSPECTOR    */}
+        {/* TWO-COLUMN LAYOUT MIRRORING YOUR REFERENCE VIDEO                          */}
+        {/* Left: Editorial Header & Trigger | Right: 4-Column Floating Marquee / Grid*/}
         {/* ========================================================================= */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           
-          {/* Tech Cards Grid (Left 7 Columns) */}
-          <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3.5 max-h-[750px] overflow-y-auto pr-1 select-none">
-            <AnimatePresence>
-              {filteredTech.map((tech) => {
-                const isSelected = selectedTech.id === tech.id;
-                return (
-                  <motion.div
-                    key={tech.id}
-                    layout
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.25 }}
-                    onClick={() => setSelectedTech(tech)}
-                    className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer flex flex-col justify-between gap-3 ${
-                      isSelected
-                        ? "bg-[#2A0C16] border-[#FF8C38] shadow-[0_10px_30px_-10px_rgba(255,140,56,0.3)] scale-[1.02]"
-                        : "bg-white/5 border-white/10 hover:border-white/25 hover:bg-white/[0.08]"
-                    }`}
-                  >
-                    <div>
-                      {/* Top Row: Category tag + Level */}
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[9px] font-mono uppercase tracking-wider text-[#FF8C38]">
-                          {tech.category}
-                        </span>
-                        <span
-                          className={`text-[9px] font-mono px-2 py-0.5 rounded-full border ${
-                            tech.level === "Architectural"
-                              ? "border-emerald-500/40 text-emerald-400 bg-emerald-950/30"
-                              : tech.level === "Production Ready"
-                              ? "border-amber-500/40 text-amber-300 bg-amber-950/30"
-                              : "border-white/20 text-white/60 bg-white/5"
+          {/* ----------------------------------------------------------------------- */}
+          {/* LEFT COLUMN: EDITORIAL NARRATIVE & EXPLORE ACTION                       */}
+          {/* ----------------------------------------------------------------------- */}
+          <div className="lg:col-span-5 flex flex-col items-start">
+            
+            {/* Pill Eyebrow matching reference video "* Our Tech Stack" */}
+            <div className="inline-flex items-center gap-2 text-[10px] font-sans font-bold uppercase tracking-[0.24em] text-[#FF8C38] mb-5 px-3.5 py-1.5 rounded-full border border-[#FF8C38]/30 bg-[#FF8C38]/10 backdrop-blur-md">
+              <span className="text-xs">✱</span>
+              <span>OUR TECH STACK</span>
+            </div>
+
+            {/* Main Headline matching reference */}
+            <h2 className="font-sans font-black text-3xl xs:text-4xl sm:text-5xl lg:text-6xl text-[#FFFDF8] tracking-tight leading-[1.05] mb-5">
+              Key Technologies &amp; <br />
+              <span className="text-[#EAD7C0]/70">Platforms</span>
+            </h2>
+
+            {/* Descriptive Body Narrative matching reference */}
+            <p className="font-sans font-normal text-sm sm:text-base text-[#D8C4AE]/80 leading-relaxed max-w-md mb-8">
+              We work with leading platforms, modern runtimes, and engineering frameworks that empower digital transformation, accelerate delivery, and drive measurable real-world outcomes.
+            </p>
+
+            {/* Action Pill matching reference "Explore Tech Stack" */}
+            <button
+              onClick={() => setIsExplorationMode(!isExplorationMode)}
+              className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-white text-black hover:bg-[#FF8C38] hover:text-white font-sans font-bold text-xs uppercase tracking-wider transition-all duration-300 cursor-pointer shadow-xl hover:scale-105 active:scale-95"
+            >
+              <span>{isExplorationMode ? "Back to Kinetic Flow" : "Explore Tech Stack"}</span>
+              {isExplorationMode ? (
+                <RotateCcw size={13} className="rotate-180" />
+              ) : (
+                <ArrowRight size={13} />
+              )}
+            </button>
+
+            {/* Active Mode Notice */}
+            <div className="mt-6 flex items-center gap-2 text-[10px] font-mono text-white/40">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>
+                {isExplorationMode
+                  ? "GRID EXPLORATION ACTIVE · CLICK ANY LOGO TO INSPECT EXAMPLES"
+                  : "CONTINUOUS 4-COLUMN VERTICAL KINETIC FLOW"}
+              </span>
+            </div>
+          </div>
+
+          {/* ----------------------------------------------------------------------- */}
+          {/* RIGHT COLUMN: 4-COLUMN VERTICAL MARQUEE / FULL ROW-WISE EXPLORATION VIEW*/}
+          {/* ----------------------------------------------------------------------- */}
+          <div className="lg:col-span-7 w-full flex justify-center">
+            
+            <AnimatePresence mode="wait">
+              {!isExplorationMode ? (
+                /* ================================================================= */
+                /* MODE 1: 4-COLUMN ALTERNATING VERTICAL MARQUEE (EXACT VIDEO MATCH) */
+                /* ================================================================= */
+                <motion.div
+                  key="kinetic-marquee-view"
+                  initial={{ opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.96 }}
+                  transition={{ duration: 0.4 }}
+                  className="relative w-full max-w-xl h-[460px] sm:h-[500px] rounded-3xl border border-[#EAD7C0]/20 bg-[#14050A]/60 backdrop-blur-2xl overflow-hidden p-4 sm:p-6 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
+                >
+                  {/* Top and Bottom Gradient Fade Masks (for smooth entry and exit) */}
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#14050A] via-[#14050A]/80 to-transparent z-10" />
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#14050A] via-[#14050A]/80 to-transparent z-10" />
+
+                  {/* 4 Alternating Vertical Columns Container */}
+                  <div className="grid grid-cols-4 gap-3 sm:gap-4 h-full">
+                    
+                    {/* COLUMN 1: FLOATS UPWARD */}
+                    <div className="flex flex-col gap-3 sm:gap-4 animate-marquee-up hover:[animation-play-state:paused]">
+                      {[...COLUMN_1, ...COLUMN_1, ...COLUMN_1].map((item, idx) => {
+                        const IconComponent = TechIcons[item.icon];
+                        return (
+                          <div
+                            key={`col1-${item.id}-${idx}`}
+                            className="w-full aspect-square rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center p-3 text-white hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0] transition-all duration-300 cursor-pointer group shadow-sm hover:scale-105 active:scale-95"
+                          >
+                            <IconComponent size={28} className="transition-transform group-hover:scale-110" />
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* COLUMN 2: FLOATS DOWNWARD */}
+                    <div className="flex flex-col gap-3 sm:gap-4 animate-marquee-down hover:[animation-play-state:paused]">
+                      {[...COLUMN_2, ...COLUMN_2, ...COLUMN_2].map((item, idx) => {
+                        const IconComponent = TechIcons[item.icon];
+                        return (
+                          <div
+                            key={`col2-${item.id}-${idx}`}
+                            className="w-full aspect-square rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center p-3 text-white hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0] transition-all duration-300 cursor-pointer group shadow-sm hover:scale-105 active:scale-95"
+                          >
+                            <IconComponent size={28} className="transition-transform group-hover:scale-110" />
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* COLUMN 3: FLOATS UPWARD */}
+                    <div className="flex flex-col gap-3 sm:gap-4 animate-marquee-up hover:[animation-play-state:paused]">
+                      {[...COLUMN_3, ...COLUMN_3, ...COLUMN_3].map((item, idx) => {
+                        const IconComponent = TechIcons[item.icon];
+                        return (
+                          <div
+                            key={`col3-${item.id}-${idx}`}
+                            className="w-full aspect-square rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center p-3 text-white hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0] transition-all duration-300 cursor-pointer group shadow-sm hover:scale-105 active:scale-95"
+                          >
+                            <IconComponent size={28} className="transition-transform group-hover:scale-110" />
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* COLUMN 4: FLOATS DOWNWARD */}
+                    <div className="flex flex-col gap-3 sm:gap-4 animate-marquee-down hover:[animation-play-state:paused]">
+                      {[...COLUMN_4, ...COLUMN_4, ...COLUMN_4].map((item, idx) => {
+                        const IconComponent = TechIcons[item.icon];
+                        return (
+                          <div
+                            key={`col4-${item.id}-${idx}`}
+                            className="w-full aspect-square rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center p-3 text-white hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0] transition-all duration-300 cursor-pointer group shadow-sm hover:scale-105 active:scale-95"
+                          >
+                            <IconComponent size={28} className="transition-transform group-hover:scale-110" />
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                  </div>
+                </motion.div>
+              ) : (
+                /* ================================================================= */
+                /* MODE 2: ROW-WISE EXPLORATION VIEW WITH CLICKABLE EXAMPLES         */
+                /* ================================================================= */
+                <motion.div
+                  key="row-wise-explore-view"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.4 }}
+                  className="w-full flex flex-col gap-5 bg-[#14050A]/90 border border-[#EAD7C0]/25 rounded-3xl p-5 sm:p-7 backdrop-blur-2xl shadow-2xl"
+                >
+                  {/* Category Filter Pills & Search */}
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+                    <div className="flex flex-wrap gap-1.5">
+                      {categories.map((cat) => (
+                        <button
+                          key={cat.id}
+                          onClick={() => setActiveCategoryFilter(cat.id)}
+                          className={`px-2.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider transition-all cursor-pointer ${
+                            activeCategoryFilter === cat.id
+                              ? "bg-[#FF8C38] text-black font-bold shadow-sm"
+                              : "bg-white/5 border border-white/10 text-white/60 hover:text-white"
                           }`}
                         >
-                          {tech.level}
-                        </span>
+                          {cat.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="relative">
+                      <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/40" />
+                      <input
+                        type="text"
+                        value={searchFilter}
+                        onChange={(e) => setSearchFilter(e.target.value)}
+                        placeholder="Filter stack..."
+                        className="pl-7 pr-3 py-1 rounded-full bg-black/40 border border-white/15 text-[11px] text-white placeholder:text-white/30 focus:outline-none focus:border-[#FF8C38]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Full Row-Wise Grid of Tech Logos */}
+                  <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2.5 max-h-[220px] overflow-y-auto pr-1">
+                    {filteredExploreItems.map((item) => {
+                      const IconComponent = TechIcons[item.icon];
+                      const isSelected = selectedTech.id === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => setSelectedTech(item)}
+                          className={`aspect-square rounded-2xl flex flex-col items-center justify-center p-2.5 transition-all duration-200 cursor-pointer border ${
+                            isSelected
+                              ? "bg-[#EAD7C0] text-[#0B0609] border-[#FF8C38] shadow-lg scale-105"
+                              : "bg-white/5 text-white border-white/10 hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0]"
+                          }`}
+                        >
+                          <IconComponent size={24} />
+                          <span className="text-[9px] font-sans font-bold tracking-tight truncate max-w-full mt-1.5">
+                            {item.name}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Selected Tech Detail Drawer with Real-World Production Examples */}
+                  <div className="p-4 sm:p-5 rounded-2xl bg-black/60 border border-[#EAD7C0]/20 flex flex-col gap-3">
+                    <div className="flex items-start justify-between border-b border-white/10 pb-2.5">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-sans font-black text-lg text-[#FFFDF8]">
+                            {selectedTech.name}
+                          </h4>
+                          <span className="text-[9px] font-mono px-2 py-0.5 rounded-full border border-emerald-500/40 text-emerald-400 bg-emerald-950/30">
+                            {selectedTech.level}
+                          </span>
+                        </div>
+                        <div className="text-[11px] font-mono text-[#FF8C38] uppercase mt-0.5">
+                          {selectedTech.role}
+                        </div>
                       </div>
 
-                      {/* Title */}
-                      <h3 className="font-sans font-bold text-sm text-[#FFFDF8] tracking-tight">
-                        {tech.name}
-                      </h3>
-                      <p className="font-sans text-[11px] text-[#D8C4AE]/80 mt-1 line-clamp-2 leading-relaxed">
-                        {tech.description}
-                      </p>
-                    </div>
-
-                    {/* Bottom Status / Selection Cue */}
-                    <div className="flex items-center justify-between pt-2 border-t border-white/5 text-[10px] font-mono">
-                      <span className="text-white/40 truncate max-w-[170px]">
-                        {tech.projectHighlight}
-                      </span>
-                      <span
-                        className={`font-bold transition-colors ${
-                          isSelected ? "text-[#FF8C38]" : "text-white/30"
-                        }`}
-                      >
-                        {isSelected ? "ACTIVE" : "INSPECT →"}
+                      <span className="text-[10px] font-mono text-white/40 uppercase">
+                        {selectedTech.categoryLabel}
                       </span>
                     </div>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
-          </div>
 
-          {/* Live Architectural Inspector HUD (Right 5 Columns) */}
-          <div className="lg:col-span-5 sticky top-28 bg-[#1B060F]/90 border border-[#EAD7C0]/25 rounded-2xl p-6 sm:p-7 backdrop-blur-2xl shadow-[0_20px_50px_-15px_rgba(0,0,0,0.9)] flex flex-col justify-between gap-6">
-            
-            {/* Inspector Header */}
-            <div>
-              <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/10">
-                <div className="flex items-center gap-2">
-                  <Terminal size={14} className="text-[#FF8C38]" />
-                  <span className="font-mono text-xs uppercase tracking-wider text-white/70">
-                    MODULE ARCHITECTURE INSPECTOR
-                  </span>
-                </div>
-                <span className="text-[10px] font-mono text-emerald-400 animate-pulse">
-                  ● ACTIVE
-                </span>
-              </div>
+                    <p className="font-sans text-xs text-[#D8C4AE] leading-relaxed">
+                      {selectedTech.description}
+                    </p>
 
-              {/* Selected Module Title */}
-              <div className="flex items-baseline gap-2 mb-1">
-                <h3 className="font-sans font-black text-2xl sm:text-3xl text-[#FFFDF8] tracking-tight">
-                  {selectedTech.name}
-                </h3>
-              </div>
-              <div className="text-xs font-mono text-[#FF8C38] uppercase tracking-wider mb-4">
-                {selectedTech.role}
-              </div>
+                    {/* Production Example Highlight */}
+                    <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-t border-white/5 text-xs">
+                      <div className="flex items-center gap-1.5 text-white/90">
+                        <CheckCircle2 size={13} className="text-[#FF8C38]" />
+                        <span className="font-bold text-[11px]">Production Implementation:</span>
+                        <span className="text-[11px] text-[#EAD7C0]">{selectedTech.projectHighlight}</span>
+                      </div>
 
-              <p className="font-sans text-xs sm:text-sm text-[#D8C4AE] leading-relaxed mb-6">
-                {selectedTech.description}
-              </p>
-
-              {/* Architectural Highlights Box */}
-              <div className="flex flex-col gap-3 p-4 rounded-xl bg-black/40 border border-white/10 mb-4">
-                <div>
-                  <div className="text-[10px] font-mono text-white/40 uppercase mb-0.5">
-                    KEY IMPLEMENTATION &amp; WORK
+                      <div className="font-mono text-[10px] text-emerald-400">
+                        {selectedTech.metrics}
+                      </div>
+                    </div>
                   </div>
-                  <div className="font-sans font-bold text-xs text-[#EAD7C0] flex items-center gap-1.5">
-                    <CheckCircle2 size={13} className="text-[#FF8C38]" />
-                    <span>{selectedTech.projectHighlight}</span>
-                  </div>
-                </div>
 
-                <div>
-                  <div className="text-[10px] font-mono text-white/40 uppercase mb-0.5">
-                    ARCHITECTURAL METRIC
-                  </div>
-                  <div className="font-mono text-xs text-emerald-400">
-                    {selectedTech.metrics}
-                  </div>
-                </div>
-              </div>
-
-              {/* Optional Code Snippet / Architecture Spec */}
-              {selectedTech.codeSnippet && (
-                <div>
-                  <div className="text-[10px] font-mono text-white/40 uppercase mb-1.5">
-                    LIVE SYSTEM SIGNATURE
-                  </div>
-                  <pre className="p-3 rounded-lg bg-black/70 border border-white/10 font-mono text-[11px] text-[#EAD7C0]/90 overflow-x-auto leading-relaxed">
-                    <code>{selectedTech.codeSnippet}</code>
-                  </pre>
-                </div>
+                </motion.div>
               )}
-            </div>
-
-            {/* Quick Action Button */}
-            <div className="pt-4 border-t border-white/10 flex items-center justify-between">
-              <span className="text-[10px] font-mono text-white/40">
-                CSE (AI/ML) · NSEC KOLKATA
-              </span>
-              <a
-                href="#monument-exhibition"
-                className="inline-flex items-center gap-1.5 text-xs font-sans font-bold text-[#FF8C38] hover:text-[#EAD7C0] transition-colors"
-              >
-                <span>VIEW IN COMMISSIONS</span>
-                <ArrowRight size={12} />
-              </a>
-            </div>
+            </AnimatePresence>
 
           </div>
 
         </div>
 
       </div>
+
+      {/* Global CSS Animation Keyframes for the Alternating Vertical Marquee */}
+      <style jsx>{`
+        @keyframes marqueeUp {
+          0% {
+            transform: translateY(0);
+          }
+          100% {
+            transform: translateY(-50%);
+          }
+        }
+        @keyframes marqueeDown {
+          0% {
+            transform: translateY(-50%);
+          }
+          100% {
+            transform: translateY(0);
+          }
+        }
+        .animate-marquee-up {
+          animation: marqueeUp 24s linear infinite;
+        }
+        .animate-marquee-down {
+          animation: marqueeDown 24s linear infinite;
+        }
+      `}</style>
     </section>
   );
 });

@@ -77,19 +77,20 @@ export const TerminalFinale: React.FC = memo(() => {
     return () => clearInterval(interval);
   }, []);
 
-  // Sequenced Headline Animation:
-  // 1. Handwriting unmask for "Let's Build"
-  // 2. Typing animation for "SOMETHING REAL."
+  // Sequenced Signature Handwriting Animation:
+  // "Let's Build" letter-by-letter cursive stroke flow (~2.2s)
+  // followed by "SOMETHING REAL." typewriter execution
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (!sectionRef.current) return;
 
     if (prefersReducedMotion) {
       setTypedSubtext(fullSubtext);
-      if (handwritingRef.current) {
-        handwritingRef.current.style.clipPath = "inset(0% 0% 0% 0%)";
-        handwritingRef.current.style.opacity = "1";
-      }
+      const glyphs = document.querySelectorAll<HTMLElement>(".signature-glyph");
+      glyphs.forEach((g) => {
+        g.style.clipPath = "polygon(-25% -25%, 125% -25%, 125% 125%, -25% 125%)";
+        g.style.opacity = "1";
+      });
       return;
     }
 
@@ -100,33 +101,54 @@ export const TerminalFinale: React.FC = memo(() => {
       onEnter: () => {
         setIsSectionInView(true);
 
-        // Phase 1: Handwriting animation for "Let's Build"
-        if (handwritingRef.current) {
-          gsap.fromTo(
-            handwritingRef.current,
+        const glyphs = Array.from(document.querySelectorAll<HTMLElement>(".signature-glyph"));
+        if (!glyphs.length) return;
+
+        // Master cursive signature handwriting timeline
+        const signatureTl = gsap.timeline({
+          onComplete: () => {
+            // Phase 2: Typing animation for "SOMETHING REAL."
+            let currentIdx = 0;
+            const typingInterval = setInterval(() => {
+              currentIdx++;
+              setTypedSubtext(fullSubtext.slice(0, currentIdx));
+              if (currentIdx >= fullSubtext.length) {
+                clearInterval(typingInterval);
+              }
+            }, 75);
+          },
+        });
+
+        // Letter durations proportional to stroke length (authentic luxury pace ~2.3s total)
+        const strokeDurations: Record<string, number> = {
+          L: 0.44,
+          e: 0.19,
+          t: 0.22,
+          "'": 0.12,
+          s: 0.22,
+          B: 0.46,
+          u: 0.19,
+          i: 0.18,
+          l: 0.24,
+          d: 0.28,
+        };
+
+        glyphs.forEach((el) => {
+          const char = el.dataset.char || "";
+          const dur = strokeDurations[char] || 0.22;
+
+          signatureTl.to(
+            el,
             {
-              clipPath: "inset(0% 100% 0% 0%)",
-              opacity: 0.2,
-            },
-            {
-              clipPath: "inset(0% 0% 0% 0%)",
+              clipPath: "polygon(-30% -30%, 130% -30%, 130% 130%, -30% 130%)",
               opacity: 1,
-              duration: 1.25,
-              ease: "power2.inOut",
-              onComplete: () => {
-                // Phase 2: Typing animation for "SOMETHING REAL."
-                let currentIdx = 0;
-                const typingInterval = setInterval(() => {
-                  currentIdx++;
-                  setTypedSubtext(fullSubtext.slice(0, currentIdx));
-                  if (currentIdx >= fullSubtext.length) {
-                    clearInterval(typingInterval);
-                  }
-                }, 75);
-              },
-            }
+              duration: dur,
+              ease: "power1.inOut",
+            },
+            // Pen lift pause after "s" before starting "Build"
+            char === "B" ? "+=0.22" : ">"
           );
-        }
+        });
       },
     });
 
@@ -310,15 +332,51 @@ END:VCARD`;
         {/* ========================================================================= */}
         <div className="w-full flex flex-col items-center text-center">
           <h2 className="relative flex flex-col items-center justify-center select-none mb-4">
-            {/* Word 1: "Let's Build" in Citadel Script with Handwriting Stroke Reveal */}
+            {/* Word 1: "Let's Build" in Citadel Script with Authentic Per-Letter Signature Handwriting Flow */}
             <span
-              ref={handwritingRef}
-              className="font-citadel font-normal text-6xl xs:text-7xl sm:text-8xl md:text-9xl lg:text-[9.5rem] text-[#FFFDF8] leading-[0.76] relative z-20 -mb-2 sm:-mb-4 -translate-x-2 sm:-translate-x-4 drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] will-change-[clip-path,opacity]"
-              style={{
-                clipPath: isSectionInView ? "inset(0% 0% 0% 0%)" : "inset(0% 100% 0% 0%)",
-              }}
+              className="font-citadel font-normal text-6xl xs:text-7xl sm:text-8xl md:text-9xl lg:text-[9.5rem] text-[#FFFDF8] leading-[0.76] relative z-20 -mb-2 sm:-mb-4 -translate-x-2 sm:-translate-x-4 drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] inline-flex items-baseline"
             >
-              Let&apos;s Build
+              {[
+                { char: "L", key: "L" },
+                { char: "e", key: "e" },
+                { char: "t", key: "t" },
+                { char: "'", key: "apos" },
+                { char: "s", key: "s" },
+              ].map(({ char, key }) => (
+                <span
+                  key={key}
+                  data-char={char}
+                  className="signature-glyph inline-block overflow-visible will-change-[clip-path,opacity]"
+                  style={{
+                    clipPath: isSectionInView ? "polygon(-30% -30%, 130% -30%, 130% 130%, -30% 130%)" : "polygon(-30% -30%, -30% -30%, -30% 130%, -30% 130%)",
+                    opacity: isSectionInView ? 1 : 0,
+                  }}
+                >
+                  {char}
+                </span>
+              ))}
+
+              <span className="inline-block w-3 sm:w-6" />
+
+              {[
+                { char: "B", key: "B" },
+                { char: "u", key: "u" },
+                { char: "i", key: "i" },
+                { char: "l", key: "l" },
+                { char: "d", key: "d" },
+              ].map(({ char, key }) => (
+                <span
+                  key={key}
+                  data-char={char}
+                  className="signature-glyph inline-block overflow-visible will-change-[clip-path,opacity]"
+                  style={{
+                    clipPath: isSectionInView ? "polygon(-30% -30%, 130% -30%, 130% 130%, -30% 130%)" : "polygon(-30% -30%, -30% -30%, -30% 130%, -30% 130%)",
+                    opacity: isSectionInView ? 1 : 0,
+                  }}
+                >
+                  {char}
+                </span>
+              ))}
             </span>
 
             {/* Word 2: "SOMETHING REAL." in Helvetica Compressed with Typing Animation */}

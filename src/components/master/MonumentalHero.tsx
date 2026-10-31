@@ -62,13 +62,12 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         gsap.set(mobileVideoWrapperRef.current, { opacity: 1, scale: 1, display: "block" });
       }
 
-      // Initial Cinematic Blur & Depth State for Monumental Headline
+      // Initial State for Monumental Headline (Pure GPU accelerated transform, zero blur repaints)
       if (mobileIdentityRef.current) {
         gsap.set(mobileIdentityRef.current, {
           opacity: 0,
-          y: 45,
-          scale: 0.94,
-          filter: "blur(18px)",
+          y: 40,
+          scale: 0.96,
           pointerEvents: "none",
         });
       }
@@ -186,7 +185,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         );
       }
 
-      // Phase 3 (0.38 -> 0.65): Monumental Header materializes with cinematic optical focus pull into razor-sharp clarity
+      // Phase 3 (0.38 -> 0.65): Monumental Header materializes cleanly with GPU transforms (No blur filter jitter)
       if (mobileIdentityRef.current) {
         masterTl.to(
           mobileIdentityRef.current,
@@ -194,7 +193,6 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             opacity: 1,
             y: 0,
             scale: 1,
-            filter: "blur(0px)",
             duration: 0.27,
             ease: "power2.out",
           },
@@ -321,14 +319,14 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               {/* Signature Aesthetic Font Pairing (Citadel Script + Helvetica Compressed - Matching 'Soft Light') */}
               <h1
                 ref={mobileTitleRef}
-                className="relative flex flex-col items-center justify-center text-center select-none mb-4"
+                className="relative flex flex-col items-center justify-center text-center select-none mb-4 overflow-visible"
               >
                 {/* Word 1: Soham in Citadel Script (matching 'Soft') */}
-                <span className="font-citadel font-normal text-[4.8rem] xs:text-[5.8rem] sm:text-[6.8rem] text-[#FFFDF8] leading-[0.74] relative z-20 -mb-2.5 xs:-mb-4 -translate-x-3 xs:-translate-x-6 drop-shadow-[0_3px_8px_rgba(0,0,0,0.75)] drop-shadow-[0_8px_18px_rgba(0,0,0,0.55)]">
+                <span className="font-citadel font-normal text-[4.8rem] xs:text-[5.8rem] sm:text-[6.8rem] text-[#FFFDF8] leading-[0.8] relative z-20 -mb-2.5 xs:-mb-4 -translate-x-3 xs:-translate-x-6 drop-shadow-[0_3px_8px_rgba(0,0,0,0.75)] drop-shadow-[0_8px_18px_rgba(0,0,0,0.55)]">
                   Soham
                 </span>
                 {/* Word 2: Roychoudhury in Helvetica Compressed (matching 'Light') */}
-                <span className="font-helvetica font-normal text-[3.4rem] xs:text-[4.2rem] sm:text-[4.8rem] text-[#F8F5EE] tracking-[0.025em] leading-[0.85] relative z-10 drop-shadow-[0_6px_25px_rgba(0,0,0,0.9)]">
+                <span className="font-helvetica font-normal text-[3.4rem] xs:text-[4.2rem] sm:text-[4.8rem] text-[#F8F5EE] tracking-[0.025em] leading-[1.0] pb-2 sm:pb-3 relative z-10 drop-shadow-[0_6px_25px_rgba(0,0,0,0.9)] overflow-visible inline-block">
                   Roychoudhury
                 </span>
               </h1>

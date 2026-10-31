@@ -141,84 +141,54 @@ export const KineticStatement: React.FC = memo(() => {
 
     // =========================================================================
     // MOBILE SCROLL EXPERIENCE (< 768px):
-    // Full Cinematic Ellipse Aperture Reveal & Silky Line Unmasking on Mobile
+    // Pure Solid Rectangular Stage (Zero Ellipse Curve on Mobile) & Natural Scroll Entrance
     // =========================================================================
     mm.add("(max-width: 767px)", () => {
       const statementLines = headlineRef.current?.querySelectorAll(".statement-line");
 
-      // 1. Entrance Ascent on Mobile: Rises until apex reaches the absolute top (y=0) at top top
+      // Mobile: 100% Solid Full-Width Stage without any elliptical clipping
       if (stageRef.current) {
-        gsap.fromTo(
-          stageRef.current,
-          { clipPath: "ellipse(65% 138% at 50% 238%)" },
-          {
-            clipPath: "ellipse(65% 138% at 50% 138%)",
-            ease: "power1.inOut",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top bottom",
-              end: "top top",
-              scrub: 0.5,
-            },
-          }
-        );
+        gsap.set(stageRef.current, { clipPath: "none" });
       }
 
-      // 2. Pinned Stage Timeline on Mobile:
-      // While pinned at the top, scrolling first expands the curved shoulders into a full rectangle,
-      // then continuing to scroll reveals the text upwards!
+      // Smooth unmasking when statement scrolls into view
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: "top top",
-          end: "+=550",
-          scrub: 0.4,
+          start: "top 80%",
         },
       });
-
-      if (stageRef.current) {
-        tl.fromTo(
-          stageRef.current,
-          { clipPath: "ellipse(65% 138% at 50% 138%)" },
-          {
-            clipPath: "ellipse(150% 150% at 50% 50%)",
-            ease: "power2.inOut",
-            duration: 0.35,
-          },
-          0
-        );
-      }
 
       if (dividerTopRef.current && dividerBottomRef.current) {
         tl.fromTo(
           [dividerTopRef.current, dividerBottomRef.current],
           { scaleX: 0, transformOrigin: "left center" },
-          { scaleX: 1, duration: 0.20, ease: "power2.out" },
-          0.35
+          { scaleX: 1, duration: 0.5, ease: "power2.out" },
+          0
         );
       }
 
       if (metaBarRef.current) {
         tl.fromTo(
           metaBarRef.current,
-          { opacity: 0, y: -6 },
-          { opacity: 1, y: 0, duration: 0.20, ease: "power2.out" },
-          0.40
+          { opacity: 0, y: -8 },
+          { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" },
+          0.1
         );
       }
 
       if (statementLines && statementLines.length > 0) {
         tl.fromTo(
           statementLines,
-          { yPercent: 60, opacity: 0 },
+          { yPercent: 40, opacity: 0 },
           {
             yPercent: 0,
             opacity: 1,
-            stagger: 0.1,
-            duration: 0.35,
-            ease: "power3.out",
+            stagger: 0.12,
+            duration: 0.6,
+            ease: "power2.out",
           },
-          0.45
+          0.2
         );
       }
 
@@ -226,24 +196,9 @@ export const KineticStatement: React.FC = memo(() => {
         tl.fromTo(
           attributionRef.current,
           { opacity: 0, y: 8 },
-          { opacity: 1, y: 0, duration: 0.20, ease: "power2.out" },
-          0.65
+          { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" },
+          0.5
         );
-      }
-
-      if (containerRef.current) {
-        gsap.to(containerRef.current, {
-          scale: 0.94,
-          yPercent: -10,
-          opacity: 0.15,
-          ease: "power2.inOut",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "bottom bottom",
-            end: "bottom top",
-            scrub: true,
-          },
-        });
       }
     });
 
@@ -254,13 +209,12 @@ export const KineticStatement: React.FC = memo(() => {
     <div
       id="monument-statement"
       ref={sectionRef}
-      className="relative w-full z-20"
-      style={{ height: "calc(100svh + 900px)" }}
+      className="relative w-full z-20 min-h-[100svh] md:h-[calc(100svh+900px)]"
     >
-      {/* Sticky 100svh Dedicated Architectural Stage (Rich Wine Red & Warm Italian Light Sand) */}
+      {/* Sticky 100svh on Desktop, Natural Fluid Stage on Mobile (Rich Wine Red & Warm Italian Light Sand) */}
       <section
         ref={stageRef}
-        className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-center pt-20 sm:pt-28 pb-8 sm:pb-12 px-5 sm:px-12 md:px-20 overflow-hidden bg-[#2D0A12] border-t border-[#EAD7C0]/20 will-change-[clip-path]"
+        className="relative md:sticky md:top-0 min-h-[100svh] md:h-[100svh] w-full flex flex-col justify-center pt-24 sm:pt-28 pb-12 sm:pb-12 px-5 sm:px-12 md:px-20 overflow-hidden bg-[#2D0A12] border-t border-[#EAD7C0]/20 will-change-[clip-path]"
       >
         {/* Leading Architectural Razor Hairline */}
         <div className="absolute top-0 inset-x-0 h-[1px] bg-[#EAD7C0]/30" />
@@ -287,17 +241,17 @@ export const KineticStatement: React.FC = memo(() => {
             ref={headlineRef}
             className="font-sans font-black text-xl xs:text-2xl sm:text-4xl md:text-5xl lg:text-[3.4rem] xl:text-[4rem] tracking-tight leading-[1.08] uppercase text-[#EAD7C0] mb-5 sm:mb-12 select-none"
           >
-            <div className="overflow-hidden pb-1">
+            <div className="overflow-hidden py-1.5">
               <span className="statement-line inline-block">
                 WE DO NOT BUILD SOFTWARE TO SIT PASSIVELY ON A SCREEN.
               </span>
             </div>
-            <div className="overflow-hidden pb-1">
+            <div className="overflow-hidden py-1.5">
               <span className="statement-line inline-block">
                 WE ENGINEER <span className="text-[#FF8C38]">DIGITAL ENVIRONMENTS</span> WITH PHYSICAL WEIGHT,
               </span>
             </div>
-            <div className="overflow-hidden pb-1">
+            <div className="overflow-hidden py-1.5">
               <span className="statement-line inline-block text-[#EAD7C0]/50">
                 KINETIC INTENTION, AND INTERNATIONAL SCALE.
               </span>

@@ -99,11 +99,11 @@ export const SiteFooter: React.FC<SiteFooterProps> = ({ onNavigate }) => {
             {/* Signature Font Pairing Matching Hero Section */}
             <div className="relative flex flex-col items-start select-none mb-6">
               {/* Word 1: Soham in Citadel Script */}
-              <span className="font-citadel font-normal text-5xl xs:text-7xl sm:text-8xl md:text-9xl text-[#FFFDF8] leading-[0.74] relative z-20 -mb-2 xs:-mb-3 sm:-mb-5 md:-mb-6 -translate-x-2 xs:-translate-x-3 sm:-translate-x-5 drop-shadow-[0_4px_12px_rgba(0,0,0,0.85)]">
+              <span className="font-citadel font-normal text-5xl xs:text-7xl sm:text-8xl md:text-9xl text-[#FFFDF8] leading-[0.8] relative z-20 -mb-2 xs:-mb-3 sm:-mb-5 md:-mb-6 -translate-x-2 xs:-translate-x-3 sm:-translate-x-5 drop-shadow-[0_4px_12px_rgba(0,0,0,0.85)] overflow-visible">
                 Soham
               </span>
               {/* Word 2: Roychoudhury in Helvetica Compressed */}
-              <span className="font-helvetica font-normal text-[2.2rem] xs:text-[2.6rem] sm:text-7xl md:text-8xl text-[#F8F5EE] tracking-[0.025em] leading-[0.84] relative z-10 drop-shadow-[0_8px_25px_rgba(0,0,0,0.9)]">
+              <span className="font-helvetica font-normal text-[2.2rem] xs:text-[2.6rem] sm:text-7xl md:text-8xl text-[#F8F5EE] tracking-[0.025em] leading-[1.0] pb-2 sm:pb-3 relative z-10 drop-shadow-[0_8px_25px_rgba(0,0,0,0.9)] overflow-visible inline-block">
                 Roychoudhury
               </span>
             </div>

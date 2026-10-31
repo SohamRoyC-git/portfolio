@@ -276,10 +276,16 @@ const COLUMN_4 = [TECH_ITEMS[15], TECH_ITEMS[16], TECH_ITEMS[17], TECH_ITEMS[18]
 export const ArchitecturalMatrix: React.FC = memo(() => {
   const [isExplorationMode, setIsExplorationMode] = useState(false);
   const [selectedTech, setSelectedTech] = useState<TechItem>(TECH_ITEMS[0]);
+  const [activeMarqueeId, setActiveMarqueeId] = useState<string | null>(null);
   const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>("all");
   const [searchFilter, setSearchFilter] = useState<string>("");
 
   const sectionRef = useRef<HTMLElement | null>(null);
+
+  const handleMarqueeSelect = (item: TechItem) => {
+    setActiveMarqueeId((prev) => (prev === item.id ? null : item.id));
+    setSelectedTech(item);
+  };
 
   const categories = [
     { id: "all", label: "ALL TECHNOLOGIES" },
@@ -353,14 +359,23 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
               )}
             </button>
 
-            {/* Active Mode Notice */}
-            <div className="mt-6 flex items-center gap-2 text-[10px] font-mono text-white/40">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>
-                {isExplorationMode
-                  ? "GRID EXPLORATION ACTIVE · CLICK ANY LOGO TO INSPECT EXAMPLES"
-                  : "CONTINUOUS 4-COLUMN VERTICAL KINETIC FLOW"}
-              </span>
+            {/* Active Mode Notice & Lit Logo Preview */}
+            <div className="mt-5 flex flex-col gap-2.5">
+              <div className="flex items-center gap-2 text-[10px] font-mono text-white/40">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>
+                  {isExplorationMode
+                    ? "GRID EXPLORATION ACTIVE · CLICK ANY LOGO TO INSPECT EXAMPLES"
+                    : "CONTINUOUS 4-COLUMN VERTICAL KINETIC FLOW · TAP ANY LOGO TO LIGHT UP"}
+                </span>
+              </div>
+
+              {activeMarqueeId && !isExplorationMode && (
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EAD7C0] text-[#0B0609] text-xs font-mono font-bold shadow-lg animate-fade-in self-start border border-[#FF8C38]/40">
+                  <Sparkles size={12} className="text-[#FF8C38]" />
+                  <span>{selectedTech.name} // {selectedTech.role}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -393,13 +408,20 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
                     <div className="flex flex-col gap-2 xs:gap-3 sm:gap-4 animate-marquee-up hover:[animation-play-state:paused]">
                       {[...COLUMN_1, ...COLUMN_1, ...COLUMN_1].map((item, idx) => {
                         const IconComponent = TechIcons[item.icon];
+                        const isLit = activeMarqueeId === item.id;
                         return (
-                          <div
+                          <button
                             key={`col1-${item.id}-${idx}`}
-                            className="w-full aspect-square rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center p-2 xs:p-2.5 sm:p-3 text-white hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0] transition-all duration-300 cursor-pointer group shadow-sm hover:scale-105 active:scale-95"
+                            type="button"
+                            onClick={() => handleMarqueeSelect(item)}
+                            className={`w-full aspect-square rounded-xl sm:rounded-2xl border transition-all duration-300 cursor-pointer flex items-center justify-center p-2 xs:p-2.5 sm:p-3 shadow-sm active:scale-95 ${
+                              isLit
+                                ? "bg-[#EAD7C0] text-[#0B0609] border-[#FF8C38] scale-105 shadow-[0_0_25px_rgba(255,140,56,0.55)] z-20 ring-2 ring-[#FF8C38]/40"
+                                : "bg-white/5 text-white border-white/10 hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0] hover:scale-105"
+                            }`}
                           >
                             <IconComponent size={24} className="transition-transform group-hover:scale-110" />
-                          </div>
+                          </button>
                         );
                       })}
                     </div>
@@ -408,13 +430,20 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
                     <div className="flex flex-col gap-2 xs:gap-3 sm:gap-4 animate-marquee-down hover:[animation-play-state:paused]">
                       {[...COLUMN_2, ...COLUMN_2, ...COLUMN_2].map((item, idx) => {
                         const IconComponent = TechIcons[item.icon];
+                        const isLit = activeMarqueeId === item.id;
                         return (
-                          <div
+                          <button
                             key={`col2-${item.id}-${idx}`}
-                            className="w-full aspect-square rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center p-2 xs:p-2.5 sm:p-3 text-white hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0] transition-all duration-300 cursor-pointer group shadow-sm hover:scale-105 active:scale-95"
+                            type="button"
+                            onClick={() => handleMarqueeSelect(item)}
+                            className={`w-full aspect-square rounded-xl sm:rounded-2xl border transition-all duration-300 cursor-pointer flex items-center justify-center p-2 xs:p-2.5 sm:p-3 shadow-sm active:scale-95 ${
+                              isLit
+                                ? "bg-[#EAD7C0] text-[#0B0609] border-[#FF8C38] scale-105 shadow-[0_0_25px_rgba(255,140,56,0.55)] z-20 ring-2 ring-[#FF8C38]/40"
+                                : "bg-white/5 text-white border-white/10 hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0] hover:scale-105"
+                            }`}
                           >
                             <IconComponent size={24} className="transition-transform group-hover:scale-110" />
-                          </div>
+                          </button>
                         );
                       })}
                     </div>
@@ -423,13 +452,20 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
                     <div className="flex flex-col gap-2 xs:gap-3 sm:gap-4 animate-marquee-up hover:[animation-play-state:paused]">
                       {[...COLUMN_3, ...COLUMN_3, ...COLUMN_3].map((item, idx) => {
                         const IconComponent = TechIcons[item.icon];
+                        const isLit = activeMarqueeId === item.id;
                         return (
-                          <div
+                          <button
                             key={`col3-${item.id}-${idx}`}
-                            className="w-full aspect-square rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center p-2 xs:p-2.5 sm:p-3 text-white hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0] transition-all duration-300 cursor-pointer group shadow-sm hover:scale-105 active:scale-95"
+                            type="button"
+                            onClick={() => handleMarqueeSelect(item)}
+                            className={`w-full aspect-square rounded-xl sm:rounded-2xl border transition-all duration-300 cursor-pointer flex items-center justify-center p-2 xs:p-2.5 sm:p-3 shadow-sm active:scale-95 ${
+                              isLit
+                                ? "bg-[#EAD7C0] text-[#0B0609] border-[#FF8C38] scale-105 shadow-[0_0_25px_rgba(255,140,56,0.55)] z-20 ring-2 ring-[#FF8C38]/40"
+                                : "bg-white/5 text-white border-white/10 hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0] hover:scale-105"
+                            }`}
                           >
                             <IconComponent size={24} className="transition-transform group-hover:scale-110" />
-                          </div>
+                          </button>
                         );
                       })}
                     </div>
@@ -438,13 +474,20 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
                     <div className="flex flex-col gap-2 xs:gap-3 sm:gap-4 animate-marquee-down hover:[animation-play-state:paused]">
                       {[...COLUMN_4, ...COLUMN_4, ...COLUMN_4].map((item, idx) => {
                         const IconComponent = TechIcons[item.icon];
+                        const isLit = activeMarqueeId === item.id;
                         return (
-                          <div
+                          <button
                             key={`col4-${item.id}-${idx}`}
-                            className="w-full aspect-square rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center p-2 xs:p-2.5 sm:p-3 text-white hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0] transition-all duration-300 cursor-pointer group shadow-sm hover:scale-105 active:scale-95"
+                            type="button"
+                            onClick={() => handleMarqueeSelect(item)}
+                            className={`w-full aspect-square rounded-xl sm:rounded-2xl border transition-all duration-300 cursor-pointer flex items-center justify-center p-2 xs:p-2.5 sm:p-3 shadow-sm active:scale-95 ${
+                              isLit
+                                ? "bg-[#EAD7C0] text-[#0B0609] border-[#FF8C38] scale-105 shadow-[0_0_25px_rgba(255,140,56,0.55)] z-20 ring-2 ring-[#FF8C38]/40"
+                                : "bg-white/5 text-white border-white/10 hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0] hover:scale-105"
+                            }`}
                           >
                             <IconComponent size={24} className="transition-transform group-hover:scale-110" />
-                          </div>
+                          </button>
                         );
                       })}
                     </div>

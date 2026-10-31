@@ -423,8 +423,8 @@ END:VCARD`;
               </svg>
             </div>
 
-            {/* Word 2: "SOMETHING REAL." in Helvetica Compressed with Typing Animation */}
-            <h2 className="font-helvetica font-normal text-4xl xs:text-5xl sm:text-7xl md:text-8xl lg:text-[6.5rem] text-[#EAD7C0] tracking-[0.03em] leading-[0.84] relative z-10 drop-shadow-[0_8px_30px_rgba(0,0,0,0.95)] uppercase flex items-center min-h-[0.84em] -mt-1 sm:-mt-3">
+            {/* Word 2: "SOMETHING REAL." in Helvetica Compressed with Typing Animation (Full Line Height & Vertical Clearance) */}
+            <h2 className="font-helvetica font-normal text-4xl xs:text-5xl sm:text-7xl md:text-8xl lg:text-[6.5rem] text-[#EAD7C0] tracking-[0.03em] leading-[1.05] relative z-10 drop-shadow-[0_8px_30px_rgba(0,0,0,0.95)] uppercase flex items-center min-h-[1.15em] mt-1 sm:mt-2 py-2 sm:py-3 overflow-visible">
               <span ref={subtextRef}>{"\u00A0"}</span>
               <span
                 ref={caretRef}
@@ -500,10 +500,10 @@ END:VCARD`;
                     <span>MASTER IDENTITY // B.TECH CSE (AI &amp; ML)</span>
                   </div>
 
-                  <span className="font-citadel font-normal text-5xl xs:text-6xl sm:text-8xl md:text-[6.8rem] text-[#FFFDF8] leading-[0.74] relative z-20 -mb-2 sm:-mb-5 -translate-x-2 sm:-translate-x-4 drop-shadow-[0_4px_14px_rgba(0,0,0,0.9)]">
+                  <span className="font-citadel font-normal text-5xl xs:text-6xl sm:text-8xl md:text-[6.8rem] text-[#FFFDF8] leading-[0.8] relative z-20 -mb-2 sm:-mb-5 -translate-x-2 sm:-translate-x-4 drop-shadow-[0_4px_14px_rgba(0,0,0,0.9)] overflow-visible">
                     Soham
                   </span>
-                  <span className="font-helvetica font-normal text-[2.2rem] xs:text-[2.6rem] sm:text-7xl md:text-8xl text-[#F8F5EE] tracking-[0.025em] leading-[0.84] relative z-10 drop-shadow-[0_8px_25px_rgba(0,0,0,0.95)]">
+                  <span className="font-helvetica font-normal text-[2.2rem] xs:text-[2.6rem] sm:text-7xl md:text-8xl text-[#F8F5EE] tracking-[0.025em] leading-[1.0] pb-2 sm:pb-3 relative z-10 drop-shadow-[0_8px_25px_rgba(0,0,0,0.95)] overflow-visible inline-block">
                     Roychoudhury
                   </span>
 

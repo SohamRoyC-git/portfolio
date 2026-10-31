@@ -446,7 +446,7 @@ END:VCARD`;
           
           {/* Card Viewport Container */}
           <div
-            className="w-full max-w-3xl min-h-[500px] sm:min-h-[540px] perspective-[1400px] select-none"
+            className="w-full max-w-3xl min-h-[480px] xs:min-h-[500px] sm:min-h-[540px] perspective-[1400px] select-none touch-pan-y"
             onMouseMove={handleCardMouseMove}
             onMouseLeave={handleCardMouseLeave}
           >
@@ -457,7 +457,7 @@ END:VCARD`;
                 transition: "transform 0.65s cubic-bezier(0.2, 0.8, 0.2, 1)",
                 transformStyle: "preserve-3d",
               }}
-              className="relative w-full h-full min-h-[500px] sm:min-h-[540px] rounded-3xl shadow-[0_30px_80px_-20px_rgba(0,0,0,0.95)]"
+              className="relative w-full h-full min-h-[480px] xs:min-h-[500px] sm:min-h-[540px] rounded-3xl shadow-[0_30px_80px_-20px_rgba(0,0,0,0.95)] touch-pan-y"
             >
               
               {/* =================================================================== */}
@@ -465,7 +465,7 @@ END:VCARD`;
               {/* =================================================================== */}
               <div
                 style={{ backfaceVisibility: "hidden" }}
-                className="absolute inset-0 w-full h-full rounded-3xl bg-gradient-to-br from-[#1C060D] via-[#120408] to-[#080103] border-2 border-[#EAD7C0]/35 p-7 sm:p-10 md:p-12 flex flex-col justify-between overflow-hidden backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]"
+                className="absolute inset-0 w-full h-full rounded-3xl bg-gradient-to-br from-[#1C060D] via-[#120408] to-[#080103] border-2 border-[#EAD7C0]/35 p-5 xs:p-6 sm:p-10 md:p-12 flex flex-col justify-between overflow-hidden backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]"
               >
                 {/* Specular Glare Reflection */}
                 <div
@@ -479,13 +479,13 @@ END:VCARD`;
                 <div className="absolute inset-0 bg-[radial-gradient(#EAD7C0_1px,transparent_1px)] [background-size:24px_24px] opacity-[0.04] pointer-events-none" />
 
                 {/* Front Top Bar: Live Status + Telemetry */}
-                <div className="relative z-10 flex items-center justify-between border-b border-white/10 pb-4">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-950/40 text-emerald-400 font-mono text-[10px] uppercase tracking-wider">
+                <div className="relative z-10 flex items-center justify-between border-b border-white/10 pb-3 sm:pb-4">
+                  <div className="inline-flex items-center gap-2 px-2.5 sm:px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-950/40 text-emerald-400 font-mono text-[9px] sm:text-[10px] uppercase tracking-wider">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                     <span>AVAILABLE FOR ROLES 2026</span>
                   </div>
 
-                  <div className="flex items-center gap-2 font-mono text-[10px] text-white/60">
+                  <div className="flex items-center gap-2 font-mono text-[9px] sm:text-[10px] text-white/60">
                     <Compass size={13} className="text-[#FF8C38]" />
                     <span className="text-white font-bold">{time || "00:00:00"} IST</span>
                     <span className="hidden sm:inline text-white/30">•</span>
@@ -494,43 +494,43 @@ END:VCARD`;
                 </div>
 
                 {/* Front Center: Signature Hero Typography Lockup */}
-                <div className="relative z-10 my-auto py-6 flex flex-col items-start select-none">
-                  <div className="text-[10px] font-sans font-bold uppercase tracking-[0.22em] text-[#FF8C38] mb-2 flex items-center gap-2">
+                <div className="relative z-10 my-auto py-4 sm:py-6 flex flex-col items-start select-none">
+                  <div className="text-[9px] sm:text-[10px] font-sans font-bold uppercase tracking-[0.22em] text-[#FF8C38] mb-1.5 sm:mb-2 flex items-center gap-2">
                     <Sparkles size={11} className="text-[#FF8C38]" />
                     <span>MASTER IDENTITY // B.TECH CSE (AI &amp; ML)</span>
                   </div>
 
-                  <span className="font-citadel font-normal text-6xl xs:text-7xl sm:text-8xl md:text-[6.8rem] text-[#FFFDF8] leading-[0.74] relative z-20 -mb-3 sm:-mb-5 -translate-x-3 sm:-translate-x-4 drop-shadow-[0_4px_14px_rgba(0,0,0,0.9)]">
+                  <span className="font-citadel font-normal text-5xl xs:text-6xl sm:text-8xl md:text-[6.8rem] text-[#FFFDF8] leading-[0.74] relative z-20 -mb-2 sm:-mb-5 -translate-x-2 sm:-translate-x-4 drop-shadow-[0_4px_14px_rgba(0,0,0,0.9)]">
                     Soham
                   </span>
-                  <span className="font-helvetica font-normal text-5xl xs:text-6xl sm:text-7xl md:text-8xl text-[#F8F5EE] tracking-[0.025em] leading-[0.84] relative z-10 drop-shadow-[0_8px_25px_rgba(0,0,0,0.95)]">
+                  <span className="font-helvetica font-normal text-[2.2rem] xs:text-[2.6rem] sm:text-7xl md:text-8xl text-[#F8F5EE] tracking-[0.025em] leading-[0.84] relative z-10 drop-shadow-[0_8px_25px_rgba(0,0,0,0.95)]">
                     Roychoudhury
                   </span>
 
-                  <p className="font-helvetica font-normal text-xs sm:text-sm text-[#D8C4AE] tracking-[0.16em] uppercase mt-4">
+                  <p className="font-helvetica font-normal text-[11px] xs:text-xs sm:text-sm text-[#D8C4AE] tracking-[0.14em] uppercase mt-3 sm:mt-4 leading-normal">
                     Computer Science &amp; Engineering (AI/ML) · Frontend Architect · Digital Operations
                   </p>
                 </div>
 
                 {/* Front Bottom Bar: Direct Contacts + Flip to Contact Form Button */}
-                <div className="relative z-10 pt-5 border-t border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                <div className="relative z-10 pt-4 sm:pt-5 border-t border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
                   {/* Quick Direct Contacts */}
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-2 sm:gap-3">
                     <button
                       onClick={handleCopyEmail}
-                      className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-white/15 bg-white/5 hover:border-[#FF8C38] hover:bg-white/10 text-white/90 hover:text-white transition-all text-xs font-mono cursor-pointer"
+                      className="inline-flex items-center justify-center gap-2 px-3 py-1.5 sm:py-2 rounded-xl border border-white/15 bg-white/5 hover:border-[#FF8C38] hover:bg-white/10 text-white/90 hover:text-white transition-all text-xs font-mono cursor-pointer"
                     >
-                      <Mail size={13} className="text-[#FF8C38]" />
-                      <span className="hidden xs:inline">roychoudhurysoham006@gmail.com</span>
-                      <span className="xs:hidden">Email</span>
+                      <Mail size={13} className="text-[#FF8C38] shrink-0" />
+                      <span className="hidden sm:inline">roychoudhurysoham006@gmail.com</span>
+                      <span className="sm:hidden">Email</span>
                       {copiedEmail ? <Check size={12} className="text-emerald-400" /> : <Copy size={11} className="text-white/40" />}
                     </button>
 
                     <button
                       onClick={handleCopyPhone}
-                      className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-white/15 bg-white/5 hover:border-emerald-400 hover:bg-white/10 text-white/90 hover:text-white transition-all text-xs font-mono cursor-pointer"
+                      className="inline-flex items-center justify-center gap-2 px-3 py-1.5 sm:py-2 rounded-xl border border-white/15 bg-white/5 hover:border-emerald-400 hover:bg-white/10 text-white/90 hover:text-white transition-all text-xs font-mono cursor-pointer"
                     >
-                      <Phone size={13} className="text-emerald-400" />
+                      <Phone size={13} className="text-emerald-400 shrink-0" />
                       <span>+91 8240708402</span>
                       {copiedPhone ? <Check size={12} className="text-emerald-400" /> : <Copy size={11} className="text-white/40" />}
                     </button>
@@ -539,7 +539,7 @@ END:VCARD`;
                   {/* Prominent Flip Action to Contact Form */}
                   <button
                     onClick={() => setIsFlipped(true)}
-                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-[#EAD7C0] hover:bg-[#FF8C38] text-black font-sans font-bold text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-lg hover:scale-105 active:scale-95"
+                    className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-[#EAD7C0] hover:bg-[#FF8C38] text-black font-sans font-bold text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-lg hover:scale-105 active:scale-95"
                   >
                     <span>TRANSMIT DIRECT MESSAGE</span>
                     <RotateCw size={13} />
@@ -555,10 +555,10 @@ END:VCARD`;
                   backfaceVisibility: "hidden",
                   transform: "rotateY(180deg)",
                 }}
-                className="absolute inset-0 w-full h-full rounded-3xl bg-gradient-to-br from-[#1C060D] via-[#100307] to-[#070103] border-2 border-[#FF8C38]/40 p-6 sm:p-8 md:p-10 flex flex-col justify-between overflow-hidden backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]"
+                className="absolute inset-0 w-full h-full rounded-3xl bg-gradient-to-br from-[#1C060D] via-[#100307] to-[#070103] border-2 border-[#FF8C38]/40 p-4 xs:p-5 sm:p-8 md:p-10 flex flex-col justify-between overflow-hidden backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]"
               >
                 {/* Back Top Bar: Return to Profile + SCAN QR Pill */}
-                <div className="relative z-10 flex items-center justify-between border-b border-white/10 pb-3">
+                <div className="relative z-10 flex items-center justify-between border-b border-white/10 pb-2.5 sm:pb-3">
                   <button
                     onClick={() => {
                       setIsFlipped(false);
@@ -587,7 +587,7 @@ END:VCARD`;
                 </div>
 
                 {/* Back Content Area: Toggle between Form and Scannable QR Code */}
-                <div className="relative z-10 my-auto py-2">
+                <div className="relative z-10 my-auto py-2 overflow-y-auto max-h-[380px] xs:max-h-[420px] sm:max-h-none pr-1">
                   <AnimatePresence mode="wait">
                     {showQR ? (
                       /* ----------------------------------------------------------- */
@@ -599,7 +599,7 @@ END:VCARD`;
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.94 }}
                         transition={{ duration: 0.3 }}
-                        className="flex flex-col items-center justify-center gap-4 py-2"
+                        className="flex flex-col items-center justify-center gap-3 sm:gap-4 py-2"
                       >
                         <div className="p-3 sm:p-4 rounded-2xl bg-white text-black shadow-2xl flex items-center justify-center">
                           {/* Authentic Scan-Tested QR Code Vector Image */}
@@ -608,7 +608,7 @@ END:VCARD`;
                             alt="Scannable QR Code for Soham Roychoudhury"
                             width={160}
                             height={160}
-                            className="w-36 h-36 sm:w-44 sm:h-44 object-contain"
+                            className="w-32 h-32 sm:w-44 sm:h-44 object-contain"
                             priority
                           />
                         </div>
@@ -650,20 +650,20 @@ END:VCARD`;
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.97 }}
                         transition={{ duration: 0.3 }}
-                        className="flex flex-col gap-3.5"
+                        className="flex flex-col gap-3 sm:gap-3.5"
                       >
                         {/* Topic Selector Chips */}
                         <div>
-                          <div className="text-[10px] font-mono uppercase tracking-wider text-white/50 mb-1.5">
+                          <div className="text-[9px] sm:text-[10px] font-mono uppercase tracking-wider text-white/50 mb-1">
                             TRANSMISSION INTENT
                           </div>
-                          <div className="flex flex-wrap gap-1.5">
+                          <div className="flex flex-wrap gap-1 xs:gap-1.5">
                             {intentOptions.map((intent) => (
                               <button
                                 key={intent}
                                 type="button"
                                 onClick={() => setSelectedIntent(intent)}
-                                className={`px-2.5 py-1 rounded-full text-[11px] font-sans transition-all cursor-pointer ${
+                                className={`px-2 xs:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] xs:text-[11px] font-sans transition-all cursor-pointer ${
                                   selectedIntent === intent
                                     ? "bg-[#FF8C38] text-black font-bold shadow-md"
                                     : "bg-white/5 border border-white/15 text-white/70 hover:text-white"
@@ -675,7 +675,7 @@ END:VCARD`;
                           </div>
                         </div>
 
-                        <form onSubmit={handleFormSubmit} className="flex flex-col gap-3">
+                        <form onSubmit={handleFormSubmit} className="flex flex-col gap-2.5 sm:gap-3">
                           {/* Web3Forms Access Key Hidden Input */}
                           <input
                             type="hidden"
@@ -690,9 +690,9 @@ END:VCARD`;
                           />
 
                           {/* Inputs Row */}
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                             <div>
-                              <label className="block text-[10px] font-mono uppercase tracking-wider text-white/50 mb-1">
+                              <label className="block text-[9px] sm:text-[10px] font-mono uppercase tracking-wider text-white/50 mb-0.5 sm:mb-1">
                                 YOUR NAME / ORG *
                               </label>
                               <input
@@ -702,12 +702,12 @@ END:VCARD`;
                                 value={formState.name}
                                 onChange={(e) => setFormState({ ...formState, name: e.target.value })}
                                 placeholder="e.g. Elena Rostova / Acme"
-                                className="w-full px-3.5 py-2 rounded-xl bg-black/50 border border-[#EAD7C0]/20 focus:border-[#FF8C38] focus:outline-none text-xs text-[#EAD7C0] placeholder:text-white/20 transition-colors"
+                                className="w-full px-3 py-1.5 sm:py-2 rounded-xl bg-black/50 border border-[#EAD7C0]/20 focus:border-[#FF8C38] focus:outline-none text-xs text-[#EAD7C0] placeholder:text-white/20 transition-colors"
                               />
                             </div>
 
                             <div>
-                              <label className="block text-[10px] font-mono uppercase tracking-wider text-white/50 mb-1">
+                              <label className="block text-[9px] sm:text-[10px] font-mono uppercase tracking-wider text-white/50 mb-0.5 sm:mb-1">
                                 EMAIL ADDRESS *
                               </label>
                               <input
@@ -717,14 +717,14 @@ END:VCARD`;
                                 value={formState.email}
                                 onChange={(e) => setFormState({ ...formState, email: e.target.value })}
                                 placeholder="e.g. elena@company.com"
-                                className="w-full px-3.5 py-2 rounded-xl bg-black/50 border border-[#EAD7C0]/20 focus:border-[#FF8C38] focus:outline-none text-xs text-[#EAD7C0] placeholder:text-white/20 transition-colors"
+                                className="w-full px-3 py-1.5 sm:py-2 rounded-xl bg-black/50 border border-[#EAD7C0]/20 focus:border-[#FF8C38] focus:outline-none text-xs text-[#EAD7C0] placeholder:text-white/20 transition-colors"
                               />
                             </div>
                           </div>
 
                           {/* Message Area */}
                           <div>
-                            <label className="block text-[10px] font-mono uppercase tracking-wider text-white/50 mb-1">
+                            <label className="block text-[9px] sm:text-[10px] font-mono uppercase tracking-wider text-white/50 mb-0.5 sm:mb-1">
                               MESSAGE / PROJECT SCOPE *
                             </label>
                             <textarea
@@ -734,16 +734,16 @@ END:VCARD`;
                               value={formState.message}
                               onChange={(e) => setFormState({ ...formState, message: e.target.value })}
                               placeholder={`Hello Soham, we want to discuss an opportunity regarding ${selectedIntent}...`}
-                              className="w-full px-3.5 py-2 rounded-xl bg-black/50 border border-[#EAD7C0]/20 focus:border-[#FF8C38] focus:outline-none text-xs text-[#EAD7C0] placeholder:text-white/20 transition-colors resize-none"
+                              className="w-full px-3 py-1.5 sm:py-2 rounded-xl bg-black/50 border border-[#EAD7C0]/20 focus:border-[#FF8C38] focus:outline-none text-xs text-[#EAD7C0] placeholder:text-white/20 transition-colors resize-none"
                             />
                           </div>
 
                           {/* Submit & Status Bar */}
-                          <div className="flex items-center justify-between gap-3 pt-1">
+                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 pt-1">
                             <button
                               type="submit"
                               disabled={formStatus === "submitting"}
-                              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#EAD7C0] hover:bg-[#FF8C38] text-black font-sans font-bold text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-md hover:scale-105 active:scale-95 disabled:opacity-50"
+                              className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 rounded-full bg-[#EAD7C0] hover:bg-[#FF8C38] text-black font-sans font-bold text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-md hover:scale-105 active:scale-95 disabled:opacity-50"
                             >
                               {formStatus === "submitting" ? (
                                 <>

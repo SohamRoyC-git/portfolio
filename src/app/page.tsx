@@ -28,15 +28,15 @@ export default function Home() {
 
     let tickerCallback: ((time: number) => void) | null = null;
 
-    // Unified Lenis Smooth Scroll (Desktop + Mobile with buttery touch interpolation)
+    // Unified Lenis Smooth Scroll (Buttery smooth on desktop, native touch momentum on mobile)
     if (!prefersReducedMotion) {
       const lenis = new Lenis({
-        lerp: isTouch ? 0.09 : 0.08,
-        duration: isTouch ? 0.9 : 1.1,
+        lerp: isTouch ? 0.1 : 0.08,
+        duration: isTouch ? 0.8 : 1.1,
         smoothWheel: true,
         wheelMultiplier: 1.0,
-        syncTouch: true,
-        touchMultiplier: 1.2,
+        syncTouch: false, // Disables touch hijacking so mobile uses buttery-smooth native momentum
+        touchMultiplier: 1.0,
       });
       lenisRef.current = lenis;
 
@@ -68,15 +68,14 @@ export default function Home() {
 
     mm.add("(max-width: 767px)", () => {
       gsap.to("#hero-wrapper", {
-        scale: 0.96,
-        yPercent: -8,
-        opacity: 0.05,
-        ease: "power2.inOut",
+        scale: 0.98,
+        opacity: 0,
+        ease: "power1.inOut",
         scrollTrigger: {
           trigger: "#monument-statement",
           start: "top bottom",
           end: "top top",
-          scrub: 0.5,
+          scrub: 0.35,
         },
       });
     });

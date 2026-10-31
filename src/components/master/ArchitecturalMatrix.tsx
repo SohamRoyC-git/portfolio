@@ -380,70 +380,70 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.96 }}
                   transition={{ duration: 0.4 }}
-                  className="relative w-full max-w-xl h-[460px] sm:h-[500px] rounded-3xl border border-[#EAD7C0]/20 bg-[#14050A]/60 backdrop-blur-2xl overflow-hidden p-4 sm:p-6 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
+                  className="relative w-full max-w-xl h-[420px] xs:h-[460px] sm:h-[500px] rounded-3xl border border-[#EAD7C0]/20 bg-[#14050A]/60 backdrop-blur-2xl overflow-hidden p-3 xs:p-4 sm:p-6 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
                 >
                   {/* Top and Bottom Gradient Fade Masks (for smooth entry and exit) */}
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#14050A] via-[#14050A]/80 to-transparent z-10" />
-                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#14050A] via-[#14050A]/80 to-transparent z-10" />
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-16 sm:h-20 bg-gradient-to-b from-[#14050A] via-[#14050A]/80 to-transparent z-10" />
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 sm:h-20 bg-gradient-to-t from-[#14050A] via-[#14050A]/80 to-transparent z-10" />
 
                   {/* 4 Alternating Vertical Columns Container */}
-                  <div className="grid grid-cols-4 gap-3 sm:gap-4 h-full">
+                  <div className="grid grid-cols-4 gap-2 xs:gap-3 sm:gap-4 h-full">
                     
                     {/* COLUMN 1: FLOATS UPWARD */}
-                    <div className="flex flex-col gap-3 sm:gap-4 animate-marquee-up hover:[animation-play-state:paused]">
+                    <div className="flex flex-col gap-2 xs:gap-3 sm:gap-4 animate-marquee-up hover:[animation-play-state:paused]">
                       {[...COLUMN_1, ...COLUMN_1, ...COLUMN_1].map((item, idx) => {
                         const IconComponent = TechIcons[item.icon];
                         return (
                           <div
                             key={`col1-${item.id}-${idx}`}
-                            className="w-full aspect-square rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center p-3 text-white hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0] transition-all duration-300 cursor-pointer group shadow-sm hover:scale-105 active:scale-95"
+                            className="w-full aspect-square rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center p-2 xs:p-2.5 sm:p-3 text-white hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0] transition-all duration-300 cursor-pointer group shadow-sm hover:scale-105 active:scale-95"
                           >
-                            <IconComponent size={28} className="transition-transform group-hover:scale-110" />
+                            <IconComponent size={24} className="transition-transform group-hover:scale-110" />
                           </div>
                         );
                       })}
                     </div>
 
                     {/* COLUMN 2: FLOATS DOWNWARD */}
-                    <div className="flex flex-col gap-3 sm:gap-4 animate-marquee-down hover:[animation-play-state:paused]">
+                    <div className="flex flex-col gap-2 xs:gap-3 sm:gap-4 animate-marquee-down hover:[animation-play-state:paused]">
                       {[...COLUMN_2, ...COLUMN_2, ...COLUMN_2].map((item, idx) => {
                         const IconComponent = TechIcons[item.icon];
                         return (
                           <div
                             key={`col2-${item.id}-${idx}`}
-                            className="w-full aspect-square rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center p-3 text-white hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0] transition-all duration-300 cursor-pointer group shadow-sm hover:scale-105 active:scale-95"
+                            className="w-full aspect-square rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center p-2 xs:p-2.5 sm:p-3 text-white hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0] transition-all duration-300 cursor-pointer group shadow-sm hover:scale-105 active:scale-95"
                           >
-                            <IconComponent size={28} className="transition-transform group-hover:scale-110" />
+                            <IconComponent size={24} className="transition-transform group-hover:scale-110" />
                           </div>
                         );
                       })}
                     </div>
 
                     {/* COLUMN 3: FLOATS UPWARD */}
-                    <div className="flex flex-col gap-3 sm:gap-4 animate-marquee-up hover:[animation-play-state:paused]">
+                    <div className="flex flex-col gap-2 xs:gap-3 sm:gap-4 animate-marquee-up hover:[animation-play-state:paused]">
                       {[...COLUMN_3, ...COLUMN_3, ...COLUMN_3].map((item, idx) => {
                         const IconComponent = TechIcons[item.icon];
                         return (
                           <div
                             key={`col3-${item.id}-${idx}`}
-                            className="w-full aspect-square rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center p-3 text-white hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0] transition-all duration-300 cursor-pointer group shadow-sm hover:scale-105 active:scale-95"
+                            className="w-full aspect-square rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center p-2 xs:p-2.5 sm:p-3 text-white hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0] transition-all duration-300 cursor-pointer group shadow-sm hover:scale-105 active:scale-95"
                           >
-                            <IconComponent size={28} className="transition-transform group-hover:scale-110" />
+                            <IconComponent size={24} className="transition-transform group-hover:scale-110" />
                           </div>
                         );
                       })}
                     </div>
 
                     {/* COLUMN 4: FLOATS DOWNWARD */}
-                    <div className="flex flex-col gap-3 sm:gap-4 animate-marquee-down hover:[animation-play-state:paused]">
+                    <div className="flex flex-col gap-2 xs:gap-3 sm:gap-4 animate-marquee-down hover:[animation-play-state:paused]">
                       {[...COLUMN_4, ...COLUMN_4, ...COLUMN_4].map((item, idx) => {
                         const IconComponent = TechIcons[item.icon];
                         return (
                           <div
                             key={`col4-${item.id}-${idx}`}
-                            className="w-full aspect-square rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center p-3 text-white hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0] transition-all duration-300 cursor-pointer group shadow-sm hover:scale-105 active:scale-95"
+                            className="w-full aspect-square rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center p-2 xs:p-2.5 sm:p-3 text-white hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0] transition-all duration-300 cursor-pointer group shadow-sm hover:scale-105 active:scale-95"
                           >
-                            <IconComponent size={28} className="transition-transform group-hover:scale-110" />
+                            <IconComponent size={24} className="transition-transform group-hover:scale-110" />
                           </div>
                         );
                       })}
@@ -461,16 +461,16 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.4 }}
-                  className="w-full flex flex-col gap-5 bg-[#14050A]/90 border border-[#EAD7C0]/25 rounded-3xl p-5 sm:p-7 backdrop-blur-2xl shadow-2xl"
+                  className="w-full flex flex-col gap-4 sm:gap-5 bg-[#14050A]/90 border border-[#EAD7C0]/25 rounded-3xl p-4 xs:p-5 sm:p-7 backdrop-blur-2xl shadow-2xl"
                 >
                   {/* Category Filter Pills & Search */}
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
-                    <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-white/10 pb-3 sm:pb-4">
+                    <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 sm:pb-0 scrollbar-none sm:flex-wrap">
                       {categories.map((cat) => (
                         <button
                           key={cat.id}
                           onClick={() => setActiveCategoryFilter(cat.id)}
-                          className={`px-2.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider transition-all cursor-pointer ${
+                          className={`whitespace-nowrap px-2.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider transition-all cursor-pointer ${
                             activeCategoryFilter === cat.id
                               ? "bg-[#FF8C38] text-black font-bold shadow-sm"
                               : "bg-white/5 border border-white/10 text-white/60 hover:text-white"
@@ -481,20 +481,20 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
                       ))}
                     </div>
 
-                    <div className="relative">
+                    <div className="relative w-full sm:w-auto">
                       <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/40" />
                       <input
                         type="text"
                         value={searchFilter}
                         onChange={(e) => setSearchFilter(e.target.value)}
                         placeholder="Filter stack..."
-                        className="pl-7 pr-3 py-1 rounded-full bg-black/40 border border-white/15 text-[11px] text-white placeholder:text-white/30 focus:outline-none focus:border-[#FF8C38]"
+                        className="w-full sm:w-auto pl-7 pr-3 py-1 rounded-full bg-black/40 border border-white/15 text-[11px] text-white placeholder:text-white/30 focus:outline-none focus:border-[#FF8C38]"
                       />
                     </div>
                   </div>
 
                   {/* Full Row-Wise Grid of Tech Logos */}
-                  <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2.5 max-h-[220px] overflow-y-auto pr-1">
+                  <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 sm:gap-2.5 max-h-[220px] overflow-y-auto pr-1">
                     {filteredExploreItems.map((item) => {
                       const IconComponent = TechIcons[item.icon];
                       const isSelected = selectedTech.id === item.id;
@@ -502,14 +502,14 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
                         <button
                           key={item.id}
                           onClick={() => setSelectedTech(item)}
-                          className={`aspect-square rounded-2xl flex flex-col items-center justify-center p-2.5 transition-all duration-200 cursor-pointer border ${
+                          className={`aspect-square rounded-xl sm:rounded-2xl flex flex-col items-center justify-center p-2 sm:p-2.5 transition-all duration-200 cursor-pointer border ${
                             isSelected
                               ? "bg-[#EAD7C0] text-[#0B0609] border-[#FF8C38] shadow-lg scale-105"
                               : "bg-white/5 text-white border-white/10 hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0]"
                           }`}
                         >
-                          <IconComponent size={24} />
-                          <span className="text-[9px] font-sans font-bold tracking-tight truncate max-w-full mt-1.5">
+                          <IconComponent size={22} />
+                          <span className="text-[8.5px] sm:text-[9px] font-sans font-bold tracking-tight truncate max-w-full mt-1">
                             {item.name}
                           </span>
                         </button>
@@ -518,23 +518,23 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
                   </div>
 
                   {/* Selected Tech Detail Drawer with Real-World Production Examples */}
-                  <div className="p-4 sm:p-5 rounded-2xl bg-black/60 border border-[#EAD7C0]/20 flex flex-col gap-3">
+                  <div className="p-3.5 sm:p-5 rounded-2xl bg-black/60 border border-[#EAD7C0]/20 flex flex-col gap-2.5 sm:gap-3">
                     <div className="flex items-start justify-between border-b border-white/10 pb-2.5">
                       <div>
                         <div className="flex items-center gap-2">
-                          <h4 className="font-sans font-black text-lg text-[#FFFDF8]">
+                          <h4 className="font-sans font-black text-base sm:text-lg text-[#FFFDF8]">
                             {selectedTech.name}
                           </h4>
-                          <span className="text-[9px] font-mono px-2 py-0.5 rounded-full border border-emerald-500/40 text-emerald-400 bg-emerald-950/30">
+                          <span className="text-[8.5px] sm:text-[9px] font-mono px-2 py-0.5 rounded-full border border-emerald-500/40 text-emerald-400 bg-emerald-950/30">
                             {selectedTech.level}
                           </span>
                         </div>
-                        <div className="text-[11px] font-mono text-[#FF8C38] uppercase mt-0.5">
+                        <div className="text-[10px] sm:text-[11px] font-mono text-[#FF8C38] uppercase mt-0.5">
                           {selectedTech.role}
                         </div>
                       </div>
 
-                      <span className="text-[10px] font-mono text-white/40 uppercase">
+                      <span className="text-[9px] sm:text-[10px] font-mono text-white/40 uppercase">
                         {selectedTech.categoryLabel}
                       </span>
                     </div>
@@ -544,14 +544,14 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
                     </p>
 
                     {/* Production Example Highlight */}
-                    <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-t border-white/5 text-xs">
-                      <div className="flex items-center gap-1.5 text-white/90">
-                        <CheckCircle2 size={13} className="text-[#FF8C38]" />
-                        <span className="font-bold text-[11px]">Production Implementation:</span>
-                        <span className="text-[11px] text-[#EAD7C0]">{selectedTech.projectHighlight}</span>
+                    <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 sm:gap-2 border-t border-white/5 text-xs">
+                      <div className="flex flex-wrap items-center gap-1.5 text-white/90">
+                        <CheckCircle2 size={13} className="text-[#FF8C38] shrink-0" />
+                        <span className="font-bold text-[10.5px] sm:text-[11px]">Production:</span>
+                        <span className="text-[10.5px] sm:text-[11px] text-[#EAD7C0]">{selectedTech.projectHighlight}</span>
                       </div>
 
-                      <div className="font-mono text-[10px] text-emerald-400">
+                      <div className="font-mono text-[9.5px] sm:text-[10px] text-emerald-400">
                         {selectedTech.metrics}
                       </div>
                     </div>

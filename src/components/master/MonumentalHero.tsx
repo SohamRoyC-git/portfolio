@@ -324,11 +324,11 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
                 className="relative flex flex-col items-center justify-center text-center select-none mb-4"
               >
                 {/* Word 1: Soham in Citadel Script (matching 'Soft') */}
-                <span className="font-citadel font-normal text-[5.8rem] xs:text-[6.8rem] text-[#FFFDF8] leading-[0.74] relative z-20 -mb-3 xs:-mb-4 -translate-x-4 xs:-translate-x-6 drop-shadow-[0_3px_8px_rgba(0,0,0,0.75)] drop-shadow-[0_8px_18px_rgba(0,0,0,0.55)]">
+                <span className="font-citadel font-normal text-[4.8rem] xs:text-[5.8rem] sm:text-[6.8rem] text-[#FFFDF8] leading-[0.74] relative z-20 -mb-2.5 xs:-mb-4 -translate-x-3 xs:-translate-x-6 drop-shadow-[0_3px_8px_rgba(0,0,0,0.75)] drop-shadow-[0_8px_18px_rgba(0,0,0,0.55)]">
                   Soham
                 </span>
                 {/* Word 2: Roychoudhury in Helvetica Compressed (matching 'Light') */}
-                <span className="font-helvetica font-normal text-[4.2rem] xs:text-[4.8rem] text-[#F8F5EE] tracking-[0.025em] leading-[0.85] relative z-10 drop-shadow-[0_6px_25px_rgba(0,0,0,0.9)]">
+                <span className="font-helvetica font-normal text-[3.4rem] xs:text-[4.2rem] sm:text-[4.8rem] text-[#F8F5EE] tracking-[0.025em] leading-[0.85] relative z-10 drop-shadow-[0_6px_25px_rgba(0,0,0,0.9)]">
                   Roychoudhury
                 </span>
               </h1>

@@ -77,7 +77,7 @@ export const SiteFooter: React.FC<SiteFooterProps> = ({ onNavigate }) => {
   ];
 
   return (
-    <footer className="relative w-full z-40 bg-[#080608] text-[#F8F5EE] border-t border-[#EAD7C0]/15 pt-20 sm:pt-28 pb-12 sm:pb-16 px-6 sm:px-10 md:px-14 lg:px-20 overflow-hidden select-none">
+    <footer className="relative w-full z-40 bg-[#080608] text-[#F8F5EE] border-t border-[#EAD7C0]/15 pt-20 sm:pt-28 pb-12 sm:pb-16 px-4 xs:px-6 sm:px-10 md:px-14 lg:px-20 overflow-hidden select-none">
       {/* Background Architectural Watermark Grid */}
       <div className="absolute inset-0 bg-[radial-gradient(#EAD7C0_1px,transparent_1px)] [background-size:32px_32px] opacity-[0.03] pointer-events-none" />
 
@@ -99,11 +99,11 @@ export const SiteFooter: React.FC<SiteFooterProps> = ({ onNavigate }) => {
             {/* Signature Font Pairing Matching Hero Section */}
             <div className="relative flex flex-col items-start select-none mb-6">
               {/* Word 1: Soham in Citadel Script */}
-              <span className="font-citadel font-normal text-6xl xs:text-7xl sm:text-8xl md:text-9xl text-[#FFFDF8] leading-[0.74] relative z-20 -mb-3 sm:-mb-5 md:-mb-6 -translate-x-3 sm:-translate-x-5 drop-shadow-[0_4px_12px_rgba(0,0,0,0.85)]">
+              <span className="font-citadel font-normal text-5xl xs:text-7xl sm:text-8xl md:text-9xl text-[#FFFDF8] leading-[0.74] relative z-20 -mb-2 xs:-mb-3 sm:-mb-5 md:-mb-6 -translate-x-2 xs:-translate-x-3 sm:-translate-x-5 drop-shadow-[0_4px_12px_rgba(0,0,0,0.85)]">
                 Soham
               </span>
               {/* Word 2: Roychoudhury in Helvetica Compressed */}
-              <span className="font-helvetica font-normal text-5xl xs:text-6xl sm:text-7xl md:text-8xl text-[#F8F5EE] tracking-[0.025em] leading-[0.84] relative z-10 drop-shadow-[0_8px_25px_rgba(0,0,0,0.9)]">
+              <span className="font-helvetica font-normal text-[2.2rem] xs:text-[2.6rem] sm:text-7xl md:text-8xl text-[#F8F5EE] tracking-[0.025em] leading-[0.84] relative z-10 drop-shadow-[0_8px_25px_rgba(0,0,0,0.9)]">
                 Roychoudhury
               </span>
             </div>

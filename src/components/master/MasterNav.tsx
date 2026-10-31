@@ -154,7 +154,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
             animate={{ opacity: 1, clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)" }}
             exit={{ opacity: 0, clipPath: "polygon(0 0, 100% 0, 100% 0, 0 0)" }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-50 bg-[#09070A]/98 backdrop-blur-3xl flex flex-col justify-between p-6 sm:p-12 md:p-16 select-none"
+            className="fixed inset-0 z-50 bg-[#09070A]/98 backdrop-blur-3xl flex flex-col justify-between p-5 xs:p-6 sm:p-12 md:p-16 select-none overflow-y-auto overscroll-contain"
           >
             {/* Top Bar inside Overlay */}
             <motion.div
@@ -181,7 +181,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
             </motion.div>
 
             {/* Nav Links Stack (Monumental Forge Style with Staggered Kinetic Typography) */}
-            <div className="max-w-4xl mx-auto w-full my-auto py-8 sm:py-12 flex flex-col gap-3 sm:gap-5">
+            <div className="max-w-4xl mx-auto w-full my-auto py-6 sm:py-12 flex flex-col gap-2.5 sm:gap-5">
               {links.map((link, idx) => {
                 const isActive = activeId === link.id;
                 return (
@@ -198,12 +198,12 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
                     onClick={() => handleLinkClick(link.id)}
                     className="group flex flex-col sm:flex-row sm:items-baseline justify-between text-left py-2 border-b border-white/5 hover:border-[#FF8C38]/40 transition-colors cursor-pointer"
                   >
-                    <div className="flex items-baseline gap-4 sm:gap-6">
+                    <div className="flex items-baseline gap-3 sm:gap-6">
                       <span className="font-mono text-xs sm:text-sm text-[#FF8C38]/70 group-hover:text-[#FF8C38] group-hover:translate-x-1 transition-transform">
                         {link.num}
                       </span>
                       <span
-                        className={`font-sans font-black text-2xl xs:text-3xl sm:text-4xl md:text-5xl uppercase tracking-tight transition-colors ${
+                        className={`font-sans font-black text-xl xs:text-2xl sm:text-4xl md:text-5xl uppercase tracking-tight transition-colors ${
                           isActive
                             ? "text-[#FF8C38]"
                             : "text-white group-hover:text-[#EAD7C0]"
@@ -213,7 +213,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
                       </span>
                     </div>
 
-                    <span className="font-sans text-[11px] sm:text-xs text-white/40 group-hover:text-white/80 transition-colors mt-1 sm:mt-0 font-medium tracking-wide">
+                    <span className="font-sans text-[10px] sm:text-xs text-white/40 group-hover:text-white/80 transition-colors mt-0.5 sm:mt-0 font-medium tracking-wide">
                       {link.sub}
                     </span>
                   </motion.button>
@@ -227,10 +227,10 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
               transition={{ delay: 0.35, duration: 0.4, ease: "easeOut" }}
-              className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/10 pt-4 sm:pt-6 font-mono text-[10px] sm:text-xs text-white/60"
+              className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 border-t border-white/10 pt-4 sm:pt-6 font-mono text-[10px] sm:text-xs text-white/60"
             >
               {/* Live Clock & Coordinates Telemetry */}
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                 <Compass size={13} className="text-[#FF8C38]" />
                 <span className="text-white font-bold tracking-wider">
                   KOLKATA {time || "00:00:00"} IST
@@ -242,7 +242,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
               </div>
 
               {/* Quick Actions */}
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 sm:gap-4 text-[10px] sm:text-xs">
                 <a
                   href="/cv.pdf"
                   target="_blank"

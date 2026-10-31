@@ -2,7 +2,6 @@
 
 import React, { memo, useState, useRef, useEffect } from "react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 import Image from "next/image";
@@ -21,8 +20,7 @@ import {
   X,
   ArrowRight,
 } from "lucide-react";
-
-gsap.registerPlugin(ScrollTrigger);
+import { CALLIGRAPHY_VIEWBOX, D_LETS, D_BUILD } from "./CalligraphyPaths";
 
 export const TerminalFinale: React.FC = memo(() => {
   const [copiedEmail, setCopiedEmail] = useState(false);
@@ -34,11 +32,6 @@ export const TerminalFinale: React.FC = memo(() => {
   const [rotateX, setRotateX] = useState(0);
   const [rotateY, setRotateY] = useState(0);
   const [glarePos, setGlarePos] = useState({ x: 50, y: 50, opacity: 0 });
-
-  // Headline Animation State: "Let's Build" (Handwriting) -> "SOMETHING REAL." (Typing)
-  const [isSectionInView, setIsSectionInView] = useState(false);
-  const [typedSubtext, setTypedSubtext] = useState("");
-  const fullSubtext = "SOMETHING REAL.";
 
   // Contact Form State
   const [selectedIntent, setSelectedIntent] = useState("Internship 2026");
@@ -56,8 +49,10 @@ export const TerminalFinale: React.FC = memo(() => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const headlineRef = useRef<HTMLDivElement | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
-  const wordLetsRef = useRef<HTMLSpanElement | null>(null);
-  const wordBuildRef = useRef<HTMLSpanElement | null>(null);
+  const pathLetsRef = useRef<SVGPathElement | null>(null);
+  const pathBuildRef = useRef<SVGPathElement | null>(null);
+  const subtextRef = useRef<HTMLSpanElement | null>(null);
+  const caretRef = useRef<HTMLSpanElement | null>(null);
   const signatureTlRef = useRef<gsap.core.Timeline | null>(null);
   const typingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -81,12 +76,27 @@ export const TerminalFinale: React.FC = memo(() => {
     return () => clearInterval(interval);
   }, []);
 
-  // Sequenced Signature Handwriting Animation with Bidirectional Replay:
-  // "Let's Build" cursive handwriting stroke flow (~2.5s total with pen lift)
+  // Authentic SVG Calligraphy Stroke Handwriting Animation with IntersectionObserver Replay:
+  // "Let's Build" fountain pen stroke flow (~1.35s each + 0.22s pen lift)
   // followed by "SOMETHING REAL." typewriter execution
-  // Replays whenever the user enters or re-enters the section
+  // Fully decoupled from React state to avoid any re-render jumps or race conditions
   useEffect(() => {
-    if (!headlineRef.current || !sectionRef.current) return;
+    if (!headlineRef.current || !pathLetsRef.current || !pathBuildRef.current) return;
+
+    const pLets = pathLetsRef.current;
+    const pBuild = pathBuildRef.current;
+
+    const lenLets = pLets.getTotalLength();
+    const lenBuild = pBuild.getTotalLength();
+
+    // Initial setup: stroke hidden, fill transparent
+    pLets.style.strokeDasharray = `${lenLets}`;
+    pLets.style.strokeDashoffset = `${lenLets}`;
+    pLets.style.fillOpacity = "0";
+
+    pBuild.style.strokeDasharray = `${lenBuild}`;
+    pBuild.style.strokeDashoffset = `${lenBuild}`;
+    pBuild.style.fillOpacity = "0";
 
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -99,44 +109,43 @@ export const TerminalFinale: React.FC = memo(() => {
         signatureTlRef.current.kill();
         signatureTlRef.current = null;
       }
-      if (wordLetsRef.current && wordBuildRef.current) {
-        gsap.set([wordLetsRef.current, wordBuildRef.current], {
-          clipPath: "polygon(-20% -25%, -20% -25%, -35% 125%, -35% 125%)",
-          opacity: 0,
-        });
-      }
-      setIsSectionInView(false);
-      setTypedSubtext("");
+
+      gsap.set(pLets, { strokeDashoffset: lenLets, fillOpacity: 0 });
+      gsap.set(pBuild, { strokeDashoffset: lenBuild, fillOpacity: 0 });
+
+      if (subtextRef.current) subtextRef.current.textContent = "\u00A0";
+      if (caretRef.current) caretRef.current.style.display = "none";
     };
 
     const playAnimation = () => {
       resetAnimation();
-      setIsSectionInView(true);
 
       if (prefersReducedMotion) {
-        if (wordLetsRef.current && wordBuildRef.current) {
-          gsap.set([wordLetsRef.current, wordBuildRef.current], {
-            clipPath: "polygon(-20% -25%, 125% -25%, 110% 125%, -20% 125%)",
-            opacity: 1,
-          });
-        }
-        setTypedSubtext(fullSubtext);
+        gsap.set([pLets, pBuild], { strokeDashoffset: 0, fillOpacity: 1 });
+        if (subtextRef.current) subtextRef.current.textContent = "SOMETHING REAL.";
         return;
       }
 
-      if (!wordLetsRef.current || !wordBuildRef.current) return;
-
+      const fullSubtext = "SOMETHING REAL.";
       const signatureTl = gsap.timeline({
         onComplete: () => {
-          let currentIdx = 1;
-          setTypedSubtext(fullSubtext.slice(0, 1));
+          // Phase 2: Typewriter
+          if (subtextRef.current) subtextRef.current.textContent = fullSubtext.slice(0, 1);
+          if (caretRef.current) caretRef.current.style.display = "inline-block";
+
+          let idx = 1;
           typingTimerRef.current = setInterval(() => {
-            currentIdx++;
-            setTypedSubtext(fullSubtext.slice(0, currentIdx));
-            if (currentIdx >= fullSubtext.length) {
+            idx++;
+            if (subtextRef.current) {
+              subtextRef.current.textContent = fullSubtext.slice(0, idx);
+            }
+            if (idx >= fullSubtext.length) {
               if (typingTimerRef.current) {
                 clearInterval(typingTimerRef.current);
                 typingTimerRef.current = null;
+              }
+              if (caretRef.current) {
+                caretRef.current.style.display = "none";
               }
             }
           }, 70);
@@ -145,42 +154,66 @@ export const TerminalFinale: React.FC = memo(() => {
 
       signatureTlRef.current = signatureTl;
 
-      // 1. Slow, continuous calligraphic cursive pen sweep for "Let's" (~1.15s)
-      signatureTl.to(wordLetsRef.current, {
-        clipPath: "polygon(-20% -25%, 125% -25%, 110% 125%, -20% 125%)",
-        opacity: 1,
-        duration: 1.15,
+      // 1. Slow, deliberate stroke flow for "Let's" (~1.35s)
+      signatureTl.to(pLets, {
+        strokeDashoffset: 0,
+        duration: 1.35,
         ease: "power1.inOut",
       });
+      // Soft luxury fill bloom as strokes complete
+      signatureTl.to(
+        pLets,
+        {
+          fillOpacity: 1,
+          duration: 0.35,
+          ease: "power1.out",
+        },
+        "<65%"
+      );
 
-      // Natural pen-lift pause between "Let's" and "Build" (~0.22s)
+      // Natural pen-lift pause between words (~0.22s)
       signatureTl.to({}, { duration: 0.22 });
 
-      // 2. Slow, continuous calligraphic cursive pen sweep for "Build" (~1.15s)
-      signatureTl.to(wordBuildRef.current, {
-        clipPath: "polygon(-20% -25%, 125% -25%, 110% 125%, -20% 125%)",
-        opacity: 1,
-        duration: 1.15,
+      // 2. Slow, deliberate stroke flow for "Build" (~1.35s)
+      signatureTl.to(pBuild, {
+        strokeDashoffset: 0,
+        duration: 1.35,
         ease: "power1.inOut",
       });
+      // Soft luxury fill bloom as strokes complete
+      signatureTl.to(
+        pBuild,
+        {
+          fillOpacity: 1,
+          duration: 0.35,
+          ease: "power1.out",
+        },
+        "<65%"
+      );
     };
 
-    // Attach trigger directly to the headline so the animation only starts
-    // when the headline is clearly centered/in view in the viewport (start: "top 75%")
-    // And replay automatically whenever the user enters or re-enters the section
-    const trigger = ScrollTrigger.create({
-      trigger: headlineRef.current,
-      endTrigger: sectionRef.current,
-      start: "top 75%",
-      end: "bottom 15%",
-      onEnter: () => playAnimation(),
-      onEnterBack: () => playAnimation(),
-      onLeave: () => resetAnimation(),
-      onLeaveBack: () => resetAnimation(),
-    });
+    // Dedicated IntersectionObserver: 100% resilient to Lenis, dynamic layout, and window resizes
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            playAnimation();
+          } else {
+            resetAnimation();
+          }
+        });
+      },
+      {
+        root: null,
+        rootMargin: "0px 0px -20% 0px", // triggers when headline is 20% above bottom of viewport
+        threshold: 0.15,
+      }
+    );
+
+    observer.observe(headlineRef.current);
 
     return () => {
-      trigger.kill();
+      observer.disconnect();
       if (typingTimerRef.current) clearInterval(typingTimerRef.current);
       if (signatureTlRef.current) signatureTlRef.current.kill();
     };
@@ -364,52 +397,50 @@ END:VCARD`;
         <div
           id="terminal-headline"
           ref={headlineRef}
-          className="w-full flex flex-col items-center text-center"
+          className="w-full flex flex-col items-center text-center select-none mb-4"
         >
-          <h2 className="relative flex flex-col items-center justify-center select-none mb-4">
-            {/* Word 1: "Let's Build" in Citadel Script with Authentic Signature Handwriting Flow */}
-            <span
-              className="font-citadel font-normal text-6xl xs:text-7xl sm:text-8xl md:text-9xl lg:text-[9.5rem] text-[#FFFDF8] leading-[0.76] relative z-20 -mb-2 sm:-mb-4 -translate-x-2 sm:-translate-x-4 drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] inline-flex items-baseline overflow-visible"
-            >
-              <span
-                ref={wordLetsRef}
-                className="inline-block relative overflow-visible will-change-[clip-path,opacity] px-1 sm:px-2"
-                style={{
-                  clipPath: isSectionInView
-                    ? "polygon(-20% -25%, 125% -25%, 110% 125%, -20% 125%)"
-                    : "polygon(-20% -25%, -20% -25%, -35% 125%, -35% 125%)",
-                  opacity: isSectionInView ? 1 : 0,
-                }}
+          <div className="relative flex flex-col items-center justify-center w-full max-w-4xl px-2">
+            {/* Word 1: "Let's Build" in Authentic SVG Calligraphy Stroke Paths */}
+            <div className="w-full max-w-[760px] mx-auto -mb-2 sm:-mb-5">
+              <svg
+                viewBox={CALLIGRAPHY_VIEWBOX}
+                className="w-full h-auto overflow-visible drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]"
+                fill="none"
               >
-                Let&apos;s
-              </span>
-
-              <span className="inline-block w-4 sm:w-8 md:w-10" />
-
-              <span
-                ref={wordBuildRef}
-                className="inline-block relative overflow-visible will-change-[clip-path,opacity] px-1 sm:px-2"
-                style={{
-                  clipPath: isSectionInView
-                    ? "polygon(-20% -25%, 125% -25%, 110% 125%, -20% 125%)"
-                    : "polygon(-20% -25%, -20% -25%, -35% 125%, -35% 125%)",
-                  opacity: isSectionInView ? 1 : 0,
-                }}
-              >
-                Build
-              </span>
-            </span>
+                <path
+                  ref={pathLetsRef}
+                  d={D_LETS}
+                  fill="#FFFDF8"
+                  stroke="#FFFDF8"
+                  strokeWidth="1.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{ fillOpacity: 0 }}
+                />
+                <path
+                  ref={pathBuildRef}
+                  d={D_BUILD}
+                  fill="#FFFDF8"
+                  stroke="#FFFDF8"
+                  strokeWidth="1.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{ fillOpacity: 0 }}
+                />
+              </svg>
+            </div>
 
             {/* Word 2: "SOMETHING REAL." in Helvetica Compressed with Typing Animation */}
-            <span className="font-helvetica font-normal text-4xl xs:text-5xl sm:text-7xl md:text-8xl lg:text-[6.5rem] text-[#EAD7C0] tracking-[0.03em] leading-[0.84] relative z-10 drop-shadow-[0_8px_30px_rgba(0,0,0,0.95)] uppercase flex items-center min-h-[0.84em]">
-              <span>{typedSubtext || "\u00A0"}</span>
-              {typedSubtext.length > 0 && typedSubtext.length < fullSubtext.length && isSectionInView && (
-                <span className="inline-block w-1.5 sm:w-2.5 h-[0.75em] bg-[#FF8C38] ml-2 animate-pulse align-middle" />
-              )}
-            </span>
-          </h2>
+            <h2 className="font-helvetica font-normal text-4xl xs:text-5xl sm:text-7xl md:text-8xl lg:text-[6.5rem] text-[#EAD7C0] tracking-[0.03em] leading-[0.84] relative z-10 drop-shadow-[0_8px_30px_rgba(0,0,0,0.95)] uppercase flex items-center min-h-[0.84em] -mt-1 sm:-mt-3">
+              <span ref={subtextRef}>{"\u00A0"}</span>
+              <span
+                ref={caretRef}
+                className="hidden inline-block w-1.5 sm:w-2.5 h-[0.75em] bg-[#FF8C38] ml-2 animate-pulse align-middle"
+              />
+            </h2>
+          </div>
 
-          <p className="font-serif italic font-light text-sm sm:text-lg md:text-xl text-[#D8C4AE] leading-relaxed max-w-xl mx-auto">
+          <p className="font-serif italic font-light text-sm sm:text-lg md:text-xl text-[#D8C4AE] leading-relaxed max-w-xl mx-auto mt-4">
             Seeking software engineering and frontend development internships. Interact with the 3D identity card or flip it to send a direct message.
           </p>
         </div>

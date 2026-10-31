@@ -45,6 +45,14 @@ export const metadata: Metadata = {
   title: "Soham Roychoudhury — Software & Web Development | Digital Operations",
   description:
     "Interactive developer portfolio of Soham Roychoudhury — Computer Science & Engineering (AI/ML) at NSEC Kolkata. Frontend development, cross-border digital operations, and intelligent systems.",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/assets/favicon_script_s.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export default function RootLayout({

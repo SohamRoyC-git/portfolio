@@ -1,12 +1,14 @@
 "use client";
 
-import React, { memo, useRef, useEffect } from "react";
+import React, { memo, useRef, useEffect, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
 export const KineticStatement: React.FC = memo(() => {
+  const [touchPos, setTouchPos] = useState({ x: 0, y: 0, active: false });
+
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -15,6 +17,23 @@ export const KineticStatement: React.FC = memo(() => {
   const dividerBottomRef = useRef<HTMLDivElement | null>(null);
   const headlineRef = useRef<HTMLHeadingElement | null>(null);
   const attributionRef = useRef<HTMLDivElement | null>(null);
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLElement>) => {
+    if (!stageRef.current) return;
+    const rect = stageRef.current.getBoundingClientRect();
+    const touch = e.touches[0];
+    if (touch) {
+      setTouchPos({
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top,
+        active: true,
+      });
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setTouchPos((prev) => ({ ...prev, active: false }));
+  };
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -140,22 +159,39 @@ export const KineticStatement: React.FC = memo(() => {
     });
 
     // =========================================================================
-    // MOBILE SCROLL EXPERIENCE (< 768px):
-    // Pure Solid Rectangular Stage (Zero Ellipse Curve on Mobile) & Natural Scroll Entrance
+    // MOBILE SCROLL EXPERIENCE (< 768px) — DIRECTION B:
+    // Architectural Sheet Lift + Laser Hairlines + Touch Specular Glow (Zero Ellipse)
     // =========================================================================
     mm.add("(max-width: 767px)", () => {
       const statementLines = headlineRef.current?.querySelectorAll(".statement-line");
 
-      // Mobile: 100% Solid Full-Width Stage without any elliptical clipping
+      // 1. Direction B: Architectural Sheet Lift from Below
+      // The wine plinth smoothly lifts upward and expands from scale 0.95 to 1.0 as you scroll into it
       if (stageRef.current) {
         gsap.set(stageRef.current, { clipPath: "none" });
+
+        gsap.fromTo(
+          stageRef.current,
+          { yPercent: 12, scale: 0.95 },
+          {
+            yPercent: 0,
+            scale: 1,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top bottom",
+              end: "top 30%",
+              scrub: 0.35,
+            },
+          }
+        );
       }
 
-      // Smooth unmasking when statement scrolls into view
+      // 2. Laser Hairlines & Kinetic Unmasking
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: "top 80%",
+          start: "top 72%",
         },
       });
 
@@ -163,7 +199,7 @@ export const KineticStatement: React.FC = memo(() => {
         tl.fromTo(
           [dividerTopRef.current, dividerBottomRef.current],
           { scaleX: 0, transformOrigin: "left center" },
-          { scaleX: 1, duration: 0.5, ease: "power2.out" },
+          { scaleX: 1, duration: 0.6, ease: "power3.out" },
           0
         );
       }
@@ -171,8 +207,8 @@ export const KineticStatement: React.FC = memo(() => {
       if (metaBarRef.current) {
         tl.fromTo(
           metaBarRef.current,
-          { opacity: 0, y: -8 },
-          { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" },
+          { opacity: 0, y: -10 },
+          { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" },
           0.1
         );
       }
@@ -180,13 +216,13 @@ export const KineticStatement: React.FC = memo(() => {
       if (statementLines && statementLines.length > 0) {
         tl.fromTo(
           statementLines,
-          { yPercent: 40, opacity: 0 },
+          { yPercent: 100, opacity: 0 },
           {
             yPercent: 0,
             opacity: 1,
             stagger: 0.12,
-            duration: 0.6,
-            ease: "power2.out",
+            duration: 0.65,
+            ease: "power3.out",
           },
           0.2
         );
@@ -195,9 +231,9 @@ export const KineticStatement: React.FC = memo(() => {
       if (attributionRef.current) {
         tl.fromTo(
           attributionRef.current,
-          { opacity: 0, y: 8 },
-          { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" },
-          0.5
+          { opacity: 0, y: 12 },
+          { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" },
+          0.55
         );
       }
     });
@@ -211,17 +247,32 @@ export const KineticStatement: React.FC = memo(() => {
       ref={sectionRef}
       className="relative w-full z-20 min-h-[100svh] md:h-[calc(100svh+900px)]"
     >
-      {/* Sticky 100svh on Desktop, Natural Fluid Stage on Mobile (Rich Wine Red & Warm Italian Light Sand) */}
+      {/* 
+        Direction B: Architectural Sheet on Mobile (rounded-t-[2.2rem], top amber horizon line, touch light) 
+        and Sticky 100svh on Desktop
+      */}
       <section
         ref={stageRef}
-        className="relative md:sticky md:top-0 min-h-[100svh] md:h-[100svh] w-full flex flex-col justify-center pt-24 sm:pt-28 pb-12 sm:pb-12 px-5 sm:px-12 md:px-20 overflow-hidden bg-[#2D0A12] border-t border-[#EAD7C0]/20 will-change-[clip-path]"
+        onTouchMove={handleTouchMove}
+        onTouchStart={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        className="relative md:sticky md:top-0 min-h-[100svh] md:h-[100svh] w-full flex flex-col justify-center pt-24 sm:pt-28 pb-12 sm:pb-12 px-5 sm:px-12 md:px-20 overflow-hidden bg-[#2D0A12] border-t-2 border-[#FF8C38]/40 md:border-t md:border-[#EAD7C0]/20 rounded-t-[2.2rem] md:rounded-none shadow-[0_-25px_60px_rgba(0,0,0,0.95)] md:shadow-none will-change-[transform,opacity]"
       >
-        {/* Leading Architectural Razor Hairline */}
-        <div className="absolute top-0 inset-x-0 h-[1px] bg-[#EAD7C0]/30" />
+        {/* Glowing Horizon Hairline */}
+        <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#FF8C38] to-transparent shadow-[0_0_15px_#FF8C38]" />
+
+        {/* Dynamic Mobile Specular Amber Finger Light */}
+        <div
+          className="md:hidden absolute inset-0 pointer-events-none transition-opacity duration-300 z-0"
+          style={{
+            opacity: touchPos.active ? 1 : 0,
+            background: `radial-gradient(circle 240px at ${touchPos.x}px ${touchPos.y}px, rgba(255, 140, 56, 0.22), transparent 70%)`,
+          }}
+        />
 
         <div
           ref={containerRef}
-          className="w-full max-w-6xl mx-auto flex flex-col justify-center will-change-[transform,opacity]"
+          className="relative z-10 w-full max-w-6xl mx-auto flex flex-col justify-center will-change-[transform,opacity]"
         >
           {/* Architectural Meta Bar */}
           <div
@@ -233,8 +284,8 @@ export const KineticStatement: React.FC = memo(() => {
             <span className="text-[#FF8C38]">TERRACE PERSPECTIVE</span>
           </div>
 
-          {/* Top Hairline Divider */}
-          <div ref={dividerTopRef} className="w-full h-[1px] bg-[#EAD7C0]/20 mb-5 sm:mb-12 will-change-transform" />
+          {/* Top Laser Hairline Divider */}
+          <div ref={dividerTopRef} className="w-full h-[1px] bg-[#EAD7C0]/25 mb-5 sm:mb-12 will-change-transform shadow-[0_0_8px_rgba(255,140,56,0.3)]" />
 
           {/* Monumental All-Caps Statement in Warm Italian Light Sand */}
           <h2
@@ -258,8 +309,8 @@ export const KineticStatement: React.FC = memo(() => {
             </div>
           </h2>
 
-          {/* Bottom Hairline Divider */}
-          <div ref={dividerBottomRef} className="w-full h-[1px] bg-[#EAD7C0]/20 mb-4 sm:mb-6 will-change-transform" />
+          {/* Bottom Laser Hairline Divider */}
+          <div ref={dividerBottomRef} className="w-full h-[1px] bg-[#EAD7C0]/25 mb-4 sm:mb-6 will-change-transform shadow-[0_0_8px_rgba(255,140,56,0.3)]" />
 
           {/* Attribution Tag */}
           <div

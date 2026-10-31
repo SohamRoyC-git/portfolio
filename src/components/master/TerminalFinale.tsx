@@ -54,8 +54,12 @@ export const TerminalFinale: React.FC = memo(() => {
   const phone = "+91 8240708402";
 
   const sectionRef = useRef<HTMLElement | null>(null);
+  const headlineRef = useRef<HTMLDivElement | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
-  const handwritingRef = useRef<HTMLSpanElement | null>(null);
+  const wordLetsRef = useRef<HTMLSpanElement | null>(null);
+  const wordBuildRef = useRef<HTMLSpanElement | null>(null);
+  const signatureTlRef = useRef<gsap.core.Timeline | null>(null);
+  const typingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Live Kolkata IST Clock
   const [time, setTime] = useState("");
@@ -77,82 +81,109 @@ export const TerminalFinale: React.FC = memo(() => {
     return () => clearInterval(interval);
   }, []);
 
-  // Sequenced Signature Handwriting Animation:
-  // "Let's Build" letter-by-letter cursive stroke flow (~2.2s)
+  // Sequenced Signature Handwriting Animation with Bidirectional Replay:
+  // "Let's Build" cursive handwriting stroke flow (~2.5s total with pen lift)
   // followed by "SOMETHING REAL." typewriter execution
+  // Replays whenever the user enters or re-enters the section
   useEffect(() => {
+    if (!headlineRef.current || !sectionRef.current) return;
+
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!sectionRef.current) return;
 
-    if (prefersReducedMotion) {
-      setTypedSubtext(fullSubtext);
-      const glyphs = document.querySelectorAll<HTMLElement>(".signature-glyph");
-      glyphs.forEach((g) => {
-        g.style.clipPath = "polygon(-25% -25%, 125% -25%, 125% 125%, -25% 125%)";
-        g.style.opacity = "1";
-      });
-      return;
-    }
+    const resetAnimation = () => {
+      if (typingTimerRef.current) {
+        clearInterval(typingTimerRef.current);
+        typingTimerRef.current = null;
+      }
+      if (signatureTlRef.current) {
+        signatureTlRef.current.kill();
+        signatureTlRef.current = null;
+      }
+      if (wordLetsRef.current && wordBuildRef.current) {
+        gsap.set([wordLetsRef.current, wordBuildRef.current], {
+          clipPath: "polygon(-20% -25%, -20% -25%, -35% 125%, -35% 125%)",
+          opacity: 0,
+        });
+      }
+      setIsSectionInView(false);
+      setTypedSubtext("");
+    };
 
-    const trigger = ScrollTrigger.create({
-      trigger: sectionRef.current,
-      start: "top 65%",
-      once: true,
-      onEnter: () => {
-        setIsSectionInView(true);
+    const playAnimation = () => {
+      resetAnimation();
+      setIsSectionInView(true);
 
-        const glyphs = Array.from(document.querySelectorAll<HTMLElement>(".signature-glyph"));
-        if (!glyphs.length) return;
+      if (prefersReducedMotion) {
+        if (wordLetsRef.current && wordBuildRef.current) {
+          gsap.set([wordLetsRef.current, wordBuildRef.current], {
+            clipPath: "polygon(-20% -25%, 125% -25%, 110% 125%, -20% 125%)",
+            opacity: 1,
+          });
+        }
+        setTypedSubtext(fullSubtext);
+        return;
+      }
 
-        // Master cursive signature handwriting timeline
-        const signatureTl = gsap.timeline({
-          onComplete: () => {
-            // Phase 2: Typing animation for "SOMETHING REAL."
-            let currentIdx = 0;
-            const typingInterval = setInterval(() => {
-              currentIdx++;
-              setTypedSubtext(fullSubtext.slice(0, currentIdx));
-              if (currentIdx >= fullSubtext.length) {
-                clearInterval(typingInterval);
+      if (!wordLetsRef.current || !wordBuildRef.current) return;
+
+      const signatureTl = gsap.timeline({
+        onComplete: () => {
+          let currentIdx = 1;
+          setTypedSubtext(fullSubtext.slice(0, 1));
+          typingTimerRef.current = setInterval(() => {
+            currentIdx++;
+            setTypedSubtext(fullSubtext.slice(0, currentIdx));
+            if (currentIdx >= fullSubtext.length) {
+              if (typingTimerRef.current) {
+                clearInterval(typingTimerRef.current);
+                typingTimerRef.current = null;
               }
-            }, 75);
-          },
-        });
+            }
+          }, 70);
+        },
+      });
 
-        // Letter durations proportional to stroke length (authentic luxury pace ~2.3s total)
-        const strokeDurations: Record<string, number> = {
-          L: 0.44,
-          e: 0.19,
-          t: 0.22,
-          "'": 0.12,
-          s: 0.22,
-          B: 0.46,
-          u: 0.19,
-          i: 0.18,
-          l: 0.24,
-          d: 0.28,
-        };
+      signatureTlRef.current = signatureTl;
 
-        glyphs.forEach((el) => {
-          const char = el.dataset.char || "";
-          const dur = strokeDurations[char] || 0.22;
+      // 1. Slow, continuous calligraphic cursive pen sweep for "Let's" (~1.15s)
+      signatureTl.to(wordLetsRef.current, {
+        clipPath: "polygon(-20% -25%, 125% -25%, 110% 125%, -20% 125%)",
+        opacity: 1,
+        duration: 1.15,
+        ease: "power1.inOut",
+      });
 
-          signatureTl.to(
-            el,
-            {
-              clipPath: "polygon(-30% -30%, 130% -30%, 130% 130%, -30% 130%)",
-              opacity: 1,
-              duration: dur,
-              ease: "power1.inOut",
-            },
-            // Pen lift pause after "s" before starting "Build"
-            char === "B" ? "+=0.22" : ">"
-          );
-        });
-      },
+      // Natural pen-lift pause between "Let's" and "Build" (~0.22s)
+      signatureTl.to({}, { duration: 0.22 });
+
+      // 2. Slow, continuous calligraphic cursive pen sweep for "Build" (~1.15s)
+      signatureTl.to(wordBuildRef.current, {
+        clipPath: "polygon(-20% -25%, 125% -25%, 110% 125%, -20% 125%)",
+        opacity: 1,
+        duration: 1.15,
+        ease: "power1.inOut",
+      });
+    };
+
+    // Attach trigger directly to the headline so the animation only starts
+    // when the headline is clearly centered/in view in the viewport (start: "top 75%")
+    // And replay automatically whenever the user enters or re-enters the section
+    const trigger = ScrollTrigger.create({
+      trigger: headlineRef.current,
+      endTrigger: sectionRef.current,
+      start: "top 75%",
+      end: "bottom 15%",
+      onEnter: () => playAnimation(),
+      onEnterBack: () => playAnimation(),
+      onLeave: () => resetAnimation(),
+      onLeaveBack: () => resetAnimation(),
     });
 
-    return () => trigger.kill();
+    return () => {
+      trigger.kill();
+      if (typingTimerRef.current) clearInterval(typingTimerRef.current);
+      if (signatureTlRef.current) signatureTlRef.current.kill();
+    };
   }, []);
 
   // 3D Holographic Card Mouse Move Handler (Smooth tactile gyro tilt)
@@ -330,60 +361,50 @@ END:VCARD`;
         {/* ========================================================================= */}
         {/* SEQUENCED HEADLINE: "Let's Build" (Handwriting) -> "SOMETHING REAL." (Typing)*/}
         {/* ========================================================================= */}
-        <div className="w-full flex flex-col items-center text-center">
+        <div
+          id="terminal-headline"
+          ref={headlineRef}
+          className="w-full flex flex-col items-center text-center"
+        >
           <h2 className="relative flex flex-col items-center justify-center select-none mb-4">
-            {/* Word 1: "Let's Build" in Citadel Script with Authentic Per-Letter Signature Handwriting Flow */}
+            {/* Word 1: "Let's Build" in Citadel Script with Authentic Signature Handwriting Flow */}
             <span
-              className="font-citadel font-normal text-6xl xs:text-7xl sm:text-8xl md:text-9xl lg:text-[9.5rem] text-[#FFFDF8] leading-[0.76] relative z-20 -mb-2 sm:-mb-4 -translate-x-2 sm:-translate-x-4 drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] inline-flex items-baseline"
+              className="font-citadel font-normal text-6xl xs:text-7xl sm:text-8xl md:text-9xl lg:text-[9.5rem] text-[#FFFDF8] leading-[0.76] relative z-20 -mb-2 sm:-mb-4 -translate-x-2 sm:-translate-x-4 drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] inline-flex items-baseline overflow-visible"
             >
-              {[
-                { char: "L", key: "L" },
-                { char: "e", key: "e" },
-                { char: "t", key: "t" },
-                { char: "'", key: "apos" },
-                { char: "s", key: "s" },
-              ].map(({ char, key }) => (
-                <span
-                  key={key}
-                  data-char={char}
-                  className="signature-glyph inline-block overflow-visible will-change-[clip-path,opacity]"
-                  style={{
-                    clipPath: isSectionInView ? "polygon(-30% -30%, 130% -30%, 130% 130%, -30% 130%)" : "polygon(-30% -30%, -30% -30%, -30% 130%, -30% 130%)",
-                    opacity: isSectionInView ? 1 : 0,
-                  }}
-                >
-                  {char}
-                </span>
-              ))}
+              <span
+                ref={wordLetsRef}
+                className="inline-block relative overflow-visible will-change-[clip-path,opacity] px-1 sm:px-2"
+                style={{
+                  clipPath: isSectionInView
+                    ? "polygon(-20% -25%, 125% -25%, 110% 125%, -20% 125%)"
+                    : "polygon(-20% -25%, -20% -25%, -35% 125%, -35% 125%)",
+                  opacity: isSectionInView ? 1 : 0,
+                }}
+              >
+                Let&apos;s
+              </span>
 
-              <span className="inline-block w-3 sm:w-6" />
+              <span className="inline-block w-4 sm:w-8 md:w-10" />
 
-              {[
-                { char: "B", key: "B" },
-                { char: "u", key: "u" },
-                { char: "i", key: "i" },
-                { char: "l", key: "l" },
-                { char: "d", key: "d" },
-              ].map(({ char, key }) => (
-                <span
-                  key={key}
-                  data-char={char}
-                  className="signature-glyph inline-block overflow-visible will-change-[clip-path,opacity]"
-                  style={{
-                    clipPath: isSectionInView ? "polygon(-30% -30%, 130% -30%, 130% 130%, -30% 130%)" : "polygon(-30% -30%, -30% -30%, -30% 130%, -30% 130%)",
-                    opacity: isSectionInView ? 1 : 0,
-                  }}
-                >
-                  {char}
-                </span>
-              ))}
+              <span
+                ref={wordBuildRef}
+                className="inline-block relative overflow-visible will-change-[clip-path,opacity] px-1 sm:px-2"
+                style={{
+                  clipPath: isSectionInView
+                    ? "polygon(-20% -25%, 125% -25%, 110% 125%, -20% 125%)"
+                    : "polygon(-20% -25%, -20% -25%, -35% 125%, -35% 125%)",
+                  opacity: isSectionInView ? 1 : 0,
+                }}
+              >
+                Build
+              </span>
             </span>
 
             {/* Word 2: "SOMETHING REAL." in Helvetica Compressed with Typing Animation */}
-            <span className="font-helvetica font-normal text-4xl xs:text-5xl sm:text-7xl md:text-8xl lg:text-[6.5rem] text-[#EAD7C0] tracking-[0.03em] leading-[0.84] relative z-10 drop-shadow-[0_8px_30px_rgba(0,0,0,0.95)] uppercase flex items-center">
+            <span className="font-helvetica font-normal text-4xl xs:text-5xl sm:text-7xl md:text-8xl lg:text-[6.5rem] text-[#EAD7C0] tracking-[0.03em] leading-[0.84] relative z-10 drop-shadow-[0_8px_30px_rgba(0,0,0,0.95)] uppercase flex items-center min-h-[0.84em]">
               <span>{typedSubtext || "\u00A0"}</span>
-              {typedSubtext.length < fullSubtext.length && isSectionInView && (
-                <span className="inline-block w-2 sm:w-3 h-[0.85em] bg-[#FF8C38] ml-2 animate-pulse align-middle" />
+              {typedSubtext.length > 0 && typedSubtext.length < fullSubtext.length && isSectionInView && (
+                <span className="inline-block w-1.5 sm:w-2.5 h-[0.75em] bg-[#FF8C38] ml-2 animate-pulse align-middle" />
               )}
             </span>
           </h2>

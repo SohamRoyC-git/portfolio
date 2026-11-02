@@ -6,6 +6,44 @@ import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const STATEMENT_LINES = [
+  {
+    words: [
+      { text: "WE", highlight: false },
+      { text: "DO", highlight: false },
+      { text: "NOT", highlight: false },
+      { text: "BUILD", highlight: false },
+      { text: "SOFTWARE", highlight: false },
+      { text: "TO", highlight: false },
+      { text: "SIT", highlight: false },
+      { text: "PASSIVELY", highlight: false },
+      { text: "ON", highlight: false },
+      { text: "A", highlight: false },
+      { text: "SCREEN.", highlight: false },
+    ],
+  },
+  {
+    words: [
+      { text: "WE", highlight: false },
+      { text: "ENGINEER", highlight: false },
+      { text: "DIGITAL", highlight: true },
+      { text: "ENVIRONMENTS", highlight: true },
+      { text: "WITH", highlight: false },
+      { text: "PHYSICAL", highlight: false },
+      { text: "WEIGHT,", highlight: false },
+    ],
+  },
+  {
+    words: [
+      { text: "KINETIC", highlight: false },
+      { text: "INTENTION,", highlight: false },
+      { text: "AND", highlight: false },
+      { text: "INTERNATIONAL", highlight: false },
+      { text: "SCALE.", highlight: false },
+    ],
+  },
+];
+
 export const KineticStatement: React.FC = memo(() => {
   const [touchPos, setTouchPos] = useState({ x: 0, y: 0, active: false });
 
@@ -159,20 +197,19 @@ export const KineticStatement: React.FC = memo(() => {
     });
 
     // =========================================================================
-    // MOBILE SCROLL EXPERIENCE (< 768px) — DIRECTION B:
-    // Architectural Sheet Lift + Laser Hairlines + Touch Specular Glow (Zero Ellipse)
+    // MOBILE SCROLL EXPERIENCE (< 768px) — FORGE AUTOMOTIVE TEXT FILL WAVE:
+    // Architectural Plinth Lift + Laser Hairlines + Dynamic Word Fill Wave + Touch Spotlight
     // =========================================================================
     mm.add("(max-width: 767px)", () => {
-      const statementLines = headlineRef.current?.querySelectorAll(".statement-line");
+      const words = headlineRef.current?.querySelectorAll(".statement-word");
 
-      // 1. Direction B: Architectural Sheet Lift from Below
-      // The wine plinth smoothly lifts upward and expands from scale 0.95 to 1.0 as you scroll into it
+      // 1. Plinth Lift from Below: Smoothly ascends and docks into the viewport
       if (stageRef.current) {
         gsap.set(stageRef.current, { clipPath: "none" });
 
         gsap.fromTo(
           stageRef.current,
-          { yPercent: 12, scale: 0.95 },
+          { yPercent: 10, scale: 0.96 },
           {
             yPercent: 0,
             scale: 1,
@@ -180,14 +217,14 @@ export const KineticStatement: React.FC = memo(() => {
             scrollTrigger: {
               trigger: sectionRef.current,
               start: "top bottom",
-              end: "top 30%",
+              end: "top 25%",
               scrub: 0.35,
             },
           }
         );
       }
 
-      // 2. Laser Hairlines & Kinetic Unmasking
+      // 2. Laser Hairlines & Meta Telemetry Entrance
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
@@ -213,27 +250,45 @@ export const KineticStatement: React.FC = memo(() => {
         );
       }
 
-      if (statementLines && statementLines.length > 0) {
-        tl.fromTo(
-          statementLines,
-          { yPercent: 100, opacity: 0 },
-          {
-            yPercent: 0,
-            opacity: 1,
-            stagger: 0.12,
-            duration: 0.65,
-            ease: "power3.out",
-          },
-          0.2
-        );
-      }
-
       if (attributionRef.current) {
         tl.fromTo(
           attributionRef.current,
-          { opacity: 0, y: 12 },
+          { opacity: 0, y: 10 },
           { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" },
-          0.55
+          0.4
+        );
+      }
+
+      // 3. Forge Automotive Signature Text Fill Wave (Scrubbed word-by-word illumination)
+      if (words && words.length > 0) {
+        gsap.fromTo(
+          words,
+          {
+            opacity: 0.2,
+            color: "rgba(234, 215, 192, 0.2)",
+            textShadow: "0 0 0px transparent",
+          },
+          {
+            opacity: 1,
+            color: (index, target) => {
+              return (target as HTMLElement).getAttribute("data-highlight") === "amber"
+                ? "#FF8C38"
+                : "#FFFDF8";
+            },
+            textShadow: (index, target) => {
+              return (target as HTMLElement).getAttribute("data-highlight") === "amber"
+                ? "0 0 24px rgba(255, 140, 56, 0.75)"
+                : "0 0 14px rgba(255, 253, 248, 0.35)";
+            },
+            stagger: 0.05,
+            ease: "power1.out",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top 68%",
+              end: "top 12%",
+              scrub: 0.35,
+            },
+          }
         );
       }
     });
@@ -248,7 +303,7 @@ export const KineticStatement: React.FC = memo(() => {
       className="relative w-full z-20 min-h-[100svh] md:h-[calc(100svh+900px)]"
     >
       {/* 
-        Direction B: Architectural Sheet on Mobile (rounded-t-[2.2rem], top amber horizon line, touch light) 
+        Forge Automotive Architectural Sheet on Mobile (rounded-t-[2.2rem], top amber horizon line, touch light) 
         and Sticky 100svh on Desktop
       */}
       <section
@@ -261,7 +316,13 @@ export const KineticStatement: React.FC = memo(() => {
         {/* Glowing Horizon Hairline */}
         <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#FF8C38] to-transparent shadow-[0_0_15px_#FF8C38]" />
 
-        {/* Dynamic Mobile Specular Amber Finger Light */}
+        {/* Forge Atelier Corner Crosshairs */}
+        <span className="absolute top-3 left-4 font-mono text-[10px] text-[#FF8C38]/50 select-none pointer-events-none">+</span>
+        <span className="absolute top-3 right-4 font-mono text-[10px] text-[#FF8C38]/50 select-none pointer-events-none">+</span>
+        <span className="absolute bottom-3 left-4 font-mono text-[10px] text-[#FF8C38]/50 select-none pointer-events-none">+</span>
+        <span className="absolute bottom-3 right-4 font-mono text-[10px] text-[#FF8C38]/50 select-none pointer-events-none">+</span>
+
+        {/* Dynamic Mobile Specular Amber Finger Light (Touch Spotlight) */}
         <div
           className="md:hidden absolute inset-0 pointer-events-none transition-opacity duration-300 z-0"
           style={{
@@ -287,26 +348,28 @@ export const KineticStatement: React.FC = memo(() => {
           {/* Top Laser Hairline Divider */}
           <div ref={dividerTopRef} className="w-full h-[1px] bg-[#EAD7C0]/25 mb-5 sm:mb-12 will-change-transform shadow-[0_0_8px_rgba(255,140,56,0.3)]" />
 
-          {/* Monumental All-Caps Statement in Warm Italian Light Sand */}
+          {/* Monumental All-Caps Statement with Forge Text Fill Wave (Warm Sand / White / Amber) */}
           <h2
             ref={headlineRef}
-            className="font-sans font-black text-xl xs:text-2xl sm:text-4xl md:text-5xl lg:text-[3.4rem] xl:text-[4rem] tracking-tight leading-[1.08] uppercase text-[#EAD7C0] mb-5 sm:mb-12 select-none"
+            className="font-sans font-black text-xl xs:text-2xl sm:text-4xl md:text-5xl lg:text-[3.4rem] xl:text-[4rem] tracking-tight leading-[1.12] uppercase text-[#EAD7C0] mb-5 sm:mb-12 select-none"
           >
-            <div className="overflow-hidden py-1.5">
-              <span className="statement-line inline-block">
-                WE DO NOT BUILD SOFTWARE TO SIT PASSIVELY ON A SCREEN.
-              </span>
-            </div>
-            <div className="overflow-hidden py-1.5">
-              <span className="statement-line inline-block">
-                WE ENGINEER <span className="text-[#FF8C38]">DIGITAL ENVIRONMENTS</span> WITH PHYSICAL WEIGHT,
-              </span>
-            </div>
-            <div className="overflow-hidden py-1.5">
-              <span className="statement-line inline-block text-[#EAD7C0]/50">
-                KINETIC INTENTION, AND INTERNATIONAL SCALE.
-              </span>
-            </div>
+            {STATEMENT_LINES.map((line, lIdx) => (
+              <div key={lIdx} className="overflow-hidden py-1.5">
+                <span className="statement-line inline-block w-full">
+                  {line.words.map((word, wIdx) => (
+                    <span
+                      key={wIdx}
+                      data-highlight={word.highlight ? "amber" : "none"}
+                      className={`statement-word inline-block mr-[0.26em] transition-colors duration-150 ${
+                        word.highlight ? "text-[#FF8C38]" : "text-[#EAD7C0]"
+                      }`}
+                    >
+                      {word.text}
+                    </span>
+                  ))}
+                </span>
+              </div>
+            ))}
           </h2>
 
           {/* Bottom Laser Hairline Divider */}

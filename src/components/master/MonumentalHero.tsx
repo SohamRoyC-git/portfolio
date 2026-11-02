@@ -13,13 +13,14 @@ interface MonumentalHeroProps {
 }
 
 export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, onConnect }) => {
-  // Mobile Refs
+  // Mobile Refs (Forge Automotive Letterbox Visor Engine)
   const mobileContainerRef = useRef<HTMLDivElement | null>(null);
   const mobileVideoWrapperRef = useRef<HTMLDivElement | null>(null);
-  const irisOverlayRef = useRef<HTMLDivElement | null>(null);
+  const visorFrameRef = useRef<HTMLDivElement | null>(null);
   const laptopCueRef = useRef<HTMLDivElement | null>(null);
   const mobileIdentityRef = useRef<HTMLDivElement | null>(null);
   const mobileTitleRef = useRef<HTMLHeadingElement | null>(null);
+  const mobileBottomHudRef = useRef<HTMLDivElement | null>(null);
 
   // Desktop Refs
   const desktopSectionRef = useRef<HTMLElement | null>(null);
@@ -32,41 +33,32 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
     const mm = gsap.matchMedia();
 
     // =========================================================================
-    // MOBILE TIMELINE (< 768px):
-    // Black Lens Ellipse Aperture Transition & Cinematic Header Blur Reveal
+    // MOBILE TIMELINE (< 768px) — FORGE AUTOMOTIVE VISOR TRANSITION:
+    // Snappy Pacing (~185vh) · Living Letterbox Visor Aperture · Zero Dead Scroll
     // =========================================================================
     mm.add("(max-width: 767px)", () => {
       if (!mobileContainerRef.current) return;
 
-      // 1. Initial State: Dedicated Black Elliptical Aperture (Wide open at 150%)
-      const irisData = { r: 150 };
-
-      const updateIrisMask = (r: number) => {
-        if (!irisOverlayRef.current) return;
-        const inner = Math.max(0, r);
-        const outer = Math.max(0, r + 24);
-        const mask = `radial-gradient(ellipse 70% 60% at 56% 52%, transparent 0%, transparent ${inner.toFixed(1)}%, black ${outer.toFixed(1)}%, black 100%)`;
-        irisOverlayRef.current.style.webkitMaskImage = mask;
-        irisOverlayRef.current.style.maskImage = mask;
-      };
-
-      updateIrisMask(150);
-
-      if (irisOverlayRef.current) {
-        gsap.set(irisOverlayRef.current, { opacity: 1 });
-      }
-
+      // 1. Initial State Setup
       if (mobileVideoWrapperRef.current) {
-        mobileVideoWrapperRef.current.style.webkitMaskImage = "";
-        mobileVideoWrapperRef.current.style.maskImage = "";
-        gsap.set(mobileVideoWrapperRef.current, { opacity: 1, scale: 1, display: "block" });
+        gsap.set(mobileVideoWrapperRef.current, {
+          clipPath: "inset(0% 0% 0% 0% round 0px)",
+          opacity: 1,
+          scale: 1,
+        });
       }
 
-      // Initial State for Monumental Headline (Pure GPU accelerated transform, zero blur repaints)
+      if (visorFrameRef.current) {
+        gsap.set(visorFrameRef.current, {
+          opacity: 0,
+          scale: 0.98,
+        });
+      }
+
       if (mobileIdentityRef.current) {
         gsap.set(mobileIdentityRef.current, {
           opacity: 0,
-          y: 40,
+          y: 35,
           scale: 0.96,
           pointerEvents: "none",
         });
@@ -76,7 +68,11 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         gsap.set(laptopCueRef.current, { opacity: 1, y: 0 });
       }
 
-      // 2. Continuous Idle Levitation on Laptop Micro-Cue
+      if (mobileBottomHudRef.current) {
+        gsap.set(mobileBottomHudRef.current, { opacity: 1, y: 0 });
+      }
+
+      // Continuous Idle Levitation on Laptop Micro-Cue
       let cueTween: gsap.core.Tween | null = null;
       if (laptopCueRef.current) {
         cueTween = gsap.to(laptopCueRef.current, {
@@ -88,8 +84,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         });
       }
 
-      // 3. Silky Continuous Scroll Scrub Timeline (Aesthetic, organic & fluid)
-      // Generous scroll distance ensures ellipse finishes completely with 0% of next section visible
+      // 2. Silky Continuous Scroll Scrub Timeline (~185vh total height = ~1.5 thumb swipes)
       const masterTl = gsap.timeline({
         scrollTrigger: {
           trigger: mobileContainerRef.current,
@@ -97,26 +92,24 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
           end: "bottom bottom",
           scrub: 0.35, // Smooth touch momentum tracking
           onUpdate: (self) => {
-            // 1. Instantly stop and freeze video when aperture has closed
             const videoEl = mobileVideoWrapperRef.current?.querySelector("video");
             if (videoEl) {
-              if (self.progress >= 0.35 && !videoEl.paused) {
+              if (self.progress >= 0.82 && !videoEl.paused) {
                 videoEl.pause();
-              } else if (self.progress < 0.35 && videoEl.paused) {
+              } else if (self.progress < 0.82 && videoEl.paused) {
                 videoEl.play().catch(() => {});
               }
             }
 
-            // 2. Interactive pointer events
             if (mobileIdentityRef.current) {
               mobileIdentityRef.current.style.pointerEvents =
-                self.progress > 0.45 ? "auto" : "none";
+                self.progress > 0.38 ? "auto" : "none";
             }
           },
         },
       });
 
-      // Phase 1 (0 -> 14%): Laptop micro-cue dissolves early
+      // Phase 1 (0.0 -> 0.16): Cue & initial bottom hint dissolve early
       if (laptopCueRef.current) {
         masterTl.to(
           laptopCueRef.current,
@@ -124,68 +117,55 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             opacity: 0,
             y: -18,
             scale: 0.92,
-            duration: 0.14,
+            duration: 0.16,
             ease: "power2.out",
           },
           0
         );
       }
 
-      // Phase 2 (0 -> 35%): Black Photographic Ellipse contracts smoothly into the laptop
-      // Pure deep black (#0C0C0E) closes in on the laptop at 56% 52% (Never becomes a square!)
-      // By 35% scroll, the ellipse has fully closed, while the next section is still 160vh below!
-      masterTl.to(
-        irisData,
-        {
-          r: -24,
-          duration: 0.35,
-          ease: "power2.inOut",
-          onUpdate: () => {
-            updateIrisMask(irisData.r);
+      if (mobileBottomHudRef.current) {
+        masterTl.to(
+          mobileBottomHudRef.current,
+          {
+            opacity: 0,
+            y: 12,
+            duration: 0.16,
+            ease: "power2.out",
           },
-        },
-        0
-      );
+          0
+        );
+      }
 
-      // Terrace video subtle camera scale for optical depth (stays 100% solid, zero premature transparency)
+      // Phase 2 (0.0 -> 0.44): Full-bleed video contracts into cinematic letterbox visor below MasterNav
       if (mobileVideoWrapperRef.current) {
         masterTl.to(
           mobileVideoWrapperRef.current,
           {
-            scale: 0.96,
-            duration: 0.35,
-            ease: "power1.inOut",
+            clipPath: "inset(7.0% 4.5% 56.5% 4.5% round 1.25rem)",
+            duration: 0.44,
+            ease: "power2.inOut",
           },
           0
         );
+      }
 
-        // HARD CUT: At exact moment 0.35 (aperture 100% closed into solid black),
-        // completely hide and remove the video wrapper so it NEVER shows or plays for a split second!
-        masterTl.set(
-          mobileVideoWrapperRef.current,
+      // Visor Frame with glowing amber border illuminates precisely as the visor forms
+      if (visorFrameRef.current) {
+        masterTl.fromTo(
+          visorFrameRef.current,
+          { opacity: 0, scale: 0.98 },
           {
-            display: "none",
-            opacity: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.30,
+            ease: "power2.out",
           },
-          0.35
+          0.14
         );
       }
 
-      // Phase 2b (0.35 -> 0.50): With video completely gone behind solid black,
-      // the black overlay dissolves to unveil the continuous global smoky fluid artwork
-      if (irisOverlayRef.current) {
-        masterTl.to(
-          irisOverlayRef.current,
-          {
-            opacity: 0,
-            duration: 0.15,
-            ease: "power1.inOut",
-          },
-          0.35
-        );
-      }
-
-      // Phase 3 (0.38 -> 0.65): Monumental Header materializes cleanly with GPU transforms (No blur filter jitter)
+      // Phase 3 (0.16 -> 0.46): Monumental Identity ascends into the lower section
       if (mobileIdentityRef.current) {
         masterTl.to(
           mobileIdentityRef.current,
@@ -193,15 +173,29 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             opacity: 1,
             y: 0,
             scale: 1,
-            duration: 0.27,
+            duration: 0.30,
             ease: "power2.out",
           },
-          0.38
+          0.16
         );
       }
 
-      // Phase 4 (0.65 -> 1.00): Dedicated luxury hold period where header remains 100% crisp and readable
-      masterTl.to({}, { duration: 0.35 });
+      // Phase 4 (0.46 -> 0.76): High-impact hold for full reading & button interaction
+      masterTl.to({}, { duration: 0.30 });
+
+      // Phase 5 (0.76 -> 1.00): Visor and identity gently ease as Kinetic Statement lifts up
+      if (mobileVideoWrapperRef.current && visorFrameRef.current) {
+        masterTl.to(
+          [mobileVideoWrapperRef.current, visorFrameRef.current],
+          {
+            opacity: 0.35,
+            scale: 0.97,
+            duration: 0.24,
+            ease: "power1.inOut",
+          },
+          0.76
+        );
+      }
 
       return () => {
         if (cueTween) cueTween.kill();
@@ -243,17 +237,17 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
   return (
     <div id="monument-hero" className="relative w-full overflow-visible">
       {/* ========================================================================= */}
-      {/* MOBILE EXPERIENCE (< 768px): VIBRANT ORANGE FLUID CINEMATIC APERTURE      */}
+      {/* MOBILE EXPERIENCE (< 768px): FORGE AUTOMOTIVE VISOR APERTURE HERO         */}
       {/* ========================================================================= */}
       <div
         ref={mobileContainerRef}
-        className="md:hidden relative w-full h-[360vh] bg-transparent overflow-clip"
+        className="md:hidden relative w-full h-[185vh] bg-transparent overflow-clip"
       >
-        <div className="sticky top-0 h-[100dvh] min-h-[100dvh] min-h-screen w-full overflow-hidden bg-transparent flex flex-col justify-between">
+        <div className="sticky top-0 h-[100dvh] min-h-[100dvh] min-h-screen w-full overflow-hidden bg-transparent select-none">
           {/* 1. Living Pixel-Art Terrace Video Layer */}
           <div
             ref={mobileVideoWrapperRef}
-            className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden will-change-[transform,opacity]"
+            className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden will-change-[clip-path,opacity,transform]"
           >
             <video
               autoPlay
@@ -266,13 +260,34 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               <source src="/assets/hero_pixel_art_loop.mp4" type="video/mp4" />
               <source src="/assets/Animate_pixel_art_environment_loop_03a9505a.mp4" type="video/mp4" />
             </video>
+            {/* Subtle atmospheric vignette */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/50 pointer-events-none" />
           </div>
 
-          {/* 2. Full-Screen Black Elliptical Aperture Overlay (Deep black #0C0C0E lens eclipse) */}
+          {/* 2. Precision Visor Letterbox Frame (Forge Automotive Style - Cleanly positioned below MasterNav) */}
           <div
-            ref={irisOverlayRef}
-            className="absolute inset-0 z-10 pointer-events-none bg-[#0C0C0E] will-change-[mask-image,opacity]"
-          />
+            ref={visorFrameRef}
+            className="absolute pointer-events-none z-10 rounded-[1.25rem] border border-[#FF8C38]/40 shadow-[0_12px_45px_rgba(0,0,0,0.85)] will-change-[opacity,transform]"
+            style={{
+              top: "7.0%",
+              left: "4.5%",
+              right: "4.5%",
+              height: "36.5%",
+            }}
+          >
+            {/* Specular Edge Gradient */}
+            <div className="absolute inset-0 rounded-[1.25rem] bg-gradient-to-b from-white/10 via-transparent to-black/30 pointer-events-none" />
+            {/* Corner Crosshairs */}
+            <span className="absolute top-2 left-2.5 font-mono text-[9px] text-[#FF8C38]/60 select-none">+</span>
+            <span className="absolute top-2 right-2.5 font-mono text-[9px] text-[#FF8C38]/60 select-none">+</span>
+            {/* Visor Telemetry Pill */}
+            <div className="absolute top-2.5 right-4 flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/75 border border-white/20 backdrop-blur-md">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FF8C38] animate-pulse" />
+              <span className="font-mono text-[8px] font-bold tracking-widest text-[#EAD7C0] uppercase">
+                TERRACE VISOR
+              </span>
+            </div>
+          </div>
 
           {/* 3. Understated Editorial Swiss Laptop Micro-Cue (Anchored above laptop) */}
           <div
@@ -291,7 +306,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               </span>
               <span className="text-white/30 text-[8px]">•</span>
               <span className="font-sans font-medium text-[9px] tracking-wider text-slate-200 uppercase flex items-center gap-1.5">
-                <span>Scroll to see portfolio</span>
+                <span>Swipe to enter</span>
                 <ArrowDown size={10} className="text-[#FF7A00] animate-bounce" />
               </span>
             </div>
@@ -300,39 +315,48 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             <div className="w-1 h-1 rounded-full bg-[#FF5500] mx-auto -mt-0.5" />
           </div>
 
-          {/* 3. Monumental Identity Section (Vibrant Orange Fluid Background throughout) */}
+          {/* 4. Initial Mobile Bottom Hint HUD */}
+          <div
+            ref={mobileBottomHudRef}
+            className="absolute bottom-5 inset-x-5 z-20 flex items-center justify-between text-[9px] font-mono text-white/70 uppercase tracking-widest pointer-events-none"
+          >
+            <span>KOLKATA // STUDIO</span>
+            <span className="flex items-center gap-1.5 text-[#FF8C38] font-bold">
+              <span>SCROLL TO ENTER</span>
+              <ArrowDown size={11} className="animate-bounce" />
+            </span>
+          </div>
+
+          {/* 5. Monumental Identity Section (Ascends underneath visor) */}
           <div
             ref={mobileIdentityRef}
-            className="absolute inset-0 z-20 flex flex-col justify-between pt-24 pb-8 px-6 text-center will-change-[transform,opacity] pointer-events-none opacity-0"
+            className="absolute top-[45%] inset-x-0 bottom-0 z-20 flex flex-col justify-between px-5 pt-3 pb-5 text-center will-change-[transform,opacity] pointer-events-none opacity-0"
           >
-            {/* Top spacer */}
-            <div />
-
             {/* Centered Identity Lockup */}
             <div className="relative z-10 w-full max-w-sm mx-auto flex flex-col items-center my-auto">
               {/* Minimalist Hairline Eyebrow */}
-              <div className="inline-flex items-center gap-2 text-[9px] font-sans font-bold uppercase tracking-[0.24em] text-orange-200/90 mb-5 px-3.5 py-1 rounded-full border border-orange-500/25 bg-black/40 backdrop-blur-md">
+              <div className="inline-flex items-center gap-2 text-[9px] font-sans font-bold uppercase tracking-[0.24em] text-orange-200/90 mb-3 px-3.5 py-1 rounded-full border border-orange-500/25 bg-black/50 backdrop-blur-md">
                 <Sparkles size={10} className="text-[#FF7A00]" />
                 <span>NSEC (2024–2028)</span>
               </div>
 
-              {/* Signature Aesthetic Font Pairing (Citadel Script + Helvetica Compressed - Matching 'Soft Light') */}
+              {/* Signature Aesthetic Font Pairing (Citadel Script + Helvetica Compressed) */}
               <h1
                 ref={mobileTitleRef}
-                className="relative flex flex-col items-center justify-center text-center select-none mb-4 overflow-visible"
+                className="relative flex flex-col items-center justify-center text-center select-none mb-3 overflow-visible"
               >
-                {/* Word 1: Soham in Citadel Script (matching 'Soft') */}
-                <span className="font-citadel font-normal text-[4.8rem] xs:text-[5.8rem] sm:text-[6.8rem] text-[#FFFDF8] leading-[0.8] relative z-20 -mb-2.5 xs:-mb-4 -translate-x-3 xs:-translate-x-6 drop-shadow-[0_3px_8px_rgba(0,0,0,0.75)] drop-shadow-[0_8px_18px_rgba(0,0,0,0.55)]">
+                {/* Word 1: Soham in Citadel Script */}
+                <span className="font-citadel font-normal text-[4.5rem] xs:text-[5.4rem] sm:text-[6.2rem] text-[#FFFDF8] leading-[0.8] relative z-20 -mb-2 xs:-mb-3.5 -translate-x-3 xs:-translate-x-5 drop-shadow-[0_4px_12px_rgba(0,0,0,0.85)]">
                   Soham
                 </span>
-                {/* Word 2: Roychoudhury in Helvetica Compressed (matching 'Light') */}
-                <span className="font-helvetica font-normal text-[3.4rem] xs:text-[4.2rem] sm:text-[4.8rem] text-[#F8F5EE] tracking-[0.025em] leading-[1.0] pb-2 sm:pb-3 relative z-10 drop-shadow-[0_6px_25px_rgba(0,0,0,0.9)] overflow-visible inline-block">
+                {/* Word 2: Roychoudhury in Helvetica Compressed */}
+                <span className="font-helvetica font-normal text-[3.2rem] xs:text-[3.9rem] sm:text-[4.5rem] text-[#F8F5EE] tracking-[0.025em] leading-[1.0] pb-2 sm:pb-3 relative z-10 drop-shadow-[0_6px_25px_rgba(0,0,0,0.95)] overflow-visible inline-block">
                   Roychoudhury
                 </span>
               </h1>
 
-              {/* Editorial Subtitle in Helvetica Compressed (matching 'Some moments glow in silence.') */}
-              <p className="font-helvetica font-normal text-xs xs:text-sm text-orange-100/90 tracking-[0.15em] uppercase leading-relaxed mb-8 max-w-xs px-1 drop-shadow-md">
+              {/* Editorial Subtitle in Helvetica Compressed */}
+              <p className="font-helvetica font-normal text-[11px] xs:text-xs text-orange-100/90 tracking-[0.14em] uppercase leading-relaxed mb-5 max-w-xs px-1 drop-shadow-md">
                 Artificial Intelligence &amp; Machine Learning · Frontend Architect · Digital Operations
               </p>
 
@@ -340,26 +364,26 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               <div className="flex items-center justify-center gap-3 w-full max-w-xs">
                 <button
                   onClick={onExplore}
-                  className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-white text-black hover:bg-orange-100 transition-all duration-200 font-sans font-bold text-xs uppercase tracking-wider cursor-pointer shadow-xl active:scale-95"
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-white text-black hover:bg-orange-100 transition-all duration-200 font-sans font-bold text-xs uppercase tracking-wider cursor-pointer shadow-xl active:scale-95"
                 >
                   <span>Explore</span>
-                  <ArrowDown size={13} />
+                  <ArrowDown size={12} />
                 </button>
 
                 <button
                   onClick={handleConnectClick}
-                  className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-black/50 hover:bg-black/75 text-white border border-white/25 transition-all duration-200 font-sans font-bold text-xs uppercase tracking-wider cursor-pointer backdrop-blur-md active:scale-95 shadow-lg"
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-black/60 hover:bg-black/80 text-white border border-white/25 transition-all duration-200 font-sans font-bold text-xs uppercase tracking-wider cursor-pointer backdrop-blur-md active:scale-95 shadow-lg"
                 >
                   <span>Contact</span>
-                  <ArrowUpRight size={13} className="text-orange-300" />
+                  <ArrowUpRight size={12} className="text-orange-300" />
                 </button>
               </div>
             </div>
 
-            {/* Bottom Coordinates & Location Bar (Clean floating typography without card border) */}
-            <div className="relative z-10 w-full flex items-center justify-between pt-3 text-[9px] font-sans font-bold text-orange-200/70 uppercase tracking-widest">
+            {/* Bottom Coordinates Bar */}
+            <div className="relative z-10 w-full flex items-center justify-between text-[9px] font-mono text-orange-200/60 uppercase tracking-widest pt-1">
               <span>KOLKATA // LAT 22.5726° N</span>
-              <span>ARCHIVE 2026</span>
+              <span>ATELIER 2026</span>
             </div>
           </div>
         </div>

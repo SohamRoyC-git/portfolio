@@ -50,7 +50,6 @@ export const KineticStatement: React.FC = memo(() => {
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const centerLaserRef = useRef<HTMLDivElement | null>(null);
   const metaBarRef = useRef<HTMLDivElement | null>(null);
   const dividerTopRef = useRef<HTMLDivElement | null>(null);
   const dividerBottomRef = useRef<HTMLDivElement | null>(null);
@@ -198,8 +197,8 @@ export const KineticStatement: React.FC = memo(() => {
     });
 
     // =========================================================================
-    // MOBILE SCROLL EXPERIENCE (< 768px) — DIRECTION 1: PINNED ANAMORPHIC LASER ECLIPSE
-    // Viewport Magnetic Lock · Central Laser Ignition · Stage Split · Text Fill Wave
+    // MOBILE SCROLL EXPERIENCE (< 768px) — ALTERNATIVE B: 3D CAMERA DOLLY / FLY-THROUGH
+    // Deep Perspective Bloom · Laser Hairline Ignite · Forge Text Fill Wave
     // =========================================================================
     mm.add("(max-width: 767px)", () => {
       const words = headlineRef.current?.querySelectorAll(".statement-word");
@@ -208,18 +207,12 @@ export const KineticStatement: React.FC = memo(() => {
         gsap.set(stageRef.current, { clipPath: "none" });
       }
 
-      if (centerLaserRef.current) {
-        gsap.set(centerLaserRef.current, {
-          scaleX: 0,
-          opacity: 0,
-          transformOrigin: "center center",
-        });
-      }
-
       if (containerRef.current) {
         gsap.set(containerRef.current, {
           opacity: 0,
-          scale: 0.96,
+          scale: 0.74,
+          y: 45,
+          transformOrigin: "center center",
         });
       }
 
@@ -246,7 +239,7 @@ export const KineticStatement: React.FC = memo(() => {
         });
       }
 
-      // Master Pinned Anamorphic Laser Timeline (Scrubbed across the 500px pin)
+      // Master Pinned 3D Camera Dolly Timeline (Scrubbed across the 500px pin)
       const masterTl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
@@ -256,59 +249,31 @@ export const KineticStatement: React.FC = memo(() => {
         },
       });
 
-      // Phase 1 (0.00 -> 0.22): Anamorphic central laser ignites and shoots outward
-      if (centerLaserRef.current) {
-        masterTl.fromTo(
-          centerLaserRef.current,
-          { scaleX: 0, opacity: 0 },
-          {
-            scaleX: 1,
-            opacity: 1,
-            duration: 0.22,
-            ease: "power2.out",
-          },
-          0
-        );
-      }
-
-      // Phase 2 (0.22 -> 0.44): Laser splits vertically to open the stage
-      // Central beam dissolves while top and bottom laser dividers scale out and the stage container expands
-      if (centerLaserRef.current) {
-        masterTl.to(
-          centerLaserRef.current,
-          {
-            opacity: 0,
-            scaleY: 0,
-            duration: 0.14,
-            ease: "power2.in",
-          },
-          0.22
-        );
-      }
-
-      if (dividerTopRef.current && dividerBottomRef.current) {
-        masterTl.fromTo(
-          [dividerTopRef.current, dividerBottomRef.current],
-          { scaleX: 0 },
-          {
-            scaleX: 1,
-            duration: 0.24,
-            ease: "power2.out",
-          },
-          0.20
-        );
-      }
-
+      // Phase 1 (0.00 -> 0.32): 3D Dolly Bloom from Deep Perspective into Focal Lock
       if (containerRef.current) {
         masterTl.to(
           containerRef.current,
           {
             opacity: 1,
             scale: 1,
-            duration: 0.24,
+            y: 0,
+            duration: 0.32,
             ease: "power2.out",
           },
-          0.22
+          0
+        );
+      }
+
+      // Laser hairlines expand outward as statement arrives in focal view
+      if (dividerTopRef.current && dividerBottomRef.current) {
+        masterTl.to(
+          [dividerTopRef.current, dividerBottomRef.current],
+          {
+            scaleX: 1,
+            duration: 0.26,
+            ease: "power2.out",
+          },
+          0.06
         );
       }
 
@@ -318,14 +283,14 @@ export const KineticStatement: React.FC = memo(() => {
           {
             opacity: 1,
             y: 0,
-            duration: 0.20,
+            duration: 0.22,
             ease: "power2.out",
           },
-          0.26
+          0.10
         );
       }
 
-      // Phase 3 (0.32 -> 0.82): Forge Automotive Text Fill Wave sweeps across the quote words
+      // Phase 2 (0.32 -> 0.82): Forge Automotive Text Fill Wave sweeps across the quote words
       if (words && words.length > 0) {
         masterTl.fromTo(
           words,
@@ -367,7 +332,7 @@ export const KineticStatement: React.FC = memo(() => {
         );
       }
 
-      // Phase 4 (0.82 -> 1.00): Luxury hold where quote is 100% complete before unlocking
+      // Phase 3 (0.82 -> 1.00): Luxury hold where quote is 100% complete before unlocking
       masterTl.to({}, { duration: 0.18 });
     });
 
@@ -388,22 +353,20 @@ export const KineticStatement: React.FC = memo(() => {
         onTouchMove={handleTouchMove}
         onTouchStart={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-center pt-20 sm:pt-28 pb-10 sm:pb-12 px-5 sm:px-12 md:px-20 overflow-hidden bg-[#18040A] border-t-2 border-[#FF8C38]/40 md:border-t md:border-[#EAD7C0]/20 rounded-t-[2.2rem] md:rounded-none shadow-[0_-25px_60px_rgba(0,0,0,0.95)] md:shadow-none will-change-[transform,opacity]"
+        className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-center pt-20 sm:pt-28 pb-10 sm:pb-12 px-5 sm:px-12 md:px-20 overflow-hidden bg-[#060709] md:bg-[#18040A] border-none md:border-t md:border-[#EAD7C0]/20 rounded-none md:rounded-none shadow-none md:shadow-none will-change-[transform,opacity]"
+        style={{ perspective: "1000px" }}
       >
-        {/* Glowing Horizon Hairline */}
-        <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#FF8C38] to-transparent shadow-[0_0_15px_#FF8C38]" />
+        {/* Desktop Glowing Horizon Hairline */}
+        <div className="hidden md:block absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#FF8C38] to-transparent shadow-[0_0_15px_#FF8C38]" />
 
-        {/* Anamorphic Central Laser Beam (Ignites on Viewport Lock) */}
-        <div
-          ref={centerLaserRef}
-          className="md:hidden absolute inset-x-0 top-1/2 -translate-y-1/2 h-[2px] bg-gradient-to-r from-transparent via-[#FF8C38] to-transparent shadow-[0_0_20px_#FF8C38,0_0_40px_#FF8C38] will-change-transform z-30 pointer-events-none"
-        />
+        {/* Mobile Deep Atmospheric Darkroom Radial Ambience (Zero harsh edges, pure 3D continuity) */}
+        <div className="md:hidden absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_120%_80%_at_50%_50%,rgba(38,10,18,0.7)_0%,rgba(6,7,9,1)_85%)]" />
 
         {/* Forge Atelier Corner Crosshairs */}
-        <span className="absolute top-3 left-4 font-mono text-[10px] text-[#FF8C38]/50 select-none pointer-events-none">+</span>
-        <span className="absolute top-3 right-4 font-mono text-[10px] text-[#FF8C38]/50 select-none pointer-events-none">+</span>
-        <span className="absolute bottom-3 left-4 font-mono text-[10px] text-[#FF8C38]/50 select-none pointer-events-none">+</span>
-        <span className="absolute bottom-3 right-4 font-mono text-[10px] text-[#FF8C38]/50 select-none pointer-events-none">+</span>
+        <span className="absolute top-4 left-5 font-mono text-[10px] text-[#FF8C38]/40 select-none pointer-events-none">+</span>
+        <span className="absolute top-4 right-5 font-mono text-[10px] text-[#FF8C38]/40 select-none pointer-events-none">+</span>
+        <span className="absolute bottom-4 left-5 font-mono text-[10px] text-[#FF8C38]/40 select-none pointer-events-none">+</span>
+        <span className="absolute bottom-4 right-5 font-mono text-[10px] text-[#FF8C38]/40 select-none pointer-events-none">+</span>
 
         {/* Dynamic Mobile Specular Amber Finger Light (Touch Spotlight) */}
         <div
@@ -416,7 +379,7 @@ export const KineticStatement: React.FC = memo(() => {
 
         <div
           ref={containerRef}
-          className="relative z-10 w-full max-w-6xl mx-auto flex flex-col justify-center will-change-[transform,opacity]"
+          className="relative z-10 w-full max-w-6xl mx-auto flex flex-col justify-center will-change-[transform,opacity] [transform-style:preserve-3d]"
         >
           {/* Architectural Meta Bar */}
           <div

@@ -154,7 +154,7 @@ export default function Home() {
       {/* 3. Cohesive Spatial Storytelling Sequence */}
       <main className="relative z-10">
         {/* Movement 00: Monumental Hero (Sticky at top on desktop so Movement 01 wipes over it) */}
-        <div id="hero-wrapper" className="relative w-full z-10 md:sticky md:top-0 md:h-[100svh] will-change-[transform,opacity]">
+        <div id="hero-wrapper" className="relative w-full z-10 overflow-x-clip md:sticky md:top-0 md:h-[100svh] will-change-[transform,opacity]">
           <MonumentalHero onExplore={() => handleNavigate("monument-statement")} onConnect={() => handleNavigate("monument-terminal")} />
         </div>
 

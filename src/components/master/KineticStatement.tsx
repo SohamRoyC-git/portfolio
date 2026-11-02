@@ -50,6 +50,7 @@ export const KineticStatement: React.FC = memo(() => {
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const centerLaserRef = useRef<HTMLDivElement | null>(null);
   const metaBarRef = useRef<HTMLDivElement | null>(null);
   const dividerTopRef = useRef<HTMLDivElement | null>(null);
   const dividerBottomRef = useRef<HTMLDivElement | null>(null);
@@ -197,71 +198,136 @@ export const KineticStatement: React.FC = memo(() => {
     });
 
     // =========================================================================
-    // MOBILE SCROLL EXPERIENCE (< 768px) — FORGE AUTOMOTIVE TEXT FILL WAVE:
-    // Architectural Plinth Lift + Laser Hairlines + Dynamic Word Fill Wave + Touch Spotlight
+    // MOBILE SCROLL EXPERIENCE (< 768px) — DIRECTION 1: PINNED ANAMORPHIC LASER ECLIPSE
+    // Viewport Magnetic Lock · Central Laser Ignition · Stage Split · Text Fill Wave
     // =========================================================================
     mm.add("(max-width: 767px)", () => {
       const words = headlineRef.current?.querySelectorAll(".statement-word");
 
-      // 1. Plinth Lift from Below: Smoothly ascends and docks into the viewport
       if (stageRef.current) {
         gsap.set(stageRef.current, { clipPath: "none" });
-
-        gsap.fromTo(
-          stageRef.current,
-          { yPercent: 10, scale: 0.96 },
-          {
-            yPercent: 0,
-            scale: 1,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top bottom",
-              end: "top 25%",
-              scrub: 0.35,
-            },
-          }
-        );
       }
 
-      // 2. Laser Hairlines & Meta Telemetry Entrance
-      const tl = gsap.timeline({
+      if (centerLaserRef.current) {
+        gsap.set(centerLaserRef.current, {
+          scaleX: 0,
+          opacity: 0,
+          transformOrigin: "center center",
+        });
+      }
+
+      if (containerRef.current) {
+        gsap.set(containerRef.current, {
+          opacity: 0,
+          scale: 0.96,
+        });
+      }
+
+      if (dividerTopRef.current && dividerBottomRef.current) {
+        gsap.set([dividerTopRef.current, dividerBottomRef.current], {
+          scaleX: 0,
+          transformOrigin: "center center",
+        });
+      }
+
+      if (metaBarRef.current) {
+        gsap.set(metaBarRef.current, { opacity: 0, y: -10 });
+      }
+
+      if (attributionRef.current) {
+        gsap.set(attributionRef.current, { opacity: 0, y: 10 });
+      }
+
+      if (words && words.length > 0) {
+        gsap.set(words, {
+          opacity: 0.2,
+          color: "rgba(234, 215, 192, 0.2)",
+          textShadow: "0 0 0px transparent",
+        });
+      }
+
+      // Master Pinned Anamorphic Laser Timeline (Scrubbed across the 500px pin)
+      const masterTl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: "top 72%",
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 0.35,
         },
       });
 
-      if (dividerTopRef.current && dividerBottomRef.current) {
-        tl.fromTo(
-          [dividerTopRef.current, dividerBottomRef.current],
-          { scaleX: 0, transformOrigin: "left center" },
-          { scaleX: 1, duration: 0.6, ease: "power3.out" },
+      // Phase 1 (0.00 -> 0.22): Anamorphic central laser ignites and shoots outward
+      if (centerLaserRef.current) {
+        masterTl.fromTo(
+          centerLaserRef.current,
+          { scaleX: 0, opacity: 0 },
+          {
+            scaleX: 1,
+            opacity: 1,
+            duration: 0.22,
+            ease: "power2.out",
+          },
           0
         );
       }
 
+      // Phase 2 (0.22 -> 0.44): Laser splits vertically to open the stage
+      // Central beam dissolves while top and bottom laser dividers scale out and the stage container expands
+      if (centerLaserRef.current) {
+        masterTl.to(
+          centerLaserRef.current,
+          {
+            opacity: 0,
+            scaleY: 0,
+            duration: 0.14,
+            ease: "power2.in",
+          },
+          0.22
+        );
+      }
+
+      if (dividerTopRef.current && dividerBottomRef.current) {
+        masterTl.fromTo(
+          [dividerTopRef.current, dividerBottomRef.current],
+          { scaleX: 0 },
+          {
+            scaleX: 1,
+            duration: 0.24,
+            ease: "power2.out",
+          },
+          0.20
+        );
+      }
+
+      if (containerRef.current) {
+        masterTl.to(
+          containerRef.current,
+          {
+            opacity: 1,
+            scale: 1,
+            duration: 0.24,
+            ease: "power2.out",
+          },
+          0.22
+        );
+      }
+
       if (metaBarRef.current) {
-        tl.fromTo(
+        masterTl.to(
           metaBarRef.current,
-          { opacity: 0, y: -10 },
-          { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" },
-          0.1
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.20,
+            ease: "power2.out",
+          },
+          0.26
         );
       }
 
-      if (attributionRef.current) {
-        tl.fromTo(
-          attributionRef.current,
-          { opacity: 0, y: 10 },
-          { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" },
-          0.4
-        );
-      }
-
-      // 3. Forge Automotive Signature Text Fill Wave (Scrubbed word-by-word illumination)
+      // Phase 3 (0.32 -> 0.82): Forge Automotive Text Fill Wave sweeps across the quote words
       if (words && words.length > 0) {
-        gsap.fromTo(
+        masterTl.fromTo(
           words,
           {
             opacity: 0.2,
@@ -280,17 +346,29 @@ export const KineticStatement: React.FC = memo(() => {
                 ? "0 0 24px rgba(255, 140, 56, 0.75)"
                 : "0 0 14px rgba(255, 253, 248, 0.35)";
             },
-            stagger: 0.05,
+            stagger: 0.035,
+            duration: 0.50,
             ease: "power1.out",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top 68%",
-              end: "top 12%",
-              scrub: 0.35,
-            },
-          }
+          },
+          0.32
         );
       }
+
+      if (attributionRef.current) {
+        masterTl.to(
+          attributionRef.current,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.20,
+            ease: "power2.out",
+          },
+          0.70
+        );
+      }
+
+      // Phase 4 (0.82 -> 1.00): Luxury hold where quote is 100% complete before unlocking
+      masterTl.to({}, { duration: 0.18 });
     });
 
     return () => mm.revert();
@@ -300,21 +378,26 @@ export const KineticStatement: React.FC = memo(() => {
     <div
       id="monument-statement"
       ref={sectionRef}
-      className="relative w-full z-20 min-h-[100svh] md:h-[calc(100svh+900px)]"
+      className="relative w-full z-20 h-[calc(100svh+500px)] md:h-[calc(100svh+900px)]"
     >
       {/* 
-        Forge Automotive Architectural Sheet on Mobile (rounded-t-[2.2rem], top amber horizon line, touch light) 
-        and Sticky 100svh on Desktop
+        Forge Automotive Pinned Architectural Stage on Mobile & Desktop
       */}
       <section
         ref={stageRef}
         onTouchMove={handleTouchMove}
         onTouchStart={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        className="relative md:sticky md:top-0 min-h-[100svh] md:h-[100svh] w-full flex flex-col justify-center pt-24 sm:pt-28 pb-12 sm:pb-12 px-5 sm:px-12 md:px-20 overflow-hidden bg-[#2D0A12] border-t-2 border-[#FF8C38]/40 md:border-t md:border-[#EAD7C0]/20 rounded-t-[2.2rem] md:rounded-none shadow-[0_-25px_60px_rgba(0,0,0,0.95)] md:shadow-none will-change-[transform,opacity]"
+        className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-center pt-20 sm:pt-28 pb-10 sm:pb-12 px-5 sm:px-12 md:px-20 overflow-hidden bg-[#18040A] border-t-2 border-[#FF8C38]/40 md:border-t md:border-[#EAD7C0]/20 rounded-t-[2.2rem] md:rounded-none shadow-[0_-25px_60px_rgba(0,0,0,0.95)] md:shadow-none will-change-[transform,opacity]"
       >
         {/* Glowing Horizon Hairline */}
         <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#FF8C38] to-transparent shadow-[0_0_15px_#FF8C38]" />
+
+        {/* Anamorphic Central Laser Beam (Ignites on Viewport Lock) */}
+        <div
+          ref={centerLaserRef}
+          className="md:hidden absolute inset-x-0 top-1/2 -translate-y-1/2 h-[2px] bg-gradient-to-r from-transparent via-[#FF8C38] to-transparent shadow-[0_0_20px_#FF8C38,0_0_40px_#FF8C38] will-change-transform z-30 pointer-events-none"
+        />
 
         {/* Forge Atelier Corner Crosshairs */}
         <span className="absolute top-3 left-4 font-mono text-[10px] text-[#FF8C38]/50 select-none pointer-events-none">+</span>

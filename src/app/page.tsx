@@ -66,20 +66,6 @@ export default function Home() {
       });
     });
 
-    mm.add("(max-width: 767px)", () => {
-      gsap.to("#hero-wrapper", {
-        scale: 0.98,
-        opacity: 0,
-        ease: "power1.inOut",
-        scrollTrigger: {
-          trigger: "#monument-statement",
-          start: "top bottom",
-          end: "top top",
-          scrub: 0.35,
-        },
-      });
-    });
-
     const timeout = setTimeout(() => {
       ScrollTrigger.refresh();
     }, 250);

@@ -1,11 +1,46 @@
 "use client";
 
-import React, { memo, useEffect, useRef } from "react";
+import React, { memo, useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { ArrowDown, ArrowUpRight, Sparkles } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
+
+const STATEMENT_LINES = [
+  {
+    words: [
+      { text: "I", highlight: false },
+      { text: "shape", highlight: false },
+      { text: "the", highlight: false },
+      { text: "digital", highlight: false },
+      { text: "void", highlight: false },
+    ],
+  },
+  {
+    words: [
+      { text: "into", highlight: false },
+      { text: "high-precision", highlight: false },
+      { text: "spatial", highlight: false },
+      { text: "couture,", highlight: false },
+    ],
+  },
+  {
+    words: [
+      { text: "architecting", highlight: false },
+      { text: "autonomous", highlight: false },
+      { text: "intelligence", highlight: false },
+    ],
+  },
+  {
+    words: [
+      { text: "and", highlight: false },
+      { text: "monumental", highlight: false },
+      { text: "digital", highlight: true },
+      { text: "environments.", highlight: true },
+    ],
+  },
+];
 
 interface MonumentalHeroProps {
   onExplore: () => void;
@@ -13,21 +48,70 @@ interface MonumentalHeroProps {
 }
 
 export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, onConnect }) => {
-  // Mobile Refs (Alternative B: 3D Camera Dolly Fly-Through)
+  const [touchPos, setTouchPos] = useState({ x: 0, y: 0, active: false });
+
+  // Mobile 3D Camera Depth Tunnel Refs (Zero Y-axis scroll · Pure Z-depth)
   const mobileContainerRef = useRef<HTMLDivElement | null>(null);
+  const mobileStageRef = useRef<HTMLDivElement | null>(null);
   const mobileVideoWrapperRef = useRef<HTMLDivElement | null>(null);
   const mobileBackdropVeilRef = useRef<HTMLDivElement | null>(null);
   const laptopCueRef = useRef<HTMLDivElement | null>(null);
+  const mobileBottomHudRef = useRef<HTMLDivElement | null>(null);
+
+  // Hero Identity Plane Refs
   const mobileIdentityRef = useRef<HTMLDivElement | null>(null);
   const mobileTitleRef = useRef<HTMLHeadingElement | null>(null);
   const mobileMetaRef = useRef<HTMLDivElement | null>(null);
   const mobileSubtitleRef = useRef<HTMLParagraphElement | null>(null);
   const mobileActionsRef = useRef<HTMLDivElement | null>(null);
-  const mobileBottomHudRef = useRef<HTMLDivElement | null>(null);
+
+  // Architectural Statement Plane Refs
+  const mobileStatementRef = useRef<HTMLDivElement | null>(null);
+  const statementMetaRef = useRef<HTMLDivElement | null>(null);
+  const statementHeadlineRef = useRef<HTMLHeadingElement | null>(null);
+  const statementDividerTopRef = useRef<HTMLDivElement | null>(null);
+  const statementDividerBottomRef = useRef<HTMLDivElement | null>(null);
+  const statementAttributionRef = useRef<HTMLDivElement | null>(null);
 
   // Desktop Refs
   const desktopSectionRef = useRef<HTMLElement | null>(null);
   const desktopVideoRef = useRef<HTMLDivElement | null>(null);
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLElement>) => {
+    const touch = e.touches[0];
+    if (touch && mobileStageRef.current) {
+      const rect = mobileStageRef.current.getBoundingClientRect();
+      setTouchPos({
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top,
+        active: true,
+      });
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setTouchPos((prev) => ({ ...prev, active: false }));
+  };
+
+  const handleExploreClick = () => {
+    if (typeof window !== "undefined" && window.innerWidth < 768 && mobileContainerRef.current) {
+      const targetScroll =
+        mobileContainerRef.current.offsetTop +
+        (mobileContainerRef.current.offsetHeight - window.innerHeight) * 0.60;
+      window.scrollTo({ top: targetScroll, behavior: "smooth" });
+    } else {
+      onExplore();
+    }
+  };
+
+  const handleConnectClick = () => {
+    if (onConnect) {
+      onConnect();
+    } else {
+      const el = document.getElementById("monument-terminal");
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -36,31 +120,23 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
     const mm = gsap.matchMedia();
 
     // =========================================================================
-    // MOBILE TIMELINE (< 768px) — ALTERNATIVE B: 3D CAMERA DOLLY / FLY-THROUGH
-    // Full-Bleed Living Video · Colossal 3.2x Camera Pass-Through into Atelier Void
+    // MOBILE TIMELINE (< 768px): CONTINUOUS 3D CAMERA DEPTH TUNNEL
+    // Zero Y-Axis Page Scrolling · Pure Z-Axis Camera Flight Deeper into Space
     // =========================================================================
     mm.add("(max-width: 767px)", () => {
       if (!mobileContainerRef.current) return;
 
       // 1. Initial State Setup
       if (mobileVideoWrapperRef.current) {
-        gsap.set(mobileVideoWrapperRef.current, {
-          opacity: 1,
-          scale: 1,
-        });
+        gsap.set(mobileVideoWrapperRef.current, { opacity: 1, scale: 1 });
       }
 
       if (mobileBackdropVeilRef.current) {
-        gsap.set(mobileBackdropVeilRef.current, {
-          opacity: 0,
-        });
+        gsap.set(mobileBackdropVeilRef.current, { opacity: 0 });
       }
 
       if (mobileIdentityRef.current) {
-        gsap.set(mobileIdentityRef.current, {
-          opacity: 0,
-          pointerEvents: "none",
-        });
+        gsap.set(mobileIdentityRef.current, { opacity: 0, pointerEvents: "none" });
       }
 
       if (mobileTitleRef.current) {
@@ -72,24 +148,40 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         });
       }
 
-      if (mobileMetaRef.current) {
-        gsap.set(mobileMetaRef.current, { opacity: 0, y: 14 });
+      if (mobileMetaRef.current) gsap.set(mobileMetaRef.current, { opacity: 0, y: 14 });
+      if (mobileSubtitleRef.current) gsap.set(mobileSubtitleRef.current, { opacity: 0, y: 14 });
+      if (mobileActionsRef.current) gsap.set(mobileActionsRef.current, { opacity: 0, y: 16 });
+      if (laptopCueRef.current) gsap.set(laptopCueRef.current, { opacity: 1, y: 0 });
+      if (mobileBottomHudRef.current) gsap.set(mobileBottomHudRef.current, { opacity: 1, y: 0 });
+
+      // Statement Plane Starts Far Back in Deep 3D Perspective (Z = -600px)
+      if (mobileStatementRef.current) {
+        gsap.set(mobileStatementRef.current, {
+          opacity: 0,
+          scale: 0.55,
+          y: 40,
+          pointerEvents: "none",
+          transformOrigin: "center center",
+        });
       }
 
-      if (mobileSubtitleRef.current) {
-        gsap.set(mobileSubtitleRef.current, { opacity: 0, y: 14 });
+      if (statementDividerTopRef.current && statementDividerBottomRef.current) {
+        gsap.set([statementDividerTopRef.current, statementDividerBottomRef.current], {
+          scaleX: 0,
+          transformOrigin: "center center",
+        });
       }
 
-      if (mobileActionsRef.current) {
-        gsap.set(mobileActionsRef.current, { opacity: 0, y: 16 });
-      }
+      if (statementMetaRef.current) gsap.set(statementMetaRef.current, { opacity: 0, y: -8 });
+      if (statementAttributionRef.current) gsap.set(statementAttributionRef.current, { opacity: 0, y: 8 });
 
-      if (laptopCueRef.current) {
-        gsap.set(laptopCueRef.current, { opacity: 1, y: 0 });
-      }
-
-      if (mobileBottomHudRef.current) {
-        gsap.set(mobileBottomHudRef.current, { opacity: 1, y: 0 });
+      const statementWords = statementHeadlineRef.current?.querySelectorAll(".statement-word");
+      if (statementWords && statementWords.length > 0) {
+        gsap.set(statementWords, {
+          opacity: 0.2,
+          color: "rgba(234, 215, 192, 0.2)",
+          textShadow: "0 0 0px transparent",
+        });
       }
 
       // Continuous Idle Levitation on Laptop Micro-Cue
@@ -104,236 +196,126 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         });
       }
 
-      // 2. Silky Continuous Scroll Scrub Timeline (~180vh total height = ~1.5 thumb swipes)
+      // 2. Silky Continuous Scroll Scrub Timeline across 280vh of thumb travel
+      // Viewport remains 100% frozen on the Y-axis: ZERO vertical page scroll!
       const masterTl = gsap.timeline({
         scrollTrigger: {
           trigger: mobileContainerRef.current,
           start: "top top",
           end: "bottom bottom",
-          scrub: 0.35, // Smooth touch momentum tracking
+          scrub: 0.35,
           onUpdate: (self) => {
             const videoEl = mobileVideoWrapperRef.current?.querySelector("video");
             if (videoEl) {
-              if (self.progress >= 0.85 && !videoEl.paused) {
+              if (self.progress >= 0.70 && !videoEl.paused) {
                 videoEl.pause();
-              } else if (self.progress < 0.85 && videoEl.paused) {
+              } else if (self.progress < 0.70 && videoEl.paused) {
                 videoEl.play().catch(() => {});
               }
             }
 
             if (mobileIdentityRef.current) {
               mobileIdentityRef.current.style.pointerEvents =
-                self.progress >= 0.40 && self.progress <= 0.70 ? "auto" : "none";
+                self.progress >= 0.30 && self.progress <= 0.48 ? "auto" : "none";
             }
           },
         },
       });
 
-      // Phase 1 (0.00 -> 0.16): Cue & initial bottom hint dissolve early
+      // Phase 1 (0.00 -> 0.14): Cue & initial bottom hint dissolve early
       if (laptopCueRef.current) {
-        masterTl.to(
-          laptopCueRef.current,
-          {
-            opacity: 0,
-            y: -18,
-            scale: 0.92,
-            duration: 0.16,
-            ease: "power2.out",
-          },
-          0
-        );
+        masterTl.to(laptopCueRef.current, { opacity: 0, y: -18, scale: 0.92, duration: 0.14, ease: "power2.out" }, 0);
       }
-
       if (mobileBottomHudRef.current) {
-        masterTl.to(
-          mobileBottomHudRef.current,
-          {
-            opacity: 0,
-            y: 12,
-            duration: 0.16,
-            ease: "power2.out",
-          },
-          0
-        );
+        masterTl.to(mobileBottomHudRef.current, { opacity: 0, y: 12, duration: 0.14, ease: "power2.out" }, 0);
       }
 
-      // Phase 2 (0.00 -> 0.45): Optical Camera Push-In on Full-Bleed Video (No box shrinkage!)
+      // Phase 2 (0.00 -> 0.35): Optical Camera Push-In into Living Terrace & Atmospheric Veil Darkens
       if (mobileVideoWrapperRef.current) {
-        masterTl.to(
-          mobileVideoWrapperRef.current,
-          {
-            scale: 1.08,
-            duration: 0.45,
-            ease: "power1.inOut",
-          },
-          0
-        );
+        masterTl.to(mobileVideoWrapperRef.current, { scale: 1.08, duration: 0.35, ease: "power1.inOut" }, 0);
       }
-
-      // Deep atmospheric obsidian veil smoothly washes over video, turning it into living background texture
       if (mobileBackdropVeilRef.current) {
-        masterTl.to(
-          mobileBackdropVeilRef.current,
-          {
-            opacity: 0.88,
-            duration: 0.45,
-            ease: "power1.inOut",
-          },
-          0
-        );
+        masterTl.to(mobileBackdropVeilRef.current, { opacity: 0.88, duration: 0.35, ease: "power1.inOut" }, 0);
       }
 
-      // Phase 3 (0.16 -> 0.45): Monumental Identity materializes in center screen from depth
+      // Phase 3 (0.14 -> 0.35): Monumental Identity materializes in center frame from depth
       if (mobileIdentityRef.current) {
-        masterTl.to(
-          mobileIdentityRef.current,
+        masterTl.to(mobileIdentityRef.current, { opacity: 1, duration: 0.12, ease: "power1.out" }, 0.14);
+      }
+      if (mobileTitleRef.current) {
+        masterTl.to(mobileTitleRef.current, { opacity: 1, scale: 1.0, y: 0, duration: 0.21, ease: "power2.out" }, 0.14);
+      }
+      if (mobileMetaRef.current) {
+        masterTl.to(mobileMetaRef.current, { opacity: 1, y: 0, duration: 0.18, ease: "power2.out" }, 0.17);
+      }
+      if (mobileSubtitleRef.current) {
+        masterTl.to(mobileSubtitleRef.current, { opacity: 1, y: 0, duration: 0.18, ease: "power2.out" }, 0.19);
+      }
+      if (mobileActionsRef.current) {
+        masterTl.to(mobileActionsRef.current, { opacity: 1, y: 0, duration: 0.18, ease: "power2.out" }, 0.21);
+      }
+
+      // Phase 4 (0.35 -> 0.48): Reading Hold for Soham Roychoudhury (Interactive buttons active)
+      masterTl.to({}, { duration: 0.13 });
+
+      // Phase 5 (0.48 -> 0.68): THE COLOSSAL FLY-THROUGH (Camera passes through letters into void)
+      if (mobileActionsRef.current) {
+        masterTl.to(mobileActionsRef.current, { opacity: 0, y: 14, scale: 0.90, duration: 0.10, ease: "power2.in" }, 0.48);
+      }
+      if (mobileMetaRef.current) {
+        masterTl.to(mobileMetaRef.current, { opacity: 0, y: -10, scale: 0.90, duration: 0.10, ease: "power2.in" }, 0.48);
+      }
+      if (mobileSubtitleRef.current) {
+        masterTl.to(mobileSubtitleRef.current, { opacity: 0, y: 10, scale: 0.92, duration: 0.10, ease: "power2.in" }, 0.48);
+      }
+
+      // Typographic archway expands colossally past the phone camera lens
+      if (mobileTitleRef.current) {
+        masterTl.to(mobileTitleRef.current, { scale: 4.8, opacity: 0, y: -20, duration: 0.20, ease: "power2.in" }, 0.48);
+      }
+      if (mobileVideoWrapperRef.current) {
+        masterTl.to(mobileVideoWrapperRef.current, { scale: 1.35, opacity: 0, duration: 0.20, ease: "power2.in" }, 0.48);
+      }
+      if (mobileBackdropVeilRef.current) {
+        masterTl.to(mobileBackdropVeilRef.current, { opacity: 1.0, duration: 0.20, ease: "power2.in" }, 0.48);
+      }
+
+      // Phase 6 (0.54 -> 0.70): IN THE EXACT SAME CAMERA VIEWPORT: Statement Zooms Forward from Void
+      if (mobileStatementRef.current) {
+        masterTl.to(mobileStatementRef.current, { opacity: 1, scale: 1.0, y: 0, duration: 0.16, ease: "power2.out" }, 0.54);
+      }
+      if (statementDividerTopRef.current && statementDividerBottomRef.current) {
+        masterTl.to([statementDividerTopRef.current, statementDividerBottomRef.current], { scaleX: 1, duration: 0.14, ease: "power2.out" }, 0.57);
+      }
+      if (statementMetaRef.current) {
+        masterTl.to(statementMetaRef.current, { opacity: 1, y: 0, duration: 0.12, ease: "power2.out" }, 0.58);
+      }
+
+      // Phase 7 (0.68 -> 0.90): Forge Automotive Text Fill Wave scrubs across words
+      if (statementWords && statementWords.length > 0) {
+        masterTl.fromTo(
+          statementWords,
+          { opacity: 0.2, color: "rgba(234, 215, 192, 0.2)", textShadow: "0 0 0px transparent" },
           {
             opacity: 1,
-            duration: 0.15,
+            color: (index, target) => ((target as HTMLElement).getAttribute("data-highlight") === "amber" ? "#FF8C38" : "#FFFDF8"),
+            textShadow: (index, target) =>
+              (target as HTMLElement).getAttribute("data-highlight") === "amber"
+                ? "0 0 24px rgba(255, 140, 56, 0.75)"
+                : "0 0 14px rgba(255, 253, 248, 0.35)",
+            stagger: 0.035,
+            duration: 0.22,
             ease: "power1.out",
           },
-          0.16
+          0.68
         );
       }
-
-      if (mobileTitleRef.current) {
-        masterTl.to(
-          mobileTitleRef.current,
-          {
-            opacity: 1,
-            scale: 1.0,
-            y: 0,
-            duration: 0.29,
-            ease: "power2.out",
-          },
-          0.16
-        );
+      if (statementAttributionRef.current) {
+        masterTl.to(statementAttributionRef.current, { opacity: 1, y: 0, duration: 0.12, ease: "power2.out" }, 0.84);
       }
 
-      if (mobileMetaRef.current) {
-        masterTl.to(
-          mobileMetaRef.current,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.24,
-            ease: "power2.out",
-          },
-          0.20
-        );
-      }
-
-      if (mobileSubtitleRef.current) {
-        masterTl.to(
-          mobileSubtitleRef.current,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.24,
-            ease: "power2.out",
-          },
-          0.22
-        );
-      }
-
-      if (mobileActionsRef.current) {
-        masterTl.to(
-          mobileActionsRef.current,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.24,
-            ease: "power2.out",
-          },
-          0.24
-        );
-      }
-
-      // Phase 4 (0.45 -> 0.70): High-impact hold for full reading & button interaction
-      masterTl.to({}, { duration: 0.25 });
-
-      // Phase 5 (0.70 -> 1.00): ALTERNATIVE B — 3D CAMERA DOLLY / FLY-THROUGH
-      // The camera pushes past the colossal letters of Soham Roychoudhury directly into the darkroom atelier void
-      if (mobileActionsRef.current) {
-        masterTl.to(
-          mobileActionsRef.current,
-          {
-            opacity: 0,
-            y: 16,
-            scale: 0.90,
-            duration: 0.12,
-            ease: "power2.in",
-          },
-          0.70
-        );
-      }
-
-      if (mobileMetaRef.current) {
-        masterTl.to(
-          mobileMetaRef.current,
-          {
-            opacity: 0,
-            y: -12,
-            scale: 0.90,
-            duration: 0.12,
-            ease: "power2.in",
-          },
-          0.70
-        );
-      }
-
-      if (mobileSubtitleRef.current) {
-        masterTl.to(
-          mobileSubtitleRef.current,
-          {
-            opacity: 0,
-            y: 12,
-            scale: 0.92,
-            duration: 0.14,
-            ease: "power2.in",
-          },
-          0.70
-        );
-      }
-
-      if (mobileTitleRef.current) {
-        masterTl.to(
-          mobileTitleRef.current,
-          {
-            scale: 3.2,
-            opacity: 0,
-            y: -25,
-            duration: 0.30,
-            ease: "power2.in",
-          },
-          0.70
-        );
-      }
-
-      if (mobileVideoWrapperRef.current) {
-        masterTl.to(
-          mobileVideoWrapperRef.current,
-          {
-            scale: 1.25,
-            opacity: 0,
-            duration: 0.30,
-            ease: "power2.in",
-          },
-          0.70
-        );
-      }
-
-      if (mobileBackdropVeilRef.current) {
-        masterTl.to(
-          mobileBackdropVeilRef.current,
-          {
-            opacity: 1,
-            duration: 0.30,
-            ease: "power2.in",
-          },
-          0.70
-        );
-      }
+      // Phase 8 (0.90 -> 1.00): Luxury Hold. Statement fully illuminated in camera view before unpinning.
+      masterTl.to({}, { duration: 0.10 });
 
       return () => {
         if (cueTween) cueTween.kill();
@@ -363,26 +345,31 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
     return () => mm.revert();
   }, []);
 
-  const handleConnectClick = () => {
-    if (onConnect) {
-      onConnect();
-    } else {
-      const el = document.getElementById("monument-terminal");
-      if (el) el.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
   return (
     <div id="monument-hero" className="relative w-full overflow-visible">
       {/* ========================================================================= */}
-      {/* MOBILE EXPERIENCE (< 768px): MONOLITHIC FILMIC DEPTH DISSOLVE HERO        */}
+      {/* MOBILE EXPERIENCE (< 768px): UNIFIED 3D CAMERA DEPTH TUNNEL                */}
+      {/* Zero Y-Axis Page Scrolling · Pure Z-Axis Camera Flight Deeper into Space   */}
       {/* ========================================================================= */}
       <div
         ref={mobileContainerRef}
-        className="md:hidden relative w-full h-[180vh] bg-transparent overflow-clip"
+        className="md:hidden relative w-full h-[280vh] bg-[#060709] overflow-clip"
       >
-        <div className="sticky top-0 h-[100dvh] min-h-[100dvh] min-h-screen w-full overflow-hidden bg-transparent select-none flex flex-col justify-between">
-          {/* 1. Full-Bleed Living Pixel-Art Terrace Video Layer (Zero box shrinkage) */}
+        {/* Navigation & Explore Anchor for Statement phase */}
+        <div
+          id="monument-statement"
+          className="absolute top-[55%] inset-x-0 h-[1px] pointer-events-none"
+        />
+
+        {/* 100svh Sticky 3D Camera Viewport (Zero Y-axis translation throughout!) */}
+        <div
+          ref={mobileStageRef}
+          onTouchMove={handleTouchMove}
+          onTouchStart={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          className="sticky top-0 h-[100dvh] min-h-[100dvh] w-full overflow-hidden bg-[#060709] select-none [perspective:1200px]"
+        >
+          {/* 1. Full-Bleed Living Pixel-Art Terrace Video Layer */}
           <div
             ref={mobileVideoWrapperRef}
             className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden will-change-[transform,opacity]"
@@ -398,17 +385,16 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               <source src="/assets/hero_pixel_art_loop.mp4" type="video/mp4" />
               <source src="/assets/Animate_pixel_art_environment_loop_03a9505a.mp4" type="video/mp4" />
             </video>
-            {/* Base atmospheric gradient for depth */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40 pointer-events-none" />
           </div>
 
-          {/* 2. Deep Obsidian-Espresso Atmosphere Veil (Smooth filmic dissolve on scroll) */}
+          {/* 2. Deep Obsidian-Wine Atmosphere Veil (Smooth filmic dissolve into living void) */}
           <div
             ref={mobileBackdropVeilRef}
-            className="absolute inset-0 z-10 pointer-events-none bg-gradient-to-b from-[#120408]/92 via-[#0A0205]/88 to-[#060103]/96 will-change-[opacity]"
+            className="absolute inset-0 z-10 pointer-events-none bg-gradient-to-b from-[#120408]/92 via-[#0A0205]/88 to-[#060103]/98 will-change-[opacity]"
           />
 
-          {/* 3. Understated Editorial Swiss Laptop Micro-Cue (Anchored above laptop) */}
+          {/* 3. Understated Editorial Swiss Laptop Micro-Cue */}
           <div
             ref={laptopCueRef}
             className="absolute pointer-events-none z-20 flex flex-col items-center will-change-[transform,opacity]"
@@ -429,7 +415,6 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
                 <ArrowDown size={10} className="text-[#FF7A00] animate-bounce" />
               </span>
             </div>
-            {/* Minimalist hairline pointer stem */}
             <div className="w-[1px] h-3.5 bg-gradient-to-b from-[#FF5500]/60 to-transparent mx-auto" />
             <div className="w-1 h-1 rounded-full bg-[#FF5500] mx-auto -mt-0.5" />
           </div>
@@ -446,17 +431,14 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             </span>
           </div>
 
-          {/* 5. Monumental Identity Section (Centered in the Full-Bleed Viewport) */}
+          {/* 5. HERO IDENTITY PLANE (Z=0 -> Flies Past Lens to Z=+600) */}
           <div
             ref={mobileIdentityRef}
-            className="absolute inset-0 z-20 flex flex-col justify-between pt-24 pb-8 px-6 text-center will-change-[transform,opacity] pointer-events-none opacity-0"
+            className="absolute inset-0 z-20 flex flex-col justify-between pt-24 pb-8 px-6 text-center will-change-[transform,opacity] pointer-events-none opacity-0 [transform-style:preserve-3d]"
           >
-            {/* Top spacer */}
             <div />
 
-            {/* Centered Identity Lockup */}
             <div className="relative z-10 w-full max-w-sm mx-auto flex flex-col items-center my-auto">
-              {/* Minimalist Hairline Eyebrow */}
               <div
                 ref={mobileMetaRef}
                 className="inline-flex items-center gap-2 text-[9px] font-sans font-bold uppercase tracking-[0.24em] text-orange-200/90 mb-5 px-3.5 py-1 rounded-full border border-orange-500/25 bg-black/50 backdrop-blur-md shadow-lg will-change-[transform,opacity]"
@@ -465,22 +447,18 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
                 <span>NSEC (2024–2028)</span>
               </div>
 
-              {/* Signature Aesthetic Font Pairing (Citadel Script + Helvetica Compressed) */}
               <h1
                 ref={mobileTitleRef}
                 className="relative flex flex-col items-center justify-center text-center select-none mb-4 overflow-visible will-change-transform"
               >
-                {/* Word 1: Soham in Citadel Script */}
                 <span className="font-citadel font-normal text-[4.8rem] xs:text-[5.8rem] sm:text-[6.8rem] text-[#FFFDF8] leading-[0.8] relative z-20 -mb-2.5 xs:-mb-4 -translate-x-3 xs:-translate-x-6 drop-shadow-[0_4px_14px_rgba(0,0,0,0.85)]">
                   Soham
                 </span>
-                {/* Word 2: Roychoudhury in Helvetica Compressed */}
                 <span className="font-helvetica font-normal text-[3.4rem] xs:text-[4.2rem] sm:text-[4.8rem] text-[#F8F5EE] tracking-[0.025em] leading-[1.0] pb-2 sm:pb-3 relative z-10 drop-shadow-[0_6px_25px_rgba(0,0,0,0.95)] overflow-visible inline-block">
                   Roychoudhury
                 </span>
               </h1>
 
-              {/* Editorial Subtitle in Helvetica Compressed */}
               <p
                 ref={mobileSubtitleRef}
                 className="font-helvetica font-normal text-xs xs:text-sm text-orange-100/90 tracking-[0.14em] uppercase leading-relaxed mb-7 max-w-xs px-1 drop-shadow-md will-change-[transform,opacity]"
@@ -488,13 +466,12 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
                 Artificial Intelligence &amp; Machine Learning · Frontend Architect · Digital Operations
               </p>
 
-              {/* Minimalist High-Contrast Action Controls */}
               <div
                 ref={mobileActionsRef}
                 className="flex items-center justify-center gap-3 w-full max-w-xs will-change-[transform,opacity]"
               >
                 <button
-                  onClick={onExplore}
+                  onClick={handleExploreClick}
                   className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-white text-black hover:bg-orange-100 transition-all duration-200 font-sans font-bold text-xs uppercase tracking-wider cursor-pointer shadow-xl active:scale-95"
                 >
                   <span>Explore</span>
@@ -511,10 +488,86 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               </div>
             </div>
 
-            {/* Bottom Coordinates Bar */}
             <div className="relative z-10 w-full flex items-center justify-between text-[9px] font-mono text-orange-200/60 uppercase tracking-widest pt-2">
               <span>KOLKATA // LAT 22.5726° N</span>
               <span>ATELIER 2026</span>
+            </div>
+          </div>
+
+          {/* 6. ARCHITECTURAL STATEMENT PLANE (Emerges from Z=-600 to Z=0) */}
+          <div
+            ref={mobileStatementRef}
+            className="absolute inset-0 z-20 flex flex-col justify-center px-6 text-left will-change-[transform,opacity] pointer-events-none opacity-0 [transform-style:preserve-3d]"
+          >
+            {/* Atelier Corner Crosshairs */}
+            <span className="absolute top-6 left-6 font-mono text-[10px] text-[#FF8C38]/40 select-none pointer-events-none">+</span>
+            <span className="absolute top-6 right-6 font-mono text-[10px] text-[#FF8C38]/40 select-none pointer-events-none">+</span>
+            <span className="absolute bottom-6 left-6 font-mono text-[10px] text-[#FF8C38]/40 select-none pointer-events-none">+</span>
+            <span className="absolute bottom-6 right-6 font-mono text-[10px] text-[#FF8C38]/40 select-none pointer-events-none">+</span>
+
+            {/* Specular Amber Finger Touch Spotlight */}
+            <div
+              className="absolute inset-0 pointer-events-none transition-opacity duration-300 z-0"
+              style={{
+                opacity: touchPos.active ? 1 : 0,
+                background: `radial-gradient(circle 240px at ${touchPos.x}px ${touchPos.y}px, rgba(255, 140, 56, 0.22), transparent 70%)`,
+              }}
+            />
+
+            <div className="relative z-10 w-full max-w-sm mx-auto flex flex-col justify-center">
+              {/* Architectural Meta Bar */}
+              <div
+                ref={statementMetaRef}
+                className="flex items-center justify-between text-[10px] font-sans font-bold uppercase tracking-[0.24em] text-[#CBB59D] mb-4 pb-1 will-change-[transform,opacity]"
+              >
+                <span className="text-[#EAD7C0]">ARCHITECTURAL STATEMENT</span>
+                <span className="text-[#FF8C38]">TERRACE PERSPECTIVE</span>
+              </div>
+
+              {/* Top Laser Hairline Divider */}
+              <div
+                ref={statementDividerTopRef}
+                className="w-full h-[1px] bg-[#EAD7C0]/25 mb-5 will-change-transform shadow-[0_0_8px_rgba(255,140,56,0.3)] origin-center"
+              />
+
+              {/* Monumental All-Caps Statement with Forge Text Fill Wave */}
+              <h2
+                ref={statementHeadlineRef}
+                className="font-sans font-black text-xl xs:text-2xl tracking-tight leading-[1.14] uppercase text-[#EAD7C0] mb-5 select-none"
+              >
+                {STATEMENT_LINES.map((line, lIdx) => (
+                  <div key={lIdx} className="overflow-hidden py-1">
+                    <span className="statement-line inline-block w-full">
+                      {line.words.map((word, wIdx) => (
+                        <span
+                          key={wIdx}
+                          data-highlight={word.highlight ? "amber" : "none"}
+                          className={`statement-word inline-block mr-[0.26em] transition-colors duration-150 ${
+                            word.highlight ? "text-[#FF8C38]" : "text-[#EAD7C0]"
+                          }`}
+                        >
+                          {word.text}
+                        </span>
+                      ))}
+                    </span>
+                  </div>
+                ))}
+              </h2>
+
+              {/* Bottom Laser Hairline Divider */}
+              <div
+                ref={statementDividerBottomRef}
+                className="w-full h-[1px] bg-[#EAD7C0]/25 mb-4 will-change-transform shadow-[0_0_8px_rgba(255,140,56,0.3)] origin-center"
+              />
+
+              {/* Attribution Tag */}
+              <div
+                ref={statementAttributionRef}
+                className="flex items-center justify-between text-[10px] font-mono text-[#CBB59D] tracking-wider will-change-[transform,opacity]"
+              >
+                <span className="text-[#EAD7C0]/80">SOHAM ROYCHOUDHURY · ARCHITECTURAL CREED</span>
+                <span className="text-[#FF8C38]/70">2026</span>
+              </div>
             </div>
           </div>
         </div>

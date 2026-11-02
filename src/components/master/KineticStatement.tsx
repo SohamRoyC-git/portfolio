@@ -343,7 +343,7 @@ export const KineticStatement: React.FC = memo(() => {
     <div
       id="monument-statement"
       ref={sectionRef}
-      className="relative w-full z-20 h-[calc(100svh+500px)] md:h-[calc(100svh+900px)]"
+      className="hidden md:block relative w-full z-20 md:h-[calc(100svh+900px)]"
     >
       {/* 
         Forge Automotive Pinned Architectural Stage on Mobile & Desktop

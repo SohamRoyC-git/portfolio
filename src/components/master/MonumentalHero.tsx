@@ -77,10 +77,12 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
   const statementDividerBottomRef = useRef<HTMLDivElement | null>(null);
   const statementAttributionRef = useRef<HTMLDivElement | null>(null);
 
-  // Alternative 4: Mechanical Monocoque Shutter Transition into Phase 2
-  const mobileShutterTopRef = useRef<HTMLDivElement | null>(null);
-  const mobileShutterBottomRef = useRef<HTMLDivElement | null>(null);
-  const mobileShutterLaserRef = useRef<HTMLDivElement | null>(null);
+  // Solution 1: Organic Alpine Horizon Dawn & Volumetric Sunbeams
+  const dawnSkyGlowRef = useRef<HTMLDivElement | null>(null);
+  const dawnSunOrbRef = useRef<HTMLDivElement | null>(null);
+  const dawnGodRaysRef = useRef<SVGSVGElement | null>(null);
+  const dawnMountainsRef = useRef<SVGSVGElement | null>(null);
+  const dawnLensFlareRef = useRef<HTMLDivElement | null>(null);
 
   // Desktop Refs
   const desktopSectionRef = useRef<HTMLElement | null>(null);
@@ -198,14 +200,12 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
       if (statementMetaRef.current) gsap.set(statementMetaRef.current, { opacity: 0, y: -8 });
       if (statementAttributionRef.current) gsap.set(statementAttributionRef.current, { opacity: 0, y: 8 });
 
-      // Monocoque Shutter initial state: fully open (offscreen) and laser off
-      if (mobileShutterTopRef.current && mobileShutterBottomRef.current) {
-        gsap.set(mobileShutterTopRef.current, { yPercent: -100 });
-        gsap.set(mobileShutterBottomRef.current, { yPercent: 100 });
-      }
-      if (mobileShutterLaserRef.current) {
-        gsap.set(mobileShutterLaserRef.current, { scaleX: 0, opacity: 0 });
-      }
+      // Solution 1: Horizon Dawn & Volumetric Sunbeams initial state
+      if (dawnSkyGlowRef.current) gsap.set(dawnSkyGlowRef.current, { opacity: 0 });
+      if (dawnSunOrbRef.current) gsap.set(dawnSunOrbRef.current, { y: 130, scale: 0.8, opacity: 0 });
+      if (dawnGodRaysRef.current) gsap.set(dawnGodRaysRef.current, { opacity: 0, rotate: -4 });
+      if (dawnMountainsRef.current) gsap.set(dawnMountainsRef.current, { y: 35, opacity: 0 });
+      if (dawnLensFlareRef.current) gsap.set(dawnLensFlareRef.current, { opacity: 0, scaleX: 0 });
 
       const statementWords = statementHeadlineRef.current?.querySelectorAll(".statement-word");
       if (statementWords && statementWords.length > 0) {
@@ -372,28 +372,56 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         masterTl.to(statementAttributionRef.current, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 8.8);
       }
 
-      // Phase 8 (9.20 -> 10.00): Luxury Hold. Statement fully illuminated in the Twilight Realm before unpinning.
-      // Phase 8 (9.20 -> 9.45): Luxury Hold for illuminated statement in Twilight Realm
-      masterTl.to({}, { duration: 0.25 }, 9.2);
+      // Phase 8 (9.00 -> 9.30): Luxury Hold for illuminated statement in Twilight Realm
+      masterTl.to({}, { duration: 0.30 }, 9.0);
 
-      // Phase 9 (9.45 -> 10.00): Alternative 4 - Mechanical Monocoque Shutter Clamps Shut
-      if (mobileShutterTopRef.current && mobileShutterBottomRef.current) {
+      // Phase 9 (9.30 -> 10.00): Solution 1 - The Horizon Dawn & Volumetric God-Rays Awaken
+      // Mountain ridges rise organically across the lower horizon
+      if (dawnMountainsRef.current) {
         masterTl.to(
-          mobileShutterTopRef.current,
-          { yPercent: 0, duration: 0.50, ease: "power3.inOut" },
-          9.45
-        );
-        masterTl.to(
-          mobileShutterBottomRef.current,
-          { yPercent: 0, duration: 0.50, ease: "power3.inOut" },
-          9.45
+          dawnMountainsRef.current,
+          { y: 0, opacity: 1, duration: 0.65, ease: "power2.out" },
+          9.30
         );
       }
-      if (mobileShutterLaserRef.current) {
+      // Celestial Sun rises gracefully from behind the mountain peaks
+      if (dawnSunOrbRef.current) {
         masterTl.to(
-          mobileShutterLaserRef.current,
-          { scaleX: 1, opacity: 1, duration: 0.35, ease: "power2.out" },
-          9.65
+          dawnSunOrbRef.current,
+          { y: 0, scale: 1.0, opacity: 1, duration: 0.70, ease: "power2.out" },
+          9.30
+        );
+      }
+      // Volumetric God-Rays fan out across the twilight sky
+      if (dawnGodRaysRef.current) {
+        masterTl.to(
+          dawnGodRaysRef.current,
+          { opacity: 0.85, rotate: 2, duration: 0.70, ease: "power1.out" },
+          9.30
+        );
+      }
+      // Horizon dawn glow warms the sky
+      if (dawnSkyGlowRef.current) {
+        masterTl.to(
+          dawnSkyGlowRef.current,
+          { opacity: 1, duration: 0.65, ease: "power2.out" },
+          9.35
+        );
+      }
+      // Anamorphic horizontal lens flare flashes across the sun rim
+      if (dawnLensFlareRef.current) {
+        masterTl.to(
+          dawnLensFlareRef.current,
+          { opacity: 0.9, scaleX: 1, duration: 0.45, ease: "power2.out" },
+          9.55
+        );
+      }
+      // Statement text floats up gently and dissolves into the dawn glow
+      if (statementContainerRef.current) {
+        masterTl.to(
+          statementContainerRef.current,
+          { y: -30, opacity: 0, scale: 1.02, duration: 0.50, ease: "power2.in" },
+          9.45
         );
       }
 
@@ -606,9 +634,114 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               }}
             />
 
+            {/* 6B. Solution 1: Organic Alpine Horizon Dawn & Volumetric Sunbeams */}
+            {/* Horizon Dawn Sky Atmosphere Glow */}
+            <div
+              ref={dawnSkyGlowRef}
+              className="absolute inset-x-0 bottom-0 h-4/5 pointer-events-none bg-[radial-gradient(ellipse_140%_80%_at_50%_90%,rgba(255,140,56,0.5)_0%,rgba(245,158,11,0.22)_40%,transparent_80%)] will-change-[opacity]"
+            />
+
+            {/* Volumetric SVG God Rays */}
+            <svg
+              ref={dawnGodRaysRef}
+              className="absolute -inset-x-6 bottom-16 h-[520px] w-[calc(100%+48px)] mix-blend-screen pointer-events-none filter blur-[3px] will-change-[opacity,transform]"
+              viewBox="0 0 500 500"
+              preserveAspectRatio="none"
+            >
+              <defs>
+                <linearGradient id="heroSoftRay" x1="0.5" y1="1" x2="0.5" y2="0">
+                  <stop offset="0%" stopColor="#FFE0B2" stopOpacity="0.6" />
+                  <stop offset="40%" stopColor="#FFB74D" stopOpacity="0.32" />
+                  <stop offset="75%" stopColor="#FF7043" stopOpacity="0.12" />
+                  <stop offset="100%" stopColor="#FF5722" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <polygon points="250,420 50,0 110,0" fill="url(#heroSoftRay)" opacity="0.65" />
+              <polygon points="250,420 140,0 195,0" fill="url(#heroSoftRay)" opacity="0.85" />
+              <polygon points="250,420 220,0 270,0" fill="url(#heroSoftRay)" opacity="0.95" />
+              <polygon points="250,420 295,0 350,0" fill="url(#heroSoftRay)" opacity="0.85" />
+              <polygon points="250,420 380,0 440,0" fill="url(#heroSoftRay)" opacity="0.65" />
+              <polygon points="250,420 0,60 40,20" fill="url(#heroSoftRay)" opacity="0.45" />
+              <polygon points="250,420 460,20 500,60" fill="url(#heroSoftRay)" opacity="0.45" />
+            </svg>
+
+            {/* Rising Celestial Sun Orb */}
+            <div
+              ref={dawnSunOrbRef}
+              className="absolute left-1/2 -translate-x-1/2 bottom-[145px] w-36 h-36 rounded-full pointer-events-none will-change-[transform,opacity]"
+              style={{
+                background: "radial-gradient(circle, #FFFDF8 0%, #FEF3C7 22%, #FBBF24 50%, #EA580C 75%, transparent 95%)",
+                boxShadow: "0 0 35px rgba(255, 235, 180, 0.9), 0 0 80px rgba(255, 140, 56, 0.7), 0 0 150px rgba(245, 158, 11, 0.45)",
+              }}
+            />
+
+            {/* Anamorphic Horizontal Sun Lens Flare */}
+            <div
+              ref={dawnLensFlareRef}
+              className="absolute inset-x-0 bottom-[218px] h-[2px] pointer-events-none will-change-[transform,opacity] origin-center"
+              style={{
+                background: "linear-gradient(90deg, transparent 0%, rgba(255, 140, 56, 0.3) 25%, rgba(255, 245, 220, 0.95) 50%, rgba(255, 140, 56, 0.3) 75%, transparent 100%)",
+                boxShadow: "0 0 16px rgba(255, 180, 80, 0.85)",
+              }}
+            />
+
+            {/* Multi-Layer Organic Alpine Silhouettes (SVG) */}
+            <svg
+              ref={dawnMountainsRef}
+              className="absolute inset-x-0 bottom-0 h-[360px] w-full pointer-events-none will-change-[transform,opacity]"
+              viewBox="0 0 1000 600"
+              preserveAspectRatio="none"
+            >
+              <defs>
+                <linearGradient id="heroDistantMtnGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#2D1426" stopOpacity="0.75" />
+                  <stop offset="100%" stopColor="#140713" stopOpacity="0.95" />
+                </linearGradient>
+                <linearGradient id="heroMidMtnGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#190A15" />
+                  <stop offset="100%" stopColor="#090308" />
+                </linearGradient>
+                <linearGradient id="heroForeMtnGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#0A0407" />
+                  <stop offset="100%" stopColor="#030103" />
+                </linearGradient>
+              </defs>
+
+              <path
+                d="M0,320 C80,300 140,250 200,240 C260,230 310,270 370,230 C430,190 480,210 540,190 C600,170 660,230 730,190 C800,150 860,220 920,200 C960,190 980,210 1000,200 L1000,600 L0,600 Z"
+                fill="url(#heroDistantMtnGrad)"
+              />
+              <path
+                d="M0,360 C40,350 70,330 110,335 C150,340 180,300 230,290 C280,280 320,310 360,285 C400,260 440,275 480,250 C520,225 560,240 600,220 C650,240 690,210 740,225 C790,240 840,270 890,260 C940,250 970,270 1000,265 L1000,600 L0,600 Z"
+                fill="url(#heroMidMtnGrad)"
+              />
+              <path
+                d="M0,430 C50,420 90,400 140,410 C190,420 230,380 290,375 C350,370 410,395 470,360 C530,330 580,360 640,340 C700,320 760,350 820,330 C880,310 940,340 1000,320 L1000,600 L0,600 Z"
+                fill="url(#heroForeMtnGrad)"
+              />
+            </svg>
+
+            {/* Cyber-Pastoral Terrace Deck & Railing Silhouette */}
+            <svg
+              className="absolute inset-x-0 bottom-0 h-[110px] w-full pointer-events-none"
+              viewBox="0 0 1000 200"
+              preserveAspectRatio="none"
+            >
+              <rect x="0" y="80" width="1000" height="14" fill="#080306" rx="2" />
+              <line x1="0" y1="80" x2="1000" y2="80" stroke="#FF8C38" strokeWidth="1.5" strokeOpacity="0.4" />
+              <g fill="#070205">
+                {[40, 90, 140, 190, 240, 290, 340, 390, 440, 490, 540, 590, 640, 690, 740, 790, 840, 890, 940].map((x) => (
+                  <rect key={x} x={x} y="94" width="6" height="106" />
+                ))}
+              </g>
+              <rect x="0" y="170" width="1000" height="30" fill="#030102" />
+              <path d="M0,90 C25,75 40,65 55,75 C70,85 85,60 100,75 C115,90 120,70 135,85 L135,120 L0,120 Z" fill="#060205" opacity="0.95" />
+              <path d="M865,85 C880,70 895,90 910,75 C925,60 940,85 955,75 C970,65 985,75 1000,90 L1000,120 L865,120 Z" fill="#060205" opacity="0.95" />
+            </svg>
+
             <div
               ref={statementContainerRef}
-              className="relative z-10 w-full max-w-sm mx-auto flex flex-col justify-center will-change-transform"
+              className="relative z-20 w-full max-w-sm mx-auto flex flex-col justify-center will-change-transform"
             >
               {/* Architectural Meta Bar */}
               <div
@@ -696,34 +829,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             </div>
           </div>
 
-          {/* 8. MECHANICAL MONOCOQUE SHUTTER (Alternative 4: Automotive Airlock Clamp) */}
-          <div
-            ref={mobileShutterTopRef}
-            className="absolute top-0 inset-x-0 h-1/2 bg-[#060709] z-40 will-change-transform border-b border-[#FF8C38]/40 shadow-[0_4px_25px_rgba(0,0,0,0.9)] flex flex-col justify-end pb-3 px-6 pointer-events-none"
-          >
-            <div className="absolute inset-0 bg-[radial-gradient(#1a1d24_1px,transparent_1px)] [background-size:16px_16px] opacity-40 pointer-events-none" />
-            <div className="relative z-10 flex items-center justify-between text-[8px] font-mono text-[#FF8C38]/70 uppercase tracking-[0.2em]">
-              <span>MONOCOQUE CHAMBER // SEALING</span>
-              <span>SYS.AIRLOCK.01</span>
-            </div>
-          </div>
 
-          <div
-            ref={mobileShutterBottomRef}
-            className="absolute bottom-0 inset-x-0 h-1/2 bg-[#060709] z-40 will-change-transform border-t border-[#FF8C38]/40 shadow-[0_-4px_25px_rgba(0,0,0,0.9)] flex flex-col justify-start pt-3 px-6 pointer-events-none"
-          >
-            <div className="absolute inset-0 bg-[radial-gradient(#1a1d24_1px,transparent_1px)] [background-size:16px_16px] opacity-40 pointer-events-none" />
-            <div className="relative z-10 flex items-center justify-between text-[8px] font-mono text-[#FF8C38]/70 uppercase tracking-[0.2em]">
-              <span>PRESSURIZED ENGINEERING CORE</span>
-              <span>PHASE 02 READY</span>
-            </div>
-          </div>
-
-          {/* Center Glowing Amber Laser Hairline at the Shutter Meeting Seam */}
-          <div
-            ref={mobileShutterLaserRef}
-            className="absolute top-1/2 -translate-y-1/2 inset-x-0 h-[2px] bg-[#FF8C38] z-50 pointer-events-none will-change-transform origin-center shadow-[0_0_20px_#FF8C38,0_0_45px_rgba(255,140,56,0.85)]"
-          />
         </div>
       </div>
 

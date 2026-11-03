@@ -31,10 +31,11 @@ export const ArchitecturalCreed: React.FC = memo(() => {
   const mobileSectionRef = useRef<HTMLDivElement | null>(null);
   const mobileStageRef = useRef<HTMLDivElement | null>(null);
 
-  // Alternative 4: Mechanical Monocoque Shutter Reveal
-  const creedShutterTopRef = useRef<HTMLDivElement | null>(null);
-  const creedShutterBottomRef = useRef<HTMLDivElement | null>(null);
-  const creedShutterLaserRef = useRef<HTMLDivElement | null>(null);
+  // Solution 1: Organic Alpine Horizon Dawn & Volumetric Sunbeams
+  const creedSkyGlowRef = useRef<HTMLDivElement | null>(null);
+  const creedSunOrbRef = useRef<HTMLDivElement | null>(null);
+  const creedGodRaysRef = useRef<SVGSVGElement | null>(null);
+  const creedMistRef = useRef<HTMLDivElement | null>(null);
   const mobileSpotlightRef = useRef<HTMLDivElement | null>(null);
 
   // Mobile Telemetry HUD
@@ -143,22 +144,19 @@ export const ArchitecturalCreed: React.FC = memo(() => {
       if (!mobileSectionRef.current) return;
 
       // Initial States:
-      // Shutter starts closed with center laser glowing (seamless handoff from MonumentalHero)
-      if (creedShutterTopRef.current && creedShutterBottomRef.current) {
-        gsap.set(creedShutterTopRef.current, { yPercent: 0 });
-        gsap.set(creedShutterBottomRef.current, { yPercent: 0 });
-      }
-      if (creedShutterLaserRef.current) {
-        gsap.set(creedShutterLaserRef.current, { scaleX: 1, opacity: 1 });
-      }
+      // Horizon Dawn initial state (continuing seamlessly from MonumentalHero)
+      if (creedSkyGlowRef.current) gsap.set(creedSkyGlowRef.current, { opacity: 1 });
+      if (creedSunOrbRef.current) gsap.set(creedSunOrbRef.current, { y: 0, scale: 1.0, opacity: 1 });
+      if (creedGodRaysRef.current) gsap.set(creedGodRaysRef.current, { opacity: 0.85, rotate: 2 });
+      if (creedMistRef.current) gsap.set(creedMistRef.current, { opacity: 0.75, scale: 1.0 });
 
       // HUD and Stage Interior
       if (hudRef.current) gsap.set(hudRef.current, { opacity: 0, y: -12 });
-      if (mobileSpotlightRef.current) gsap.set(mobileSpotlightRef.current, { opacity: 0 });
+      if (mobileSpotlightRef.current) gsap.set(mobileSpotlightRef.current, { opacity: 0.7 });
       if (mobileOdometerRef.current) gsap.set(mobileOdometerRef.current, { yPercent: 0 });
 
-      // Cards initial positions: Sheet 01 docked, Sheets 02-04 stacked completely offscreen below (yPercent: 180)
-      if (card1Ref.current) gsap.set(card1Ref.current, { yPercent: 0, scale: 1.0, opacity: 1 });
+      // Cards initial positions: Sheet 01 glides up as dawn mist parts, Sheets 02-04 stacked below
+      if (card1Ref.current) gsap.set(card1Ref.current, { yPercent: 32, scale: 0.96, opacity: 0 });
       if (card2Ref.current) gsap.set(card2Ref.current, { yPercent: 180, scale: 1.0, opacity: 1 });
       if (card3Ref.current) gsap.set(card3Ref.current, { yPercent: 180, scale: 1.0, opacity: 1 });
       if (card4Ref.current) gsap.set(card4Ref.current, { yPercent: 180, scale: 1.0, opacity: 1 });
@@ -173,33 +171,30 @@ export const ArchitecturalCreed: React.FC = memo(() => {
         },
       });
 
-      // Phase 1 (0.00 -> 1.50): AIRLOCK IRIS OPENING
-      // Center laser line flares and splits; carbon shutters slide open vertically
-      if (creedShutterLaserRef.current) {
+      // Phase 1 (0.00 -> 1.50): DAWN MIST DISSOLVE & SHEET 01 PLINTH DOCK
+      // Valley morning mist gently parts in the golden sunlight
+      if (creedMistRef.current) {
         masterTl.to(
-          creedShutterLaserRef.current,
-          { scaleX: 1.15, opacity: 0, duration: 0.9, ease: "power2.out" },
+          creedMistRef.current,
+          { opacity: 0, scale: 1.15, duration: 1.25, ease: "power2.out" },
           0
         );
       }
-      if (creedShutterTopRef.current && creedShutterBottomRef.current) {
+      // Sheet 01 glides smoothly up from the terrace plinth into docked focus
+      if (card1Ref.current) {
         masterTl.to(
-          creedShutterTopRef.current,
-          { yPercent: -100, duration: 1.35, ease: "power3.inOut" },
-          0.10
-        );
-        masterTl.to(
-          creedShutterBottomRef.current,
-          { yPercent: 100, duration: 1.35, ease: "power3.inOut" },
-          0.10
+          card1Ref.current,
+          { yPercent: 0, scale: 1.0, opacity: 1, duration: 1.45, ease: "power2.out" },
+          0.05
         );
       }
-      // Stage spotlight and HUD bloom in
-      if (mobileSpotlightRef.current) {
-        masterTl.to(mobileSpotlightRef.current, { opacity: 1, duration: 1.2, ease: "power1.out" }, 0.30);
-      }
+      // Top Telemetry HUD illuminates cleanly
       if (hudRef.current) {
-        masterTl.to(hudRef.current, { opacity: 1, y: 0, duration: 1.0, ease: "power2.out" }, 0.40);
+        masterTl.to(hudRef.current, { opacity: 1, y: 0, duration: 1.1, ease: "power2.out" }, 0.35);
+      }
+      // Volumetric god rays gently drift across the morning sky
+      if (creedGodRaysRef.current) {
+        masterTl.to(creedGodRaysRef.current, { rotate: 5, duration: 1.8, ease: "power1.inOut" }, 0);
       }
 
       // Phase 2 (1.50 -> 3.20): SHEET 01 READING HOLD (Academic Core — NSEC AIML)
@@ -365,6 +360,105 @@ export const ArchitecturalCreed: React.FC = memo(() => {
             className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_120%_80%_at_50%_0%,rgba(255,140,56,0.15)_0%,transparent_75%)] will-change-[opacity]"
           />
 
+          {/* Solution 1: Horizon Dawn Atmosphere & Golden Terrace Plinth */}
+          {/* Dawn Sky Glow */}
+          <div
+            ref={creedSkyGlowRef}
+            className="absolute inset-x-0 bottom-0 h-4/5 pointer-events-none bg-[radial-gradient(ellipse_140%_80%_at_50%_90%,rgba(255,140,56,0.45)_0%,rgba(245,158,11,0.20)_40%,transparent_80%)] will-change-[opacity]"
+          />
+
+          {/* Volumetric SVG God Rays */}
+          <svg
+            ref={creedGodRaysRef}
+            className="absolute -inset-x-6 bottom-16 h-[520px] w-[calc(100%+48px)] mix-blend-screen pointer-events-none filter blur-[3px] will-change-[opacity,transform]"
+            viewBox="0 0 500 500"
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <linearGradient id="creedSoftRay" x1="0.5" y1="1" x2="0.5" y2="0">
+                <stop offset="0%" stopColor="#FFE0B2" stopOpacity="0.6" />
+                <stop offset="40%" stopColor="#FFB74D" stopOpacity="0.32" />
+                <stop offset="75%" stopColor="#FF7043" stopOpacity="0.12" />
+                <stop offset="100%" stopColor="#FF5722" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <polygon points="250,420 50,0 110,0" fill="url(#creedSoftRay)" opacity="0.65" />
+            <polygon points="250,420 140,0 195,0" fill="url(#creedSoftRay)" opacity="0.85" />
+            <polygon points="250,420 220,0 270,0" fill="url(#creedSoftRay)" opacity="0.95" />
+            <polygon points="250,420 295,0 350,0" fill="url(#creedSoftRay)" opacity="0.85" />
+            <polygon points="250,420 380,0 440,0" fill="url(#creedSoftRay)" opacity="0.65" />
+            <polygon points="250,420 0,60 40,20" fill="url(#creedSoftRay)" opacity="0.45" />
+            <polygon points="250,420 460,20 500,60" fill="url(#creedSoftRay)" opacity="0.45" />
+          </svg>
+
+          {/* Golden Solar Orb */}
+          <div
+            ref={creedSunOrbRef}
+            className="absolute left-1/2 -translate-x-1/2 bottom-[145px] w-36 h-36 rounded-full pointer-events-none will-change-[transform,opacity]"
+            style={{
+              background: "radial-gradient(circle, #FFFDF8 0%, #FEF3C7 22%, #FBBF24 50%, #EA580C 75%, transparent 95%)",
+              boxShadow: "0 0 35px rgba(255, 235, 180, 0.9), 0 0 80px rgba(255, 140, 56, 0.7), 0 0 150px rgba(245, 158, 11, 0.45)",
+            }}
+          />
+
+          {/* Multi-Layer Organic Alpine Silhouettes (SVG) */}
+          <svg
+            className="absolute inset-x-0 bottom-0 h-[360px] w-full pointer-events-none"
+            viewBox="0 0 1000 600"
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <linearGradient id="creedDistantMtnGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#2D1426" stopOpacity="0.75" />
+                <stop offset="100%" stopColor="#140713" stopOpacity="0.95" />
+              </linearGradient>
+              <linearGradient id="creedMidMtnGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#190A15" />
+                <stop offset="100%" stopColor="#090308" />
+              </linearGradient>
+              <linearGradient id="creedForeMtnGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#0A0407" />
+                <stop offset="100%" stopColor="#030103" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M0,320 C80,300 140,250 200,240 C260,230 310,270 370,230 C430,190 480,210 540,190 C600,170 660,230 730,190 C800,150 860,220 920,200 C960,190 980,210 1000,200 L1000,600 L0,600 Z"
+              fill="url(#creedDistantMtnGrad)"
+            />
+            <path
+              d="M0,360 C40,350 70,330 110,335 C150,340 180,300 230,290 C280,280 320,310 360,285 C400,260 440,275 480,250 C520,225 560,240 600,220 C650,240 690,210 740,225 C790,240 840,270 890,260 C940,250 970,270 1000,265 L1000,600 L0,600 Z"
+              fill="url(#creedMidMtnGrad)"
+            />
+            <path
+              d="M0,430 C50,420 90,400 140,410 C190,420 230,380 290,375 C350,370 410,395 470,360 C530,330 580,360 640,340 C700,320 760,350 820,330 C880,310 940,340 1000,320 L1000,600 L0,600 Z"
+              fill="url(#creedForeMtnGrad)"
+            />
+          </svg>
+
+          {/* Cyber-Pastoral Terrace Deck & Railing Silhouette */}
+          <svg
+            className="absolute inset-x-0 bottom-0 h-[110px] w-full pointer-events-none"
+            viewBox="0 0 1000 200"
+            preserveAspectRatio="none"
+          >
+            <rect x="0" y="80" width="1000" height="14" fill="#080306" rx="2" />
+            <line x1="0" y1="80" x2="1000" y2="80" stroke="#FF8C38" strokeWidth="1.5" strokeOpacity="0.4" />
+            <g fill="#070205">
+              {[40, 90, 140, 190, 240, 290, 340, 390, 440, 490, 540, 590, 640, 690, 740, 790, 840, 890, 940].map((x) => (
+                <rect key={x} x={x} y="94" width="6" height="106" />
+              ))}
+            </g>
+            <rect x="0" y="170" width="1000" height="30" fill="#030102" />
+            <path d="M0,90 C25,75 40,65 55,75 C70,85 85,60 100,75 C115,90 120,70 135,85 L135,120 L0,120 Z" fill="#060205" opacity="0.95" />
+            <path d="M865,85 C880,70 895,90 910,75 C925,60 940,85 955,75 C970,65 985,75 1000,90 L1000,120 L865,120 Z" fill="#060205" opacity="0.95" />
+          </svg>
+
+          {/* Valley Morning Mist Layer (Dissolves as Sheet 01 Docks) */}
+          <div
+            ref={creedMistRef}
+            className="absolute inset-x-0 bottom-0 h-3/5 pointer-events-none bg-gradient-to-t from-[#1A0C16]/80 via-[#2E1410]/40 to-transparent will-change-[opacity,transform]"
+          />
+
           {/* Starlit Celestial Dust Texture */}
           <div className="absolute inset-0 pointer-events-none opacity-30 bg-[radial-gradient(circle_at_25%_25%,rgba(255,255,255,0.1)_1px,transparent_1px),radial-gradient(circle_at_75%_35%,rgba(255,140,56,0.12)_1.5px,transparent_1.5px)] bg-[length:80px_80px]" />
 
@@ -495,34 +589,7 @@ export const ArchitecturalCreed: React.FC = memo(() => {
             <span className="text-[#FF8C38] font-bold">VERIFIED PLINTH</span>
           </div>
 
-          {/* 4. MECHANICAL MONOCOQUE SHUTTERS (Alternative 4: Reveal Stage) */}
-          <div
-            ref={creedShutterTopRef}
-            className="absolute top-0 inset-x-0 h-1/2 bg-[#060709] z-40 will-change-transform border-b border-[#FF8C38]/50 shadow-[0_4px_25px_rgba(0,0,0,0.95)] flex flex-col justify-end pb-3 px-6 pointer-events-none"
-          >
-            <div className="absolute inset-0 bg-[radial-gradient(#1a1d24_1px,transparent_1px)] [background-size:16px_16px] opacity-40 pointer-events-none" />
-            <div className="relative z-10 flex items-center justify-between text-[8px] font-mono text-[#FF8C38]/70 uppercase tracking-[0.2em]">
-              <span>MONOCOQUE CHAMBER // UNSEALING</span>
-              <span>SYS.AIRLOCK.02</span>
-            </div>
-          </div>
 
-          <div
-            ref={creedShutterBottomRef}
-            className="absolute bottom-0 inset-x-0 h-1/2 bg-[#060709] z-40 will-change-transform border-t border-[#FF8C38]/50 shadow-[0_-4px_25px_rgba(0,0,0,0.95)] flex flex-col justify-start pt-3 px-6 pointer-events-none"
-          >
-            <div className="absolute inset-0 bg-[radial-gradient(#1a1d24_1px,transparent_1px)] [background-size:16px_16px] opacity-40 pointer-events-none" />
-            <div className="relative z-10 flex items-center justify-between text-[8px] font-mono text-[#FF8C38]/70 uppercase tracking-[0.2em]">
-              <span>CREDENTIALS UNLOCKED</span>
-              <span>FOUNDATIONS ACTIVE</span>
-            </div>
-          </div>
-
-          {/* Center Glowing Amber Laser Hairline at the Shutter Meeting Seam */}
-          <div
-            ref={creedShutterLaserRef}
-            className="absolute top-1/2 -translate-y-1/2 inset-x-0 h-[2px] bg-[#FF8C38] z-50 pointer-events-none will-change-transform origin-center shadow-[0_0_20px_#FF8C38,0_0_45px_rgba(255,140,56,0.85)]"
-          />
         </div>
       </div>
 

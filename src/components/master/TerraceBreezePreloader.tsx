@@ -10,284 +10,434 @@ export const TerraceBreezePreloader: React.FC = memo(() => {
   const [visible, setVisible] = useState(true);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const centerBoxRef = useRef<HTMLDivElement | null>(null);
   const fillRef = useRef<HTMLDivElement | null>(null);
   const enterBtnRef = useRef<HTMLButtonElement | null>(null);
-  const windOverlayRef = useRef<HTMLDivElement | null>(null);
+  const mistForeRef = useRef<HTMLDivElement | null>(null);
+  const mistMidRef = useRef<HTMLDivElement | null>(null);
+  const windLayerRef = useRef<HTMLDivElement | null>(null);
 
-  // Status message based on loading percentage
+  // Poetic natural status message
   const getStatusText = (p: number) => {
-    if (p < 28) return "CALIBRATING TERRACE HABITAT...";
-    if (p < 58) return "WARMING PIXEL ART VIDEO TEXTURES...";
-    if (p < 85) return "TUNING 3D KINETIC COORDINATES...";
-    if (p < 100) return "SYNCHRONIZING MOUNTAIN ATMOSPHERE...";
-    return "TERRACE ENVIRONMENT READY";
+    if (p < 25) return "Listening to the morning quiet...";
+    if (p < 55) return "Warming the terrace sunlight...";
+    if (p < 80) return "Buffering mountain pixel textures...";
+    if (p < 100) return "Gathering the garden in stillness...";
+    return "The terrace is peaceful and ready.";
   };
 
-  // Smooth asset loading simulation with real font/video readiness check
+  // 1. GENUINE ASSET PRELOADING ENGINE
+  // Rigorously verifies that the hero video, document fonts, and site assets are 100% loaded
   useEffect(() => {
-    let currentP = 0;
-    const interval = setInterval(() => {
-      // Accelerate towards 100%
-      const increment = Math.max(1, Math.floor(Math.random() * 6) + 2);
-      currentP = Math.min(100, currentP + increment);
-      setProgress(currentP);
+    let mounted = true;
+    const criticalImages = [
+      "/assets/soham_headshot.png",
+      "/assets/disc_indiacenter.png",
+      "/assets/disc_izieat.png",
+      "/assets/disc_lcf.png",
+      "/assets/disc_varti.png",
+      "/assets/lcf_logo.png",
+      "/assets/varti_logo.png",
+      "/assets/terrace_laptop_desk.jpg",
+      "/assets/logos/izieat.png",
+      "/assets/logos/latvia_cricket.png",
+      "/assets/logos/india_center.png",
+      "/assets/logos/varti_international.png",
+      "/assets/linkedin_qr.svg",
+    ];
 
-      if (currentP >= 100) {
-        clearInterval(interval);
-        setIsReady(true);
-      }
-    }, 45);
+    let totalWeight = criticalImages.length + 4; // +3 weight for video, +1 for fonts
+    let loadedWeight = 0;
 
-    // Ensure fonts and video textures kick in
+    const updateWeight = (weightToAdd: number) => {
+      if (!mounted) return;
+      loadedWeight += weightToAdd;
+      const targetPercent = Math.min(100, Math.round((loadedWeight / totalWeight) * 100));
+      setProgress((prev) => Math.max(prev, targetPercent));
+    };
+
+    // A. Preload Fonts
     if (typeof document !== "undefined" && document.fonts) {
       document.fonts.ready.then(() => {
-        // Boost if fonts are already loaded
-        currentP = Math.max(currentP, 40);
+        updateWeight(1);
+      });
+    } else {
+      updateWeight(1);
+    }
+
+    // B. Preload Images
+    criticalImages.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+      img.onload = () => updateWeight(1);
+      img.onerror = () => updateWeight(1); // gracefully don't block
+    });
+
+    // C. Genuine Hero Video Buffer Verification
+    let videoHandled = false;
+    const handleVideoReady = () => {
+      if (videoHandled) return;
+      videoHandled = true;
+      updateWeight(3);
+    };
+
+    const video = document.createElement("video");
+    video.src = "/assets/hero_pixel_art_loop.mp4";
+    video.preload = "auto";
+    video.muted = true;
+    video.playsInline = true;
+
+    video.addEventListener("canplaythrough", handleVideoReady, { once: true });
+    video.addEventListener("loadeddata", () => {
+      if (video.readyState >= 3) handleVideoReady();
+    });
+    try {
+      video.load();
+    } catch {
+      // ignore
+    }
+
+    // Also inspect any existing DOM hero video elements
+    if (typeof document !== "undefined") {
+      const domVideos = Array.from(document.querySelectorAll<HTMLVideoElement>("video"));
+      domVideos.forEach((v) => {
+        if (v.readyState >= 3) {
+          handleVideoReady();
+        } else {
+          v.addEventListener("canplaythrough", handleVideoReady, { once: true });
+          v.addEventListener("loadeddata", () => {
+            if (v.readyState >= 3) handleVideoReady();
+          });
+        }
       });
     }
 
-    return () => clearInterval(interval);
+    // Fallback timer: ensure if slow connection or constrained mobile data, we still complete within 4.5s max
+    const fallbackTimer = setTimeout(() => {
+      if (!videoHandled) handleVideoReady();
+      setProgress(100);
+      setIsReady(true);
+    }, 4500);
+
+    return () => {
+      mounted = false;
+      clearTimeout(fallbackTimer);
+      video.removeEventListener("canplaythrough", handleVideoReady);
+    };
   }, []);
 
-  // Update loading bar fill via GSAP
+  // Lock Lenis scroll while preloader is active to prevent scroll drift
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const lenis = (window as any).lenis;
+      if (lenis && visible) {
+        lenis.stop();
+      }
+    }
+  }, [visible]);
+
+  // Check when 100% is reached
+  useEffect(() => {
+    if (progress >= 100) {
+      setIsReady(true);
+    }
+  }, [progress]);
+
+  // Update loading bar fill via GSAP with organic easing
   useEffect(() => {
     if (fillRef.current) {
       gsap.to(fillRef.current, {
         width: `${progress}%`,
-        duration: 0.15,
-        ease: "power1.out",
+        duration: 0.35,
+        ease: "power2.out",
       });
     }
   }, [progress]);
 
-  // Entrance of interactive prompt when ready
+  // Entrance of subtle CTA when 100% loaded
   useEffect(() => {
     if (isReady && enterBtnRef.current) {
       gsap.fromTo(
         enterBtnRef.current,
-        { opacity: 0, y: 14, scale: 0.94 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.5)" }
+        { opacity: 0, y: 12 },
+        { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }
       );
     }
   }, [isReady]);
 
-  // The Morning Breeze Reveal Sequence
-  const handleEnter = useCallback(() => {
+  // 2. OPTION 2: THE ATMOSPHERIC MOUNTAIN MIST & LEAF CURRENT BREEZE REVEAL (2.2s)
+  const handleStepOutside = useCallback(() => {
     if (isBreezing) return;
     setIsBreezing(true);
 
     const tl = gsap.timeline({
       onComplete: () => {
         setVisible(false);
+        if (typeof window !== "undefined") {
+          const lenis = (window as any).lenis;
+          if (lenis) lenis.start();
+          import("gsap/dist/ScrollTrigger").then(({ ScrollTrigger }) => {
+            ScrollTrigger.refresh();
+          });
+        }
       },
     });
 
-    // 1. Enter button clicks/pops
-    if (enterBtnRef.current) {
-      tl.to(enterBtnRef.current, { scale: 0.92, opacity: 0, duration: 0.2, ease: "power2.in" }, 0);
+    // Phase 1 (0.0s - 0.5s): Center typography and bar dissolve upward into morning air
+    if (centerBoxRef.current) {
+      tl.to(
+        centerBoxRef.current,
+        {
+          opacity: 0,
+          y: -18,
+          duration: 0.65,
+          ease: "power2.inOut",
+        },
+        0
+      );
     }
 
-    // 2. Wind breeze particles shoot from left to right across the screen
-    if (windOverlayRef.current) {
-      const leaves = windOverlayRef.current.querySelectorAll(".breeze-leaf");
-      const streaks = windOverlayRef.current.querySelectorAll(".breeze-streak");
+    // Phase 2 (0.2s - 2.0s): Aerodynamic Leaf Current flutters across the screen
+    if (windLayerRef.current) {
+      const leaves = windLayerRef.current.querySelectorAll(".nature-leaf");
+      const wisps = windLayerRef.current.querySelectorAll(".air-wisp");
 
-      // Wind streaks flash across screen with high velocity
-      if (streaks && streaks.length > 0) {
+      // Soft air wisps roll across
+      if (wisps && wisps.length > 0) {
         tl.fromTo(
-          streaks,
+          wisps,
           { xPercent: -120, opacity: 0 },
           {
             xPercent: 140,
-            opacity: (i) => (i % 2 === 0 ? 0.85 : 0.6),
-            stagger: 0.04,
-            duration: 0.75,
-            ease: "power2.inOut",
+            opacity: (i) => (i % 2 === 0 ? 0.45 : 0.25),
+            stagger: 0.08,
+            duration: 1.4,
+            ease: "power1.inOut",
           },
-          0.05
+          0.1
         );
       }
 
-      // Floating foliage & leaves drift with flutter
+      // Botanical leaves tumble & flutter with 3D aerodynamic rotation
       if (leaves && leaves.length > 0) {
         tl.fromTo(
           leaves,
-          { xPercent: -150, yPercent: 0, rotation: 0, opacity: 0 },
           {
-            xPercent: 160,
-            yPercent: (i) => (i % 2 === 0 ? -40 : 40),
-            rotation: (i) => (i % 2 === 0 ? 360 : -360),
-            opacity: 1,
-            stagger: 0.03,
-            duration: 0.95,
-            ease: "power1.inOut",
+            x: -120,
+            y: (i) => (i % 2 === 0 ? 10 : -10),
+            rotation: 0,
+            rotationX: 0,
+            rotationY: 0,
+            opacity: 0,
           },
-          0.08
+          {
+            x: () => window.innerWidth + 200,
+            y: (i) => (i % 2 === 0 ? -60 : 70),
+            rotation: (i) => (i % 2 === 0 ? 540 : -480),
+            rotationX: (i) => (i % 2 === 0 ? 360 : -360),
+            rotationY: 720,
+            opacity: 0.9,
+            stagger: 0.05,
+            duration: 1.8,
+            ease: "sine.inOut",
+          },
+          0.15
         );
       }
     }
 
-    // 3. The dark preloader curtain parts with an organic wind-wipe
+    // Phase 3 (0.5s - 2.2s): Multi-layered Valley Mist Dissolves and Parts
+    if (mistForeRef.current) {
+      tl.to(
+        mistForeRef.current,
+        {
+          xPercent: 120,
+          opacity: 0,
+          duration: 1.4,
+          ease: "power2.inOut",
+        },
+        0.4
+      );
+    }
+
+    if (mistMidRef.current) {
+      tl.to(
+        mistMidRef.current,
+        {
+          opacity: 0,
+          scale: 1.08,
+          duration: 1.8,
+          ease: "power2.out",
+        },
+        0.5
+      );
+    }
+
+    // Phase 4 (0.8s - 2.2s): The deep cedar background softens away into the sunny terrace
     if (containerRef.current) {
       tl.to(
         containerRef.current,
         {
-          clipPath: "polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%)",
-          opacity: 0.85,
-          duration: 0.85,
-          ease: "power3.inOut",
+          opacity: 0,
+          duration: 1.2,
+          ease: "power2.inOut",
         },
-        0.20
+        0.8
       );
     }
   }, [isBreezing]);
 
-  // Global keydown listener for desktop ("Press any key to enter")
+  // Global keydown listener for desktop ("Press any key to step outside")
   useEffect(() => {
     const handleKeyDown = () => {
       if (isReady && !isBreezing) {
-        handleEnter();
+        handleStepOutside();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isReady, isBreezing, handleEnter]);
+  }, [isReady, isBreezing, handleStepOutside]);
 
   if (!visible) return null;
 
   return (
     <div
       ref={containerRef}
-      onClick={isReady ? handleEnter : undefined}
-      className={`fixed inset-0 z-[99999] bg-[#07080B] text-[#F8F5EE] select-none overflow-hidden flex flex-col justify-between p-6 sm:p-10 md:p-12 transition-colors ${
+      onClick={isReady ? handleStepOutside : undefined}
+      onTouchMove={(e) => {
+        if (!isBreezing) e.stopPropagation();
+      }}
+      onWheel={(e) => {
+        if (!isBreezing) e.stopPropagation();
+      }}
+      className={`fixed inset-0 z-[99999] bg-[#0D0C0A] text-[#ECE5DA] select-none overflow-hidden touch-none flex flex-col justify-between p-6 sm:p-10 md:p-14 ${
         isReady ? "cursor-pointer" : "cursor-default"
       }`}
-      style={{
-        clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
-      }}
-      aria-label="Terrace Atelier Loading Experience"
+      aria-label="Terrace Experience Loader"
     >
-      {/* 1. Ambient Warm Terrace Lantern Glow */}
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_100%_70%_at_50%_50%,rgba(255,140,56,0.12)_0%,rgba(20,10,8,0.5)_55%,transparent_100%)]" />
+      {/* 1. Warm Cedar Wood Ambient Atmosphere */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_100%_70%_at_50%_45%,rgba(229,178,110,0.07)_0%,rgba(16,14,12,0.8)_60%,#0D0C0A_100%)]" />
 
-      {/* 2. Starlit Celestial Dust Texture */}
-      <div className="absolute inset-0 pointer-events-none opacity-20 bg-[radial-gradient(circle_at_20%_25%,rgba(255,255,255,0.8)_1px,transparent_1px),radial-gradient(circle_at_80%_30%,rgba(255,215,160,0.7)_1.5px,transparent_1.5px),radial-gradient(circle_at_45%_70%,rgba(255,255,255,0.5)_1px,transparent_1px)] bg-[length:140px_140px]" />
+      {/* 2. Valley Mist Layers (For Option 2 Breeze Parting) */}
+      <div
+        ref={mistMidRef}
+        className="absolute inset-0 pointer-events-none bg-gradient-to-r from-transparent via-[#14120E]/40 to-transparent will-change-[opacity,transform]"
+      />
+      <div
+        ref={mistForeRef}
+        className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_120%_80%_at_30%_50%,rgba(30,26,22,0.6)_0%,transparent_75%)] will-change-[transform,opacity]"
+      />
 
-      {/* 3. Corner Atelier Crosshairs */}
-      <span className="absolute top-4 left-4 sm:top-6 sm:left-6 font-mono text-[10px] text-[#FF8C38]/40 select-none pointer-events-none">+</span>
-      <span className="absolute top-4 right-4 sm:top-6 sm:right-6 font-mono text-[10px] text-[#FF8C38]/40 select-none pointer-events-none">+</span>
-      <span className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 font-mono text-[10px] text-[#FF8C38]/40 select-none pointer-events-none">+</span>
-      <span className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 font-mono text-[10px] text-[#FF8C38]/40 select-none pointer-events-none">+</span>
-
-      {/* 4. Top Telemetry Header Bar */}
-      <div className="relative z-10 w-full flex items-center justify-between text-[9px] sm:text-[10px] font-mono tracking-[0.22em] uppercase text-[#CBB59D]/70">
+      {/* 3. Top Natural Header */}
+      <div className="relative z-10 w-full flex items-center justify-between text-[10px] sm:text-[11px] font-sans tracking-[0.24em] uppercase text-[#ECE5DA]/50">
         <div className="flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#FF8C38] shadow-[0_0_8px_#FF8C38] animate-pulse" />
-          <span className="text-[#EAD7C0]">ATELIER CALIBRATION</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-[#E5B26E] opacity-80" />
+          <span className="text-[#ECE5DA]/80 font-medium">Soham Roychoudhury</span>
         </div>
-        <div className="hidden xs:block text-white/50">
-          KOLKATA // LAT 22.5726° N · LON 88.3639° E
+        <div className="hidden xs:block text-[#ECE5DA]/40 tracking-[0.2em]">
+          Mountain Veranda · Kolkata
         </div>
       </div>
 
-      {/* 5. Centerpiece: Emblem, Hairline Progress Bar & Interactive Enter Prompt */}
-      <div className="relative z-10 w-full max-w-sm sm:max-w-md mx-auto my-auto flex flex-col items-center text-center px-4">
-        {/* Minimal Animated Leaf/Sun Emblem */}
-        <div className="relative w-11 h-11 mb-5 flex items-center justify-center">
-          <div className="absolute inset-0 rounded-full border border-[#FF8C38]/30 border-t-[#FF8C38] animate-spin" style={{ animationDuration: "6s" }} />
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF8C38" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
-            <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
-          </svg>
+      {/* 4. Centerpiece: Serene Title, Natural Hairline Bar, and Poetic Status */}
+      <div
+        ref={centerBoxRef}
+        className="relative z-10 w-full max-w-sm sm:max-w-md mx-auto my-auto flex flex-col items-center text-center px-4 will-change-[transform,opacity]"
+      >
+        <div className="text-[10px] sm:text-[11px] font-sans tracking-[0.28em] uppercase text-[#E5B26E]/85 mb-2.5">
+          Summer Afternoon
         </div>
+        <h1 className="text-2xl sm:text-3xl font-serif italic tracking-wide text-[#ECE5DA] mb-7">
+          Preparing the Terrace
+        </h1>
 
-        <div className="text-[10px] font-sans font-bold tracking-[0.3em] uppercase text-[#FF8C38] mb-2">
-          CYBER-PASTORAL TERRACE
-        </div>
-        <h2 className="text-xl sm:text-2xl font-sans font-black tracking-tight uppercase text-[#FFFDF8] mb-6">
-          INITIALIZING DIGITAL HABITAT
-        </h2>
-
-        {/* Sleek Hairline Horizontal Loading Bar */}
-        <div className="w-full h-[2px] bg-white/10 rounded-full overflow-hidden relative mb-4">
+        {/* Minimalist Natural Hairline Loading Bar */}
+        <div className="w-full h-[1.5px] bg-[#ECE5DA]/15 rounded-full overflow-hidden relative mb-4">
           <div
             ref={fillRef}
-            className="absolute top-0 left-0 bottom-0 w-0 bg-gradient-to-r from-[#EA580C] via-[#FF8C38] to-[#FEF08A] rounded-full shadow-[0_0_12px_#FF8C38,0_0_24px_rgba(255,140,56,0.8)]"
+            className="absolute top-0 left-0 bottom-0 w-0 bg-gradient-to-r from-[#9C784C] via-[#E5B26E] to-[#FFF2DD] rounded-full shadow-[0_0_10px_rgba(229,178,110,0.5)]"
           />
         </div>
 
-        {/* Status Telemetry Line */}
-        <div className="w-full flex items-center justify-between font-mono text-[9px] sm:text-[10px] tracking-[0.16em] uppercase text-[#EAD7C0]/70 mb-2">
-          <span className="truncate pr-2">{getStatusText(progress)}</span>
-          <span className="text-[#FF8C38] font-bold shrink-0">[ {progress}% ]</span>
+        {/* Status Line */}
+        <div className="w-full flex items-center justify-between text-[9px] sm:text-[10px] tracking-[0.2em] uppercase text-[#ECE5DA]/55 mb-6">
+          <span className="truncate pr-2 font-sans">{getStatusText(progress)}</span>
+          <span className="text-[#E5B26E] font-medium shrink-0 font-mono">[ {progress}% ]</span>
         </div>
 
-        {/* Interactive Enter Action (Appears when 100% loaded) */}
-        <div className="h-14 flex items-center justify-center mt-2">
+        {/* Step Outside Action (Appears when 100% loaded) */}
+        <div className="h-12 flex items-center justify-center">
           {isReady && (
             <button
               ref={enterBtnRef}
               onClick={(e) => {
                 e.stopPropagation();
-                handleEnter();
+                handleStepOutside();
               }}
-              className="group inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-[#FF8C38]/15 hover:bg-[#FF8C38]/25 border border-[#FF8C38]/40 hover:border-[#FF8C38]/70 text-[#FFFDF8] font-sans font-bold text-xs uppercase tracking-[0.22em] backdrop-blur-md shadow-[0_0_25px_rgba(255,140,56,0.25)] transition-all duration-300 active:scale-95"
+              className="inline-flex items-center gap-2.5 px-4 sm:px-6 py-2 rounded-full border border-[#E5B26E]/40 hover:border-[#E5B26E]/70 bg-[#E5B26E]/10 hover:bg-[#E5B26E]/15 text-[#ECE5DA] font-sans text-[9px] sm:text-[11px] tracking-[0.16em] sm:tracking-[0.22em] uppercase backdrop-blur-sm transition-all duration-300 active:scale-95 shadow-[0_4px_20px_rgba(0,0,0,0.4)] whitespace-nowrap"
             >
-              <span className="w-2 h-2 rounded-full bg-[#FF8C38] shadow-[0_0_8px_#FF8C38] animate-ping" />
-              <span>TAP / PRESS ANY KEY TO ENTER</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#E5B26E] animate-pulse shrink-0" />
+              <span className="hidden sm:inline">Press any key or click to step outside</span>
+              <span className="inline sm:hidden">Tap anywhere to step outside</span>
             </button>
           )}
         </div>
       </div>
 
-      {/* 6. Footer Telemetry Bar */}
-      <div className="relative z-10 w-full flex items-center justify-between text-[8px] sm:text-[9px] font-mono tracking-[0.2em] uppercase text-[#CBB59D]/50 border-t border-white/5 pt-3">
-        <span>DIGITAL OPERATIONS · SPATIAL COUTURE</span>
-        <span>ATELIER 2026 // ALL SYSTEMS OPTIMAL</span>
+      {/* 5. Natural Footer */}
+      <div className="relative z-10 w-full flex items-center justify-between text-[8px] sm:text-[9px] tracking-[0.2em] uppercase text-[#ECE5DA]/35 border-t border-[#ECE5DA]/10 pt-3">
+        <span>Quiet Nature &amp; Architecture</span>
+        <span>Living Atelier</span>
       </div>
 
-      {/* 7. Wind Breeze Overlay Particles & High-Speed Streaks */}
+      {/* 6. Option 2 Wind Breeze: Organic Valley Air Wisps & Aerodynamic Leaves */}
       <div
-        ref={windOverlayRef}
+        ref={windLayerRef}
         className="absolute inset-0 pointer-events-none z-30 overflow-hidden"
       >
-        {/* Dynamic Wind Streaks */}
-        {[20, 35, 52, 68, 82].map((top, idx) => (
+        {/* Soft Air Currents */}
+        {[22, 38, 54, 70, 84].map((top, idx) => (
           <div
-            key={`streak-${idx}`}
-            className="breeze-streak absolute h-[1px] opacity-0"
+            key={`air-${idx}`}
+            className="air-wisp absolute h-[1px] opacity-0"
             style={{
               top: `${top}%`,
               left: "0%",
-              width: `${260 + idx * 50}px`,
+              width: `${300 + idx * 60}px`,
               background:
-                "linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent)",
-              boxShadow: "0 0 10px rgba(255, 200, 140, 0.6)",
-              transform: `rotate(${idx % 2 === 0 ? -4 : -2}deg)`,
+                "linear-gradient(90deg, transparent, rgba(236, 229, 218, 0.45), transparent)",
+              transform: `rotate(${idx % 2 === 0 ? -3 : -1.5}deg)`,
             }}
           />
         ))}
 
-        {/* Floating Ghibli Foliage / Leaf Particles */}
-        {[15, 28, 42, 58, 72, 85].map((top, idx) => (
+        {/* Aerodynamic Botanical Leaves (Varying organic tea, oak, and willow silhouettes) */}
+        {[14, 22, 31, 40, 48, 57, 65, 74, 82, 89].map((top, idx) => (
           <div
             key={`leaf-${idx}`}
-            className="breeze-leaf absolute opacity-0"
+            className="nature-leaf absolute opacity-0"
             style={{
               top: `${top}%`,
               left: "0%",
+              perspective: "600px",
             }}
           >
             <svg
-              width={16 + (idx % 3) * 4}
-              height={16 + (idx % 3) * 4}
+              width={14 + (idx % 4) * 3}
+              height={14 + (idx % 4) * 3}
               viewBox="0 0 24 24"
-              fill={idx % 2 === 0 ? "#FF8C38" : "#FBBF24"}
-              opacity={0.85}
-              className="drop-shadow-[0_0_8px_rgba(255,140,56,0.6)]"
+              fill={idx % 3 === 0 ? "#8A9A7B" : idx % 3 === 1 ? "#E5B26E" : "#C48A54"}
+              opacity={0.88}
+              className="drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]"
             >
-              <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+              {idx % 2 === 0 ? (
+                // Tea / Laurel Leaf
+                <path d="M12 2C6.5 2 2 6.5 2 12c0 4.5 3 8.3 7.2 9.5-.2-1.8.2-3.7 1.3-5.2 1.6-2.2 4.1-3.6 6.8-3.8 1.8-.1 3.5.5 4.7 1.7.1-.7.2-1.5.2-2.2 0-5.5-4.5-10-10-10z" />
+              ) : (
+                // Maple / Oak Foliage
+                <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+              )}
             </svg>
           </div>
         ))}

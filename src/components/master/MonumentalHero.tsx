@@ -77,6 +77,11 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
   const statementDividerBottomRef = useRef<HTMLDivElement | null>(null);
   const statementAttributionRef = useRef<HTMLDivElement | null>(null);
 
+  // Alternative 4: Mechanical Monocoque Shutter Transition into Phase 2
+  const mobileShutterTopRef = useRef<HTMLDivElement | null>(null);
+  const mobileShutterBottomRef = useRef<HTMLDivElement | null>(null);
+  const mobileShutterLaserRef = useRef<HTMLDivElement | null>(null);
+
   // Desktop Refs
   const desktopSectionRef = useRef<HTMLElement | null>(null);
   const desktopVideoRef = useRef<HTMLDivElement | null>(null);
@@ -192,6 +197,15 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
 
       if (statementMetaRef.current) gsap.set(statementMetaRef.current, { opacity: 0, y: -8 });
       if (statementAttributionRef.current) gsap.set(statementAttributionRef.current, { opacity: 0, y: 8 });
+
+      // Monocoque Shutter initial state: fully open (offscreen) and laser off
+      if (mobileShutterTopRef.current && mobileShutterBottomRef.current) {
+        gsap.set(mobileShutterTopRef.current, { yPercent: -100 });
+        gsap.set(mobileShutterBottomRef.current, { yPercent: 100 });
+      }
+      if (mobileShutterLaserRef.current) {
+        gsap.set(mobileShutterLaserRef.current, { scaleX: 0, opacity: 0 });
+      }
 
       const statementWords = statementHeadlineRef.current?.querySelectorAll(".statement-word");
       if (statementWords && statementWords.length > 0) {
@@ -359,7 +373,29 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
       }
 
       // Phase 8 (9.20 -> 10.00): Luxury Hold. Statement fully illuminated in the Twilight Realm before unpinning.
-      masterTl.to({}, { duration: 0.8 }, 9.2);
+      // Phase 8 (9.20 -> 9.45): Luxury Hold for illuminated statement in Twilight Realm
+      masterTl.to({}, { duration: 0.25 }, 9.2);
+
+      // Phase 9 (9.45 -> 10.00): Alternative 4 - Mechanical Monocoque Shutter Clamps Shut
+      if (mobileShutterTopRef.current && mobileShutterBottomRef.current) {
+        masterTl.to(
+          mobileShutterTopRef.current,
+          { yPercent: 0, duration: 0.50, ease: "power3.inOut" },
+          9.45
+        );
+        masterTl.to(
+          mobileShutterBottomRef.current,
+          { yPercent: 0, duration: 0.50, ease: "power3.inOut" },
+          9.45
+        );
+      }
+      if (mobileShutterLaserRef.current) {
+        masterTl.to(
+          mobileShutterLaserRef.current,
+          { scaleX: 1, opacity: 1, duration: 0.35, ease: "power2.out" },
+          9.65
+        );
+      }
 
       return () => {
         if (cueTween) cueTween.kill();
@@ -659,6 +695,35 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               </div>
             </div>
           </div>
+
+          {/* 8. MECHANICAL MONOCOQUE SHUTTER (Alternative 4: Automotive Airlock Clamp) */}
+          <div
+            ref={mobileShutterTopRef}
+            className="absolute top-0 inset-x-0 h-1/2 bg-[#060709] z-40 will-change-transform border-b border-[#FF8C38]/40 shadow-[0_4px_25px_rgba(0,0,0,0.9)] flex flex-col justify-end pb-3 px-6 pointer-events-none"
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(#1a1d24_1px,transparent_1px)] [background-size:16px_16px] opacity-40 pointer-events-none" />
+            <div className="relative z-10 flex items-center justify-between text-[8px] font-mono text-[#FF8C38]/70 uppercase tracking-[0.2em]">
+              <span>MONOCOQUE CHAMBER // SEALING</span>
+              <span>SYS.AIRLOCK.01</span>
+            </div>
+          </div>
+
+          <div
+            ref={mobileShutterBottomRef}
+            className="absolute bottom-0 inset-x-0 h-1/2 bg-[#060709] z-40 will-change-transform border-t border-[#FF8C38]/40 shadow-[0_-4px_25px_rgba(0,0,0,0.9)] flex flex-col justify-start pt-3 px-6 pointer-events-none"
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(#1a1d24_1px,transparent_1px)] [background-size:16px_16px] opacity-40 pointer-events-none" />
+            <div className="relative z-10 flex items-center justify-between text-[8px] font-mono text-[#FF8C38]/70 uppercase tracking-[0.2em]">
+              <span>PRESSURIZED ENGINEERING CORE</span>
+              <span>PHASE 02 READY</span>
+            </div>
+          </div>
+
+          {/* Center Glowing Amber Laser Hairline at the Shutter Meeting Seam */}
+          <div
+            ref={mobileShutterLaserRef}
+            className="absolute top-1/2 -translate-y-1/2 inset-x-0 h-[2px] bg-[#FF8C38] z-50 pointer-events-none will-change-transform origin-center shadow-[0_0_20px_#FF8C38,0_0_45px_rgba(255,140,56,0.85)]"
+          />
         </div>
       </div>
 

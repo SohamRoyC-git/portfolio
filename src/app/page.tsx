@@ -18,9 +18,16 @@ import { YouTubeSkeletonLoader } from "@/components/master/YouTubeSkeletonLoader
 
 gsap.registerPlugin(ScrollTrigger);
 
+if (typeof window !== "undefined") {
+  ScrollTrigger.defaults({
+    scroller: "#app-scroller",
+  });
+}
+
 export default function Home() {
   const [activeId, setActiveId] = useState("monument-hero");
   const lenisRef = useRef<Lenis | null>(null);
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -28,17 +35,26 @@ export default function Home() {
 
     let tickerCallback: ((time: number) => void) | null = null;
 
-    // Unified Lenis Smooth Scroll (Buttery smooth on desktop, native touch momentum on mobile)
-    if (!prefersReducedMotion) {
+    // Set default scroller for all ScrollTrigger instances to internal app shell
+    if (scrollerRef.current) {
+      ScrollTrigger.defaults({
+        scroller: scrollerRef.current,
+      });
+    }
+
+    // Unified Lenis Smooth Scroll targeting internal App Shell
+    if (!prefersReducedMotion && scrollerRef.current) {
       const lenis = new Lenis({
-        lerp: isTouch ? 0.1 : 0.08,
-        duration: isTouch ? 0.8 : 1.1,
+        wrapper: scrollerRef.current,
+        content: scrollerRef.current.firstElementChild as HTMLElement,
+        lerp: isTouch ? 0.09 : 0.08,
+        duration: isTouch ? 0.9 : 1.1,
         smoothWheel: true,
-        wheelMultiplier: 1.0,
-        syncTouch: true, // Intercepts touch gestures to keep mobile browser bottom bar fixed & stable
-        touchMultiplier: 1.0,
+        syncTouch: true,
+        touchMultiplier: 1.15,
       });
       lenisRef.current = lenis;
+      (window as any).lenis = lenis;
 
       lenis.on("scroll", ScrollTrigger.update);
 
@@ -77,6 +93,7 @@ export default function Home() {
       if (lenisRef.current) {
         lenisRef.current.destroy();
         lenisRef.current = null;
+        delete (window as any).lenis;
       }
       ScrollTrigger.getAll().forEach((t) => t.kill());
     };
@@ -102,6 +119,7 @@ export default function Home() {
         });
       },
       {
+        root: scrollerRef.current,
         rootMargin: "-20% 0px -60% 0px",
         threshold: 0,
       }
@@ -127,7 +145,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-[#060709] text-[#F8F5EE] selection:bg-[#FF7A00]/30 selection:text-[#FF7A00] overflow-x-clip">
+    <div className="relative h-screen w-screen bg-[#060709] text-[#F8F5EE] selection:bg-[#FF7A00]/30 selection:text-[#FF7A00] overflow-hidden">
       {/* 0. Authentic YouTube Shimmer Skeleton Loader (Mounts once on load, dissolves smoothly) */}
       <YouTubeSkeletonLoader />
 
@@ -138,7 +156,13 @@ export default function Home() {
       <MasterNav onNavigate={handleNavigate} activeId={activeId} />
 
       {/* 3. Cohesive Spatial Storytelling Sequence */}
-      <main className="relative z-10">
+      <div
+        id="app-scroller"
+        ref={scrollerRef}
+        className="relative h-full w-full overflow-y-auto overflow-x-hidden overscroll-none"
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
+        <main className="relative z-10">
         {/* Movement 00: Monumental Hero (Sticky at top on desktop so Movement 01 wipes over it) */}
         <div id="hero-wrapper" className="relative w-full z-10 overflow-x-clip md:sticky md:top-0 md:h-[100svh] will-change-[transform,opacity]">
           <MonumentalHero onExplore={() => handleNavigate("monument-statement")} onConnect={() => handleNavigate("monument-terminal")} />
@@ -162,6 +186,7 @@ export default function Home() {
         {/* Movement 05: Master Architectural Site Map & Colophon Footer */}
         <SiteFooter onNavigate={handleNavigate} />
       </main>
+      </div>
     </div>
   );
 }

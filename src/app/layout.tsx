@@ -63,11 +63,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${cormorantGaramond.variable} ${bnRiley.variable} ${citadelScript.variable} ${helveticaCompressed.variable}`}
+      className={`h-full w-full overflow-hidden ${inter.variable} ${cormorantGaramond.variable} ${bnRiley.variable} ${citadelScript.variable} ${helveticaCompressed.variable}`}
       suppressHydrationWarning
     >
       <body
-        className="bg-[#FAFAF9] text-[#0F172A] font-sans antialiased selection:bg-[#10B981]/20 selection:text-[#059669] min-h-screen overflow-x-clip"
+        className="h-full w-full overflow-hidden bg-[#FAFAF9] text-[#0F172A] font-sans antialiased selection:bg-[#10B981]/20 selection:text-[#059669]"
         suppressHydrationWarning
       >
         {children}

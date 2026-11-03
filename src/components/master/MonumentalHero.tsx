@@ -411,7 +411,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
           onTouchMove={handleTouchMove}
           onTouchStart={handleTouchMove}
           onTouchEnd={handleTouchEnd}
-          className="sticky top-0 h-[100dvh] min-h-[100dvh] w-full overflow-hidden bg-[#060709] select-none [perspective:1200px]"
+          className="sticky top-0 h-[100svh] min-h-[100svh] w-full overflow-hidden bg-[#060709] select-none [perspective:1200px]"
         >
           {/* 1. Full-Bleed Living Pixel-Art Terrace Video Layer */}
           <div

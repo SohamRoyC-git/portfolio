@@ -35,7 +35,7 @@ export default function Home() {
         duration: isTouch ? 0.8 : 1.1,
         smoothWheel: true,
         wheelMultiplier: 1.0,
-        syncTouch: false, // Disables touch hijacking so mobile uses buttery-smooth native momentum
+        syncTouch: true, // Intercepts touch gestures to keep mobile browser bottom bar fixed & stable
         touchMultiplier: 1.0,
       });
       lenisRef.current = lenis;

@@ -437,7 +437,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
       >
         {/* Navigation & Explore Anchor for Statement phase */}
         <div
-          id="monument-statement"
+          id="monument-statement-mobile"
           className="absolute top-[55%] inset-x-0 h-[1px] pointer-events-none"
         />
 

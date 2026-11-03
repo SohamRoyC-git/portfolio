@@ -65,6 +65,10 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
   const mobileSubtitleRef = useRef<HTMLParagraphElement | null>(null);
   const mobileActionsRef = useRef<HTMLDivElement | null>(null);
 
+  // Luminous Aperture Portal Refs (Technique 1: The Doctor Strange / A24 Gateway)
+  const portalRingRef = useRef<HTMLDivElement | null>(null);
+  const statementContainerRef = useRef<HTMLDivElement | null>(null);
+
   // Architectural Statement Plane Refs
   const mobileStatementRef = useRef<HTMLDivElement | null>(null);
   const statementMetaRef = useRef<HTMLDivElement | null>(null);
@@ -154,13 +158,27 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
       if (laptopCueRef.current) gsap.set(laptopCueRef.current, { opacity: 1, y: 0 });
       if (mobileBottomHudRef.current) gsap.set(mobileBottomHudRef.current, { opacity: 1, y: 0 });
 
-      // Statement Plane Starts Far Back in Deep 3D Perspective (Z = -600px)
+      // Stargate Portal Ring & Statement Initial Setup
+      if (portalRingRef.current) {
+        gsap.set(portalRingRef.current, {
+          scale: 0.1,
+          opacity: 0,
+        });
+      }
+
       if (mobileStatementRef.current) {
         gsap.set(mobileStatementRef.current, {
+          clipPath: "circle(0% at 50% 50%)",
           opacity: 0,
-          scale: 0.55,
-          y: 40,
           pointerEvents: "none",
+        });
+      }
+
+      if (statementContainerRef.current) {
+        gsap.set(statementContainerRef.current, {
+          scale: 0.72,
+          y: 20,
+          opacity: 0.5,
           transformOrigin: "center center",
         });
       }
@@ -196,7 +214,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         });
       }
 
-      // 2. Silky Continuous Scroll Scrub Timeline across 280vh of thumb travel
+      // 2. Silky Continuous Scroll Scrub Timeline across 280vh of thumb travel (Normalized to 10.0s)
       // Viewport remains 100% frozen on the Y-axis: ZERO vertical page scroll!
       const masterTl = gsap.timeline({
         scrollTrigger: {
@@ -207,91 +225,117 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
           onUpdate: (self) => {
             const videoEl = mobileVideoWrapperRef.current?.querySelector("video");
             if (videoEl) {
-              if (self.progress >= 0.70 && !videoEl.paused) {
+              if (self.progress >= 0.74 && !videoEl.paused) {
                 videoEl.pause();
-              } else if (self.progress < 0.70 && videoEl.paused) {
+              } else if (self.progress < 0.74 && videoEl.paused) {
                 videoEl.play().catch(() => {});
               }
             }
 
             if (mobileIdentityRef.current) {
               mobileIdentityRef.current.style.pointerEvents =
-                self.progress >= 0.30 && self.progress <= 0.48 ? "auto" : "none";
+                self.progress >= 0.35 && self.progress <= 0.48 ? "auto" : "none";
             }
           },
         },
       });
 
-      // Phase 1 (0.00 -> 0.14): Cue & initial bottom hint dissolve early
+      // Phase 1 (0.00 -> 1.50): Cue & initial bottom hint dissolve early
       if (laptopCueRef.current) {
-        masterTl.to(laptopCueRef.current, { opacity: 0, y: -18, scale: 0.92, duration: 0.14, ease: "power2.out" }, 0);
+        masterTl.to(laptopCueRef.current, { opacity: 0, y: -18, scale: 0.92, duration: 1.4, ease: "power2.out" }, 0);
       }
       if (mobileBottomHudRef.current) {
-        masterTl.to(mobileBottomHudRef.current, { opacity: 0, y: 12, duration: 0.14, ease: "power2.out" }, 0);
+        masterTl.to(mobileBottomHudRef.current, { opacity: 0, y: 12, duration: 1.4, ease: "power2.out" }, 0);
       }
 
-      // Phase 2 (0.00 -> 0.35): Optical Camera Push-In into Living Terrace & Atmospheric Veil Darkens
+      // Phase 2 (0.00 -> 3.50): Optical Camera Push-In into Living Terrace
       if (mobileVideoWrapperRef.current) {
-        masterTl.to(mobileVideoWrapperRef.current, { scale: 1.08, duration: 0.35, ease: "power1.inOut" }, 0);
+        masterTl.to(mobileVideoWrapperRef.current, { scale: 1.08, duration: 3.5, ease: "power1.inOut" }, 0);
       }
       if (mobileBackdropVeilRef.current) {
-        masterTl.to(mobileBackdropVeilRef.current, { opacity: 0.88, duration: 0.35, ease: "power1.inOut" }, 0);
+        masterTl.to(mobileBackdropVeilRef.current, { opacity: 0.75, duration: 3.5, ease: "power1.inOut" }, 0);
       }
 
-      // Phase 3 (0.14 -> 0.35): Monumental Identity materializes in center frame from depth
+      // Phase 3 (1.50 -> 3.50): Monumental Identity materializes in center frame from depth
       if (mobileIdentityRef.current) {
-        masterTl.to(mobileIdentityRef.current, { opacity: 1, duration: 0.12, ease: "power1.out" }, 0.14);
+        masterTl.to(mobileIdentityRef.current, { opacity: 1, duration: 1.2, ease: "power1.out" }, 1.5);
       }
       if (mobileTitleRef.current) {
-        masterTl.to(mobileTitleRef.current, { opacity: 1, scale: 1.0, y: 0, duration: 0.21, ease: "power2.out" }, 0.14);
+        masterTl.to(mobileTitleRef.current, { opacity: 1, scale: 1.0, y: 0, duration: 2.0, ease: "power2.out" }, 1.5);
       }
       if (mobileMetaRef.current) {
-        masterTl.to(mobileMetaRef.current, { opacity: 1, y: 0, duration: 0.18, ease: "power2.out" }, 0.17);
+        masterTl.to(mobileMetaRef.current, { opacity: 1, y: 0, duration: 1.8, ease: "power2.out" }, 1.7);
       }
       if (mobileSubtitleRef.current) {
-        masterTl.to(mobileSubtitleRef.current, { opacity: 1, y: 0, duration: 0.18, ease: "power2.out" }, 0.19);
+        masterTl.to(mobileSubtitleRef.current, { opacity: 1, y: 0, duration: 1.8, ease: "power2.out" }, 1.9);
       }
       if (mobileActionsRef.current) {
-        masterTl.to(mobileActionsRef.current, { opacity: 1, y: 0, duration: 0.18, ease: "power2.out" }, 0.21);
+        masterTl.to(mobileActionsRef.current, { opacity: 1, y: 0, duration: 1.8, ease: "power2.out" }, 2.1);
       }
 
-      // Phase 4 (0.35 -> 0.48): Reading Hold for Soham Roychoudhury (Interactive buttons active)
-      masterTl.to({}, { duration: 0.13 });
+      // Phase 4 (3.50 -> 4.60): Reading Hold for Soham Roychoudhury (Interactive buttons active)
+      masterTl.to({}, { duration: 1.1 }, 3.5);
 
-      // Phase 5 (0.48 -> 0.68): THE COLOSSAL FLY-THROUGH (Camera passes through letters into void)
+      // Phase 5 (4.60 -> 5.40): IDENTITY DISSOLVE & PORTAL APERTURE IGNITION
+      // Identity elements gracefully scale outward and clear the frame for the portal
       if (mobileActionsRef.current) {
-        masterTl.to(mobileActionsRef.current, { opacity: 0, y: 14, scale: 0.90, duration: 0.10, ease: "power2.in" }, 0.48);
+        masterTl.to(mobileActionsRef.current, { opacity: 0, y: 14, scale: 0.90, duration: 0.6, ease: "power2.in" }, 4.6);
       }
       if (mobileMetaRef.current) {
-        masterTl.to(mobileMetaRef.current, { opacity: 0, y: -10, scale: 0.90, duration: 0.10, ease: "power2.in" }, 0.48);
+        masterTl.to(mobileMetaRef.current, { opacity: 0, y: -10, scale: 0.90, duration: 0.6, ease: "power2.in" }, 4.6);
       }
       if (mobileSubtitleRef.current) {
-        masterTl.to(mobileSubtitleRef.current, { opacity: 0, y: 10, scale: 0.92, duration: 0.10, ease: "power2.in" }, 0.48);
+        masterTl.to(mobileSubtitleRef.current, { opacity: 0, y: 10, scale: 0.92, duration: 0.6, ease: "power2.in" }, 4.6);
       }
-
-      // Typographic archway expands colossally past the phone camera lens
       if (mobileTitleRef.current) {
-        masterTl.to(mobileTitleRef.current, { scale: 4.8, opacity: 0, y: -20, duration: 0.20, ease: "power2.in" }, 0.48);
+        masterTl.to(mobileTitleRef.current, { scale: 1.30, opacity: 0, y: -20, duration: 0.7, ease: "power2.in" }, 4.6);
       }
+
+      // Glowing Stargate Ring ignites and expands into the center landscape (scale 1.0, 220px diameter)
+      if (portalRingRef.current) {
+        masterTl.to(portalRingRef.current, { scale: 1.0, opacity: 1, duration: 0.8, ease: "back.out(1.4)" }, 4.6);
+      }
+      // Circular portal aperture opens cleanly into the Twilight Landscape Realm (28.2% radius matches 220px ring)
+      if (mobileStatementRef.current) {
+        masterTl.to(mobileStatementRef.current, { opacity: 1, clipPath: "circle(28.2% at 50% 50%)", duration: 0.8, ease: "power2.out" }, 4.6);
+      }
+
+      // Phase 5B (5.40 -> 5.80): Portal Gateway Hold (Viewer sees the Stargate hovering in the terrace landscape)
+      masterTl.to({}, { duration: 0.4 }, 5.4);
+
+      // Phase 6 (5.80 -> 7.40): THE 3D PORTAL BREACH & PLUNGE (Camera flies through Stargate into Twilight Realm)
+      // The Stargate ring expands massively past the phone screen edges (breaching the threshold)
+      if (portalRingRef.current) {
+        masterTl.to(portalRingRef.current, { scale: 7.0, opacity: 0, duration: 1.6, ease: "power2.in" }, 5.8);
+      }
+
+      // The portal clipPath expands to 140%, completely engulfing the entire phone screen
+      if (mobileStatementRef.current) {
+        masterTl.to(mobileStatementRef.current, { clipPath: "circle(140% at 50% 50%)", duration: 1.6, ease: "power2.in" }, 5.8);
+      }
+
+      // Statement content zooms from 0.72 to 1.0 into focal lock
+      if (statementContainerRef.current) {
+        masterTl.to(statementContainerRef.current, { scale: 1.0, opacity: 1, y: 0, duration: 1.6, ease: "power2.out" }, 5.8);
+      }
+
+      // Terrace video dissolves as portal engulfs screen
       if (mobileVideoWrapperRef.current) {
-        masterTl.to(mobileVideoWrapperRef.current, { scale: 1.35, opacity: 0, duration: 0.20, ease: "power2.in" }, 0.48);
+        masterTl.to(mobileVideoWrapperRef.current, { scale: 1.35, opacity: 0, duration: 1.6, ease: "power2.in" }, 5.8);
       }
       if (mobileBackdropVeilRef.current) {
-        masterTl.to(mobileBackdropVeilRef.current, { opacity: 1.0, duration: 0.20, ease: "power2.in" }, 0.48);
+        masterTl.to(mobileBackdropVeilRef.current, { opacity: 1.0, duration: 1.6, ease: "power2.in" }, 5.8);
       }
 
-      // Phase 6 (0.54 -> 0.70): IN THE EXACT SAME CAMERA VIEWPORT: Statement Zooms Forward from Void
-      if (mobileStatementRef.current) {
-        masterTl.to(mobileStatementRef.current, { opacity: 1, scale: 1.0, y: 0, duration: 0.16, ease: "power2.out" }, 0.54);
-      }
+      // Laser hairlines and meta bar ignite as viewer emerges into the Twilight Realm
       if (statementDividerTopRef.current && statementDividerBottomRef.current) {
-        masterTl.to([statementDividerTopRef.current, statementDividerBottomRef.current], { scaleX: 1, duration: 0.14, ease: "power2.out" }, 0.57);
+        masterTl.to([statementDividerTopRef.current, statementDividerBottomRef.current], { scaleX: 1, duration: 1.2, ease: "power2.out" }, 6.6);
       }
       if (statementMetaRef.current) {
-        masterTl.to(statementMetaRef.current, { opacity: 1, y: 0, duration: 0.12, ease: "power2.out" }, 0.58);
+        masterTl.to(statementMetaRef.current, { opacity: 1, y: 0, duration: 1.0, ease: "power2.out" }, 6.8);
       }
 
-      // Phase 7 (0.68 -> 0.90): Forge Automotive Text Fill Wave scrubs across words
+      // Phase 7 (7.40 -> 9.20): Forge Automotive Text Fill Wave scrubs across words
       if (statementWords && statementWords.length > 0) {
         masterTl.fromTo(
           statementWords,
@@ -303,19 +347,19 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               (target as HTMLElement).getAttribute("data-highlight") === "amber"
                 ? "0 0 24px rgba(255, 140, 56, 0.75)"
                 : "0 0 14px rgba(255, 253, 248, 0.35)",
-            stagger: 0.035,
-            duration: 0.22,
+            stagger: 0.08,
+            duration: 0.35,
             ease: "power1.out",
           },
-          0.68
+          7.4
         );
       }
       if (statementAttributionRef.current) {
-        masterTl.to(statementAttributionRef.current, { opacity: 1, y: 0, duration: 0.12, ease: "power2.out" }, 0.84);
+        masterTl.to(statementAttributionRef.current, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 8.8);
       }
 
-      // Phase 8 (0.90 -> 1.00): Luxury Hold. Statement fully illuminated in camera view before unpinning.
-      masterTl.to({}, { duration: 0.10 });
+      // Phase 8 (9.20 -> 10.00): Luxury Hold. Statement fully illuminated in the Twilight Realm before unpinning.
+      masterTl.to({}, { duration: 0.8 }, 9.2);
 
       return () => {
         if (cueTween) cueTween.kill();
@@ -494,11 +538,23 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             </div>
           </div>
 
-          {/* 6. ARCHITECTURAL STATEMENT PLANE (Emerges from Z=-600 to Z=0) */}
+          {/* 6. THE DIMENSIONAL TWILIGHT REALM & ARCHITECTURAL STATEMENT */}
           <div
             ref={mobileStatementRef}
-            className="absolute inset-0 z-20 flex flex-col justify-center px-6 text-left will-change-[transform,opacity] pointer-events-none opacity-0 [transform-style:preserve-3d]"
+            className="absolute inset-0 z-20 flex flex-col justify-center px-6 text-left will-change-[transform,opacity,clip-path] pointer-events-none opacity-0 bg-[#060709]"
+            style={{
+              clipPath: "circle(0% at 50% 50%)",
+            }}
           >
+            {/* Atmospheric Dusk Horizon Gradient */}
+            <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-[#1C0814] via-[#0E030A] to-[#060103]" />
+
+            {/* Twilight Horizon Glow (Echoing distant mountains) */}
+            <div className="absolute inset-x-0 bottom-0 h-2/3 pointer-events-none bg-[radial-gradient(ellipse_120%_60%_at_50%_90%,rgba(255,140,56,0.20)_0%,transparent_80%)]" />
+
+            {/* Starlit Celestial Dust Texture */}
+            <div className="absolute inset-0 pointer-events-none opacity-40 bg-[radial-gradient(circle_at_25%_25%,rgba(255,255,255,0.12)_1px,transparent_1px),radial-gradient(circle_at_75%_35%,rgba(255,140,56,0.15)_1.5px,transparent_1.5px),radial-gradient(circle_at_45%_70%,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[length:80px_80px]" />
+
             {/* Atelier Corner Crosshairs */}
             <span className="absolute top-6 left-6 font-mono text-[10px] text-[#FF8C38]/40 select-none pointer-events-none">+</span>
             <span className="absolute top-6 right-6 font-mono text-[10px] text-[#FF8C38]/40 select-none pointer-events-none">+</span>
@@ -514,7 +570,10 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               }}
             />
 
-            <div className="relative z-10 w-full max-w-sm mx-auto flex flex-col justify-center">
+            <div
+              ref={statementContainerRef}
+              className="relative z-10 w-full max-w-sm mx-auto flex flex-col justify-center will-change-transform"
+            >
               {/* Architectural Meta Bar */}
               <div
                 ref={statementMetaRef}
@@ -567,6 +626,36 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               >
                 <span className="text-[#EAD7C0]/80">SOHAM ROYCHOUDHURY · ARCHITECTURAL CREED</span>
                 <span className="text-[#FF8C38]/70">2026</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 7. THE LUMINOUS DIMENSIONAL STARGATE RING (Technique 1: Doctor Strange / A24 Gateway) */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
+            <div
+              ref={portalRingRef}
+              className="relative w-[220px] h-[220px] rounded-full will-change-transform opacity-0 flex items-center justify-center"
+            >
+              {/* Multi-layered Glowing Plasma Border */}
+              <div className="absolute inset-0 rounded-full border-2 border-[#FF8C38] shadow-[0_0_35px_#FF8C38,0_0_70px_rgba(255,140,56,0.6),inset_0_0_30px_rgba(255,140,56,0.8)]" />
+
+              {/* Concentric Rotating Celestial Laser Rings */}
+              <div
+                className="absolute -inset-2 rounded-full border border-amber-300/40 animate-spin"
+                style={{ animationDuration: "20s" }}
+              />
+              <div
+                className="absolute -inset-5 rounded-full border border-[#FF8C38]/25 animate-spin"
+                style={{ animationDuration: "35s", animationDirection: "reverse" }}
+              />
+
+              {/* Anamorphic Horizontal Horizon Lens Flares */}
+              <div className="absolute top-1/2 -inset-x-12 -translate-y-1/2 h-[2px] bg-gradient-to-r from-transparent via-[#FF8C38] to-transparent shadow-[0_0_20px_#FF8C38]" />
+              <div className="absolute top-1/2 -inset-x-24 -translate-y-1/2 h-[1px] bg-gradient-to-r from-transparent via-amber-200 to-transparent opacity-80" />
+
+              {/* Stargate Telemetry Tag */}
+              <div className="absolute -top-7 inset-x-0 text-center font-mono text-[8px] tracking-[0.28em] text-[#FF8C38] uppercase">
+                PORTAL // TRANSIT ACTIVE
               </div>
             </div>
           </div>

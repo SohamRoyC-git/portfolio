@@ -345,7 +345,7 @@ export const ArchitecturalCreed: React.FC = memo(() => {
   const cardRefs = [card1Ref, card2Ref, card3Ref, card4Ref];
 
   return (
-    <div id="monument-creed" className="relative w-full z-25 overflow-visible -mt-[100svh] md:mt-0">
+    <div id="monument-creed" className="relative w-full z-25 overflow-visible">
       {/* ========================================================================= */}
       {/* MOBILE CINEMATIC STAGE (< 768px):                                          */}
       {/* Alternative 4: Mechanical Monocoque Shutter & 4-Sheet Titanium Stacking    */}

@@ -7,6 +7,7 @@ import Lenis from "lenis";
 
 import { SilkyFluidBackdrop } from "@/components/master/SilkyFluidBackdrop";
 import { MasterNav } from "@/components/master/MasterNav";
+import { PullToRefresh } from "@/components/master/PullToRefresh";
 import { MonumentalHero } from "@/components/master/MonumentalHero";
 import { KineticStatement } from "@/components/master/KineticStatement";
 import { ArchitecturalCreed } from "@/components/master/ArchitecturalCreed";
@@ -154,6 +155,9 @@ export default function Home() {
 
       {/* 2. Architectural Minimal Navigation */}
       <MasterNav onNavigate={handleNavigate} activeId={activeId} />
+
+      {/* Tactile In-App Pull-Down Refresh (Leaves browser bottom toolbar locked & stable) */}
+      <PullToRefresh scrollerRef={scrollerRef} />
 
       {/* 3. Cohesive Spatial Storytelling Sequence */}
       <div

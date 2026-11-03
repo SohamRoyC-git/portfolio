@@ -15,7 +15,7 @@ import { GrandSpatialDiscs } from "@/components/master/GrandSpatialDiscs";
 import { ArchitecturalMatrix } from "@/components/master/ArchitecturalMatrix";
 import { TerminalFinale } from "@/components/master/TerminalFinale";
 import { SiteFooter } from "@/components/master/SiteFooter";
-import { YouTubeSkeletonLoader } from "@/components/master/YouTubeSkeletonLoader";
+import { TerraceBreezePreloader } from "@/components/master/TerraceBreezePreloader";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -147,8 +147,8 @@ export default function Home() {
 
   return (
     <div className="relative h-screen w-screen bg-[#060709] text-[#F8F5EE] selection:bg-[#FF7A00]/30 selection:text-[#FF7A00] overflow-hidden">
-      {/* 0. Authentic YouTube Shimmer Skeleton Loader (Mounts once on load, dissolves smoothly) */}
-      <YouTubeSkeletonLoader />
+      {/* 0. Cyber-Pastoral Terrace Breeze Preloader (Sleek hairline progress bar with wind reveal) */}
+      <TerraceBreezePreloader />
 
       {/* 1. Disciplined Architectural Obsidian Canvas (Zero AI glows) */}
       <SilkyFluidBackdrop />

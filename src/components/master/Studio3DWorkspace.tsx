@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState, useCallback, memo } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import gsap from "gsap";
 import {
   X,
@@ -50,7 +51,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   // Terminal state
   const [terminalInput, setTerminalInput] = useState("");
   const [terminalHistory, setTerminalHistory] = useState<Array<{ cmd: string; out: string }>>([
-    { cmd: "system.init", out: "Soham Battlestation 3D Kernel · Photogrammetry Mesh Active" },
+    { cmd: "system.init", out: "Soham Battlestation 3D Kernel · Production GLB Assets Active" },
     { cmd: "whoami", out: "Soham Roychoudhury — AI/ML Engineer & Systems Architect" },
     { cmd: "help", out: "Commands: 'whoami', 'projects', 'specs', 'hobbies', 'sound on', 'sound off', 'enter', 'clear'" },
   ]);
@@ -68,10 +69,10 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   const screenGlowLightRef = useRef<THREE.PointLight | null>(null);
   const particlesRef = useRef<THREE.Points | null>(null);
 
-  // Seated Chair POV Target Coordinates
+  // Seated Chair POV Coordinates (Eye-level seated view overlooking keyboard, mousepad, monitor, and PC)
   const mouseNorm = useRef({ x: 0, y: 0 });
-  const cameraBasePos = useRef(new THREE.Vector3(-0.10, 0.65, 0.58));
-  const cameraLookTarget = useRef(new THREE.Vector3(-0.11, 0.58, -0.05));
+  const cameraBasePos = useRef(new THREE.Vector3(-0.04, 0.78, 0.78));
+  const cameraLookTarget = useRef(new THREE.Vector3(-0.05, 0.56, -0.06));
   const isFlyingIntoScreen = useRef(false);
 
   // Web Audio Context & Nodes
@@ -170,16 +171,16 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     } catch {}
   }, [isAudioPlaying]);
 
-  // Continuous 3D Camera Flight into the BenQ Monitor Screen (Zero Flash, Zero Blur Pop)
+  // Continuous 3D Camera Flight into the BenQ Monitor Screen
   const trigger3DCameraFlight = useCallback(() => {
     if (isFlyingIntoScreen.current || !cameraRef.current) return;
     isFlyingIntoScreen.current = true;
     playClickSound(1100);
 
     const camera = cameraRef.current;
-    // Monitor screen 3D center coordinates: (x: -0.112, y: 0.725, z: -0.04)
-    const targetPos = new THREE.Vector3(-0.112, 0.725, 0.18);
-    const targetLook = new THREE.Vector3(-0.112, 0.725, -0.04);
+    // Monitor screen 3D center: (x: -0.06, y: 0.70, z: -0.07)
+    const targetPos = new THREE.Vector3(-0.06, 0.70, 0.15);
+    const targetLook = new THREE.Vector3(-0.06, 0.70, -0.07);
 
     gsap.to(camera.position, {
       x: targetPos.x,
@@ -260,7 +261,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Main Three.js Scene Setup (Seated Chair POV with Polycam Mesh + Live Interactive Overlays)
+  // Main Three.js Scene Setup (Curated GLB Assets + First-Person Seated Chair POV)
   useEffect(() => {
     const container = mountRef.current;
     if (!container) return;
@@ -272,16 +273,18 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     // 1. SCENE
     const scene = new THREE.Scene();
     sceneRef.current = scene;
-    scene.background = new THREE.Color("#07080A");
-    scene.fog = new THREE.FogExp2("#07080A", 0.08);
+    scene.background = new THREE.Color("#08090C");
+    scene.fog = new THREE.FogExp2("#08090C", 0.04);
 
-    // 2. CAMERA (Seated Chair POV: right in front of the keyboard and monitor!)
-    const camera = new THREE.PerspectiveCamera(isMobile ? 58 : 50, width / height, 0.05, 30);
+    // 2. CAMERA (First-person seated view overlooking the entire desk setup)
+    const camera = new THREE.PerspectiveCamera(isMobile ? 56 : 48, width / height, 0.05, 30);
     const initialPos = isMobile
-      ? new THREE.Vector3(-0.10, 0.72, 0.68)
-      : new THREE.Vector3(-0.10, 0.65, 0.58);
+      ? new THREE.Vector3(-0.04, 0.85, 0.90)
+      : new THREE.Vector3(-0.04, 0.78, 0.78);
     camera.position.copy(initialPos);
     cameraBasePos.current.copy(initialPos);
+    cameraLookTarget.current.set(-0.05, 0.56, -0.06);
+    camera.lookAt(cameraLookTarget.current);
     cameraRef.current = camera;
 
     // 3. RENDERER
@@ -298,80 +301,229 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     renderer.toneMappingExposure = 1.35;
     container.appendChild(renderer.domElement);
 
-    // 4. LIGHTING: Multi-Source Studio
-    // Warm Ambient Light
-    const ambientLight = new THREE.AmbientLight(0xFFFFFF, 1.35);
+    // 4. MULTI-SOURCE STUDIO LIGHTING
+    const ambientLight = new THREE.AmbientLight(0x2A303C, 1.4);
     scene.add(ambientLight);
 
-    // Soft Studio Warm Key Light (matches real room ceiling light)
+    // Warm Studio Key Light (Ceiling downlight)
     const keyLight = new THREE.DirectionalLight(0xFFEDD5, 2.4);
-    keyLight.position.set(2.0, 4.0, 3.0);
+    keyLight.position.set(2.4, 4.2, 2.5);
     keyLight.castShadow = true;
     keyLight.shadow.mapSize.width = 2048;
     keyLight.shadow.mapSize.height = 2048;
     keyLight.shadow.bias = -0.0004;
     scene.add(keyLight);
 
-    // Cool Rim Light (edge highlights on PC tower)
-    const rimLight = new THREE.DirectionalLight(0x93C5FD, 1.2);
-    rimLight.position.set(-2.5, 3.0, -1.0);
+    // Cool Studio Rim Light (Bevel edge definition)
+    const rimLight = new THREE.DirectionalLight(0x93C5FD, 1.3);
+    rimLight.position.set(-2.5, 3.2, -1.0);
     scene.add(rimLight);
 
-    // Emissive BenQ Monitor Glow Light (Bounces blue-white light downward onto keyboard)
-    const screenGlow = new THREE.PointLight(0x60A5FA, 1.8, 1.4);
-    screenGlow.position.set(-0.112, 0.725, 0.12);
+    // Emissive BenQ Monitor Glow (Downward illumination onto keyboard & mousepad)
+    const screenGlow = new THREE.PointLight(0x60A5FA, 2.0, 1.6);
+    screenGlow.position.set(-0.06, 0.70, 0.15);
     scene.add(screenGlow);
     screenGlowLightRef.current = screenGlow;
 
-    // Internal Zebronics ARGB Fan Glow Light (Pulsing warm magenta/red)
-    const pcFanLight = new THREE.PointLight(0xFF2D55, 2.4, 1.2);
-    pcFanLight.position.set(0.38, 0.65, 0.02);
+    // Zebronics ARGB Internal Fan Glow (Pulsing warm magenta/red)
+    const pcFanLight = new THREE.PointLight(0xFF2D55, 2.8, 1.4);
+    pcFanLight.position.set(0.44, 0.67, 0.02);
     scene.add(pcFanLight);
 
-    // 5. ARCHITECTURAL STUDIO BACKDROP & FLOOR (Cleans up raw scan boundary edges)
-    // Dark mahogany desk extension underneath
-    const deskExtension = new THREE.Mesh(
-      new THREE.PlaneGeometry(5.0, 4.0),
-      new THREE.MeshStandardMaterial({ color: 0x1A1412, roughness: 0.6 })
-    );
-    deskExtension.rotation.x = -Math.PI / 2;
-    deskExtension.position.set(0, 0.385, 0);
-    deskExtension.receiveShadow = true;
-    scene.add(deskExtension);
-
-    // Warm Terracotta Wall behind the desk
+    // 5. ARCHITECTURAL ROOM SURFACES
+    // Terracotta accent wall behind desk
     const backWall = new THREE.Mesh(
       new THREE.PlaneGeometry(6.0, 4.0),
-      new THREE.MeshStandardMaterial({ color: 0x82382D, roughness: 0.85 })
+      new THREE.MeshStandardMaterial({ color: 0x7A362D, roughness: 0.88 })
     );
-    backWall.position.set(0, 1.0, -0.45);
+    backWall.position.set(0, 1.1, -0.65);
     backWall.receiveShadow = true;
     scene.add(backWall);
 
-    const hitBoxes: THREE.Mesh[] = [];
-    const hitBoxMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
-
-    // 6. LOAD USER'S REAL POLYCAM GLTF 3D SCAN
-    const loader = new GLTFLoader();
-    loader.load(
-      "/models/soham_real_desk.glb",
-      (gltf) => {
-        const model = gltf.scene;
-        model.traverse((child) => {
-          if ((child as THREE.Mesh).isMesh) {
-            child.castShadow = true;
-            child.receiveShadow = true;
-          }
-        });
-        scene.add(model);
-      },
-      undefined,
-      (err) => {
-        console.warn("Polycam model load error:", err);
-      }
+    // Deep mahogany floor
+    const floor = new THREE.Mesh(
+      new THREE.PlaneGeometry(6.0, 5.0),
+      new THREE.MeshStandardMaterial({ color: 0x120E0C, roughness: 0.7 })
     );
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.set(0, 0, 0);
+    floor.receiveShadow = true;
+    scene.add(floor);
 
-    // 7. HIGH-DEFINITION INTERACTIVE 3D SCREEN OVERLAY (Crisp Live Interface)
+    // 6. DUAL-TIER DESK SETUP (Main Desk + Wooden Monitor Riser Shelf)
+    // Main Desk Surface (Dark teak/walnut)
+    const deskGeo = new THREE.BoxGeometry(2.3, 0.04, 1.1);
+    const deskMat = new THREE.MeshStandardMaterial({
+      color: 0x221A15,
+      roughness: 0.52,
+      metalness: 0.08,
+    });
+    const mainDesk = new THREE.Mesh(deskGeo, deskMat);
+    mainDesk.position.set(0, 0.38, 0.06);
+    mainDesk.receiveShadow = true;
+    mainDesk.castShadow = true;
+    scene.add(mainDesk);
+
+    // Desk Legs
+    const legMat = new THREE.MeshStandardMaterial({ color: 0x14161A, roughness: 0.65, metalness: 0.3 });
+    const legGeo = new THREE.CylinderGeometry(0.025, 0.025, 0.38, 16);
+    [
+      [-1.05, 0.19, -0.40],
+      [1.05, 0.19, -0.40],
+      [-1.05, 0.19, 0.45],
+      [1.05, 0.19, 0.45],
+    ].forEach(([lx, ly, lz]) => {
+      const leg = new THREE.Mesh(legGeo, legMat);
+      leg.position.set(lx, ly, lz);
+      scene.add(leg);
+    });
+
+    // Wooden Monitor Riser Shelf (Dual-tier shelf)
+    const riserGeo = new THREE.BoxGeometry(1.28, 0.025, 0.28);
+    const riserMat = new THREE.MeshStandardMaterial({
+      color: 0x2C211A,
+      roughness: 0.48,
+      metalness: 0.06,
+    });
+    const riserShelf = new THREE.Mesh(riserGeo, riserMat);
+    riserShelf.position.set(-0.06, 0.50, -0.14);
+    riserShelf.receiveShadow = true;
+    riserShelf.castShadow = true;
+    scene.add(riserShelf);
+
+    // Aluminum Riser Feet
+    const riserFootGeo = new THREE.BoxGeometry(0.04, 0.10, 0.24);
+    const footL = new THREE.Mesh(riserFootGeo, legMat);
+    footL.position.set(-0.66, 0.45, -0.14);
+    scene.add(footL);
+    const footR = new THREE.Mesh(riserFootGeo, legMat);
+    footR.position.set(0.54, 0.45, -0.14);
+    scene.add(footR);
+
+    // 7. EXTENDED REDGEAR GAMING MOUSEPAD (Distressed Crimson Artwork)
+    const padCanvas = document.createElement("canvas");
+    padCanvas.width = 1024;
+    padCanvas.height = 512;
+    const pCtx = padCanvas.getContext("2d");
+    if (pCtx) {
+      // Dark carbon micro-weave
+      pCtx.fillStyle = "#121418";
+      pCtx.fillRect(0, 0, 1024, 512);
+
+      // Fine grid
+      pCtx.fillStyle = "rgba(255,255,255,0.025)";
+      for (let x = 0; x < 1024; x += 4) pCtx.fillRect(x, 0, 2, 512);
+      for (let y = 0; y < 512; y += 4) pCtx.fillRect(0, y, 1024, 2);
+
+      // Crimson distress artwork
+      pCtx.save();
+      const grad = pCtx.createLinearGradient(420, 0, 1024, 512);
+      grad.addColorStop(0, "rgba(220, 20, 45, 0.15)");
+      grad.addColorStop(0.4, "rgba(230, 30, 50, 0.85)");
+      grad.addColorStop(0.8, "rgba(160, 10, 25, 0.95)");
+      grad.addColorStop(1, "rgba(70, 5, 12, 0.9)");
+
+      pCtx.fillStyle = grad;
+      pCtx.beginPath();
+      pCtx.moveTo(530, 30);
+      pCtx.lineTo(990, 20);
+      pCtx.lineTo(1005, 490);
+      pCtx.lineTo(610, 470);
+      pCtx.lineTo(690, 280);
+      pCtx.closePath();
+      pCtx.fill();
+
+      // Distressed claw scratches
+      pCtx.fillStyle = "#FF2E44";
+      for (let i = 0; i < 5; i++) {
+        pCtx.beginPath();
+        pCtx.ellipse(760 + i * 40, 140 + i * 55, 110, 12, -0.65, 0, Math.PI * 2);
+        pCtx.fill();
+      }
+
+      // Redgear emblem & logo
+      pCtx.fillStyle = "rgba(255,255,255,0.85)";
+      pCtx.font = "bold 26px sans-serif";
+      pCtx.fillText("REDGEAR", 845, 62);
+      pCtx.restore();
+
+      // Perimeter stitched border
+      pCtx.strokeStyle = "rgba(255, 30, 55, 0.6)";
+      pCtx.lineWidth = 8;
+      pCtx.strokeRect(4, 4, 1016, 504);
+    }
+
+    const padTexture = new THREE.CanvasTexture(padCanvas);
+    padTexture.anisotropy = 4;
+    const mousepad = new THREE.Mesh(
+      new THREE.BoxGeometry(0.92, 0.005, 0.40),
+      new THREE.MeshStandardMaterial({ map: padTexture, roughness: 0.82, metalness: 0.05 })
+    );
+    mousepad.position.set(-0.06, 0.402, 0.18);
+    mousepad.receiveShadow = true;
+    scene.add(mousepad);
+
+    // 8. ERGONOMIC GAMING MOUSE
+    const mouseGroup = new THREE.Group();
+    mouseGroup.position.set(0.24, 0.406, 0.18);
+    mouseGroup.rotation.y = -0.06;
+
+    const mouseBody = new THREE.Mesh(
+      new THREE.BoxGeometry(0.068, 0.032, 0.118),
+      new THREE.MeshStandardMaterial({ color: 0x16181D, roughness: 0.38, metalness: 0.2 })
+    );
+    mouseBody.position.y = 0.016;
+    mouseBody.castShadow = true;
+    mouseGroup.add(mouseBody);
+
+    const mouseWheelGeo = new THREE.CylinderGeometry(0.009, 0.009, 0.008, 16);
+    mouseWheelGeo.rotateZ(Math.PI / 2);
+    const mouseWheel = new THREE.Mesh(
+      mouseWheelGeo,
+      new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.3, emissive: 0x00FFCC, emissiveIntensity: 0.35 })
+    );
+    mouseWheel.position.set(0, 0.033, -0.025);
+    mouseGroup.add(mouseWheel);
+
+    const mouseRgb = new THREE.Mesh(
+      new THREE.BoxGeometry(0.055, 0.004, 0.008),
+      new THREE.MeshBasicMaterial({ color: 0xFF0055 })
+    );
+    mouseRgb.position.set(0, 0.012, 0.052);
+    mouseGroup.add(mouseRgb);
+    scene.add(mouseGroup);
+
+    // 9. BENQ WIDESCREEN IPS MONITOR & INTERACTIVE SCREEN
+    const monitorGroup = new THREE.Group();
+    monitorGroup.position.set(-0.06, 0.70, -0.08);
+
+    // Trapezoidal Base on the wooden riser
+    const baseMesh = new THREE.Mesh(
+      new THREE.BoxGeometry(0.28, 0.014, 0.18),
+      new THREE.MeshStandardMaterial({ color: 0x181A1F, roughness: 0.5, metalness: 0.4 })
+    );
+    baseMesh.position.set(0, -0.194, 0.02);
+    baseMesh.castShadow = true;
+    monitorGroup.add(baseMesh);
+
+    // Upright Support Neck
+    const neckMesh = new THREE.Mesh(
+      new THREE.BoxGeometry(0.045, 0.22, 0.04),
+      new THREE.MeshStandardMaterial({ color: 0x1A1C22, roughness: 0.4, metalness: 0.5 })
+    );
+    neckMesh.position.set(0, -0.08, -0.02);
+    neckMesh.castShadow = true;
+    monitorGroup.add(neckMesh);
+
+    // Monitor Outer Bezel Housing
+    const bezelMesh = new THREE.Mesh(
+      new THREE.BoxGeometry(0.72, 0.42, 0.025),
+      new THREE.MeshStandardMaterial({ color: 0x0E1014, roughness: 0.4, metalness: 0.3 })
+    );
+    bezelMesh.castShadow = true;
+    monitorGroup.add(bezelMesh);
+
+    // Live High-Res Interactive Canvas Display
     const screenCanvas = document.createElement("canvas");
     screenCanvas.width = 1024;
     screenCanvas.height = 576;
@@ -380,22 +532,22 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       // Atmospheric Cyber-Pastoral Terrace Background
       const grad = sCtx.createLinearGradient(0, 0, 0, 576);
       grad.addColorStop(0, "#080D1A");
-      grad.addColorStop(0.5, "#131C2E");
-      grad.addColorStop(1, "#05070B");
+      grad.addColorStop(0.5, "#141D30");
+      grad.addColorStop(1, "#06070B");
       sCtx.fillStyle = grad;
       sCtx.fillRect(0, 0, 1024, 576);
 
       // Glowing Amber Sunrise Horizon
-      sCtx.fillStyle = "rgba(255, 122, 0, 0.4)";
+      sCtx.fillStyle = "rgba(255, 122, 0, 0.45)";
       sCtx.beginPath();
-      sCtx.ellipse(512, 280, 380, 100, 0, 0, Math.PI * 2);
+      sCtx.ellipse(512, 290, 400, 110, 0, 0, Math.PI * 2);
       sCtx.fill();
 
       // Top Status Bar
-      sCtx.fillStyle = "rgba(255,255,255,0.7)";
+      sCtx.fillStyle = "rgba(255,255,255,0.75)";
       sCtx.font = "bold 20px monospace";
       sCtx.fillText("SOHAM ROYCHOUDHURY · ATELIER // 2026", 60, 60);
-      sCtx.fillText("SYS: RUNNING · PORT 3000", 700, 60);
+      sCtx.fillText("SYS: RUNNING · 120 FPS", 700, 60);
 
       // Main Typography
       sCtx.fillStyle = "#FFFFFF";
@@ -404,66 +556,228 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
       sCtx.fillStyle = "rgba(255,255,255,0.85)";
       sCtx.font = "24px sans-serif";
-      sCtx.fillText("AI/ML Engineer · Systems · Frontend Architect", 60, 290);
+      sCtx.fillText("AI/ML Engineer · Systems Architect · Full-Stack Leader", 60, 290);
 
       // Enter Button Pill
-      sCtx.fillStyle = "rgba(255, 122, 0, 0.9)";
+      sCtx.fillStyle = "rgba(255, 122, 0, 0.95)";
       sCtx.beginPath();
-      sCtx.roundRect(60, 370, 420, 68, 34);
+      sCtx.roundRect(60, 370, 460, 68, 34);
       sCtx.fill();
 
       sCtx.fillStyle = "#000000";
       sCtx.font = "bold 24px monospace";
-      sCtx.fillText("CLICK MONITOR TO ENTER ↗", 95, 412);
+      sCtx.fillText("CLICK SCREEN TO ENTER ↗", 95, 412);
     }
 
     const screenTexture = new THREE.CanvasTexture(screenCanvas);
     screenTextureRef.current = screenTexture;
-
     const screenMesh = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.52, 0.30),
+      new THREE.PlaneGeometry(0.68, 0.38),
       new THREE.MeshBasicMaterial({ map: screenTexture })
     );
-    // Positioned right on the front face of the BenQ monitor
-    screenMesh.position.set(-0.112, 0.725, -0.04);
-    scene.add(screenMesh);
+    screenMesh.position.set(0, 0, 0.014);
+    monitorGroup.add(screenMesh);
+    scene.add(monitorGroup);
 
-    // Screen Hit-Box
-    const monitorHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.34, 0.12), hitBoxMat);
-    monitorHitBox.position.set(-0.112, 0.725, -0.02);
-    monitorHitBox.userData = {
-      key: "monitor",
-      label: "BenQ Widescreen Monitor",
-      sub: "Master Portal · Click to Fly Into Website ↗",
-      action: trigger3DCameraFlight,
-    };
-    scene.add(monitorHitBox);
-    hitBoxes.push(monitorHitBox);
+    // 10. ZEBRONICS GAMING PC RIG (Angular Chassis + Tempered Glass + Spinning ARGB Fan)
+    const pcGroup = new THREE.Group();
+    pcGroup.position.set(0.46, 0.67, 0.02);
 
-    // 8. ZEBRONICS PC TOWER: SPINNING ARGB FAN & HIT-BOX
-    const fanGroup = new THREE.Group();
-    fanGroup.position.set(0.38, 0.65, 0.02);
-    const fanRing = new THREE.Mesh(new THREE.TorusGeometry(0.065, 0.008, 16, 32), new THREE.MeshBasicMaterial({ color: 0xFF2D55 }));
-    fanGroup.add(fanRing);
+    // Main Chassis Body
+    const pcBody = new THREE.Mesh(
+      new THREE.BoxGeometry(0.24, 0.56, 0.46),
+      new THREE.MeshStandardMaterial({ color: 0x111317, roughness: 0.45, metalness: 0.3 })
+    );
+    pcBody.castShadow = true;
+    pcGroup.add(pcBody);
 
+    // Front Angular Facet Panel
+    const frontPanel = new THREE.Mesh(
+      new THREE.BoxGeometry(0.235, 0.55, 0.03),
+      new THREE.MeshStandardMaterial({ color: 0x0B0C0E, roughness: 0.3, metalness: 0.5 })
+    );
+    frontPanel.position.set(0, 0, 0.24);
+    pcGroup.add(frontPanel);
+
+    // Front RGB Accent Strip
+    const frontRgb = new THREE.Mesh(
+      new THREE.BoxGeometry(0.012, 0.45, 0.005),
+      new THREE.MeshBasicMaterial({ color: 0xFF2D55 })
+    );
+    frontRgb.position.set(-0.06, 0, 0.256);
+    pcGroup.add(frontRgb);
+
+    // Optical Tempered Glass Side Panel (Facing seated user)
+    const glassPanel = new THREE.Mesh(
+      new THREE.BoxGeometry(0.006, 0.52, 0.42),
+      new THREE.MeshPhysicalMaterial({
+        color: 0x11151F,
+        transmission: 0.85,
+        opacity: 0.95,
+        transparent: true,
+        roughness: 0.08,
+        metalness: 0.1,
+        clearcoat: 1.0,
+      })
+    );
+    glassPanel.position.set(-0.122, 0, 0);
+    pcGroup.add(glassPanel);
+
+    // Internal Motherboard & GPU Block
+    const gpuMesh = new THREE.Mesh(
+      new THREE.BoxGeometry(0.08, 0.06, 0.26),
+      new THREE.MeshStandardMaterial({ color: 0x1F242C, roughness: 0.4, metalness: 0.6 })
+    );
+    gpuMesh.position.set(0, -0.05, 0);
+    pcGroup.add(gpuMesh);
+
+    // Dual RAM Sticks with Glowing RGB Diffusers
+    for (let r = 0; r < 2; r++) {
+      const ram = new THREE.Mesh(
+        new THREE.BoxGeometry(0.008, 0.05, 0.06),
+        new THREE.MeshBasicMaterial({ color: 0x00E5FF })
+      );
+      ram.position.set(-0.02, 0.12, -0.03 + r * 0.02);
+      pcGroup.add(ram);
+    }
+
+    // ARGB Spinning Cooling Fan Assembly
+    const fanAssembly = new THREE.Group();
+    fanAssembly.position.set(-0.02, 0.08, 0.08);
+
+    const fanRing = new THREE.Mesh(
+      new THREE.TorusGeometry(0.065, 0.008, 16, 32),
+      new THREE.MeshBasicMaterial({ color: 0xFF2D55 })
+    );
+    fanAssembly.add(fanRing);
+
+    const fanBladesGroup = new THREE.Group();
     const bladeGeo = new THREE.BoxGeometry(0.016, 0.05, 0.004);
     const bladeMat = new THREE.MeshBasicMaterial({ color: 0xFF5588 });
     for (let b = 0; b < 7; b++) {
       const blade = new THREE.Mesh(bladeGeo, bladeMat);
       blade.rotation.z = (b / 7) * Math.PI * 2;
       blade.position.set(Math.cos(blade.rotation.z) * 0.03, Math.sin(blade.rotation.z) * 0.03, 0);
-      fanGroup.add(blade);
+      fanBladesGroup.add(blade);
     }
-    fanMeshRef.current = fanGroup;
-    scene.add(fanGroup);
+    fanAssembly.add(fanBladesGroup);
+    fanMeshRef.current = fanBladesGroup;
+    pcGroup.add(fanAssembly);
+    scene.add(pcGroup);
 
-    // PC Hit-Box
-    const pcHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.65, 0.55), hitBoxMat);
-    pcHitBox.position.set(0.40, 0.65, 0.02);
+    // 11. LOAD & NORMALIZE CURATED HIGH-FIDELITY GLB ASSETS (DRACO DECODED)
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath("/draco/gltf/");
+    const gltfLoader = new GLTFLoader();
+    gltfLoader.setDRACOLoader(dracoLoader);
+
+    // Helper: auto-center geometry & normalize dimensions
+    const normalizeAndMount = (
+      rawScene: THREE.Group,
+      targetWidth: number,
+      targetPos: THREE.Vector3,
+      targetRot: THREE.Euler,
+      onMounted?: (wrapper: THREE.Group) => void
+    ) => {
+      const box = new THREE.Box3().setFromObject(rawScene);
+      const size = new THREE.Vector3();
+      box.getSize(size);
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+
+      // Re-center internal mesh so origin is at (0, bottom, 0)
+      rawScene.position.x -= center.x;
+      rawScene.position.y -= box.min.y;
+      rawScene.position.z -= center.z;
+
+      const wrapper = new THREE.Group();
+      wrapper.add(rawScene);
+
+      const scale = targetWidth / Math.max(size.x, 0.01);
+      wrapper.scale.set(scale, scale, scale);
+      wrapper.position.copy(targetPos);
+      wrapper.rotation.copy(targetRot);
+
+      rawScene.traverse((child) => {
+        if ((child as THREE.Mesh).isMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+        }
+      });
+
+      scene.add(wrapper);
+      if (onMounted) onMounted(wrapper);
+      return wrapper;
+    };
+
+    // A. Mechanical TKL Keyboard (/models/keyboard.gltf)
+    gltfLoader.load(
+      "/models/keyboard.gltf",
+      (gltf) => {
+        normalizeAndMount(
+          gltf.scene,
+          0.38, // 38cm TKL keyboard width
+          new THREE.Vector3(-0.08, 0.404, 0.18),
+          new THREE.Euler(-0.02, 0.02, 0)
+        );
+      },
+      undefined,
+      (err) => console.warn("Keyboard GLTF load fallback:", err)
+    );
+
+    // B. Over-Ear Gaming Headphones (/models/headphones.gltf)
+    gltfLoader.load(
+      "/models/headphones.gltf",
+      (gltf) => {
+        normalizeAndMount(
+          gltf.scene,
+          0.19, // 19cm ear-to-ear
+          new THREE.Vector3(-0.46, 0.402, 0.16),
+          new THREE.Euler(0.10, 0.30, -1.25)
+        );
+      },
+      undefined,
+      (err) => console.warn("Headphones GLTF load fallback:", err)
+    );
+
+    // C. Gaming Controller / Gamepad (/models/controller.glb)
+    gltfLoader.load(
+      "/models/controller.glb",
+      (gltf) => {
+        normalizeAndMount(
+          gltf.scene,
+          0.18, // 18cm controller width
+          new THREE.Vector3(-0.52, 0.513, -0.12), // on wooden riser shelf clearly to the left of monitor
+          new THREE.Euler(-0.15, 0.25, -0.05)
+        );
+      },
+      undefined,
+      (err) => console.warn("Controller GLB load fallback:", err)
+    );
+
+    // 12. INTERACTIVE 3D HIT-BOXES
+    const hitBoxes: THREE.Mesh[] = [];
+    const hitBoxMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
+
+    // Monitor Hit-Box
+    const monitorHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.44, 0.15), hitBoxMat);
+    monitorHitBox.position.set(-0.06, 0.70, -0.06);
+    monitorHitBox.userData = {
+      key: "monitor",
+      label: "BenQ Widescreen IPS Monitor",
+      sub: "Master Portal · Click to Fly Into Website ↗",
+      action: trigger3DCameraFlight,
+    };
+    scene.add(monitorHitBox);
+    hitBoxes.push(monitorHitBox);
+
+    // Zebronics PC Rig Hit-Box
+    const pcHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.65, 0.52), hitBoxMat);
+    pcHitBox.position.set(0.46, 0.67, 0.02);
     pcHitBox.userData = {
       key: "pc_tower",
       label: "Zebronics Gaming Rig",
-      sub: "Compute Hardware & AI Tech Stack",
+      sub: "Compute Hardware & AI Architecture",
       action: () => {
         playClickSound(950);
         setActiveModal("specs");
@@ -472,9 +786,9 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     scene.add(pcHitBox);
     hitBoxes.push(pcHitBox);
 
-    // 9. COMPACT TKL KEYBOARD HIT-BOX
-    const kbHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.12, 0.22), hitBoxMat);
-    kbHitBox.position.set(-0.11, 0.42, 0.22);
+    // Keyboard Hit-Box
+    const kbHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.10, 0.22), hitBoxMat);
+    kbHitBox.position.set(-0.08, 0.42, 0.18);
     kbHitBox.userData = {
       key: "keyboard",
       label: "TKL Mechanical Keyboard",
@@ -487,13 +801,13 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     scene.add(kbHitBox);
     hitBoxes.push(kbHitBox);
 
-    // 10. GAMEPAD HIT-BOX (On Wooden Riser Left of Monitor)
-    const gpHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.12, 0.18), hitBoxMat);
-    gpHitBox.position.set(-0.35, 0.53, -0.10);
+    // Gamepad Hit-Box (on wooden riser shelf to left of monitor)
+    const gpHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.16, 0.20), hitBoxMat);
+    gpHitBox.position.set(-0.52, 0.55, -0.12);
     gpHitBox.userData = {
       key: "gamepad",
-      label: "Gamepad Controller",
-      sub: "Selected Commissions & Projects",
+      label: "Next-Gen Gamepad Controller",
+      sub: "Selected Commissions & High-Performance Projects",
       action: () => {
         playClickSound(950);
         setActiveModal("projects");
@@ -502,9 +816,9 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     scene.add(gpHitBox);
     hitBoxes.push(gpHitBox);
 
-    // 11. HEADSET HIT-BOX (Left Front Desk)
-    const hsHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.24, 0.26), hitBoxMat);
-    hsHitBox.position.set(-0.45, 0.46, 0.22);
+    // Headset Hit-Box (left desk surface)
+    const hsHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.22, 0.24), hitBoxMat);
+    hsHitBox.position.set(-0.46, 0.44, 0.16);
     hsHitBox.userData = {
       key: "headset",
       label: "Over-Ear Gaming Headset",
@@ -517,7 +831,9 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     scene.add(hsHitBox);
     hitBoxes.push(hsHitBox);
 
-    // 12. FLOATING ATMOSPHERIC PARTICLES
+    hitBoxesRef.current = hitBoxes;
+
+    // 13. FLOATING ATMOSPHERIC PARTICLES
     const particleCount = 80;
     const particleGeo = new THREE.BufferGeometry();
     const particlePos = new Float32Array(particleCount * 3);
@@ -527,14 +843,12 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       particlePos[i + 2] = (Math.random() - 0.5) * 1.8;
     }
     particleGeo.setAttribute("position", new THREE.BufferAttribute(particlePos, 3));
-    const particleMat = new THREE.PointsMaterial({ color: 0xFFE5B4, size: 0.015, transparent: true, opacity: 0.4 });
+    const particleMat = new THREE.PointsMaterial({ color: 0xFFE5B4, size: 0.015, transparent: true, opacity: 0.45 });
     const particles = new THREE.Points(particleGeo, particleMat);
     scene.add(particles);
     particlesRef.current = particles;
 
-    hitBoxesRef.current = hitBoxes;
-
-    // 13. RAYCASTING & INTERACTION
+    // 14. RAYCASTING & INTERACTION
     const raycaster = new THREE.Raycaster();
     const mouseVector = new THREE.Vector2();
 
@@ -587,7 +901,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     window.addEventListener("mousemove", onPointerMove);
     renderer.domElement.addEventListener("click", onPointerClick);
 
-    // 14. ANIMATION LOOP (Damped Head Tracking Parallax & Fan Rotation)
+    // 15. ANIMATION LOOP (Damped Head Tracking Parallax & Fan Rotation)
     let clock = new THREE.Clock();
 
     const animate = () => {
@@ -609,12 +923,12 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         particlesRef.current.geometry.attributes.position.needsUpdate = true;
       }
 
-      // Seated Chair Head-Tracking Parallax (Subtle natural head tilt!)
+      // Seated Chair Head-Tracking Parallax (Natural head tilt!)
       if (!isFlyingIntoScreen.current && cameraRef.current) {
-        const targetX = cameraBasePos.current.x + mouseNorm.current.x * 0.12;
-        const targetY = cameraBasePos.current.y + mouseNorm.current.y * 0.08;
-        camera.position.x += (targetX - camera.position.x) * 0.06;
-        camera.position.y += (targetY - camera.position.y) * 0.06;
+        const targetX = cameraBasePos.current.x + mouseNorm.current.x * 0.08;
+        const targetY = cameraBasePos.current.y + mouseNorm.current.y * 0.05;
+        camera.position.x += (targetX - camera.position.x) * 0.07;
+        camera.position.y += (targetY - camera.position.y) * 0.07;
         camera.lookAt(cameraLookTarget.current);
       }
 
@@ -631,7 +945,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       const mobile = w / h < 1.0;
 
       cameraRef.current.aspect = w / h;
-      cameraRef.current.fov = mobile ? 58 : 50;
+      cameraRef.current.fov = mobile ? 56 : 48;
       cameraRef.current.updateProjectionMatrix();
       rendererRef.current.setSize(w, h);
     };
@@ -650,7 +964,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   }, [trigger3DCameraFlight, playClickSound]);
 
   return (
-    <div className="relative w-full h-[100svh] bg-[#07080A] text-[#F8F5EE] overflow-hidden select-none">
+    <div className="relative w-full h-[100svh] bg-[#08090C] text-[#F8F5EE] overflow-hidden select-none">
       {/* Three.js Canvas Container */}
       <div ref={mountRef} className="absolute inset-0 w-full h-full z-10" />
 
@@ -658,14 +972,14 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       <header className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between pointer-events-auto">
         <div className="flex items-center gap-3 bg-black/60 backdrop-blur-md border border-white/10 px-3.5 py-1.5 rounded-full text-xs font-mono">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-white/80 font-medium">SOHAM ROYCHOUDHURY · REAL BATTLESTATION</span>
+          <span className="text-white/80 font-medium">SOHAM ROYCHOUDHURY · 3D BATTLESTATION</span>
           <span className="hidden sm:inline text-white/40">|</span>
           <span className="hidden sm:inline text-white/50">BENQ · ZEBRONICS · REDGEAR</span>
         </div>
 
         <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-xs font-mono text-white/70">
           <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          <span>Real Photogrammetry 3D Active</span>
+          <span>Curated 3D Studio Active</span>
         </div>
       </header>
 
@@ -692,12 +1006,12 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       )}
 
       {/* Floating Bottom Hardware Navigation Dock */}
-      <footer className="absolute bottom-4 left-1/2 -translate-x-1/2 z-40 max-w-full px-4 pointer-events-auto">
-        <div className="flex items-center gap-1.5 sm:gap-2 bg-black/80 backdrop-blur-xl border border-white/15 px-3 py-2 rounded-2xl shadow-2xl overflow-x-auto max-w-[95vw] scrollbar-none">
+      <footer className="absolute bottom-3 left-1/2 -translate-x-1/2 z-40 max-w-full px-3 pointer-events-auto">
+        <div className="flex items-center gap-1.5 bg-black/75 backdrop-blur-xl border border-white/15 px-2.5 py-1.5 rounded-2xl shadow-2xl overflow-x-auto max-w-[95vw] scrollbar-none">
           {/* BenQ Monitor Enter */}
           <button
             onClick={trigger3DCameraFlight}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30 text-xs font-medium transition-all shrink-0"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30 text-xs font-medium transition-all shrink-0"
           >
             <Monitor className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Monitor</span>
@@ -710,7 +1024,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
               playClickSound(950);
               setActiveModal("specs");
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-white/90 border border-white/10 text-xs font-medium transition-all shrink-0"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/15 text-white/90 border border-white/10 text-xs font-medium transition-all shrink-0"
           >
             <Cpu className="w-3.5 h-3.5 text-red-400" />
             <span>PC Rig</span>
@@ -722,7 +1036,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
               playClickSound(950);
               setActiveModal("projects");
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-white/90 border border-white/10 text-xs font-medium transition-all shrink-0"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/15 text-white/90 border border-white/10 text-xs font-medium transition-all shrink-0"
           >
             <Gamepad2 className="w-3.5 h-3.5 text-purple-400" />
             <span>Projects</span>
@@ -734,7 +1048,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
               playClickSound(950);
               setActiveModal("hobbies");
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-white/90 border border-white/10 text-xs font-medium transition-all shrink-0"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/15 text-white/90 border border-white/10 text-xs font-medium transition-all shrink-0"
           >
             <Headphones className="w-3.5 h-3.5 text-amber-400" />
             <span>Hobbies</span>
@@ -746,7 +1060,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
               playClickSound(950);
               setActiveModal("terminal");
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-white/90 border border-white/10 text-xs font-medium transition-all shrink-0"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/15 text-white/90 border border-white/10 text-xs font-medium transition-all shrink-0"
           >
             <TerminalIcon className="w-3.5 h-3.5 text-emerald-400" />
             <span>CLI Terminal</span>
@@ -756,7 +1070,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           <button
             onClick={toggleAmbientSound}
             aria-label="Toggle Terrace Wind Ambience"
-            className={`p-2 rounded-xl border transition-all shrink-0 ${
+            className={`p-1.5 rounded-xl border transition-all shrink-0 ${
               isAudioPlaying
                 ? "bg-[#FF7A00]/20 text-[#FF7A00] border-[#FF7A00]/40"
                 : "bg-white/5 hover:bg-white/15 text-white/60 border-white/10"
@@ -768,7 +1082,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           {/* Direct Enter Website CTA */}
           <button
             onClick={trigger3DCameraFlight}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#FF7A00] hover:bg-[#FF8D24] text-black font-semibold text-xs transition-all shadow-lg shadow-[#FF7A00]/20 shrink-0"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#FF7A00] hover:bg-[#FF8D24] text-black font-semibold text-xs transition-all shadow-lg shadow-[#FF7A00]/20 shrink-0"
           >
             <span>Enter Website</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -931,7 +1245,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
                     <p className="text-white/60 text-[11px]">Linear lubricated tactile switches with acoustic dampening foam.</p>
                   </div>
                   <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10">
-                    <p className="font-semibold text-white">Redgear Mat & Logitech G Mouse</p>
+                    <p className="font-semibold text-white">Redgear Mat & Logitech Precision Mouse</p>
                     <p className="text-white/60 text-[11px]">Extended distressed crimson cloth mat with optical precision sensor.</p>
                   </div>
                 </div>

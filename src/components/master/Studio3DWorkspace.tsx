@@ -234,7 +234,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       if (cameraRef.current) {
         gsap.killTweensOf(cameraRef.current.position);
         const isMobile = window.innerWidth / window.innerHeight < 1.0;
-        cameraRef.current.position.set(0, 0, isMobile ? 3.8 : 3.2);
+        cameraRef.current.position.set(0, 0, isMobile ? 3.5 : 3.0);
         cameraRef.current.lookAt(0, 0, 0);
       }
       gsap.killTweensOf(warpProgressRef);
@@ -274,7 +274,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         blackHoleGroupRef.current.scale.set(0, 0, 0);
         blackHoleGroupRef.current.visible = false;
       }
-      setInteractionHint("MOVE ACROSS ATTRACTOR · HOLD FOR BLACK HOLE · CLICK FOR HYPERSPACE");
+      setInteractionHint("MOVE TO DISTURB · HOLD TO CONDENSE MANIFOLD · WARP TO ARCHIVE");
     }
   }, [isActive]);
 
@@ -284,7 +284,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     isTransitioningRef.current = true;
     warpStartTimeRef.current = performance.now();
     playHyperspaceSound();
-    setInteractionHint("HYPERSPACE JUMP ENGAGED · LIGHTSPEED WARP");
+    setInteractionHint("LIGHTSPEED WARP · CROSSING EVENT HORIZON INTO ARCHIVE");
 
     const camera = cameraRef.current;
 
@@ -336,7 +336,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     sceneRef.current = scene;
 
     const camera = new THREE.PerspectiveCamera(isMobile ? 56 : 45, width / height, 0.1, 100);
-    camera.position.set(0, 0, isMobile ? 3.5 : 3.2);
+    camera.position.set(0, 0, isMobile ? 3.5 : 3.0);
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
@@ -567,8 +567,8 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         z += (dt / 6.0) * (k1z + 2 * k2z + 2 * k3z + k4z);
       }
 
-      // Record trajectory centered at (0.32, 0.61, 25.09) with scale giving breathing room
-      const scale = isMobile ? 0.026 : 0.032;
+      // Record trajectory centered at (0.32, 0.61, 25.09) with scale giving commanding cinematic presence
+      const scale = isMobile ? 0.026 : 0.040;
       for (let i = 0; i < LORENZ_STEPS; i++) {
         const f = (cx: number, cy: number, cz: number) => [
           sigma * (cy - cx),
@@ -592,9 +592,9 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       }
     }
 
-    // 7. PARTICLES INITIALIZATION: GOLDEN MIDDLE GROUND (12,000 Desktop / 7,500 Mobile)
+    // 7. PARTICLES INITIALIZATION: PRISTINE STARDUST FILAMENT (6,400 Desktop / 3,800 Mobile)
     // Distinct, sparkling individual stardust embers with crystal-clear negative space
-    const PARTICLE_COUNT = isMobile ? 7500 : 12000;
+    const PARTICLE_COUNT = isMobile ? 3800 : 6400;
     const currentPositions = new Float32Array(PARTICLE_COUNT * 3);
     const targetPositions = new Float32Array(PARTICLE_COUNT * 3);
     const velocities = new Float32Array(PARTICLE_COUNT * 3);
@@ -625,11 +625,11 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
       const sIndex = (i / PARTICLE_COUNT) * LORENZ_STEPS + Math.random() * 12.0;
       particleIndices[i] = sIndex % LORENZ_STEPS;
-      // Calibrated speed: 22 to 40 steps per second (slow, meditative, serene chaotic flow)
-      particleSpeeds[i] = Math.random() * 18.0 + 22.0;
+      // Calibrated speed: 12 to 22 steps per second (slow, meditative, serene majestic flow)
+      particleSpeeds[i] = Math.random() * 10.0 + 12.0;
 
       // Delicate cross-sectional ribbon width around the curve (ample breathing room)
-      particleRadii[i] = Math.random() * 0.020 + 0.004;
+      particleRadii[i] = Math.random() * 0.016 + 0.003;
       particleAngles[i] = Math.random() * Math.PI * 2;
 
       const baseIdx = Math.floor(particleIndices[i]) % LORENZ_STEPS;
@@ -660,7 +660,8 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       particleColors[i3 + 1] = shade[1] + (Math.random() - 0.5) * 0.02;
       particleColors[i3 + 2] = shade[2] + (Math.random() - 0.5) * 0.02;
 
-      particleSizes[i] = Math.random() * 1.6 + 1.3;
+      // Luminous individual stardust embers
+      particleSizes[i] = Math.random() * 2.0 + 1.8;
       particleScales[i] = 1.0;
     }
 
@@ -803,7 +804,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         isUnspoolingRef.current = false;
         blackHolePosRef.current.copy(mouseLocalPosRef.current);
         startBlackHoleSound();
-        setInteractionHint("BLACK HOLE ENGAGED · DIRECT STREAM INTAKE INTO SINGULARITY");
+        setInteractionHint("GRAVITATIONAL DECONSTRUCTION · COLLAPSING INTO SINGULARITY");
       }, 120);
     };
 
@@ -826,7 +827,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         if (typeof navigator !== "undefined" && navigator.vibrate) {
           navigator.vibrate([35, 40, 20]);
         }
-        setInteractionHint("SUPERNOVA RELEASE · STARDUST SLOWLY CONDENSING INTO ATTRACTOR");
+        setInteractionHint("SUPERNOVA RELEASE · STARDUST SLOWLY CONDENSING INTO EQUILIBRIUM");
 
         // True 3D volumetric starburst outward from singularity
         const bh = blackHolePosRef.current;
@@ -872,7 +873,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         // Full 3.8s sequence allows stardust to slowly, gracefully coalesce into Lorenz wings
         setTimeout(() => {
           isUnspoolingRef.current = false;
-          setInteractionHint("MOVE ACROSS ATTRACTOR · HOLD FOR BLACK HOLE · CLICK FOR HYPERSPACE");
+          setInteractionHint("MOVE TO DISTURB · HOLD TO CONDENSE MANIFOLD · WARP TO ARCHIVE");
         }, 3800);
       } else if (pressDuration < 220 && dx < 15 && dy < 15) {
         // Quick single click/tap: Star Wars Lightspeed Hyperspace Jump!
@@ -927,7 +928,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             if (typeof navigator !== "undefined" && navigator.vibrate) {
               navigator.vibrate([25, 60, 35]);
             }
-            setInteractionHint("SINGULARITY VOID · PULSATING CORE · RELEASE FOR SUPERNOVA");
+            setInteractionHint("ZERO-ENTROPY CORE · ALL COMPLEXITY CONDENSED · RELEASE FOR SUPERNOVA");
           }
           const pulseScale = 1.0 + Math.sin(elapsed * 4.2) * 0.12;
           blackHoleGroup.scale.lerp(new THREE.Vector3(pulseScale, pulseScale, pulseScale), 0.15);
@@ -1243,7 +1244,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
       cameraRef.current.aspect = w / h;
       cameraRef.current.fov = mobile ? 56 : 45;
-      cameraRef.current.position.z = mobile ? 3.5 : 3.2;
+      cameraRef.current.position.z = mobile ? 3.5 : 3.0;
       cameraRef.current.updateProjectionMatrix();
 
       smokeMat.uniforms.uResolution.value.set(w, h);
@@ -1316,16 +1317,34 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         </div>
       </div>
 
-      {/* Subtle, Non-Intrusive Bottom Hyperspace Jump Button */}
-      <footer className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 pointer-events-auto">
-        <button
-          onClick={triggerWarpTransition}
-          className="group flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-white/5 hover:bg-white/15 border border-white/15 hover:border-white/30 text-white/80 hover:text-white text-xs font-mono tracking-widest uppercase transition-all backdrop-blur-xl shadow-xl hover:scale-105 active:scale-95"
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-300 animate-pulse" />
-          <span>Hyperspace Jump</span>
-          <ArrowRight className="w-3.5 h-3.5 text-white/50 group-hover:text-white group-hover:translate-x-0.5 transition-transform" />
-        </button>
+      {/* Bottom Interface: Subtle Architectural Telemetry & Lightspeed Warp Button */}
+      <footer className="absolute bottom-6 left-6 right-6 z-40 flex items-center justify-between pointer-events-none">
+        {/* Left Telemetry (Desktop Only) */}
+        <div className="hidden md:flex flex-col gap-0.5 text-[10px] font-mono text-white/35 tracking-wider">
+          <div className="flex items-center gap-2">
+            <span className="text-amber-400/80 font-semibold">[ 01 // PHASE SPACE ]</span>
+            <span>σ: 10.0 · ρ: 28.0 · β: 2.67</span>
+          </div>
+          <div className="text-white/20">DETERMINISTIC CHAOS · ORDER BORN FROM PERTURBATION</div>
+        </div>
+
+        {/* Center Warp Button (Interactive) */}
+        <div className="pointer-events-auto mx-auto md:mx-0 md:absolute md:left-1/2 md:-translate-x-1/2">
+          <button
+            onClick={triggerWarpTransition}
+            className="group flex items-center gap-2.5 px-6 py-2.5 rounded-full bg-white/5 hover:bg-white/15 border border-white/15 hover:border-white/30 text-white/80 hover:text-white text-xs font-mono tracking-widest uppercase transition-all backdrop-blur-xl shadow-xl hover:scale-105 active:scale-95"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-300 animate-pulse" />
+            <span>Traverse to Archive · Hyperspace Warp</span>
+            <ArrowRight className="w-3.5 h-3.5 text-white/50 group-hover:text-white group-hover:translate-x-0.5 transition-transform" />
+          </button>
+        </div>
+
+        {/* Right Telemetry (Desktop Only) */}
+        <div className="hidden md:flex flex-col items-end gap-0.5 text-[10px] font-mono text-white/35 tracking-wider">
+          <div className="text-white/40">SYSTEM: DYNAMICAL EQUILIBRIUM</div>
+          <div className="text-white/20">6,400 STARDUST EMBERS · VELVET OBSIDIAN MIST</div>
+        </div>
       </footer>
     </div>
   );

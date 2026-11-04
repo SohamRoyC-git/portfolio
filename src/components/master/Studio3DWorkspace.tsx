@@ -14,8 +14,6 @@ import {
   VolumeX,
   Activity,
   Sparkles,
-  Compass,
-  Layers,
 } from "lucide-react";
 
 export interface Studio3DWorkspaceProps {
@@ -37,19 +35,13 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   // Audio Ambience
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
 
-  // Hovered item detection via Raycaster
-  const [hoveredItem, setHoveredItem] = useState<{
-    key: string;
-    label: string;
-    sub: string;
-    x: number;
-    y: number;
-  } | null>(null);
+  // Interaction HUD & Status
+  const [interactionHint, setInteractionHint] = useState<string>("MOVE TO SCATTER · HOLD FOR BLACK HOLE · CLICK TO WARP");
 
   // Terminal state
   const [terminalInput, setTerminalInput] = useState("");
   const [terminalHistory, setTerminalHistory] = useState<Array<{ cmd: string; out: string }>>([
-    { cmd: "system.init", out: "Cyber-Pastoral Prism · Spatial Architecture Kernel Active" },
+    { cmd: "system.init", out: "Kinetic CPU Particle Core · Studio Smoke Atmosphere Active" },
     { cmd: "whoami", out: "Soham Roychoudhury — AI/ML Engineer & Systems Architect" },
     { cmd: "help", out: "Commands: 'whoami', 'projects', 'specs', 'hobbies', 'sound on', 'sound off', 'enter', 'clear'" },
   ]);
@@ -61,62 +53,134 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const animFrameRef = useRef<number | null>(null);
-  const hitBoxesRef = useRef<THREE.Mesh[]>([]);
-  const prismGroupRef = useRef<THREE.Group | null>(null);
-  const coreOrbRef = useRef<THREE.Mesh | null>(null);
-  const coreLightRef = useRef<THREE.PointLight | null>(null);
-  const sporesRef = useRef<THREE.Points | null>(null);
-  const ring1Ref = useRef<THREE.Mesh | null>(null);
-  const ring2Ref = useRef<THREE.Mesh | null>(null);
-  const causticLightRef = useRef<THREE.PointLight | null>(null);
+  const particlesRef = useRef<THREE.Points | null>(null);
 
-  // Motion physics
-  const mouseNorm = useRef({ x: 0, y: 0 });
-  const isTransitioning = useRef(false);
+  // Simulation physics state
+  const isHoldingRef = useRef(false);
+  const holdStartRef = useRef(0);
+  const pointerDownPosRef = useRef({ x: 0, y: 0 });
+  const blackHolePosRef = useRef(new THREE.Vector3(0, 0, 0));
+  const mouseWorldPosRef = useRef(new THREE.Vector3(0, 0, 0));
+  const isTransitioningRef = useRef(false);
 
   // Web Audio Context & Nodes
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const blackHoleOscRef = useRef<OscillatorNode | null>(null);
+  const blackHoleGainRef = useRef<GainNode | null>(null);
   const ambientGainRef = useRef<GainNode | null>(null);
   const noiseSourceRef = useRef<AudioBufferSourceNode | null>(null);
 
-  // Synthesize crystalline resonance chime
-  const playGlassChime = useCallback((freq = 1200) => {
-    try {
-      if (!audioCtxRef.current) {
-        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-        if (AudioCtx) audioCtxRef.current = new AudioCtx();
-      }
-      if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
-        audioCtxRef.current.resume();
-      }
-      if (audioCtxRef.current) {
-        const ctx = audioCtxRef.current;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(freq, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(freq * 0.5, ctx.currentTime + 0.12);
-        gain.gain.setValueAtTime(0.05, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.18);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.19);
-      }
-    } catch {}
+  // Initialize Audio Context safely
+  const getAudioContext = useCallback(() => {
+    if (!audioCtxRef.current) {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioCtx) audioCtxRef.current = new AudioCtx();
+    }
+    if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
+      audioCtxRef.current.resume();
+    }
+    return audioCtxRef.current;
   }, []);
+
+  // Audio: Black Hole Gravitational Drone (starts on hold)
+  const startBlackHoleSound = useCallback(() => {
+    try {
+      const ctx = getAudioContext();
+      if (!ctx) return;
+
+      if (blackHoleOscRef.current) {
+        try {
+          blackHoleOscRef.current.stop();
+          blackHoleOscRef.current.disconnect();
+        } catch {}
+      }
+
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(55, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(32, ctx.currentTime + 1.2);
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(140, ctx.currentTime);
+      filter.Q.setValueAtTime(3.0, ctx.currentTime);
+
+      gain.gain.setValueAtTime(0.001, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 0.3);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start();
+      blackHoleOscRef.current = osc;
+      blackHoleGainRef.current = gain;
+    } catch {}
+  }, [getAudioContext]);
+
+  // Audio: Supernova Shockwave Detonation (plays on release)
+  const stopBlackHoleSoundAndBlast = useCallback(() => {
+    try {
+      const ctx = getAudioContext();
+      if (!ctx) return;
+
+      // Stop black hole drone
+      if (blackHoleGainRef.current) {
+        blackHoleGainRef.current.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.08);
+      }
+      setTimeout(() => {
+        try {
+          if (blackHoleOscRef.current) {
+            blackHoleOscRef.current.stop();
+            blackHoleOscRef.current.disconnect();
+            blackHoleOscRef.current = null;
+          }
+        } catch {}
+      }, 100);
+
+      // Supernova air-burst pop
+      const blastOsc = ctx.createOscillator();
+      const blastGain = ctx.createGain();
+      blastOsc.type = "sine";
+      blastOsc.frequency.setValueAtTime(160, ctx.currentTime);
+      blastOsc.frequency.exponentialRampToValueAtTime(25, ctx.currentTime + 0.22);
+
+      blastGain.gain.setValueAtTime(0.18, ctx.currentTime);
+      blastGain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.24);
+
+      blastOsc.connect(blastGain);
+      blastGain.connect(ctx.destination);
+      blastOsc.start();
+      blastOsc.stop(ctx.currentTime + 0.25);
+    } catch {}
+  }, [getAudioContext]);
+
+  // Audio: Tactical Keystroke/Chime
+  const playTactileClick = useCallback((freq = 900) => {
+    try {
+      const ctx = getAudioContext();
+      if (!ctx) return;
+
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.4, ctx.currentTime + 0.04);
+      gain.gain.setValueAtTime(0.04, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.045);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.05);
+    } catch {}
+  }, [getAudioContext]);
 
   // Ambient organic terrace mountain breeze generator
   const toggleAmbientSound = useCallback(() => {
     try {
-      if (!audioCtxRef.current) {
-        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-        if (AudioCtx) audioCtxRef.current = new AudioCtx();
-      }
-      const ctx = audioCtxRef.current;
+      const ctx = getAudioContext();
       if (!ctx) return;
-
-      if (ctx.state === "suspended") ctx.resume();
 
       if (isAudioPlaying) {
         if (ambientGainRef.current) {
@@ -168,48 +232,29 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         setIsAudioPlaying(true);
       }
     } catch {}
-  }, [isAudioPlaying]);
+  }, [isAudioPlaying, getAudioContext]);
 
-  // "Genesis Unfold" Transition into Portfolio Hero
-  const triggerPrismTransition = useCallback(() => {
-    if (isTransitioning.current || !cameraRef.current || !prismGroupRef.current) return;
-    isTransitioning.current = true;
-    playGlassChime(1500);
+  // Warp Flight into Portfolio Website
+  const triggerWarpTransition = useCallback(() => {
+    if (isTransitioningRef.current || !cameraRef.current) return;
+    isTransitioningRef.current = true;
+    playTactileClick(1400);
 
     const camera = cameraRef.current;
-    const prismGroup = prismGroupRef.current;
 
-    // 1. Crystal Facet Expansion / Bloom
-    gsap.to(prismGroup.scale, {
-      x: 1.8,
-      y: 1.8,
-      z: 1.8,
-      duration: 1.2,
-      ease: "power2.out",
-    });
-
-    // 2. Core Light Surge
-    if (coreLightRef.current) {
-      gsap.to(coreLightRef.current, {
-        intensity: 8.0,
-        duration: 0.8,
-        ease: "power2.inOut",
-      });
-    }
-
-    // 3. Camera Glide straight through the heart of the crystal
+    // Camera surges forward through the particle field
     gsap.to(camera.position, {
       x: 0,
       y: 0,
-      z: 0.2,
-      duration: 1.25,
+      z: -0.8,
+      duration: 1.35,
       ease: "power3.inOut",
       onComplete: () => {
         onEnterPortfolio();
-        isTransitioning.current = false;
+        isTransitioningRef.current = false;
       },
     });
-  }, [onEnterPortfolio, playGlassChime]);
+  }, [onEnterPortfolio, playTactileClick]);
 
   // Handle Terminal Commands
   const handleTerminalSubmit = (e: React.FormEvent) => {
@@ -217,7 +262,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     const cmd = terminalInput.trim().toLowerCase();
     if (!cmd) return;
 
-    playGlassChime(1300);
+    playTactileClick(1200);
 
     let output = "";
     if (cmd === "whoami") {
@@ -235,10 +280,10 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       if (isAudioPlaying) toggleAmbientSound();
       output = "Terrace organic soundscape: MUTED.";
     } else if (cmd === "enter") {
-      output = "Unfolding Cyber-Pastoral Prism into portfolio...";
+      output = "Warping particle core into portfolio...";
       setTimeout(() => {
         setActiveModal(null);
-        triggerPrismTransition();
+        triggerWarpTransition();
       }, 400);
     } else if (cmd === "clear") {
       setTerminalHistory([]);
@@ -269,7 +314,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Main Three.js Scene Setup (Cyber-Pastoral Prism Architecture)
+  // Main Three.js Particle Physics Engine (CPU Structure + Studio Smoke Shader)
   useEffect(() => {
     const container = mountRef.current;
     if (!container) return;
@@ -278,19 +323,16 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     const height = container.clientHeight || window.innerHeight;
     const isMobile = width / height < 1.0;
 
-    // 1. SCENE & ATMOSPHERE
+    // 1. SCENE & CAMERA
     const scene = new THREE.Scene();
     sceneRef.current = scene;
-    scene.background = new THREE.Color("#05070D");
-    scene.fog = new THREE.FogExp2("#05070D", 0.035);
 
-    // 2. CAMERA
-    const camera = new THREE.PerspectiveCamera(isMobile ? 54 : 44, width / height, 0.1, 50);
-    camera.position.set(0, 0.1, isMobile ? 3.8 : 3.2);
+    const camera = new THREE.PerspectiveCamera(isMobile ? 54 : 45, width / height, 0.1, 100);
+    camera.position.set(0, 0, isMobile ? 3.4 : 2.8);
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
-    // 3. RENDERER
+    // 2. RENDERER
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       powerPreference: "high-performance",
@@ -298,367 +340,414 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     rendererRef.current = renderer;
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.4;
+    renderer.toneMappingExposure = 1.35;
     container.appendChild(renderer.domElement);
 
-    // 4. LIGHTING: Multi-Source Studio & Caustic Shimmer
-    const ambientLight = new THREE.AmbientLight(0x1E2538, 1.4);
-    scene.add(ambientLight);
+    // 3. CINEMATIC VOLUMETRIC STUDIO SMOKE BACKGROUND (Fullscreen Shader Quad)
+    const smokeQuadGeo = new THREE.PlaneGeometry(2, 2);
+    const smokeMat = new THREE.ShaderMaterial({
+      depthWrite: false,
+      depthTest: false,
+      uniforms: {
+        uTime: { value: 0 },
+        uResolution: { value: new THREE.Vector2(width, height) },
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = vec4(position.xy, 0.9999, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float uTime;
+        uniform vec2 uResolution;
+        varying vec2 vUv;
 
-    // Warm Dawn Key Light
-    const dawnLight = new THREE.DirectionalLight(0xFFA34D, 2.6);
-    dawnLight.position.set(3.5, 4.5, 2.5);
-    dawnLight.castShadow = true;
-    scene.add(dawnLight);
+        float hash(vec2 p) {
+          return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+        }
 
-    // Electric Cyan Rim Light
-    const rimLight = new THREE.DirectionalLight(0x60A5FA, 2.0);
-    rimLight.position.set(-3.5, 3.0, -2.5);
-    scene.add(rimLight);
+        float noise(vec2 p) {
+          vec2 i = floor(p);
+          vec2 f = fract(p);
+          vec2 u = f * f * (3.0 - 2.0 * f);
+          return mix(mix(hash(i + vec2(0.0, 0.0)), hash(i + vec2(1.0, 0.0)), u.x),
+                     mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);
+        }
 
-    // Liquid Obsidian Floor Caustic Shimmer Light
-    const causticLight = new THREE.PointLight(0xFFB255, 1.8, 3.5);
-    causticLight.position.set(0, -1.2, 0.8);
-    scene.add(causticLight);
-    causticLightRef.current = causticLight;
+        float fbm(vec2 p) {
+          float v = 0.0;
+          float a = 0.5;
+          mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.5));
+          for (int i = 0; i < 4; i++) {
+            v += a * noise(p);
+            p = rot * p * 2.0;
+            a *= 0.5;
+          }
+          return v;
+        }
 
-    // 5. REFLECTIVE LIQUID OBSIDIAN FLOOR
-    const floorGeo = new THREE.PlaneGeometry(16, 16);
-    const floorMat = new THREE.MeshStandardMaterial({
-      color: 0x07090E,
-      roughness: 0.18,
-      metalness: 0.82,
+        void main() {
+          vec2 p = (vUv - 0.5) * vec2(uResolution.x / uResolution.y, 1.0);
+          float t = uTime * 0.05;
+
+          // Slow billowing studio smoke
+          vec2 smokeCoord = p * 1.4 + vec2(sin(t * 0.4) * 0.25, t * 0.2);
+          float s1 = fbm(smokeCoord);
+          float s2 = fbm(smokeCoord + vec2(s1 * 0.7, s1 * 0.4));
+
+          // Palette: Deep graphite / charcoal base with subtle warm champagne haze
+          vec3 darkBg = vec3(0.024, 0.027, 0.035);
+          vec3 smokeColor = vec3(0.075, 0.070, 0.065);
+
+          // Deep radial vignette
+          float vignette = 1.0 - smoothstep(0.3, 1.35, length(p));
+          vec3 col = mix(darkBg, smokeColor, s2 * 0.7) * vignette;
+
+          // 35mm film grain
+          float grain = (hash(vUv * 500.0 + fract(uTime)) - 0.5) * 0.022;
+          col += grain;
+
+          gl_FragColor = vec4(col, 1.0);
+        }
+      `,
     });
-    const floor = new THREE.Mesh(floorGeo, floorMat);
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.set(0, -1.35, 0);
-    floor.receiveShadow = true;
-    scene.add(floor);
+    const smokeQuad = new THREE.Mesh(smokeQuadGeo, smokeMat);
+    scene.add(smokeQuad);
 
-    // 6. MASTER PRISM GROUP (Floating Centered Centerpiece)
-    const prismGroup = new THREE.Group();
-    prismGroup.position.set(0, 0.05, 0);
-    scene.add(prismGroup);
-    prismGroupRef.current = prismGroup;
+    // 4. PROCEDURAL HIGH-TECH CPU POINT-CLOUD GENERATION
+    // Particle count: 60,000 for locked 60-120fps performance
+    const PARTICLE_COUNT = isMobile ? 35000 : 60000;
+    const currentPositions = new Float32Array(PARTICLE_COUNT * 3);
+    const targetPositions = new Float32Array(PARTICLE_COUNT * 3);
+    const velocities = new Float32Array(PARTICLE_COUNT * 3);
+    const particleColors = new Float32Array(PARTICLE_COUNT * 3);
+    const particleSizes = new Float32Array(PARTICLE_COUNT);
 
-    // A. Outer Sculpted Optical Glass Shell
-    const crystalGeo = new THREE.IcosahedronGeometry(1.22, 0);
-    const glassMat = new THREE.MeshPhysicalMaterial({
-      color: 0xEEF5FF,
-      transmission: 0.93,
-      opacity: 0.98,
-      transparent: true,
-      roughness: 0.06,
-      metalness: 0.08,
-      ior: 1.54,
-      thickness: 0.85,
-      clearcoat: 1.0,
-      clearcoatRoughness: 0.04,
-      reflectivity: 0.92,
-      side: THREE.DoubleSide,
-    });
-    const glassCrystal = new THREE.Mesh(crystalGeo, glassMat);
-    glassCrystal.castShadow = true;
-    glassCrystal.receiveShadow = true;
-    prismGroup.add(glassCrystal);
+    // Light Sand / Champagne / Warm Beige Color Palette Variations
+    const SAND_SHADES = [
+      [0.98, 0.95, 0.90], // Light Champagne (#FFF8F0)
+      [0.94, 0.88, 0.78], // Cream Sand (#F5E6D3)
+      [0.89, 0.80, 0.68], // Warm Desert Ecru (#E8D2B8)
+      [0.82, 0.71, 0.56], // Golden Sand (#D9BD99)
+      [0.72, 0.60, 0.45], // Deep Sand Shadow (#B89975)
+    ];
 
-    // Chamfered Luminous Facet Edges
-    const edgesGeo = new THREE.EdgesGeometry(crystalGeo);
-    const edgesMat = new THREE.LineBasicMaterial({
-      color: 0xFFEDD5,
-      transparent: true,
-      opacity: 0.45,
-    });
-    const crystalEdges = new THREE.LineSegments(edgesGeo, edgesMat);
-    prismGroup.add(crystalEdges);
+    let pIdx = 0;
+    function addCpuPoint(x: number, y: number, z: number, shade: number[]) {
+      if (pIdx >= PARTICLE_COUNT) return;
+      const i3 = pIdx * 3;
+      // Start in subtle initial scattered formation, will spring into CPU
+      currentPositions[i3] = x + (Math.random() - 0.5) * 0.6;
+      currentPositions[i3 + 1] = y + (Math.random() - 0.5) * 0.6;
+      currentPositions[i3 + 2] = z + (Math.random() - 0.5) * 0.6;
 
-    // B. Inner Living Terrarium: Miniature Mountain Ridge
-    const mountainGroup = new THREE.Group();
-    mountainGroup.position.set(0, -0.42, 0);
+      targetPositions[i3] = x;
+      targetPositions[i3 + 1] = y;
+      targetPositions[i3 + 2] = z;
 
-    const basePlateGeo = new THREE.CylinderGeometry(0.55, 0.42, 0.12, 7);
-    const basePlateMat = new THREE.MeshStandardMaterial({
-      color: 0x181C24,
-      roughness: 0.7,
-      metalness: 0.2,
-    });
-    const basePlate = new THREE.Mesh(basePlateGeo, basePlateMat);
-    mountainGroup.add(basePlate);
+      velocities[i3] = 0;
+      velocities[i3 + 1] = 0;
+      velocities[i3 + 2] = 0;
 
-    // Stepped low-poly mountain peak
-    const peakGeo = new THREE.ConeGeometry(0.38, 0.65, 5);
-    const peakMat = new THREE.MeshStandardMaterial({
-      color: 0x22362C,
-      roughness: 0.55,
-      flatShading: true,
-    });
-    const peak = new THREE.Mesh(peakGeo, peakMat);
-    peak.position.set(-0.06, 0.35, 0);
-    peak.rotation.y = 0.4;
-    mountainGroup.add(peak);
+      // Color variation
+      particleColors[i3] = shade[0] + (Math.random() - 0.5) * 0.04;
+      particleColors[i3 + 1] = shade[1] + (Math.random() - 0.5) * 0.04;
+      particleColors[i3 + 2] = shade[2] + (Math.random() - 0.5) * 0.04;
 
-    const subPeakGeo = new THREE.ConeGeometry(0.24, 0.45, 4);
-    const subPeakMat = new THREE.MeshStandardMaterial({
-      color: 0x2E4A3C,
-      roughness: 0.6,
-      flatShading: true,
-    });
-    const subPeak = new THREE.Mesh(subPeakGeo, subPeakMat);
-    subPeak.position.set(0.22, 0.24, 0.08);
-    mountainGroup.add(subPeak);
-
-    // Stylized Bonsai Trunk & Foliage Cloud
-    const trunkGeo = new THREE.CylinderGeometry(0.02, 0.04, 0.35, 6);
-    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x2D211C, roughness: 0.8 });
-    const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-    trunk.position.set(-0.16, 0.32, 0.15);
-    trunk.rotation.z = -0.35;
-    trunk.rotation.y = 0.5;
-    mountainGroup.add(trunk);
-
-    const foliageColors = [0xDC2626, 0xEA580C, 0xF59E0B];
-    for (let f = 0; f < 4; f++) {
-      const folGeo = new THREE.DodecahedronGeometry(0.09 - f * 0.012, 0);
-      const folMat = new THREE.MeshStandardMaterial({
-        color: foliageColors[f % foliageColors.length],
-        roughness: 0.5,
-        emissive: foliageColors[f % foliageColors.length],
-        emissiveIntensity: 0.25,
-      });
-      const foliage = new THREE.Mesh(folGeo, folMat);
-      foliage.position.set(-0.25 + f * 0.05, 0.48 + (f % 2) * 0.04, 0.18 + f * 0.03);
-      mountainGroup.add(foliage);
+      particleSizes[pIdx] = Math.random() * 2.2 + 1.2;
+      pIdx++;
     }
-    prismGroup.add(mountainGroup);
 
-    // C. Pulsing Amber Sun Orb & Internal Solar PointLight
-    const sunOrbGeo = new THREE.SphereGeometry(0.16, 24, 24);
-    const sunOrbMat = new THREE.MeshBasicMaterial({ color: 0xFFA028 });
-    const sunOrb = new THREE.Mesh(sunOrbGeo, sunOrbMat);
-    sunOrb.position.set(0.05, 0.06, -0.05);
-    prismGroup.add(sunOrb);
-    coreOrbRef.current = sunOrb;
+    // A. Central Compute Die (Multi-core matrix) - 40% of particles
+    const dieSize = 0.95;
+    const dieCount = Math.floor(PARTICLE_COUNT * 0.40);
+    for (let i = 0; i < dieCount; i++) {
+      const coreX = Math.floor(Math.random() * 4);
+      const coreY = Math.floor(Math.random() * 4);
+      const coreOriginX = -dieSize * 0.5 + coreX * (dieSize / 4) + 0.02;
+      const coreOriginY = -dieSize * 0.5 + coreY * (dieSize / 4) + 0.02;
+      const x = coreOriginX + Math.random() * (dieSize / 4 - 0.04);
+      const y = coreOriginY + Math.random() * (dieSize / 4 - 0.04);
+      const z = (Math.random() - 0.5) * 0.035;
+      const shade = SAND_SHADES[Math.floor(Math.random() * 3)];
+      addCpuPoint(x, y, z, shade);
+    }
 
-    const coreLight = new THREE.PointLight(0xFF7A00, 3.6, 2.8);
-    coreLight.position.set(0.05, 0.06, -0.05);
-    prismGroup.add(coreLight);
-    coreLightRef.current = coreLight;
+    // B. Radiating Bus Lines & Interconnect Traces - 25% of particles
+    const traceCount = Math.floor(PARTICLE_COUNT * 0.25);
+    for (let i = 0; i < traceCount; i++) {
+      const angle = (Math.floor(Math.random() * 32) / 32) * Math.PI * 2;
+      const r = 0.52 + Math.random() * 0.48;
+      const x = Math.cos(angle) * r + (Math.random() - 0.5) * 0.015;
+      const y = Math.sin(angle) * r + (Math.random() - 0.5) * 0.015;
+      const z = (Math.random() - 0.5) * 0.03;
+      const shade = SAND_SHADES[Math.floor(Math.random() * SAND_SHADES.length)];
+      addCpuPoint(x, y, z, shade);
+    }
 
-    // D. Zero-Gravity Golden Spores & Pollen Motes
-    const sporeCount = 75;
-    const sporeGeo = new THREE.BufferGeometry();
-    const sporePos = new Float32Array(sporeCount * 3);
-    for (let i = 0; i < sporeCount * 3; i += 3) {
-      const r = Math.random() * 0.85;
+    // C. Substrate & Outer Heat Spreader Frame - 22% of particles
+    const frameCount = Math.floor(PARTICLE_COUNT * 0.22);
+    const frameSize = 1.75;
+    for (let i = 0; i < frameCount; i++) {
+      const side = Math.floor(Math.random() * 4);
+      let x = 0, y = 0;
+      const t = (Math.random() - 0.5) * frameSize;
+      const offset = frameSize * 0.5 * (Math.random() > 0.5 ? 1 : -1);
+      if (side === 0 || side === 1) {
+        x = t;
+        y = offset + (Math.random() - 0.5) * 0.05;
+      } else {
+        x = offset + (Math.random() - 0.5) * 0.05;
+        y = t;
+      }
+      const z = (Math.random() - 0.5) * 0.05;
+      const shade = Math.random() > 0.5 ? SAND_SHADES[0] : SAND_SHADES[4];
+      addCpuPoint(x, y, z, shade);
+    }
+
+    // D. Outer Pin Grid Array (PGA / BGA Contacts) - 10% of particles
+    const pinCount = Math.floor(PARTICLE_COUNT * 0.10);
+    for (let i = 0; i < pinCount; i++) {
+      const px = (Math.floor(Math.random() * 26) - 13) * 0.065;
+      const py = (Math.floor(Math.random() * 26) - 13) * 0.065;
+      if (Math.abs(px) < 0.55 && Math.abs(py) < 0.55) continue;
+      addCpuPoint(px, py, -0.04 + (Math.random() - 0.5) * 0.02, SAND_SHADES[3]);
+    }
+
+    // E. Ambient Floating Dust Halo - Remaining particles
+    while (pIdx < PARTICLE_COUNT) {
+      const r = Math.random() * 2.2;
       const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(Math.random() * 2 - 1);
-      sporePos[i] = r * Math.sin(phi) * Math.cos(theta);
-      sporePos[i + 1] = r * Math.sin(phi) * Math.sin(theta);
-      sporePos[i + 2] = r * Math.cos(phi);
+      const phi = (Math.random() - 0.5) * Math.PI;
+      const x = r * Math.cos(theta) * Math.cos(phi);
+      const y = r * Math.sin(theta) * Math.cos(phi);
+      const z = r * Math.sin(phi) * 0.3;
+      addCpuPoint(x, y, z, SAND_SHADES[4]);
     }
-    sporeGeo.setAttribute("position", new THREE.BufferAttribute(sporePos, 3));
-    const sporeMat = new THREE.PointsMaterial({
-      color: 0xFFE082,
-      size: 0.024,
+
+    // 5. POINT CLOUD GEOMETRY & CUSTOM CIRCULAR SHADER MATERIAL
+    const particleGeo = new THREE.BufferGeometry();
+    particleGeo.setAttribute("position", new THREE.BufferAttribute(currentPositions, 3));
+    particleGeo.setAttribute("color", new THREE.BufferAttribute(particleColors, 3));
+    particleGeo.setAttribute("size", new THREE.BufferAttribute(particleSizes, 1));
+
+    const particleMat = new THREE.ShaderMaterial({
       transparent: true,
-      opacity: 0.75,
+      depthWrite: false,
+      blending: THREE.NormalBlending,
+      vertexShader: `
+        attribute float size;
+        attribute vec3 color;
+        varying vec3 vColor;
+        void main() {
+          vColor = color;
+          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+          gl_PointSize = clamp(size * (7.0 / -mvPosition.z), 1.5, 8.0);
+          gl_Position = projectionMatrix * mvPosition;
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vColor;
+        void main() {
+          // Circular particle with crisp edge falloff
+          float d = length(gl_PointCoord - vec2(0.5));
+          if (d > 0.5) discard;
+          float alpha = smoothstep(0.5, 0.15, d) * 0.92;
+          gl_FragColor = vec4(vColor, alpha);
+        }
+      `,
     });
-    const spores = new THREE.Points(sporeGeo, sporeMat);
-    prismGroup.add(spores);
-    sporesRef.current = spores;
 
-    // E. Floating Exterior Orbital Rings
-    const ring1Geo = new THREE.TorusGeometry(1.65, 0.005, 16, 64);
-    const ring1Mat = new THREE.MeshBasicMaterial({ color: 0x60A5FA, transparent: true, opacity: 0.4 });
-    const ring1 = new THREE.Mesh(ring1Geo, ring1Mat);
-    ring1.rotation.x = Math.PI / 3;
-    prismGroup.add(ring1);
-    ring1Ref.current = ring1;
+    const particles = new THREE.Points(particleGeo, particleMat);
+    scene.add(particles);
+    particlesRef.current = particles;
 
-    const ring2Geo = new THREE.TorusGeometry(1.95, 0.004, 16, 64);
-    const ring2Mat = new THREE.MeshBasicMaterial({ color: 0xF59E0B, transparent: true, opacity: 0.35 });
-    const ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
-    ring2.rotation.y = Math.PI / 4;
-    ring2.rotation.z = Math.PI / 6;
-    prismGroup.add(ring2);
-    ring2Ref.current = ring2;
-
-    // 7. INTERACTIVE 3D HIT-BOXES
-    const hitBoxes: THREE.Mesh[] = [];
-    const hitBoxMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
-
-    // Center Core Hitbox: Triggers Genesis Unfold -> Portfolio
-    const coreHitBox = new THREE.Mesh(new THREE.SphereGeometry(1.28, 16, 16), hitBoxMat);
-    coreHitBox.position.set(0, 0.05, 0);
-    coreHitBox.userData = {
-      key: "prism_core",
-      label: "Cyber-Pastoral Prism",
-      sub: "Click Core to Unfold into Portfolio ↗",
-      action: triggerPrismTransition,
-    };
-    scene.add(coreHitBox);
-    hitBoxes.push(coreHitBox);
-
-    // Left Anchor: Selected Projects
-    const projectsHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.45, 0.45), hitBoxMat);
-    projectsHitBox.position.set(-1.65, 0.45, 0);
-    projectsHitBox.userData = {
-      key: "projects",
-      label: "Selected Commissions",
-      sub: "Microsecond Translation · Cricket Ops · DeepSeek Harness",
-      action: () => {
-        playGlassChime(1100);
-        setActiveModal("projects");
-      },
-    };
-    scene.add(projectsHitBox);
-    hitBoxes.push(projectsHitBox);
-
-    // Right Anchor: Rig Specs & Architecture
-    const specsHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.45, 0.45), hitBoxMat);
-    specsHitBox.position.set(1.65, 0.45, 0);
-    specsHitBox.userData = {
-      key: "specs",
-      label: "System Architecture",
-      sub: "C++ · Rust · Concurrency · Optimal 28°C Thermals",
-      action: () => {
-        playGlassChime(1100);
-        setActiveModal("specs");
-      },
-    };
-    scene.add(specsHitBox);
-    hitBoxes.push(specsHitBox);
-
-    // Bottom-Left Anchor: Terrace Ambience & Sound
-    const soundHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.45, 0.45), hitBoxMat);
-    soundHitBox.position.set(-1.55, -0.65, 0);
-    soundHitBox.userData = {
-      key: "sound",
-      label: "Terrace Mountain Soundscape",
-      sub: "Real-Time Web Audio Organic Mountain Breeze",
-      action: () => {
-        playGlassChime(1100);
-        setActiveModal("hobbies");
-      },
-    };
-    scene.add(soundHitBox);
-    hitBoxes.push(soundHitBox);
-
-    // Bottom-Right Anchor: Interactive CLI Terminal
-    const terminalHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.45, 0.45), hitBoxMat);
-    terminalHitBox.position.set(1.55, -0.65, 0);
-    terminalHitBox.userData = {
-      key: "terminal",
-      label: "Hacker CLI Terminal",
-      sub: "Interactive Kernel Bash Shell",
-      action: () => {
-        playGlassChime(1100);
-        setActiveModal("terminal");
-      },
-    };
-    scene.add(terminalHitBox);
-    hitBoxes.push(terminalHitBox);
-
-    hitBoxesRef.current = hitBoxes;
-
-    // 8. RAYCASTING & CURSOR INTERACTION
+    // 6. INTERACTION RAYCASTING PLANE
+    const rayPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
     const raycaster = new THREE.Raycaster();
     const mouseVector = new THREE.Vector2();
 
-    const onPointerMove = (e: MouseEvent) => {
+    // Map screen mouse coordinates to 3D world plane
+    const updateMouseWorldPos = (clientX: number, clientY: number) => {
       const rect = renderer.domElement.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-      const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-
-      mouseNorm.current.x = x;
-      mouseNorm.current.y = y;
-      mouseVector.set(x, y);
+      mouseVector.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+      mouseVector.y = -((clientY - rect.top) / rect.height) * 2 + 1;
 
       raycaster.setFromCamera(mouseVector, camera);
-      const intersects = raycaster.intersectObjects(hitBoxesRef.current);
+      const intersectionPoint = new THREE.Vector3();
+      raycaster.ray.intersectPlane(rayPlane, intersectionPoint);
 
-      if (intersects.length > 0 && !isTransitioning.current) {
-        const hit = intersects[0].object;
-        const data = hit.userData;
-        container.style.cursor = "pointer";
-        setHoveredItem({
-          key: data.key,
-          label: data.label,
-          sub: data.sub,
-          x: e.clientX,
-          y: e.clientY,
-        });
-      } else {
-        container.style.cursor = "default";
-        setHoveredItem(null);
+      if (intersectionPoint) {
+        mouseWorldPosRef.current.copy(intersectionPoint);
       }
     };
 
-    const onPointerClick = (e: MouseEvent) => {
-      if (isTransitioning.current) return;
-      const rect = renderer.domElement.getBoundingClientRect();
-      mouseVector.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-      mouseVector.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    // POINTER MOVE: Scatter particles around cursor
+    const onPointerMove = (e: PointerEvent) => {
+      updateMouseWorldPos(e.clientX, e.clientY);
+      if (isHoldingRef.current) {
+        blackHolePosRef.current.copy(mouseWorldPosRef.current);
+      }
+    };
 
-      raycaster.setFromCamera(mouseVector, camera);
-      const intersects = raycaster.intersectObjects(hitBoxesRef.current);
+    // POINTER DOWN: Record position & schedule Black Hole hold
+    const holdTimerRef = { id: 0 as any };
+    const onPointerDown = (e: PointerEvent) => {
+      updateMouseWorldPos(e.clientX, e.clientY);
+      pointerDownPosRef.current = { x: e.clientX, y: e.clientY };
+      holdStartRef.current = performance.now();
 
-      if (intersects.length > 0) {
-        const hit = intersects[0].object;
-        if (hit.userData.action) {
-          hit.userData.action();
+      // If user holds for more than 160ms, ignite the Black Hole Singularity!
+      holdTimerRef.id = setTimeout(() => {
+        isHoldingRef.current = true;
+        blackHolePosRef.current.copy(mouseWorldPosRef.current);
+        startBlackHoleSound();
+        setInteractionHint("BLACK HOLE ACTIVE · SUCKING PARTICLES IN · RELEASE TO EXPLODE");
+      }, 160);
+    };
+
+    // POINTER UP: If holding -> Detonate Supernova! If quick click -> Warp into Portfolio!
+    const onPointerUp = (e: PointerEvent) => {
+      clearTimeout(holdTimerRef.id);
+      const pressDuration = performance.now() - holdStartRef.current;
+      const dx = Math.abs(e.clientX - pointerDownPosRef.current.x);
+      const dy = Math.abs(e.clientY - pointerDownPosRef.current.y);
+
+      if (isHoldingRef.current) {
+        // Was holding: Detonate Supernova Shockwave!
+        isHoldingRef.current = false;
+        stopBlackHoleSoundAndBlast();
+        setInteractionHint("SUPERNOVA SHOCKWAVE RELEASED · REFORMING CPU");
+
+        // Apply outward explosive velocity impulse to all particles
+        const bh = blackHolePosRef.current;
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+          const i3 = i * 3;
+          const px = currentPositions[i3];
+          const py = currentPositions[i3 + 1];
+          const pz = currentPositions[i3 + 2];
+
+          const edx = px - bh.x;
+          const edy = py - bh.y;
+          const edz = pz - bh.z;
+          const dist = Math.sqrt(edx * edx + edy * edy + edz * edz) + 0.05;
+
+          const blastForce = (Math.random() * 4.5 + 2.5) / dist;
+          velocities[i3] += (edx / dist) * blastForce;
+          velocities[i3 + 1] += (edy / dist) * blastForce;
+          velocities[i3 + 2] += (edz / dist) * blastForce;
         }
+
+        setTimeout(() => {
+          setInteractionHint("MOVE TO SCATTER · HOLD FOR BLACK HOLE · CLICK TO WARP");
+        }, 2000);
+      } else if (pressDuration < 220 && dx < 15 && dy < 15) {
+        // Quick single click/tap on particle structure: Trigger Genesis Warp!
+        triggerWarpTransition();
       }
     };
 
-    window.addEventListener("mousemove", onPointerMove);
-    renderer.domElement.addEventListener("click", onPointerClick);
+    window.addEventListener("pointermove", onPointerMove);
+    renderer.domElement.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("pointerup", onPointerUp);
 
-    // 9. ANIMATION LOOP (Refractive Tilting, Orbital Harmonics, Spore Drift)
+    // 7. HIGH-PERFORMANCE PHYSICS SIMULATION LOOP (60 - 120 FPS)
     let clock = new THREE.Clock();
 
     const animate = () => {
       animFrameRef.current = requestAnimationFrame(animate);
-      const delta = clock.getDelta();
+      const delta = Math.min(clock.getDelta(), 0.033);
       const elapsed = clock.getElapsedTime();
 
-      // Refractive Prism Spring-Damped Tilting
-      if (!isTransitioning.current && prismGroupRef.current) {
-        const targetRotY = mouseNorm.current.x * 0.45 + elapsed * 0.08;
-        const targetRotX = -mouseNorm.current.y * 0.35 + Math.sin(elapsed * 0.6) * 0.05;
+      // Update studio smoke background shader
+      smokeMat.uniforms.uTime.value = elapsed;
 
-        prismGroupRef.current.rotation.y += (targetRotY - prismGroupRef.current.rotation.y) * 0.06;
-        prismGroupRef.current.rotation.x += (targetRotX - prismGroupRef.current.rotation.x) * 0.06;
-        prismGroupRef.current.position.y = 0.05 + Math.sin(elapsed * 1.2) * 0.04;
-      }
+      // Physics constants
+      const isHolding = isHoldingRef.current;
+      const bh = blackHolePosRef.current;
+      const mw = mouseWorldPosRef.current;
+      const posArr = currentPositions;
+      const targetArr = targetPositions;
+      const velArr = velocities;
 
-      // Orbital Rings Rotation
-      if (ring1Ref.current) ring1Ref.current.rotation.z += delta * 0.25;
-      if (ring2Ref.current) ring2Ref.current.rotation.y -= delta * 0.18;
+      const scatterRadius = 0.38;
+      const scatterRadiusSq = scatterRadius * scatterRadius;
 
-      // Internal Sun Pulse
-      if (coreOrbRef.current && coreLightRef.current && !isTransitioning.current) {
-        const pulse = 1.0 + Math.sin(elapsed * 2.5) * 0.08;
-        coreOrbRef.current.scale.set(pulse, pulse, pulse);
-        coreLightRef.current.intensity = 3.6 + Math.sin(elapsed * 2.5) * 0.6;
-      }
+      // Single fast loop over all particles
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const i3 = i * 3;
+        let px = posArr[i3];
+        let py = posArr[i3 + 1];
+        let pz = posArr[i3 + 2];
+        let vx = velArr[i3];
+        let vy = velArr[i3 + 1];
+        let vz = velArr[i3 + 2];
 
-      // Zero-Gravity Spores Swirl
-      if (sporesRef.current) {
-        const pos = sporesRef.current.geometry.attributes.position.array as Float32Array;
-        for (let i = 0; i < pos.length; i += 3) {
-          pos[i + 1] += Math.sin(elapsed + i) * 0.0006;
+        if (isHolding) {
+          // BLACK HOLE MODE: Sucks all particles into swirling singularity
+          const dx = bh.x - px;
+          const dy = bh.y - py;
+          const dz = bh.z - pz;
+          const dist = Math.sqrt(dx * dx + dy * dy + dz * dz) + 0.04;
+
+          // Inward gravitational pull + tangential vortex spin
+          const pull = 4.2 / dist;
+          const spin = 2.0 / dist;
+
+          vx += (dx / dist * pull - dy / dist * spin) * delta;
+          vy += (dy / dist * pull + dx / dist * spin) * delta;
+          vz += (dz / dist * pull) * delta;
+
+          // Damping to prevent infinite orbital acceleration
+          vx *= 0.94;
+          vy *= 0.94;
+          vz *= 0.94;
+        } else {
+          // IDLE / RETURN MODE: Elastic spring back to CPU formation
+          const tx = targetArr[i3];
+          const ty = targetArr[i3 + 1];
+          const tz = targetArr[i3 + 2];
+
+          // Harmonic spring return
+          vx += (tx - px) * 6.5 * delta;
+          vy += (ty - py) * 8.0 * delta;
+          vz += (tz - pz) * 6.5 * delta;
+
+          // Cursor Scatter / Repulsion
+          const mdx = px - mw.x;
+          const mdy = py - mw.y;
+          const distSq = mdx * mdx + mdy * mdy;
+
+          if (distSq < scatterRadiusSq) {
+            const mDist = Math.sqrt(distSq) + 0.001;
+            const repForce = (scatterRadius - mDist) * 9.5;
+            vx += (mdx / mDist) * repForce * delta;
+            vy += (mdy / mDist) * repForce * delta;
+          }
+
+          // Kinetic friction damping
+          vx *= 0.92;
+          vy *= 0.92;
+          vz *= 0.92;
         }
-        sporesRef.current.geometry.attributes.position.needsUpdate = true;
+
+        // Apply velocities
+        posArr[i3] = px + vx * (delta * 60);
+        posArr[i3 + 1] = py + vy * (delta * 60);
+        posArr[i3 + 2] = pz + vz * (delta * 60);
+        velArr[i3] = vx;
+        velArr[i3 + 1] = vy;
+        velArr[i3 + 2] = vz;
       }
 
-      // Floor Caustic Light Tracks Mouse Cursor
-      if (causticLightRef.current) {
-        causticLightRef.current.position.x = mouseNorm.current.x * 2.2;
-        causticLightRef.current.position.z = 0.8 - mouseNorm.current.y * 1.4;
+      particleGeo.attributes.position.needsUpdate = true;
+
+      // Subtle atmospheric rotation
+      if (particlesRef.current && !isHolding) {
+        particlesRef.current.rotation.z = Math.sin(elapsed * 0.2) * 0.02;
       }
 
       renderer.render(scene, camera);
@@ -674,16 +763,20 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       const mobile = w / h < 1.0;
 
       cameraRef.current.aspect = w / h;
-      cameraRef.current.fov = mobile ? 54 : 44;
-      cameraRef.current.position.z = mobile ? 3.8 : 3.2;
+      cameraRef.current.fov = mobile ? 54 : 45;
+      cameraRef.current.position.z = mobile ? 3.4 : 2.8;
       cameraRef.current.updateProjectionMatrix();
+
+      smokeMat.uniforms.uResolution.value.set(w, h);
       rendererRef.current.setSize(w, h);
     };
 
     window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("mousemove", onPointerMove);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("resize", handleResize);
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
       if (rendererRef.current?.domElement) {
@@ -691,57 +784,42 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         rendererRef.current.dispose();
       }
     };
-  }, [triggerPrismTransition, playGlassChime]);
+  }, [triggerWarpTransition, startBlackHoleSound, stopBlackHoleSoundAndBlast]);
 
   return (
-    <div className="relative w-full h-[100svh] bg-[#05070D] text-[#F8F5EE] overflow-hidden select-none">
+    <div className="relative w-full h-[100svh] bg-[#06070B] text-[#F8F5EE] overflow-hidden select-none">
       {/* Three.js Canvas Container */}
-      <div ref={mountRef} className="absolute inset-0 w-full h-full z-10" />
+      <div ref={mountRef} className="absolute inset-0 w-full h-full z-10 cursor-crosshair" />
 
-      {/* Top Header Bar: Status Indicator */}
+      {/* Top Header Bar: Telemetry Status Indicator */}
       <header className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between pointer-events-auto">
         <div className="flex items-center gap-3 bg-black/60 backdrop-blur-md border border-white/10 px-3.5 py-1.5 rounded-full text-xs font-mono">
           <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-          <span className="text-white/80 font-medium">SOHAM ROYCHOUDHURY · CYBER-PASTORAL PRISM</span>
+          <span className="text-white/80 font-medium">SOHAM ROYCHOUDHURY · CPU PARTICLE CORE</span>
           <span className="hidden sm:inline text-white/40">|</span>
-          <span className="hidden sm:inline text-white/50">ATELIER // 2026</span>
+          <span className="hidden sm:inline text-white/50">STUDIO SMOKE ATMOSPHERE</span>
         </div>
 
         <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-xs font-mono text-white/70">
           <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          <span>Spatial Art Core Active</span>
+          <span>GPU Kinetic Physics Active</span>
         </div>
       </header>
 
-      {/* Floating Hologram Tag (Strictly follows cursor when over interactive anchor) */}
-      {hoveredItem && (
-        <div
-          className="fixed pointer-events-none z-50 transform -translate-x-1/2 -translate-y-full mb-4 animate-in fade-in zoom-in-95 duration-150"
-          style={{ left: hoveredItem.x, top: hoveredItem.y - 12 }}
-        >
-          <div className="flex items-center gap-2.5 bg-[#0B0D14]/95 backdrop-blur-md border border-white/20 px-3.5 py-2 rounded-xl shadow-2xl">
-            <div className="p-1.5 rounded-lg bg-white/10 text-white">
-              {hoveredItem.key === "prism_core" && <Sparkles className="w-4 h-4 text-amber-400" />}
-              {hoveredItem.key === "specs" && <Cpu className="w-4 h-4 text-red-400" />}
-              {hoveredItem.key === "projects" && <Gamepad2 className="w-4 h-4 text-purple-400" />}
-              {hoveredItem.key === "sound" && <Headphones className="w-4 h-4 text-blue-400" />}
-              {hoveredItem.key === "terminal" && <TerminalIcon className="w-4 h-4 text-emerald-400" />}
-            </div>
-            <div className="text-left">
-              <p className="text-xs font-bold text-white leading-tight">{hoveredItem.label}</p>
-              <p className="text-[10px] text-white/70 font-mono leading-tight">{hoveredItem.sub}</p>
-            </div>
-          </div>
+      {/* Center Interactive Action Pill Banner */}
+      <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
+        <div className="bg-black/40 backdrop-blur-md border border-white/10 px-4 py-1.5 rounded-full text-[11px] font-mono text-white/70 tracking-wider">
+          {interactionHint}
         </div>
-      )}
+      </div>
 
-      {/* Floating Screen Waypoints: Left & Right Tactical Badges */}
+      {/* Floating Tactical Badges: Left & Right */}
       <div className="absolute inset-x-6 top-1/2 -translate-y-1/2 z-30 pointer-events-none hidden md:flex items-center justify-between">
         {/* Left Badges */}
         <div className="space-y-4 pointer-events-auto">
           <button
             onClick={() => {
-              playGlassChime(1100);
+              playTactileClick(1100);
               setActiveModal("projects");
             }}
             className="flex items-center gap-3 px-3.5 py-2 rounded-xl bg-black/60 hover:bg-black/80 backdrop-blur-md border border-white/10 hover:border-purple-500/40 text-left transition-all group"
@@ -757,7 +835,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
           <button
             onClick={() => {
-              playGlassChime(1100);
+              playTactileClick(1100);
               setActiveModal("hobbies");
             }}
             className="flex items-center gap-3 px-3.5 py-2 rounded-xl bg-black/60 hover:bg-black/80 backdrop-blur-md border border-white/10 hover:border-blue-500/40 text-left transition-all group"
@@ -776,7 +854,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         <div className="space-y-4 pointer-events-auto">
           <button
             onClick={() => {
-              playGlassChime(1100);
+              playTactileClick(1100);
               setActiveModal("specs");
             }}
             className="flex items-center gap-3 px-3.5 py-2 rounded-xl bg-black/60 hover:bg-black/80 backdrop-blur-md border border-white/10 hover:border-red-500/40 text-right transition-all group"
@@ -792,7 +870,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
           <button
             onClick={() => {
-              playGlassChime(1100);
+              playTactileClick(1100);
               setActiveModal("terminal");
             }}
             className="flex items-center gap-3 px-3.5 py-2 rounded-xl bg-black/60 hover:bg-black/80 backdrop-blur-md border border-white/10 hover:border-emerald-500/40 text-right transition-all group"
@@ -814,7 +892,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           {/* Projects Button */}
           <button
             onClick={() => {
-              playGlassChime(1100);
+              playTactileClick(1100);
               setActiveModal("projects");
             }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-white/90 border border-white/10 text-xs font-medium transition-all shrink-0"
@@ -826,7 +904,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           {/* Specs Button */}
           <button
             onClick={() => {
-              playGlassChime(1100);
+              playTactileClick(1100);
               setActiveModal("specs");
             }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-white/90 border border-white/10 text-xs font-medium transition-all shrink-0"
@@ -838,7 +916,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           {/* Sound & Hobbies */}
           <button
             onClick={() => {
-              playGlassChime(1100);
+              playTactileClick(1100);
               setActiveModal("hobbies");
             }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-white/90 border border-white/10 text-xs font-medium transition-all shrink-0"
@@ -850,7 +928,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           {/* Terminal */}
           <button
             onClick={() => {
-              playGlassChime(1100);
+              playTactileClick(1100);
               setActiveModal("terminal");
             }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-white/90 border border-white/10 text-xs font-medium transition-all shrink-0"
@@ -872,12 +950,12 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             {isAudioPlaying ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
           </button>
 
-          {/* Direct Genesis Unfold Enter Website CTA */}
+          {/* Direct Warp Enter Website CTA */}
           <button
-            onClick={triggerPrismTransition}
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-[#FF7A00] hover:bg-[#FF8D24] text-black font-semibold text-xs transition-all shadow-lg shadow-[#FF7A00]/25 shrink-0"
+            onClick={triggerWarpTransition}
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-[#F5E6D3] hover:bg-[#FFF8F0] text-black font-semibold text-xs transition-all shadow-lg shadow-[#F5E6D3]/20 shrink-0"
           >
-            <span>Unfold Portfolio</span>
+            <span>Warp to Portfolio</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -1038,8 +1116,8 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
                     <p className="text-white/60 text-[11px]">Recursive local model inference and verifiable sandbox execution.</p>
                   </div>
                   <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10">
-                    <p className="font-semibold text-white">Spatial WebGL & Shader Mechanics</p>
-                    <p className="text-white/60 text-[11px]">Custom refraction shaders, physical glass IOR, and 120 FPS render loops.</p>
+                    <p className="font-semibold text-white">Kinetic GPU Physics Simulation</p>
+                    <p className="text-white/60 text-[11px]">Sub-millisecond vector math, harmonic damping, and 120 FPS render loops.</p>
                   </div>
                 </div>
               </div>
@@ -1128,7 +1206,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
                 </p>
                 <button
                   onClick={toggleAmbientSound}
-                  className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#FF7A00] hover:bg-[#FF8D24] text-black text-xs font-semibold transition-all"
+                  className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#F5E6D3] hover:bg-[#FFF8F0] text-black text-xs font-semibold transition-all"
                 >
                   {isAudioPlaying ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
                   <span>{isAudioPlaying ? "Stop Soundscape" : "Start Terrace Breeze"}</span>
@@ -1177,7 +1255,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
                 <div className="w-3 h-3 rounded-full bg-red-500/80" />
                 <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
                 <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
-                <span className="text-xs text-white/60 ml-2">soham@prism-kernel: ~ (bash)</span>
+                <span className="text-xs text-white/60 ml-2">soham@particle-kernel: ~ (bash)</span>
               </div>
               <button
                 onClick={() => setActiveModal(null)}

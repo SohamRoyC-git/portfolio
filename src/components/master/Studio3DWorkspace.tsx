@@ -450,8 +450,8 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     scene.add(attractorGroup);
     attractorGroupRef.current = attractorGroup;
 
-    // 4B. GIANT ARCHITECTURAL HYBRID TYPOGRAPHY (BOLD CINEMATIC DISPLAY: ORBITRON / MICHROMA)
-    // Hybrid Contrast: Solid filled "WELCOME" & "MY PORTFOLIO", Hollow wireframe "TO"
+    // 4B. CASA MOMO INSPIRED TWO-CORNER DIAGONAL EDITORIAL TYPOGRAPHY
+    // Top-Left: "WELCOME TO", Bottom-Right: "MY PORTFOLIO", Center completely open for Lorenz Attractor
     const textCanvas = document.createElement("canvas");
     textCanvas.width = 2560;
     textCanvas.height = 1440;
@@ -460,65 +460,48 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     const renderTypographyCanvas = () => {
       if (!tCtx) return;
       tCtx.clearRect(0, 0, 2560, 1440);
-      tCtx.textAlign = "center";
-      tCtx.textBaseline = "middle";
 
-      const fontFamily = "'Orbitron', 'Michroma', 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      const fontFamily = "'BN Riley', 'BNRiley', 'Cormorant Garamond', 'Cinzel', serif";
 
-      // 1. Top Line: W E L C O M E (Solid Filled Champagne Ecru with Crisp Hairline Edge)
-      const welcomeFontSize = isMobile ? 120 : 172;
-      tCtx.font = `900 ${welcomeFontSize}px ${fontFamily}`;
-      const welcomeChars = ["W", "E", "L", "C", "O", "M", "E"];
-      const startX = isMobile ? 130 : 180;
-      const endX = isMobile ? 2430 : 2380;
-      const stepX = (endX - startX) / (welcomeChars.length - 1);
-      const topY = isMobile ? 175 : 225;
+      // Solid Warm Ivory Fill (#F5EEDA) matching the CASA MOMO boutique reference
+      tCtx.fillStyle = "#F5EEDA";
+      tCtx.strokeStyle = "rgba(245, 238, 218, 0.35)";
+      tCtx.lineWidth = 1.2;
 
-      // Solid champagne gradient fill for commanding presence
-      const topGrad = tCtx.createLinearGradient(0, topY - welcomeFontSize * 0.6, 0, topY + welcomeFontSize * 0.6);
-      topGrad.addColorStop(0, "rgba(255, 250, 242, 0.96)");
-      topGrad.addColorStop(1, "rgba(235, 215, 192, 0.82)");
-      tCtx.fillStyle = topGrad;
-      tCtx.strokeStyle = "rgba(255, 255, 255, 0.40)";
-      tCtx.lineWidth = 2.2;
+      if (isMobile) {
+        // MOBILE PORTRAIT (Stacked for natural vertical cadence)
+        tCtx.textAlign = "left";
+        tCtx.textBaseline = "top";
+        tCtx.font = `normal 115px ${fontFamily}`;
+        tCtx.fillText("WELCOME", 120, 130);
+        tCtx.strokeText("WELCOME", 120, 130);
+        tCtx.fillText("TO", 120, 260);
+        tCtx.strokeText("TO", 120, 260);
 
-      for (let i = 0; i < welcomeChars.length; i++) {
-        const x = startX + i * stepX;
-        tCtx.fillText(welcomeChars[i], x, topY);
-        tCtx.strokeText(welcomeChars[i], x, topY);
-      }
+        tCtx.textAlign = "right";
+        tCtx.textBaseline = "bottom";
+        tCtx.font = `normal 105px ${fontFamily}`;
+        tCtx.fillText("MY", 2440, 1180);
+        tCtx.strokeText("MY", 2440, 1180);
+        tCtx.fillText("PORTFOLIO", 2440, 1310);
+        tCtx.strokeText("PORTFOLIO", 2440, 1310);
+      } else {
+        // DESKTOP: Bold Two-Corner Diagonal (CASA MOMO Spatial Poise)
+        // Top-Left Anchor: "WELCOME TO"
+        tCtx.textAlign = "left";
+        tCtx.textBaseline = "top";
+        const welcomeFontSize = 175;
+        tCtx.font = `normal ${welcomeFontSize}px ${fontFamily}`;
+        tCtx.fillText("WELCOME TO", 150, 160);
+        tCtx.strokeText("WELCOME TO", 150, 160);
 
-      // 2. Center Word: T O (Hollow Wireframe - Butterfly Knot Cuts Cleanly Through)
-      const toFontSize = isMobile ? 135 : 165;
-      tCtx.font = `900 ${toFontSize}px ${fontFamily}`;
-      tCtx.strokeStyle = "rgba(240, 226, 208, 0.55)";
-      tCtx.lineWidth = 3.2;
-      // Stretched spacing for "T O" to frame the central Lorenz knot
-      tCtx.strokeText("T", 1140, 720);
-      tCtx.strokeText("O", 1420, 720);
-
-      // 3. Bottom Line: M Y   P O R T F O L I O (Solid Filled Champagne Ecru)
-      const portfolioFontSize = isMobile ? 90 : 132;
-      tCtx.font = `900 ${portfolioFontSize}px ${fontFamily}`;
-      const portfolioItems = ["M", "Y", " ", "P", "O", "R", "T", "F", "O", "L", "I", "O"];
-      const pStartX = isMobile ? 130 : 180;
-      const pEndX = isMobile ? 2430 : 2380;
-      const pStepX = (pEndX - pStartX) / (portfolioItems.length - 1);
-      const bottomY = isMobile ? 1270 : 1230;
-
-      const botGrad = tCtx.createLinearGradient(0, bottomY - portfolioFontSize * 0.6, 0, bottomY + portfolioFontSize * 0.6);
-      botGrad.addColorStop(0, "rgba(255, 250, 242, 0.96)");
-      botGrad.addColorStop(1, "rgba(235, 215, 192, 0.82)");
-      tCtx.fillStyle = botGrad;
-      tCtx.strokeStyle = "rgba(255, 255, 255, 0.40)";
-      tCtx.lineWidth = 2.0;
-
-      for (let i = 0; i < portfolioItems.length; i++) {
-        if (portfolioItems[i] !== " ") {
-          const x = pStartX + i * pStepX;
-          tCtx.fillText(portfolioItems[i], x, bottomY);
-          tCtx.strokeText(portfolioItems[i], x, bottomY);
-        }
+        // Bottom-Right Counterbalance: "MY PORTFOLIO"
+        tCtx.textAlign = "right";
+        tCtx.textBaseline = "bottom";
+        const portfolioFontSize = 175;
+        tCtx.font = `normal ${portfolioFontSize}px ${fontFamily}`;
+        tCtx.fillText("MY PORTFOLIO", 2410, 1280);
+        tCtx.strokeText("MY PORTFOLIO", 2410, 1280);
       }
     };
 
@@ -528,8 +511,12 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     textTexture.minFilter = THREE.LinearFilter;
     textTexture.magFilter = THREE.LinearFilter;
 
-    // Font readiness hook to redraw once Orbitron finishes font loading
+    // Font readiness hook to redraw once BN Riley is loaded into document.fonts
     if (typeof document !== "undefined" && document.fonts) {
+      document.fonts.load("175px 'BN Riley'").then(() => {
+        renderTypographyCanvas();
+        textTexture.needsUpdate = true;
+      });
       document.fonts.ready.then(() => {
         renderTypographyCanvas();
         textTexture.needsUpdate = true;
@@ -1526,15 +1513,19 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         className="absolute inset-0 bg-[#FFFDF5] pointer-events-none opacity-0 z-50 transition-opacity"
       />
 
-      {/* Subtle, Minimal Bottom Hyperspace Button (Distraction-Free Cinematic Canvas) */}
-      <footer className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 pointer-events-auto">
+      {/* Editorial Boutique Corner: Supporting Telemetry & Hyperspace Jump (CASA MOMO Style) */}
+      <footer className="absolute bottom-8 left-8 sm:left-12 z-40 pointer-events-auto flex flex-col items-start gap-2.5">
+        <div className="hidden sm:flex flex-col text-[11px] font-mono tracking-widest text-[#F5EEDA]/45 uppercase select-none">
+          <span>Non-Linear Dynamical Phase Space</span>
+          <span>Deterministic Chaos · Atelier Edition</span>
+        </div>
         <button
           onClick={triggerWarpTransition}
-          className="group flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/70 hover:text-white text-xs font-mono tracking-wider transition-all backdrop-blur-md shadow-lg active:scale-95"
+          className="group flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#F5EEDA]/5 hover:bg-[#F5EEDA]/10 border border-[#F5EEDA]/15 hover:border-[#F5EEDA]/30 text-[#F5EEDA]/80 hover:text-[#F5EEDA] text-xs font-mono tracking-wider transition-all backdrop-blur-md shadow-lg active:scale-95"
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400/80 animate-pulse" />
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-400/90 animate-pulse" />
           <span>Hyperspace Jump</span>
-          <ArrowRight className="w-3.5 h-3.5 text-white/40 group-hover:text-white group-hover:translate-x-0.5 transition-transform" />
+          <ArrowRight className="w-3.5 h-3.5 text-[#F5EEDA]/50 group-hover:text-[#F5EEDA] group-hover:translate-x-0.5 transition-transform" />
         </button>
       </footer>
     </div>

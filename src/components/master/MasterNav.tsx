@@ -84,7 +84,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
         Top Floating Action Bar (Pure Transparent, No Black Bar)
         Clean white icons and crisp white text floating directly over artwork
       */}
-      <header className="fixed top-0 left-0 right-0 z-40 flex justify-center w-full pointer-events-none select-none">
+      <header className="fixed top-0 left-0 right-0 z-60 flex justify-center w-full pointer-events-none select-none">
         <div
           ref={navRef}
           className="w-full flex items-center justify-between gap-4 pointer-events-auto py-5 sm:py-7 px-5 sm:px-10 md:px-14 bg-transparent border-none"
@@ -155,7 +155,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
             animate={{ opacity: 1, clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)" }}
             exit={{ opacity: 0, clipPath: "polygon(0 0, 100% 0, 100% 0, 0 0)" }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-50 bg-[#09070A]/98 backdrop-blur-3xl flex flex-col justify-between p-5 xs:p-6 sm:p-12 md:p-16 select-none overflow-y-auto overscroll-contain"
+            className="fixed inset-0 z-70 bg-[#09070A]/98 backdrop-blur-3xl flex flex-col justify-between p-5 xs:p-6 sm:p-12 md:p-16 select-none overflow-y-auto overscroll-contain"
           >
             {/* Top Bar inside Overlay */}
             <motion.div

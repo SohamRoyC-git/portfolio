@@ -23,7 +23,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
   // Interaction HUD & Status
   const [interactionHint, setInteractionHint] = useState<string>(
-    "MOVE ACROSS CORE · HOLD FOR BLACK HOLE · CLICK FOR HYPERSPACE"
+    "MOVE ACROSS ATTRACTOR · HOLD FOR BLACK HOLE · CLICK FOR HYPERSPACE"
   );
 
   // Three.js instances refs
@@ -31,7 +31,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const animFrameRef = useRef<number | null>(null);
-  const cpuGroupRef = useRef<THREE.Group | null>(null);
+  const attractorGroupRef = useRef<THREE.Group | null>(null);
   const particlesRef = useRef<THREE.Points | null>(null);
   const blackHoleGroupRef = useRef<THREE.Group | null>(null);
 
@@ -39,7 +39,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   const currentPositionsRef = useRef<Float32Array | null>(null);
   const targetPositionsRef = useRef<Float32Array | null>(null);
   const velocitiesRef = useRef<Float32Array | null>(null);
-  const particleScalesRef = useRef<Float32Array | null>(null); // For shrinking into singularity
+  const particleScalesRef = useRef<Float32Array | null>(null);
 
   // Simulation physics state
   const isHoldingRef = useRef(false);
@@ -56,9 +56,10 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   const isUnspoolingRef = useRef(false);
   const unspoolStartTimeRef = useRef(0);
 
-  // Hyperspace transition state
+  // Hyperspace transition state (sustained 3.8 seconds)
   const isTransitioningRef = useRef(false);
   const warpProgressRef = useRef(0);
+  const warpStartTimeRef = useRef(0);
 
   // Web Audio Context & Nodes
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -93,13 +94,13 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(50, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(28, ctx.currentTime + 2.5);
+      osc.frequency.setValueAtTime(52, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(24, ctx.currentTime + 2.5);
 
       const filter = ctx.createBiquadFilter();
       filter.type = "lowpass";
-      filter.frequency.setValueAtTime(130, ctx.currentTime);
-      filter.Q.setValueAtTime(3.2, ctx.currentTime);
+      filter.frequency.setValueAtTime(110, ctx.currentTime);
+      filter.Q.setValueAtTime(3.4, ctx.currentTime);
 
       gain.gain.setValueAtTime(0.001, ctx.currentTime);
       gain.gain.linearRampToValueAtTime(0.14, ctx.currentTime + 0.4);
@@ -135,7 +136,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     } catch {}
   }, [getAudioContext]);
 
-  // Audio: Star Wars Hyperspace Hyperdrive Spool (matching reference video)
+  // Audio: Sustained Star Wars Hyperspace Spool (3.8 seconds)
   const playHyperspaceSound = useCallback(() => {
     try {
       const ctx = getAudioContext();
@@ -144,57 +145,42 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(110, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(2600, ctx.currentTime + 1.2);
+      osc.frequency.setValueAtTime(80, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(3400, ctx.currentTime + 3.4);
 
       const filter = ctx.createBiquadFilter();
       filter.type = "bandpass";
-      filter.frequency.setValueAtTime(280, ctx.currentTime);
-      filter.frequency.exponentialRampToValueAtTime(3600, ctx.currentTime + 1.2);
+      filter.frequency.setValueAtTime(220, ctx.currentTime);
+      filter.frequency.exponentialRampToValueAtTime(4200, ctx.currentTime + 3.4);
       filter.Q.setValueAtTime(2.2, ctx.currentTime);
 
       gain.gain.setValueAtTime(0.01, ctx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.26, ctx.currentTime + 0.7);
-      gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 1.25);
+      gain.gain.linearRampToValueAtTime(0.26, ctx.currentTime + 1.0);
+      gain.gain.setValueAtTime(0.26, ctx.currentTime + 2.8);
+      gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 3.8);
 
       osc.connect(filter);
       filter.connect(gain);
       gain.connect(ctx.destination);
       osc.start();
-      osc.stop(ctx.currentTime + 1.3);
-    } catch {}
-  }, [getAudioContext]);
-
-  // Audio: Tactical Click
-  const playTactileClick = useCallback((freq = 900) => {
-    try {
-      const ctx = getAudioContext();
-      if (!ctx) return;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(freq, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(freq * 0.4, ctx.currentTime + 0.04);
-      gain.gain.setValueAtTime(0.04, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.045);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.05);
+      osc.stop(ctx.currentTime + 3.9);
     } catch {}
   }, [getAudioContext]);
 
   // Reset workspace state whenever navigating back to 3D Studio
   useEffect(() => {
     if (isActive) {
-      if (cameraRef.current) {
-        const isMobile = window.innerWidth / window.innerHeight < 1.0;
-        cameraRef.current.position.set(0, 0, isMobile ? 3.6 : 3.0);
-        cameraRef.current.lookAt(0, 0, 0);
-      }
       if (warpFlashRef.current) {
+        gsap.killTweensOf(warpFlashRef.current);
         warpFlashRef.current.style.opacity = "0";
       }
+      if (cameraRef.current) {
+        gsap.killTweensOf(cameraRef.current.position);
+        const isMobile = window.innerWidth / window.innerHeight < 1.0;
+        cameraRef.current.position.set(0, 0, isMobile ? 3.8 : 3.2);
+        cameraRef.current.lookAt(0, 0, 0);
+      }
+      gsap.killTweensOf(warpProgressRef);
       warpProgressRef.current = 0;
       isTransitioningRef.current = false;
       isHoldingRef.current = false;
@@ -221,45 +207,50 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           scl[i] = 1.0;
         }
         particlesRef.current.geometry.attributes.position.needsUpdate = true;
+        if (particlesRef.current.geometry.attributes.scale) {
+          particlesRef.current.geometry.attributes.scale.needsUpdate = true;
+        }
       }
+
 
       if (blackHoleGroupRef.current) {
         blackHoleGroupRef.current.scale.set(0, 0, 0);
         blackHoleGroupRef.current.visible = false;
       }
-      setInteractionHint("MOVE ACROSS CORE · HOLD FOR BLACK HOLE · CLICK FOR HYPERSPACE");
+      setInteractionHint("MOVE ACROSS ATTRACTOR · HOLD FOR BLACK HOLE · CLICK FOR HYPERSPACE");
     }
   }, [isActive]);
 
-  // Star Wars Galactic Warp Hyperspace Jump (Fast Moving Stars)
+  // Star Wars Galactic Lightspeed Hyperspace Jump (Sustained 3.8 Seconds with Needle Streaks)
   const triggerWarpTransition = useCallback(() => {
     if (isTransitioningRef.current || !cameraRef.current) return;
     isTransitioningRef.current = true;
+    warpStartTimeRef.current = performance.now();
     playHyperspaceSound();
-    setInteractionHint("HYPERSPACE JUMP ENGAGED · WARPING TO PORTFOLIO");
+    setInteractionHint("HYPERSPACE JUMP ENGAGED · LIGHTSPEED WARP");
 
     const camera = cameraRef.current;
 
-    // Animate warp progress uniform (streaks stars into lightspeed radial needles)
+    // Warp progress ramps smoothly over 3.8 seconds
     gsap.to(warpProgressRef, {
       current: 1.0,
-      duration: 1.25,
+      duration: 3.8,
+      ease: "power2.inOut",
+    });
+
+    // Camera surges forward smoothly through the starfield
+    gsap.to(camera.position, {
+      z: 0.8,
+      duration: 3.8,
       ease: "power2.in",
     });
 
-    // Camera surges forward through the particle field
-    gsap.to(camera.position, {
-      z: -1.5,
-      duration: 1.35,
-      ease: "power3.in",
-    });
-
-    // White/champagne hyperspace flash overlay
+    // Final lightspeed flash overlay dissolves into portfolio hero
     if (warpFlashRef.current) {
       gsap.to(warpFlashRef.current, {
         opacity: 1,
-        duration: 0.45,
-        delay: 0.95,
+        duration: 0.6,
+        delay: 3.2,
         ease: "power2.inOut",
         onComplete: () => {
           onEnterPortfolio();
@@ -270,11 +261,11 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       setTimeout(() => {
         onEnterPortfolio();
         isTransitioningRef.current = false;
-      }, 1300);
+      }, 3800);
     }
   }, [onEnterPortfolio, playHyperspaceSound]);
 
-  // Main Three.js Particle Physics Engine (CPU Structure + Studio Smoke)
+  // Main Three.js Particle Physics Engine (Lorenz Strange Attractor + Studio Smoke)
   useEffect(() => {
     const container = mountRef.current;
     if (!container) return;
@@ -287,8 +278,8 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     const scene = new THREE.Scene();
     sceneRef.current = scene;
 
-    const camera = new THREE.PerspectiveCamera(isMobile ? 52 : 44, width / height, 0.1, 100);
-    camera.position.set(0, 0, isMobile ? 3.6 : 3.0);
+    const camera = new THREE.PerspectiveCamera(isMobile ? 54 : 45, width / height, 0.1, 100);
+    camera.position.set(0, 0, isMobile ? 3.8 : 3.2);
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
@@ -351,19 +342,26 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
         void main() {
           vec2 p = (vUv - 0.5) * vec2(uResolution.x / uResolution.y, 1.0);
-          float t = uTime * 0.04;
+          float t = uTime * 0.035;
 
-          vec2 smokeCoord = p * 1.35 + vec2(sin(t * 0.4) * 0.22, t * 0.18);
+          vec2 smokeCoord = p * 1.35 + vec2(sin(t * 0.4) * 0.20, t * 0.16);
           float s1 = fbm(smokeCoord);
           float s2 = fbm(smokeCoord + vec2(s1 * 0.7, s1 * 0.4));
 
           vec3 darkBg = vec3(0.022, 0.024, 0.030);
-          vec3 smokeColor = vec3(0.068, 0.064, 0.058);
+          vec3 smokeColor = vec3(0.065, 0.062, 0.056);
 
-          float vignette = 1.0 - smoothstep(0.3, 1.35, length(p));
+          float vignette = 1.0 - smoothstep(0.3, 1.4, length(p));
           vec3 col = mix(darkBg, smokeColor, s2 * 0.65) * vignette;
 
-          float grain = (hash(vUv * 500.0 + fract(uTime)) - 0.5) * 0.020;
+          // Subtle ambient celestial star particles in smoke
+          float starNoise = hash(floor(p * 180.0));
+          if (starNoise > 0.996) {
+            float blink = sin(uTime * 3.0 + starNoise * 100.0) * 0.5 + 0.5;
+            col += vec3(0.9, 0.85, 0.75) * blink * 0.35;
+          }
+
+          float grain = (hash(vUv * 500.0 + fract(uTime)) - 0.5) * 0.018;
           col += grain;
 
           gl_FragColor = vec4(col, 1.0);
@@ -373,16 +371,16 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     const smokeQuad = new THREE.Mesh(smokeQuadGeo, smokeMat);
     scene.add(smokeQuad);
 
-    // 4. 3D CPU ROOT GROUP (For dynamic 3D tilt & perspective parallax)
-    const cpuGroup = new THREE.Group();
-    scene.add(cpuGroup);
-    cpuGroupRef.current = cpuGroup;
+    // 4. 3D ATTRACTOR ROOT GROUP (For dynamic 3D tilt & perspective parallax)
+    const attractorGroup = new THREE.Group();
+    scene.add(attractorGroup);
+    attractorGroupRef.current = attractorGroup;
 
-    // 5. BLACK HOLE VISUAL ENTITY (Event Horizon Void + Pulsating Celestial Light)
+    // 5. BLACK HOLE VISUAL ENTITY (Event Horizon Void + Pulsating Celestial Photon Ring)
     const blackHoleGroup = new THREE.Group();
     blackHoleGroup.visible = false;
     blackHoleGroup.scale.set(0, 0, 0);
-    cpuGroup.add(blackHoleGroup);
+    attractorGroup.add(blackHoleGroup);
     blackHoleGroupRef.current = blackHoleGroup;
 
     // 5A. Dark Event Horizon Void
@@ -396,8 +394,8 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     eventHorizonMesh.renderOrder = 20;
     blackHoleGroup.add(eventHorizonMesh);
 
-    // 5B. Pulsating Celestial Photon Light (Pulsating light representing the black hole)
-    const pulsatingLightGeo = new THREE.PlaneGeometry(0.48, 0.48);
+    // 5B. Pulsating Celestial Photon Light (Breathes when particles are absorbed)
+    const pulsatingLightGeo = new THREE.PlaneGeometry(0.52, 0.52);
     const pulsatingLightMat = new THREE.ShaderMaterial({
       transparent: true,
       depthWrite: false,
@@ -421,12 +419,8 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           float r = length(p) * 2.0;
           if (r > 1.0) discard;
 
-          // Smooth breathing pulsation frequency
           float pulse = 0.5 + 0.5 * sin(uTime * 4.2);
-
-          // Concentrated photon ring at event horizon rim
-          float ring = smoothstep(0.35, 0.44, r) * (1.0 - smoothstep(0.52, 0.95, r));
-          // Soft radial celestial aura
+          float ring = smoothstep(0.34, 0.44, r) * (1.0 - smoothstep(0.52, 0.95, r));
           float halo = exp(-r * 3.8) * (0.4 + 0.6 * pulse);
 
           vec3 hotChampagne = vec3(1.0, 0.98, 0.92);
@@ -442,44 +436,111 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     pulsatingLightMesh.renderOrder = 21;
     blackHoleGroup.add(pulsatingLightMesh);
 
-    // 6. PROCEDURAL COMPACT CPU POINT-CLOUD WITH 4-WAY EXTENDED BUS LINES
-    const PARTICLE_COUNT = isMobile ? 35000 : 60000;
+    // 6. NUMERICAL INTEGRATION OF THE 3D LORENZ STRANGE ATTRACTOR TRAJECTORY
+    // Perfectly centered with breathing room matching IMURUN reference
+    const LORENZ_STEPS = 24000;
+    const lorenzPath = new Float32Array(LORENZ_STEPS * 3);
+    {
+      let x = 0.1, y = 0.0, z = 0.0;
+      const sigma = 10.0;
+      const rho = 28.0;
+      const beta = 8.0 / 3.0;
+      const dt = 0.004;
+
+      // Warm-up to settle onto the manifold
+      for (let i = 0; i < 4000; i++) {
+        const f = (cx: number, cy: number, cz: number) => [
+          sigma * (cy - cx),
+          cx * (rho - cz) - cy,
+          cx * cy - beta * cz,
+        ];
+        const [k1x, k1y, k1z] = f(x, y, z);
+        const [k2x, k2y, k2z] = f(x + 0.5 * dt * k1x, y + 0.5 * dt * k1y, z + 0.5 * dt * k1z);
+        const [k3x, k3y, k3z] = f(x + 0.5 * dt * k2x, y + 0.5 * dt * k2y, z + 0.5 * dt * k2z);
+        const [k4x, k4y, k4z] = f(x + dt * k3x, y + dt * k3y, z + dt * k3z);
+        x += (dt / 6.0) * (k1x + 2 * k2x + 2 * k3x + k4x);
+        y += (dt / 6.0) * (k1y + 2 * k2y + 2 * k3y + k4y);
+        z += (dt / 6.0) * (k1z + 2 * k2z + 2 * k3z + k4z);
+      }
+
+      // Record trajectory centered at (0.32, 0.61, 25.09) with scale giving breathing room
+      const scale = isMobile ? 0.026 : 0.032;
+      for (let i = 0; i < LORENZ_STEPS; i++) {
+        const f = (cx: number, cy: number, cz: number) => [
+          sigma * (cy - cx),
+          cx * (rho - cz) - cy,
+          cx * cy - beta * cz,
+        ];
+        const [k1x, k1y, k1z] = f(x, y, z);
+        const [k2x, k2y, k2z] = f(x + 0.5 * dt * k1x, y + 0.5 * dt * k1y, z + 0.5 * dt * k1z);
+        const [k3x, k3y, k3z] = f(x + 0.5 * dt * k2x, y + 0.5 * dt * k2y, z + 0.5 * dt * k2z);
+        const [k4x, k4y, k4z] = f(x + dt * k3x, y + dt * k3y, z + dt * k3z);
+
+        x += (dt / 6.0) * (k1x + 2 * k2x + 2 * k3x + k4x);
+        y += (dt / 6.0) * (k1y + 2 * k2y + 2 * k3y + k4y);
+        z += (dt / 6.0) * (k1z + 2 * k2z + 2 * k3z + k4z);
+
+        const idx3 = i * 3;
+        // Map X -> Screen X, Z -> Screen Y (canonical butterfly orientation), Y -> Depth Z
+        lorenzPath[idx3] = (x - 0.32) * scale;
+        lorenzPath[idx3 + 1] = (z - 25.09) * scale;
+        lorenzPath[idx3 + 2] = (y - 0.61) * scale;
+      }
+    }
+
+    // 7. PARTICLES INITIALIZATION: ELEGANT RIBBON FLOW (IMURUN Reference Style)
+    const PARTICLE_COUNT = isMobile ? 18000 : 28000;
     const currentPositions = new Float32Array(PARTICLE_COUNT * 3);
     const targetPositions = new Float32Array(PARTICLE_COUNT * 3);
     const velocities = new Float32Array(PARTICLE_COUNT * 3);
     const particleColors = new Float32Array(PARTICLE_COUNT * 3);
     const particleSizes = new Float32Array(PARTICLE_COUNT);
-    const particlePhases = new Float32Array(PARTICLE_COUNT);
-    const particleScales = new Float32Array(PARTICLE_COUNT); // 1.0 -> 0.0 when absorbed
+    const particleScales = new Float32Array(PARTICLE_COUNT);
+    const particleIndices = new Float32Array(PARTICLE_COUNT); // Position along trajectory
+    const particleSpeeds = new Float32Array(PARTICLE_COUNT);  // Flow velocity along trajectory
+    const particleRadii = new Float32Array(PARTICLE_COUNT);   // Radial ribbon dispersion
+    const particleAngles = new Float32Array(PARTICLE_COUNT);  // Angle around ribbon core
 
     currentPositionsRef.current = currentPositions;
     targetPositionsRef.current = targetPositions;
     velocitiesRef.current = velocities;
     particleScalesRef.current = particleScales;
 
-    // Monochromatic Light Sand / Champagne / Warm Beige Color Palette Variations
+    // Refined Monochromatic Champagne / Warm Sand Palette (IMURUN Palette)
     const SAND_SHADES = [
       [0.98, 0.95, 0.90], // Light Champagne (#FFF8F0)
       [0.94, 0.88, 0.78], // Cream Sand (#F5E6D3)
       [0.89, 0.80, 0.68], // Warm Desert Ecru (#E8D2B8)
       [0.82, 0.71, 0.56], // Golden Sand (#D9BD99)
-      [0.72, 0.60, 0.45], // Deep Sand Shadow (#B89975)
+      [0.74, 0.62, 0.48], // Soft Amber Sand (#BC9E7A)
     ];
 
-    let pIdx = 0;
-    function addCpuPoint(
-      x: number,
-      y: number,
-      z: number,
-      shade: number[],
-      sizeMultiplier = 1.0
-    ) {
-      if (pIdx >= PARTICLE_COUNT) return;
-      const i3 = pIdx * 3;
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      const i3 = i * 3;
 
-      currentPositions[i3] = x + (Math.random() - 0.5) * 0.15;
-      currentPositions[i3 + 1] = y + (Math.random() - 0.5) * 0.15;
-      currentPositions[i3 + 2] = z + (Math.random() - 0.5) * 0.15;
+      const sIndex = (i / PARTICLE_COUNT) * LORENZ_STEPS + Math.random() * 12.0;
+      particleIndices[i] = sIndex % LORENZ_STEPS;
+      // Constant visible speed: 100 to 220 steps per second!
+      particleSpeeds[i] = Math.random() * 120.0 + 100.0;
+
+      // Delicate cross-sectional ribbon width around the curve
+      particleRadii[i] = Math.random() * 0.016 + 0.003;
+      particleAngles[i] = Math.random() * Math.PI * 2;
+
+      const baseIdx = Math.floor(particleIndices[i]) % LORENZ_STEPS;
+      const bx = lorenzPath[baseIdx * 3];
+      const by = lorenzPath[baseIdx * 3 + 1];
+      const bz = lorenzPath[baseIdx * 3 + 2];
+
+      const r = particleRadii[i];
+      const theta = particleAngles[i];
+      const x = bx + Math.cos(theta) * r;
+      const y = by + Math.sin(theta) * r;
+      const z = bz + (Math.random() - 0.5) * 0.015;
+
+      currentPositions[i3] = x;
+      currentPositions[i3 + 1] = y;
+      currentPositions[i3 + 2] = z;
 
       targetPositions[i3] = x;
       targetPositions[i3 + 1] = y;
@@ -489,189 +550,16 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       velocities[i3 + 1] = 0;
       velocities[i3 + 2] = 0;
 
-      particleColors[i3] = shade[0] + (Math.random() - 0.5) * 0.03;
-      particleColors[i3 + 1] = shade[1] + (Math.random() - 0.5) * 0.03;
-      particleColors[i3 + 2] = shade[2] + (Math.random() - 0.5) * 0.03;
-
-      particleSizes[pIdx] = (Math.random() * 1.8 + 1.2) * sizeMultiplier;
-      particlePhases[pIdx] = Math.random() * Math.PI * 2;
-      particleScales[pIdx] = 1.0;
-
-      pIdx++;
-    }
-
-    // A. CENTRAL COMPUTE DIE (Compact focal core giving generous breathing room)
-    const dieHalf = 0.26;
-    const coreCount = Math.floor(PARTICLE_COUNT * 0.28);
-    for (let i = 0; i < coreCount; i++) {
-      const quadX = Math.random() > 0.5 ? 1 : -1;
-      const quadY = Math.random() > 0.5 ? 1 : -1;
-      const coreCenterX = quadX * 0.13;
-      const coreCenterY = quadY * 0.13;
-
-      const lineIndex = Math.floor(Math.random() * 12);
-      const rowY = coreCenterY - 0.09 + lineIndex * 0.016;
-      const rowX = coreCenterX + (Math.random() - 0.5) * 0.18;
-      const z = 0.03 + (Math.random() - 0.5) * 0.015;
-
-      const shade = SAND_SHADES[Math.floor(Math.random() * 3)];
-      addCpuPoint(rowX, rowY, z, shade, 1.0);
-    }
-
-    // Gold Pin 1 Corner Alignment Notch (Top-Left of Die)
-    for (let i = 0; i < 180; i++) {
-      const u = Math.random();
-      const v = Math.random() * (1 - u);
-      const x = -dieHalf + u * 0.06;
-      const y = dieHalf - v * 0.06;
-      addCpuPoint(x, y, 0.045, SAND_SHADES[0], 1.2);
-    }
-
-    // Die Perimeter Bevel & Heat Spreader Lip
-    const borderCount = Math.floor(PARTICLE_COUNT * 0.08);
-    for (let i = 0; i < borderCount; i++) {
-      const side = Math.floor(Math.random() * 4);
-      const t = (Math.random() - 0.5) * (dieHalf * 2);
-      let x = 0, y = 0;
-      if (side === 0) { x = t; y = dieHalf; }
-      else if (side === 1) { x = t; y = -dieHalf; }
-      else if (side === 2) { x = dieHalf; y = t; }
-      else { x = -dieHalf; y = t; }
-      addCpuPoint(x + (Math.random() - 0.5) * 0.01, y + (Math.random() - 0.5) * 0.01, 0.02, SAND_SHADES[1], 1.1);
-    }
-
-    // B. 4-WAY EXTENDED BUS INTERCONNECT TRACES (North, South, East, West)
-    const traceParticles = Math.floor(PARTICLE_COUNT * 0.44);
-    const particlesPerDir = Math.floor(traceParticles / 4);
-
-    // North Traces (Y > +0.32 up to +1.32)
-    for (let i = 0; i < particlesPerDir; i++) {
-      const lane = Math.floor(Math.random() * 18) - 9;
-      const t = Math.random();
-      let lx = lane * 0.026;
-      let ly = 0.32 + t * 1.00;
-
-      if (Math.abs(lane) > 4) {
-        const sign = lane > 0 ? 1 : -1;
-        if (t > 0.35 && t < 0.60) {
-          const bendT = (t - 0.35) / 0.25;
-          lx += sign * bendT * 0.16;
-        } else if (t >= 0.60) {
-          lx += sign * 0.16;
-        }
-      }
-
-      const z = (Math.random() - 0.5) * 0.02;
       const shade = SAND_SHADES[Math.floor(Math.random() * SAND_SHADES.length)];
-      addCpuPoint(lx, ly, z, shade, 0.95);
+      particleColors[i3] = shade[0] + (Math.random() - 0.5) * 0.02;
+      particleColors[i3 + 1] = shade[1] + (Math.random() - 0.5) * 0.02;
+      particleColors[i3 + 2] = shade[2] + (Math.random() - 0.5) * 0.02;
+
+      particleSizes[i] = Math.random() * 1.4 + 1.2;
+      particleScales[i] = 1.0;
     }
 
-    // South Traces (Y < -0.32 down to -1.32)
-    for (let i = 0; i < particlesPerDir; i++) {
-      const lane = Math.floor(Math.random() * 18) - 9;
-      const t = Math.random();
-      let lx = lane * 0.026;
-      let ly = -0.32 - t * 1.00;
-
-      if (Math.abs(lane) > 4) {
-        const sign = lane > 0 ? 1 : -1;
-        if (t > 0.35 && t < 0.60) {
-          const bendT = (t - 0.35) / 0.25;
-          lx += sign * bendT * 0.16;
-        } else if (t >= 0.60) {
-          lx += sign * 0.16;
-        }
-      }
-
-      const z = (Math.random() - 0.5) * 0.02;
-      const shade = SAND_SHADES[Math.floor(Math.random() * SAND_SHADES.length)];
-      addCpuPoint(lx, ly, z, shade, 0.95);
-    }
-
-    // East Traces (X > +0.32 out to +1.38)
-    for (let i = 0; i < particlesPerDir; i++) {
-      const lane = Math.floor(Math.random() * 18) - 9;
-      const t = Math.random();
-      let lx = 0.32 + t * 1.06;
-      let ly = lane * 0.026;
-
-      if (Math.abs(lane) > 4) {
-        const sign = lane > 0 ? 1 : -1;
-        if (t > 0.35 && t < 0.60) {
-          const bendT = (t - 0.35) / 0.25;
-          ly += sign * bendT * 0.16;
-        } else if (t >= 0.60) {
-          ly += sign * 0.16;
-        }
-      }
-
-      const z = (Math.random() - 0.5) * 0.02;
-      const shade = SAND_SHADES[Math.floor(Math.random() * SAND_SHADES.length)];
-      addCpuPoint(lx, ly, z, shade, 0.95);
-    }
-
-    // West Traces (X < -0.32 out to -1.38)
-    for (let i = 0; i < particlesPerDir; i++) {
-      const lane = Math.floor(Math.random() * 18) - 9;
-      const t = Math.random();
-      let lx = -0.32 - t * 1.06;
-      let ly = lane * 0.026;
-
-      if (Math.abs(lane) > 4) {
-        const sign = lane > 0 ? 1 : -1;
-        if (t > 0.35 && t < 0.60) {
-          const bendT = (t - 0.35) / 0.25;
-          ly += sign * bendT * 0.16;
-        } else if (t >= 0.60) {
-          ly += sign * 0.16;
-        }
-      }
-
-      const z = (Math.random() - 0.5) * 0.02;
-      const shade = SAND_SHADES[Math.floor(Math.random() * SAND_SHADES.length)];
-      addCpuPoint(lx, ly, z, shade, 0.95);
-    }
-
-    // C. TERMINAL VIA PADS / SOLDER BALL TEST POINTS
-    const padCount = Math.floor(PARTICLE_COUNT * 0.06);
-    for (let i = 0; i < padCount; i++) {
-      const side = Math.floor(Math.random() * 4);
-      const lane = Math.floor(Math.random() * 18) - 9;
-      const sign = lane > 0 ? 1 : -1;
-      const bendOffset = Math.abs(lane) > 4 ? sign * 0.16 : 0;
-      let cx = 0, cy = 0;
-
-      if (side === 0) { cx = lane * 0.026 + bendOffset; cy = 1.32; }
-      else if (side === 1) { cx = lane * 0.026 + bendOffset; cy = -1.32; }
-      else if (side === 2) { cx = 1.38; cy = lane * 0.026 + bendOffset; }
-      else { cx = -1.38; cy = lane * 0.026 + bendOffset; }
-
-      const theta = Math.random() * Math.PI * 2;
-      const r = Math.random() * 0.028;
-      addCpuPoint(cx + Math.cos(theta) * r, cy + Math.sin(theta) * r, 0.015, SAND_SHADES[0], 1.25);
-    }
-
-    // D. SUBSTRATE PIN GRID ARRAY (PGA / BGA Contacts underneath)
-    const pinCount = Math.floor(PARTICLE_COUNT * 0.06);
-    for (let i = 0; i < pinCount; i++) {
-      const px = (Math.floor(Math.random() * 16) - 8) * 0.045;
-      const py = (Math.floor(Math.random() * 16) - 8) * 0.045;
-      if (Math.abs(px) < 0.18 && Math.abs(py) < 0.18) continue;
-      addCpuPoint(px, py, -0.06 + (Math.random() - 0.5) * 0.015, SAND_SHADES[4], 0.9);
-    }
-
-    // E. DISTANT CELESTIAL BACKGROUND STARS (Visible during Singularity Void & Hyperspace)
-    while (pIdx < PARTICLE_COUNT) {
-      const r = 0.9 + Math.random() * 2.2;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = (Math.random() - 0.5) * Math.PI;
-      const x = r * Math.cos(theta) * Math.cos(phi);
-      const y = r * Math.sin(theta) * Math.cos(phi);
-      const z = -0.4 + (Math.random() - 0.5) * 1.8;
-      addCpuPoint(x, y, z, SAND_SHADES[0], 0.75);
-    }
-
-    // 7. POINT CLOUD GEOMETRY & STAR WARS HYPERSPACE STRETCH SHADER
+    // 8. ATTRACTOR POINT CLOUD GEOMETRY & SHADER
     const particleGeo = new THREE.BufferGeometry();
     particleGeo.setAttribute("position", new THREE.BufferAttribute(currentPositions, 3));
     particleGeo.setAttribute("color", new THREE.BufferAttribute(particleColors, 3));
@@ -681,7 +569,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     const particleMat = new THREE.ShaderMaterial({
       transparent: true,
       depthWrite: false,
-      blending: THREE.NormalBlending,
+      blending: THREE.AdditiveBlending,
       uniforms: {
         uTime: { value: 0 },
         uWarpProgress: { value: 0 },
@@ -711,9 +599,9 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           vStreakDir = len > 0.001 ? screenPos / len : vec2(1.0, 0.0);
 
           // Star Wars Warp streak expansion
-          float warpScale = 1.0 + uWarpProgress * 4.8;
-          float ptSize = size * scale * warpScale * (7.4 / -mvPos.z);
-          gl_PointSize = clamp(ptSize, 1.0, 42.0);
+          float warpScale = 1.0 + uWarpProgress * 4.0;
+          float ptSize = size * scale * warpScale * (12.0 / -mvPos.z);
+          gl_PointSize = clamp(ptSize, 2.0, 64.0);
           gl_Position = clipPos;
         }
       `,
@@ -737,25 +625,25 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             mat2 rot = mat2(c, s, -s, c);
             coord = rot * coord;
             // Squeeze Y into an aerodynamic needle streak so it never touches square sprite bounds
-            coord.y *= (2.4 + vWarp * 5.0);
+            coord.y *= (1.8 + vWarp * 3.2);
           }
 
           float d = length(coord);
           if (d > 0.5) discard;
 
-          float alpha = smoothstep(0.5, 0.08, d) * (0.94 + vWarp * 0.06) * vScale;
+          float alpha = smoothstep(0.5, 0.04, d) * (0.94 + vWarp * 0.06) * vScale;
           // Warp stars turn into brilliant white/champagne lightspeed needles
-          vec3 finalColor = mix(vColor, vec3(1.0, 1.0, 1.0), vWarp * 0.92);
+          vec3 finalColor = mix(vColor, vec3(1.0, 1.0, 1.0), vWarp * 0.94);
           gl_FragColor = vec4(finalColor, alpha);
         }
       `,
     });
 
     const particles = new THREE.Points(particleGeo, particleMat);
-    cpuGroup.add(particles);
+    attractorGroup.add(particles);
     particlesRef.current = particles;
 
-    // 8. INTERACTION RAYCASTING & FLUID CURSOR BRUSH
+    // 10. INTERACTION RAYCASTING & FLUID CURSOR BRUSH
     const rayPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
     const raycaster = new THREE.Raycaster();
     const mouseVector = new THREE.Vector2();
@@ -772,12 +660,11 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       const intersectionPoint = new THREE.Vector3();
       raycaster.ray.intersectPlane(rayPlane, intersectionPoint);
 
-      if (intersectionPoint && cpuGroupRef.current) {
-        const localPos = cpuGroupRef.current.worldToLocal(intersectionPoint.clone());
+      if (intersectionPoint && attractorGroupRef.current) {
+        const localPos = attractorGroupRef.current.worldToLocal(intersectionPoint.clone());
         prevMouseLocalPosRef.current.copy(mouseLocalPosRef.current);
         mouseLocalPosRef.current.copy(localPos);
 
-        // Fluid cursor brush velocity
         const vx = localPos.x - prevMouseLocalPosRef.current.x;
         const vy = localPos.y - prevMouseLocalPosRef.current.y;
         mouseVelocityRef.current.set(vx, vy);
@@ -806,7 +693,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         isUnspoolingRef.current = false;
         blackHolePosRef.current.copy(mouseLocalPosRef.current);
         startBlackHoleSound();
-        setInteractionHint("BLACK HOLE ACTIVE · ABSORBING PARTICLES INTO SINGULARITY");
+        setInteractionHint("BLACK HOLE ACTIVE · ABSORBING ATTRACTOR INTO SINGULARITY");
       }, 140);
     };
 
@@ -824,9 +711,9 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         isUnspoolingRef.current = true;
         unspoolStartTimeRef.current = performance.now();
         stopBlackHoleSound();
-        setInteractionHint("SINGULARITY RELEASED · REVERSING FLOW BACK INTO CPU");
+        setInteractionHint("SINGULARITY RELEASED · REVERSING FLOW BACK INTO LORENZ ATTRACTOR");
 
-        // Set outward velocity in the exact direction of each particle's home position
+        // Set outward velocity in the exact direction of each particle's home position on the attractor
         const bh = blackHolePosRef.current;
         for (let i = 0; i < PARTICLE_COUNT; i++) {
           const i3 = i * 3;
@@ -839,8 +726,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           const dirZ = tz - bh.z;
           const dist = Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ) + 0.01;
 
-          // Smooth outward reverse flow velocity
-          const flowSpeed = Math.min(dist * 2.8, 4.2) + Math.random() * 0.4;
+          const flowSpeed = Math.min(dist * 3.2, 4.2) + Math.random() * 0.4;
           velocities[i3] = (dirX / dist) * flowSpeed;
           velocities[i3 + 1] = (dirY / dist) * flowSpeed;
           velocities[i3 + 2] = (dirZ / dist) * flowSpeed;
@@ -848,7 +734,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
         setTimeout(() => {
           isUnspoolingRef.current = false;
-          setInteractionHint("MOVE ACROSS CORE · HOLD FOR BLACK HOLE · CLICK FOR HYPERSPACE");
+          setInteractionHint("MOVE ACROSS ATTRACTOR · HOLD FOR BLACK HOLE · CLICK FOR HYPERSPACE");
         }, 2200);
       } else if (pressDuration < 220 && dx < 15 && dy < 15) {
         // Quick single click/tap: Star Wars Lightspeed Hyperspace Jump!
@@ -860,7 +746,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     renderer.domElement.addEventListener("pointerdown", onPointerDown);
     window.addEventListener("pointerup", onPointerUp);
 
-    // 9. HIGH-PERFORMANCE PHYSICS SIMULATION LOOP (60 - 120 FPS)
+    // 11. HIGH-PERFORMANCE PHYSICS SIMULATION LOOP (60 - 120 FPS)
     let clock = new THREE.Clock();
 
     const animate = () => {
@@ -875,12 +761,11 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       pulsatingLightMat.uniforms.uTime.value = elapsed;
 
       // A. DYNAMIC 3D PERSPECTIVE TILT TOWARDS CURSOR
-      if (cpuGroupRef.current) {
-        const targetTiltX = -mouseNormRef.current.y * 0.30;
-        const targetTiltY = mouseNormRef.current.x * 0.38;
-        cpuGroupRef.current.rotation.x += (targetTiltX - cpuGroupRef.current.rotation.x) * 0.07;
-        cpuGroupRef.current.rotation.y += (targetTiltY - cpuGroupRef.current.rotation.y) * 0.07;
-        cpuGroupRef.current.rotation.z = Math.sin(elapsed * 0.25) * 0.012;
+      if (attractorGroupRef.current) {
+        const targetTiltX = -mouseNormRef.current.y * 0.42;
+        const targetTiltY = mouseNormRef.current.x * 0.48;
+        attractorGroupRef.current.rotation.x += (targetTiltX - attractorGroupRef.current.rotation.x) * 0.06;
+        attractorGroupRef.current.rotation.y += (targetTiltY - attractorGroupRef.current.rotation.y) * 0.06;
       }
 
       // B. BLACK HOLE VISUAL ANIMATION
@@ -893,7 +778,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         blackHoleGroup.position.copy(bh);
 
         if (holdDuration >= 2.5) {
-          // After 2.5s: Fully absorbed singularity void! Pulsating celestial light at hold point
+          // After 2.5s: Fully absorbed singularity void! Pulsating celestial photon light at hold point
           if (!isAbsorbedRef.current) {
             isAbsorbedRef.current = true;
             setInteractionHint("SINGULARITY VOID · PULSATING CORE · RELEASE TO REVERSE FLOW");
@@ -912,7 +797,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         }
       }
 
-      // C. PARTICLE PHYSICS INTEGRATION
+      // C. CONSTANT VISIBLE LORENZ ATTRACTOR FLOW & PHYSICS INTEGRATION
       const mw = mouseLocalPosRef.current;
       const mVel = mouseVelocityRef.current;
       const posArr = currentPositions;
@@ -922,9 +807,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       const isWarping = isTransitioningRef.current;
       const isUnspooling = isUnspoolingRef.current;
       const timeSinceUnspool = isUnspooling ? (performance.now() - unspoolStartTimeRef.current) / 1000.0 : 999.0;
-
-      // Smooth fluid brush radius (reference video 2 style)
-      const brushRadius = isMobile ? 0.24 : 0.20;
+      const brushRadius = isMobile ? 0.22 : 0.18;
 
       for (let i = 0; i < PARTICLE_COUNT; i++) {
         const i3 = i * 3;
@@ -939,10 +822,19 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         if (isWarping) {
           // STAR WARS HYPERSPACE WARP: Particles race forward into camera as radial lightspeed needles!
           const warpFactor = warpProgressRef.current;
-          vz += (16.0 + Math.random() * 16.0) * warpFactor * delta;
-          vx += px * 1.8 * warpFactor * delta;
-          vy += py * 1.8 * warpFactor * delta;
+          vz = (18.0 + (i % 7) * 2.5) * warpFactor;
+          vx = 0;
+          vy = 0;
           scl = 1.0;
+
+          // Continuous Star Wars Hyperspace loop for the entire 3.8 seconds!
+          if (pz > camera.position.z - 0.2) {
+            pz = -10.0 - Math.random() * 4.0;
+            const theta = Math.random() * Math.PI * 2;
+            const r = Math.pow(Math.random(), 0.55) * 3.2 + 0.12;
+            px = Math.cos(theta) * r;
+            py = Math.sin(theta) * r;
+          }
         } else if (isHolding) {
           // BLACK HOLE INWARD ABSORPTION (2.5 SECONDS)
           const dx = bh.x - px;
@@ -958,16 +850,15 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             vx = 0;
             vy = 0;
             vz = 0;
-            scl = Math.max(0.0, scl - delta * 4.0); // Shrinks to 0
+            scl = Math.max(0.0, scl - delta * 4.0);
           } else {
             // Pure direct inward suction accelerating smoothly over 2.5s
-            const accel = 6.0 + (holdDuration / 2.5) * 8.0;
+            const accel = 6.2 + (holdDuration / 2.5) * 8.5;
             const pull = accel / (dist + 0.04);
             vx += (dx / dist) * pull * delta;
             vy += (dy / dist) * pull * delta;
             vz += (dz / dist) * pull * delta;
 
-            // Smoothly shrink as particle approaches singularity
             if (dist < 0.12) {
               scl = Math.max(0.0, dist / 0.12);
             }
@@ -982,18 +873,39 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           vy *= 0.94;
           vz *= 0.94;
         } else {
-          // NORMAL LIVING CPU & SMOOTH RE-STRUCTURING
-          const tx = targetArr[i3];
-          const ty = targetArr[i3 + 1];
-          const tz = targetArr[i3 + 2];
+          // ACTIVE LORENZ ATTRACTOR FLIGHT (CONSTANT VISIBLE STREAMING MOTION)
+          let pIdx = particleIndices[i] + particleSpeeds[i] * delta;
+          if (pIdx >= LORENZ_STEPS) pIdx -= LORENZ_STEPS;
+          particleIndices[i] = pIdx;
 
-          // Critically damped spring return (No bouncing ripple!)
-          const springK = 4.8;
+          // Interpolate between discrete trajectory points for silky smooth flight
+          const idxA = Math.floor(pIdx) % LORENZ_STEPS;
+          const idxB = (idxA + 1) % LORENZ_STEPS;
+          const frac = pIdx - Math.floor(pIdx);
+
+          const idxA3 = idxA * 3;
+          const idxB3 = idxB * 3;
+          const bx = lorenzPath[idxA3] + (lorenzPath[idxB3] - lorenzPath[idxA3]) * frac;
+          const by = lorenzPath[idxA3 + 1] + (lorenzPath[idxB3 + 1] - lorenzPath[idxA3 + 1]) * frac;
+          const bz = lorenzPath[idxA3 + 2] + (lorenzPath[idxB3 + 2] - lorenzPath[idxA3 + 2]) * frac;
+
+          // Ribbon cross-section
+          const r = particleRadii[i];
+          const theta = particleAngles[i];
+          const tx = bx + Math.cos(theta) * r;
+          const ty = by + Math.sin(theta) * r;
+          const tz = bz;
+
+          targetArr[i3] = tx;
+          targetArr[i3 + 1] = ty;
+          targetArr[i3 + 2] = tz;
+
+          // Critically damped tracking of stream position
+          const springK = 5.6;
           vx += (tx - px) * springK * delta;
-          vy += (ty - py) * (springK * 1.08) * delta;
+          vy += (ty - py) * springK * delta;
           vz += (tz - pz) * springK * delta;
 
-          // Scale smoothly restores to 1.0
           if (scl < 1.0) {
             scl = Math.min(1.0, scl + delta * 2.5);
           }
@@ -1004,27 +916,21 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           const dist = Math.sqrt(mdx * mdx + mdy * mdy);
 
           if (dist < brushRadius) {
-            const w = Math.cos((dist / brushRadius) * (Math.PI * 0.5)); // Smooth cosine bell curve
-            // Impart directional mouse drag momentum
-            vx += mVel.x * 0.35 * w;
-            vy += mVel.y * 0.35 * w;
-            // Soft micro-deflection to prevent pointer crowding
-            vx += (mdx / (dist + 0.001)) * 0.45 * w * delta;
-            vy += (mdy / (dist + 0.001)) * 0.45 * w * delta;
+            const w = Math.cos((dist / brushRadius) * (Math.PI * 0.5));
+            // Impart directional mouse drag momentum to the flying stream
+            vx += mVel.x * 0.36 * w;
+            vy += mVel.y * 0.36 * w;
+            // Soft micro-deflection
+            vx += (mdx / (dist + 0.001)) * 0.40 * w * delta;
+            vy += (mdy / (dist + 0.001)) * 0.40 * w * delta;
           }
 
-          // Ambient micro-flow along traces
-          const phase = particlePhases[i];
-          vx += Math.cos(elapsed * 3.0 + phase) * 0.012 * delta;
-          vy += Math.sin(elapsed * 3.0 + phase) * 0.012 * delta;
-
-          // Critical damping (Prevents oscillations / water ripples)
+          // Damping for smooth fluid relaxation
           vx *= 0.88;
           vy *= 0.88;
           vz *= 0.88;
         }
 
-        // Integrate positions
         posArr[i3] = px + vx * (delta * 60);
         posArr[i3 + 1] = py + vy * (delta * 60);
         posArr[i3 + 2] = pz + vz * (delta * 60);
@@ -1035,7 +941,9 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       }
 
       particleGeo.attributes.position.needsUpdate = true;
-      particleGeo.attributes.scale.needsUpdate = true;
+      if (particleGeo.attributes.scale) {
+        particleGeo.attributes.scale.needsUpdate = true;
+      }
       renderer.render(scene, camera);
     };
 
@@ -1049,8 +957,8 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       const mobile = w / h < 1.0;
 
       cameraRef.current.aspect = w / h;
-      cameraRef.current.fov = mobile ? 52 : 44;
-      cameraRef.current.position.z = mobile ? 3.6 : 3.0;
+      cameraRef.current.fov = mobile ? 54 : 45;
+      cameraRef.current.position.z = mobile ? 3.8 : 3.2;
       cameraRef.current.updateProjectionMatrix();
 
       smokeMat.uniforms.uResolution.value.set(w, h);
@@ -1065,6 +973,9 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       window.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("resize", handleResize);
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+      if (warpFlashRef.current) gsap.killTweensOf(warpFlashRef.current);
+      if (cameraRef.current) gsap.killTweensOf(cameraRef.current.position);
+      gsap.killTweensOf(warpProgressRef);
       if (rendererRef.current?.domElement) {
         rendererRef.current.domElement.remove();
         rendererRef.current.dispose();
@@ -1087,14 +998,14 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       <header className="absolute top-5 left-5 right-5 z-30 flex items-center justify-between pointer-events-none">
         <div className="flex items-center gap-3 bg-black/50 backdrop-blur-md border border-white/10 px-3.5 py-1.5 rounded-full text-xs font-mono">
           <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-          <span className="text-white/80 font-medium">SOHAM ROYCHOUDHURY · CPU CORE</span>
+          <span className="text-white/80 font-medium">SOHAM ROYCHOUDHURY · LORENZ ATTRACTOR</span>
           <span className="hidden sm:inline text-white/40">|</span>
-          <span className="hidden sm:inline text-white/50">4-WAY BUS ARCHITECTURE</span>
+          <span className="hidden sm:inline text-white/50">NON-LINEAR DYNAMICAL CORE</span>
         </div>
 
         <div className="hidden sm:flex items-center gap-2 bg-black/50 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-xs font-mono text-white/70">
           <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          <span>3D Kinetic Parallax</span>
+          <span>3D Kinetic Chaos Stream</span>
         </div>
       </header>
 

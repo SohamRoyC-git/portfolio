@@ -248,7 +248,7 @@ export default function Home() {
       {/* Movement 00: Interactive 3D Studio Workspace (Fixed Viewport; strictly decoupled from scroller track) */}
       <div
         id="monument-studio-3d"
-        className={`fixed inset-0 w-full h-[100svh] z-35 transition-opacity duration-700 ${
+        className={`fixed inset-0 w-full h-[100svh] z-50 bg-[#06070B] transition-opacity duration-700 ${
           isStudioActive ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
       >

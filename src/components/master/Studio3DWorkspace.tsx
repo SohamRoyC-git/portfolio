@@ -137,7 +137,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     } catch {}
   }, [getAudioContext]);
 
-  // Audio: Cosmic Detonation Bloom Sound on Black Hole Release
+  // Audio: Cosmic Detonation & Celestial Condensation Bloom Sound on Black Hole Release
   const playCosmicReleaseSound = useCallback(() => {
     try {
       const ctx = getAudioContext();
@@ -145,35 +145,51 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
       const now = ctx.currentTime;
 
-      // 1. Sub-bass dissipation whoosh (65 Hz -> 26 Hz)
+      // 1. Pre-detonation micro-implosion breath (inward pitch rise 42Hz -> 175Hz)
+      const inhaleOsc = ctx.createOscillator();
+      const inhaleGain = ctx.createGain();
+      inhaleOsc.type = "sine";
+      inhaleOsc.frequency.setValueAtTime(42, now);
+      inhaleOsc.frequency.exponentialRampToValueAtTime(175, now + 0.07);
+
+      inhaleGain.gain.setValueAtTime(0.01, now);
+      inhaleGain.gain.linearRampToValueAtTime(0.12, now + 0.07);
+      inhaleGain.gain.linearRampToValueAtTime(0.001, now + 0.09);
+
+      inhaleOsc.connect(inhaleGain);
+      inhaleGain.connect(ctx.destination);
+      inhaleOsc.start(now);
+      inhaleOsc.stop(now + 0.095);
+
+      // 2. Deep Sub-bass cosmic detonation boom (90 Hz -> 22 Hz)
       const subOsc = ctx.createOscillator();
       const subGain = ctx.createGain();
       subOsc.type = "sine";
-      subOsc.frequency.setValueAtTime(65, now);
-      subOsc.frequency.exponentialRampToValueAtTime(26, now + 0.8);
+      subOsc.frequency.setValueAtTime(90, now + 0.07);
+      subOsc.frequency.exponentialRampToValueAtTime(22, now + 1.2);
 
-      subGain.gain.setValueAtTime(0.18, now);
-      subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+      subGain.gain.setValueAtTime(0.24, now + 0.07);
+      subGain.gain.exponentialRampToValueAtTime(0.001, now + 1.4);
 
       subOsc.connect(subGain);
       subGain.connect(ctx.destination);
-      subOsc.start(now);
-      subOsc.stop(now + 0.95);
+      subOsc.start(now + 0.07);
+      subOsc.stop(now + 1.45);
 
-      // 2. Luminous celestial chime bloom (880 Hz harmonic shimmer)
+      // 3. Luminous celestial harmonic stardust shimmer (1100 Hz -> 520 Hz)
       const chimeOsc = ctx.createOscillator();
       const chimeGain = ctx.createGain();
-      chimeOsc.type = "sine";
-      chimeOsc.frequency.setValueAtTime(880, now);
-      chimeOsc.frequency.exponentialRampToValueAtTime(440, now + 1.2);
+      chimeOsc.type = "triangle";
+      chimeOsc.frequency.setValueAtTime(1100, now + 0.08);
+      chimeOsc.frequency.exponentialRampToValueAtTime(520, now + 2.2);
 
-      chimeGain.gain.setValueAtTime(0.06, now);
-      chimeGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.3);
+      chimeGain.gain.setValueAtTime(0.08, now + 0.08);
+      chimeGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.4);
 
       chimeOsc.connect(chimeGain);
       chimeGain.connect(ctx.destination);
-      chimeOsc.start(now);
-      chimeOsc.stop(now + 1.35);
+      chimeOsc.start(now + 0.08);
+      chimeOsc.stop(now + 2.45);
     } catch {}
   }, [getAudioContext]);
 
@@ -609,8 +625,8 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
       const sIndex = (i / PARTICLE_COUNT) * LORENZ_STEPS + Math.random() * 12.0;
       particleIndices[i] = sIndex % LORENZ_STEPS;
-      // Calibrated speed: 50 to 75 steps per second (clearly visible, elegant flow)
-      particleSpeeds[i] = Math.random() * 25.0 + 50.0;
+      // Calibrated speed: 22 to 40 steps per second (slow, meditative, serene chaotic flow)
+      particleSpeeds[i] = Math.random() * 18.0 + 22.0;
 
       // Delicate cross-sectional ribbon width around the curve (ample breathing room)
       particleRadii[i] = Math.random() * 0.020 + 0.004;
@@ -787,11 +803,11 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         isUnspoolingRef.current = false;
         blackHolePosRef.current.copy(mouseLocalPosRef.current);
         startBlackHoleSound();
-        setInteractionHint("BLACK HOLE ENGAGED · INTAKE OF ACCRETION STREAM");
+        setInteractionHint("BLACK HOLE ENGAGED · DIRECT STREAM INTAKE INTO SINGULARITY");
       }, 120);
     };
 
-    // POINTER UP: Reverse Unspooling Supernova & Nebular Bloom, or Hyperspace Jump
+    // POINTER UP: 3D Volumetric Supernova Burst & Slow Celestial Condensation, or Hyperspace Jump
     const onPointerUp = (e: PointerEvent) => {
       clearTimeout(holdTimerRef.id);
       const pressDuration = performance.now() - holdStartRef.current;
@@ -799,7 +815,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       const dy = Math.abs(e.clientY - pointerDownPosRef.current.y);
 
       if (isHoldingRef.current) {
-        // Was holding: Release into Reverse Unspooling Supernova Bloom!
+        // Was holding: Detonate 3D Volumetric Supernova into Slow Condensation!
         isHoldingRef.current = false;
         isAbsorbedRef.current = false;
         isUnspoolingRef.current = true;
@@ -810,9 +826,9 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         if (typeof navigator !== "undefined" && navigator.vibrate) {
           navigator.vibrate([35, 40, 20]);
         }
-        setInteractionHint("SUPERNOVA RELEASE · STREAM REVERSING TO EQUILIBRIUM");
+        setInteractionHint("SUPERNOVA RELEASE · STARDUST SLOWLY CONDENSING INTO ATTRACTOR");
 
-        // Set outward velocity unwinding along reverse accretion vortex
+        // True 3D volumetric starburst outward from singularity
         const bh = blackHolePosRef.current;
         for (let i = 0; i < PARTICLE_COUNT; i++) {
           const i3 = i * 3;
@@ -833,31 +849,31 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             dist = 1.0;
           }
 
-          const uX = dirX / dist;
-          const uY = dirY / dist;
-          const uZ = dirZ / dist;
+          // Full 3D spherical dispersion cone (depth and radial dispersion)
+          const angle = Math.atan2(dirY, dirX) + (Math.random() - 0.5) * 0.55;
+          const elevation = (Math.random() - 0.5) * Math.PI * 0.70;
+          const cosElev = Math.cos(elevation);
+          const uX = Math.cos(angle) * cosElev;
+          const uY = Math.sin(angle) * cosElev;
+          const uZ = Math.sin(elevation);
 
-          // Reverse accretion swirl vector: unwinds along natural stream curve
-          const revSwirlStrength = 0.016 + (i % 7) * 0.002;
-          const revSwirlX = -uY * revSwirlStrength;
-          const revSwirlY = uX * revSwirlStrength;
+          // Calibrated volumetric burst speed (0.020 to 0.045 units/frame)
+          const stagger = 0.85 + (i % 23) * 0.014;
+          const burstSpeed = (Math.min(dist * 0.034, 0.044) + 0.016) * stagger;
 
-          // Outward burst speed: perfectly calibrated to screen space (0.024 to 0.038 units/frame)
-          const stagger = 0.88 + (i % 19) * 0.012;
-          const burstSpeed = (Math.min(dist * 0.032, 0.038) + 0.012) * stagger;
-
-          velocities[i3] = uX * burstSpeed + revSwirlX;
-          velocities[i3 + 1] = uY * burstSpeed + revSwirlY;
-          velocities[i3 + 2] = uZ * burstSpeed + (Math.random() - 0.5) * 0.006;
+          velocities[i3] = uX * burstSpeed;
+          velocities[i3 + 1] = uY * burstSpeed;
+          velocities[i3 + 2] = uZ * burstSpeed;
 
           // Micro-flare scale on detonation
-          particleScales[i] = 0.35 + Math.random() * 0.3;
+          particleScales[i] = 0.45 + Math.random() * 0.40;
         }
 
+        // Full 3.8s sequence allows stardust to slowly, gracefully coalesce into Lorenz wings
         setTimeout(() => {
           isUnspoolingRef.current = false;
           setInteractionHint("MOVE ACROSS ATTRACTOR · HOLD FOR BLACK HOLE · CLICK FOR HYPERSPACE");
-        }, 2400);
+        }, 3800);
       } else if (pressDuration < 220 && dx < 15 && dy < 15) {
         // Quick single click/tap: Star Wars Lightspeed Hyperspace Jump!
         triggerWarpTransition();
@@ -930,13 +946,21 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         shockwaveMesh.position.copy(bh);
         shockwaveMat.uniforms.uProgress.value = timeSinceUnspool / 0.65;
 
-        if (timeSinceUnspool < 0.35) {
+        if (timeSinceUnspool < 0.06) {
+          // Pre-detonation micro-implosion "breath"
           blackHoleGroup.visible = true;
           blackHoleGroup.position.copy(bh);
-          const flareProgress = timeSinceUnspool / 0.35;
-          const flareScale = 1.0 + (1.0 - flareProgress) * 1.8;
+          const inhaleProg = timeSinceUnspool / 0.06;
+          const inhaleScale = 1.0 - inhaleProg * 0.22;
+          blackHoleGroup.scale.set(inhaleScale, inhaleScale, inhaleScale);
+        } else if (timeSinceUnspool < 0.38) {
+          // Blinding champagne-white flare eruption
+          blackHoleGroup.visible = true;
+          blackHoleGroup.position.copy(bh);
+          const flareProgress = (timeSinceUnspool - 0.06) / 0.32;
+          const flareScale = 1.1 + (1.0 - flareProgress) * 2.2;
           blackHoleGroup.scale.set(flareScale, flareScale, flareScale);
-          eventHorizonMesh.scale.setScalar(Math.max(0.001, 1.0 - timeSinceUnspool / 0.18));
+          eventHorizonMesh.scale.setScalar(Math.max(0.001, 1.0 - flareProgress * 1.5));
         } else {
           blackHoleGroup.visible = false;
           blackHoleGroup.scale.set(0, 0, 0);
@@ -1027,38 +1051,34 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           // Gravitational horizon expands progressively over time (cascading intake)
           const rGrav = 0.22 + hProg * 2.8;
 
-          if (hProg >= 1.0 || dist < 0.024) {
-            // Fully swallowed inside event horizon!
+          if (hProg >= 1.0 || dist < 0.015) {
+            // Swallowed cleanly inside the singularity void core (no circling, no ring!)
             px = bh.x;
             py = bh.y;
             pz = bh.z;
             vx = 0;
             vy = 0;
             vz = 0;
-            scl = Math.max(0.0, scl - delta * 3.6);
-          } else if (distStream <= rGrav || dist < 0.35) {
-            // Captured in the swirling accretion stream into the singularity!
+            scl = Math.max(0.0, scl - delta * 4.0);
+          } else if (distStream <= rGrav || dist < 0.40) {
+            // Captured: pulled DIRECTLY into the black hole center (no orbital tangential swirl)
             const uX = dx / dist;
             const uY = dy / dist;
             const uZ = dz / dist;
 
-            // Relativistic accretion vortex swirl around black hole core
-            const swirlSpeed = 0.012 / (dist + 0.08);
-            const swirlX = -uY * swirlSpeed;
-            const swirlY = uX * swirlSpeed;
+            // Direct inward gravitational acceleration straight into the dark core
+            const inwardAccel = 0.020 + hProg * 0.028 + 0.006 / (dist + 0.03);
+            vx += uX * inwardAccel * (delta * 60);
+            vy += uY * inwardAccel * (delta * 60);
+            vz += uZ * inwardAccel * (delta * 60);
 
-            // Inward suction rate accelerates near singularity
-            const suctionRate = 0.014 + hProg * 0.022 + 0.003 / (dist + 0.04);
-            vx += (uX * suctionRate + swirlX) * (delta * 60);
-            vy += (uY * suctionRate + swirlY) * (delta * 60);
-            vz += (uZ * suctionRate) * (delta * 60);
-
-            if (dist < 0.12) {
-              scl = Math.max(0.0, dist / 0.12);
+            // Smoothly shrink scale as particle plunges through the event horizon
+            if (dist < 0.16) {
+              scl = Math.max(0.0, dist / 0.16);
             }
-            vx *= 0.90;
-            vy *= 0.90;
-            vz *= 0.90;
+            vx *= 0.88;
+            vy *= 0.88;
+            vz *= 0.88;
           } else {
             // Outside gravitational reach: continues natural flow along Lorenz attractor towards intake
             const springK = 2.4;
@@ -1070,8 +1090,8 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             vz *= 0.91;
           }
         } else if (isUnspooling) {
-          // MULTI-STAGE COSMIC SUPERNOVA & NEBULAR BLOOM (Elegantly timed across 2.4s)
-          // Advance stream index along Lorenz trajectory at 50-75 steps/s
+          // CELESTIAL SUPERNOVA & SLOW LORENZ MANIFOLD REFORMATION (3.8s Timeline)
+          // Advance stream index along Lorenz trajectory at 22-40 steps/s
           let pIdx = particleIndices[i] + particleSpeeds[i] * delta;
           if (pIdx >= LORENZ_STEPS) pIdx -= LORENZ_STEPS;
           particleIndices[i] = pIdx;
@@ -1096,33 +1116,49 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           targetArr[i3 + 1] = ty;
           targetArr[i3 + 2] = tz;
 
-          if (timeSinceUnspool < 0.75) {
-            // STAGE 1 & 2: EXPANDING SPIRAL NEBULAR BLOOM
-            // Pure celestial inertial flight without spring snapping
-            vx *= 0.945;
-            vy *= 0.945;
-            vz *= 0.945;
-            scl = Math.min(1.0, scl + delta * 3.2);
+          if (timeSinceUnspool < 0.65) {
+            // STAGE 1: SUPERNOVA DETONATION & 3D VOLUMETRIC DISPERSION (0.0s - 0.65s)
+            // Outward burst coasting through space, scale blossoming to full
+            vx *= 0.955;
+            vy *= 0.955;
+            vz *= 0.955;
+            scl = Math.min(1.0, scl + delta * 3.5);
+          } else if (timeSinceUnspool < 1.35) {
+            // STAGE 2: CELESTIAL STARDUST DRIFT & SUSPENDED NEBULA (0.65s - 1.35s)
+            // Stardust embers hover and drift gracefully in 3D depth with atmospheric damping
+            vx *= 0.940;
+            vy *= 0.940;
+            vz *= 0.940;
+            scl = 1.0;
           } else {
-            // STAGE 3: GRAVITATIONAL RE-CAPTURE (0.75s to 2.4s)
-            // Smooth cubic S-curve ease (0.0 -> 1.0)
-            const progress = Math.min(1.0, (timeSinceUnspool - 0.75) / 1.65);
-            const blend = progress * progress * (3.0 - 2.0 * progress);
+            // STAGE 3 & 4: SLOW CELESTIAL CONDENSATION (1.35s to 3.8s - 2.45s Duration)
+            // NO SLINGSHOT: Stardust slowly, serenely condenses and materializes into the Lorenz wings!
+            const progress = Math.min(1.0, (timeSinceUnspool - 1.35) / 2.45);
+            // Ultra-smooth quintic S-curve: zero jerk, zero snap at start and finish
+            const blend = progress * progress * progress * (progress * (progress * 6.0 - 15.0) + 10.0);
 
-            const springK = 2.4 * blend;
+            // Gentle condensation spring (rising softly from 0 to 1.15, avoiding any whip)
+            const springK = 1.15 * blend;
             vx += (tx - px) * springK * delta;
             vy += (ty - py) * springK * delta;
             vz += (tz - pz) * springK * delta;
 
-            const damping = 0.945 - 0.035 * blend;
+            // Critical damping prevents any oscillation or overshoot
+            const damping = 0.935 - 0.025 * blend;
             vx *= damping;
             vy *= damping;
             vz *= damping;
 
-            scl = Math.min(1.0, scl + delta * 2.2);
+            // Direct soft ease: particles slowly coalesce onto the manifold coordinates
+            const easeRate = 0.038 * blend * (delta * 60);
+            px += (tx - px) * easeRate;
+            py += (ty - py) * easeRate;
+            pz += (tz - pz) * easeRate;
+
+            scl = 1.0;
           }
         } else {
-          // ACTIVE LORENZ ATTRACTOR FLIGHT (ELEGANT 50-75 STEPS/SEC MOTION)
+          // ACTIVE LORENZ ATTRACTOR FLIGHT (ELEGANT 22-40 STEPS/SEC MOTION)
           let pIdx = particleIndices[i] + particleSpeeds[i] * delta;
           if (pIdx >= LORENZ_STEPS) pIdx -= LORENZ_STEPS;
           particleIndices[i] = pIdx;

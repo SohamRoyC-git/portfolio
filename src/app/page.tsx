@@ -28,6 +28,45 @@ if (typeof window !== "undefined") {
 
 export default function Home() {
   const [activeId, setActiveId] = useState("monument-studio-3d");
+  const [isWorkspaceLocked, setIsWorkspaceLocked] = useState(true);
+
+  // Strict Window & Scroller Lock: Completely prevent any scrolling while in 3D Studio
+  useEffect(() => {
+    if (!isWorkspaceLocked) return;
+
+    const preventScroll = (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    const handleKey = (e: KeyboardEvent) => {
+      if (
+        ["ArrowDown", "ArrowUp", "PageDown", "PageUp", "Space", "End", "Home"].includes(e.code)
+      ) {
+        e.preventDefault();
+      }
+    };
+
+    window.addEventListener("wheel", preventScroll, { passive: false, capture: true });
+    window.addEventListener("touchmove", preventScroll, { passive: false, capture: true });
+    window.addEventListener("keydown", handleKey, { capture: true });
+
+    if (lenisRef.current) {
+      lenisRef.current.stop();
+      lenisRef.current.scrollTo(0, { immediate: true });
+    }
+
+    if (scrollerRef.current) {
+      scrollerRef.current.scrollTop = 0;
+    }
+
+    return () => {
+      window.removeEventListener("wheel", preventScroll, { capture: true });
+      window.removeEventListener("touchmove", preventScroll, { capture: true });
+      window.removeEventListener("keydown", handleKey, { capture: true });
+    };
+  }, [isWorkspaceLocked]);
+
   const lenisRef = useRef<Lenis | null>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
 
@@ -57,6 +96,7 @@ export default function Home() {
       });
       lenisRef.current = lenis;
       (window as any).lenis = lenis;
+      lenis.stop(); // Strictly lock scrolling until laptop is clicked
 
       lenis.on("scroll", ScrollTrigger.update);
 
@@ -136,7 +176,34 @@ export default function Home() {
     return () => observer.disconnect();
   }, []);
 
+  const handleEnterPortfolio = useCallback(() => {
+    setIsWorkspaceLocked(false);
+    if (lenisRef.current) {
+      lenisRef.current.start();
+      const el = document.getElementById("hero-wrapper");
+      if (el) {
+        lenisRef.current.scrollTo(el, { duration: 1.2 });
+      }
+    } else {
+      const el = document.getElementById("hero-wrapper");
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+    }
+  }, []);
+
   const handleNavigate = useCallback((id: string) => {
+    if (id === "monument-studio-3d") {
+      setIsWorkspaceLocked(true);
+      if (lenisRef.current) {
+        lenisRef.current.scrollTo(0, { duration: 1.0 });
+        setTimeout(() => {
+          if (lenisRef.current) lenisRef.current.stop();
+        }, 1100);
+      }
+      return;
+    }
+
+    setIsWorkspaceLocked(false);
+    if (lenisRef.current) lenisRef.current.start();
     const el = document.getElementById(id);
     if (!el) return;
 
@@ -165,7 +232,9 @@ export default function Home() {
       <div
         id="app-scroller"
         ref={scrollerRef}
-        className="relative h-full w-full overflow-y-auto overflow-x-hidden overscroll-none"
+        className={`relative h-full w-full ${
+          isWorkspaceLocked ? "overflow-hidden touch-none" : "overflow-y-auto"
+        } overflow-x-hidden overscroll-none`}
         style={{ WebkitOverflowScrolling: "touch" }}
       >
         <main className="relative z-10">

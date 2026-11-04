@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState, useCallback, memo } from "react";
 import * as THREE from "three";
-import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import gsap from "gsap";
 import {
   X,
@@ -50,7 +50,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   // Terminal state
   const [terminalInput, setTerminalInput] = useState("");
   const [terminalHistory, setTerminalHistory] = useState<Array<{ cmd: string; out: string }>>([
-    { cmd: "system.init", out: "Soham Battlestation 3D Kernel · PBR Studio Active" },
+    { cmd: "system.init", out: "Soham Battlestation 3D Kernel · Photogrammetry Mesh Active" },
     { cmd: "whoami", out: "Soham Roychoudhury — AI/ML Engineer & Systems Architect" },
     { cmd: "help", out: "Commands: 'whoami', 'projects', 'specs', 'hobbies', 'sound on', 'sound off', 'enter', 'clear'" },
   ]);
@@ -66,13 +66,12 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   const screenTextureRef = useRef<THREE.CanvasTexture | null>(null);
   const fanMeshRef = useRef<THREE.Group | null>(null);
   const screenGlowLightRef = useRef<THREE.PointLight | null>(null);
-  const pcFanLightRef = useRef<THREE.PointLight | null>(null);
   const particlesRef = useRef<THREE.Points | null>(null);
 
-  // Mouse / Camera Target coordinates for Smooth Damped Orbit
+  // Seated Chair POV Target Coordinates
   const mouseNorm = useRef({ x: 0, y: 0 });
-  const cameraBasePos = useRef(new THREE.Vector3(0, 1.45, 2.85));
-  const cameraLookTarget = useRef(new THREE.Vector3(0, 0.42, 0.05));
+  const cameraBasePos = useRef(new THREE.Vector3(-0.10, 0.65, 0.58));
+  const cameraLookTarget = useRef(new THREE.Vector3(-0.11, 0.58, -0.05));
   const isFlyingIntoScreen = useRef(false);
 
   // Web Audio Context & Nodes
@@ -178,9 +177,9 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     playClickSound(1100);
 
     const camera = cameraRef.current;
-    // Monitor screen 3D center coordinates: (x: -0.15, y: 0.76, z: -0.05)
-    const targetPos = new THREE.Vector3(-0.15, 0.76, 0.28);
-    const targetLook = new THREE.Vector3(-0.15, 0.76, -0.05);
+    // Monitor screen 3D center coordinates: (x: -0.112, y: 0.725, z: -0.04)
+    const targetPos = new THREE.Vector3(-0.112, 0.725, 0.18);
+    const targetLook = new THREE.Vector3(-0.112, 0.725, -0.04);
 
     gsap.to(camera.position, {
       x: targetPos.x,
@@ -261,7 +260,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Main Three.js Scene Setup (Option B1: High-Fidelity Procedural PBR Room)
+  // Main Three.js Scene Setup (Seated Chair POV with Polycam Mesh + Live Interactive Overlays)
   useEffect(() => {
     const container = mountRef.current;
     if (!container) return;
@@ -274,13 +273,13 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     const scene = new THREE.Scene();
     sceneRef.current = scene;
     scene.background = new THREE.Color("#07080A");
-    scene.fog = new THREE.FogExp2("#07080A", 0.05);
+    scene.fog = new THREE.FogExp2("#07080A", 0.08);
 
-    // 2. CAMERA
-    const camera = new THREE.PerspectiveCamera(isMobile ? 54 : 44, width / height, 0.1, 40);
+    // 2. CAMERA (Seated Chair POV: right in front of the keyboard and monitor!)
+    const camera = new THREE.PerspectiveCamera(isMobile ? 58 : 50, width / height, 0.05, 30);
     const initialPos = isMobile
-      ? new THREE.Vector3(0, 1.85, 3.8)
-      : new THREE.Vector3(0, 1.45, 2.85);
+      ? new THREE.Vector3(-0.10, 0.72, 0.68)
+      : new THREE.Vector3(-0.10, 0.65, 0.58);
     camera.position.copy(initialPos);
     cameraBasePos.current.copy(initialPos);
     cameraRef.current = camera;
@@ -296,221 +295,83 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
+    renderer.toneMappingExposure = 1.35;
     container.appendChild(renderer.domElement);
 
-    // 4. LIGHTING: Multi-Source Cinematic Studio
-    // Ambient Base (Deep blue-slate shadow fill)
-    const ambientLight = new THREE.AmbientLight(0x222634, 1.4);
+    // 4. LIGHTING: Multi-Source Studio
+    // Warm Ambient Light
+    const ambientLight = new THREE.AmbientLight(0xFFFFFF, 1.35);
     scene.add(ambientLight);
 
-    // Studio Key Softbox (Warm Tungsten Key Light)
-    const keyLight = new THREE.DirectionalLight(0xFFE5D0, 2.6);
-    keyLight.position.set(-3.5, 4.8, 2.5);
+    // Soft Studio Warm Key Light (matches real room ceiling light)
+    const keyLight = new THREE.DirectionalLight(0xFFEDD5, 2.4);
+    keyLight.position.set(2.0, 4.0, 3.0);
     keyLight.castShadow = true;
     keyLight.shadow.mapSize.width = 2048;
     keyLight.shadow.mapSize.height = 2048;
-    keyLight.shadow.camera.near = 0.5;
-    keyLight.shadow.camera.far = 12;
-    keyLight.shadow.camera.left = -2.5;
-    keyLight.shadow.camera.right = 2.5;
-    keyLight.shadow.camera.top = 2.5;
-    keyLight.shadow.camera.bottom = -2.5;
     keyLight.shadow.bias = -0.0004;
     scene.add(keyLight);
 
-    // Cool Rim Light (Sharp blue edge highlight on PC case & monitor)
-    const rimLight = new THREE.DirectionalLight(0x60A5FA, 1.1);
-    rimLight.position.set(4.0, 3.2, -0.6);
+    // Cool Rim Light (edge highlights on PC tower)
+    const rimLight = new THREE.DirectionalLight(0x93C5FD, 1.2);
+    rimLight.position.set(-2.5, 3.0, -1.0);
     scene.add(rimLight);
 
     // Emissive BenQ Monitor Glow Light (Bounces blue-white light downward onto keyboard)
-    const screenGlow = new THREE.PointLight(0x8AB4F8, 1.6, 2.2);
-    screenGlow.position.set(-0.15, 0.72, 0.25);
+    const screenGlow = new THREE.PointLight(0x60A5FA, 1.8, 1.4);
+    screenGlow.position.set(-0.112, 0.725, 0.12);
     scene.add(screenGlow);
     screenGlowLightRef.current = screenGlow;
 
-    // Internal Zebronics ARGB Fan Glow Light (Casts warm crimson/magenta through tempered glass)
-    const pcFanLight = new THREE.PointLight(0xFF3366, 2.2, 1.4);
-    pcFanLight.position.set(1.05, 0.72, 0.05);
+    // Internal Zebronics ARGB Fan Glow Light (Pulsing warm magenta/red)
+    const pcFanLight = new THREE.PointLight(0xFF2D55, 2.4, 1.2);
+    pcFanLight.position.set(0.38, 0.65, 0.02);
     scene.add(pcFanLight);
-    pcFanLightRef.current = pcFanLight;
 
-    // 5. PBR MATERIALS
-    // Dark Smoked Espresso Mahogany Desk Surface
-    const mahoganyDeskMat = new THREE.MeshStandardMaterial({
-      color: 0x221B18,
-      roughness: 0.35,
-      metalness: 0.15,
-    });
-
-    // Warm Teak Wood Riser Shelf
-    const teakWoodMat = new THREE.MeshStandardMaterial({
-      color: 0x8C5638,
-      roughness: 0.42,
-      metalness: 0.1,
-    });
-
-    // Space Black Anodized Aluminum (Legs, Stand, Keyboard Base)
-    const blackAluminumMat = new THREE.MeshStandardMaterial({
-      color: 0x15161A,
-      roughness: 0.28,
-      metalness: 0.85,
-    });
-
-    // Matte Polycarbonate (Keycaps, Bezel)
-    const mattePolycarbMat = new THREE.MeshStandardMaterial({
-      color: 0x121316,
-      roughness: 0.55,
-      metalness: 0.1,
-    });
-
-    // Real Optical Tempered Glass (Zebronics PC Side Panel)
-    const temperedGlassMat = new THREE.MeshPhysicalMaterial({
-      color: 0xFFFFFF,
-      transparent: true,
-      opacity: 0.35,
-      transmission: 0.9,
-      roughness: 0.08,
-      ior: 1.52,
-      thickness: 0.4,
-      reflectivity: 0.6,
-    });
-
-    // Invisible Hit-Box Material
-    const hitBoxMat = new THREE.MeshBasicMaterial({
-      transparent: true,
-      opacity: 0,
-      depthWrite: false,
-    });
-
-    const hitBoxes: THREE.Mesh[] = [];
-
-    // 6. ARCHITECTURAL ROOM & WALLS
-    // Backing Terracotta/Coral Wall
-    const backWall = new THREE.Mesh(
-      new THREE.PlaneGeometry(12, 6.5),
-      new THREE.MeshStandardMaterial({ color: 0x8B4438, roughness: 0.85 })
+    // 5. ARCHITECTURAL STUDIO BACKDROP & FLOOR (Cleans up raw scan boundary edges)
+    // Dark mahogany desk extension underneath
+    const deskExtension = new THREE.Mesh(
+      new THREE.PlaneGeometry(5.0, 4.0),
+      new THREE.MeshStandardMaterial({ color: 0x1A1412, roughness: 0.6 })
     );
-    backWall.position.set(0, 2.0, -1.8);
+    deskExtension.rotation.x = -Math.PI / 2;
+    deskExtension.position.set(0, 0.385, 0);
+    deskExtension.receiveShadow = true;
+    scene.add(deskExtension);
+
+    // Warm Terracotta Wall behind the desk
+    const backWall = new THREE.Mesh(
+      new THREE.PlaneGeometry(6.0, 4.0),
+      new THREE.MeshStandardMaterial({ color: 0x82382D, roughness: 0.85 })
+    );
+    backWall.position.set(0, 1.0, -0.45);
     backWall.receiveShadow = true;
     scene.add(backWall);
 
-    // Architectural Acoustic Slats on Back Wall
-    const slatGeo = new RoundedBoxGeometry(0.045, 5.5, 0.03, 2, 0.005);
-    const slatMat = new THREE.MeshStandardMaterial({ color: 0x3A1F1B, roughness: 0.6 });
-    for (let x = -5.0; x <= 5.0; x += 0.22) {
-      const slat = new THREE.Mesh(slatGeo, slatMat);
-      slat.position.set(x, 2.0, -1.78);
-      slat.receiveShadow = true;
-      scene.add(slat);
-    }
+    const hitBoxes: THREE.Mesh[] = [];
+    const hitBoxMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
 
-    // Master Mahogany Desk Top
-    const deskTop = new THREE.Mesh(
-      new RoundedBoxGeometry(3.6, 0.08, 1.8, 4, 0.02),
-      mahoganyDeskMat
+    // 6. LOAD USER'S REAL POLYCAM GLTF 3D SCAN
+    const loader = new GLTFLoader();
+    loader.load(
+      "/models/soham_real_desk.glb",
+      (gltf) => {
+        const model = gltf.scene;
+        model.traverse((child) => {
+          if ((child as THREE.Mesh).isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
+        scene.add(model);
+      },
+      undefined,
+      (err) => {
+        console.warn("Polycam model load error:", err);
+      }
     );
-    deskTop.position.set(0, 0.38, 0);
-    deskTop.receiveShadow = true;
-    deskTop.castShadow = true;
-    scene.add(deskTop);
 
-    // Chamfered Metal Desk Legs
-    const legGeo = new THREE.CylinderGeometry(0.035, 0.035, 1.2, 24);
-    const legPositions = [
-      [-1.65, -0.22, -0.75],
-      [1.65, -0.22, -0.75],
-      [-1.65, -0.22, 0.75],
-      [1.65, -0.22, 0.75],
-    ];
-    legPositions.forEach(([lx, ly, lz]) => {
-      const leg = new THREE.Mesh(legGeo, blackAluminumMat);
-      leg.position.set(lx, ly, lz);
-      leg.castShadow = true;
-      scene.add(leg);
-    });
-
-    // 7. TEAK MONITOR RISER SHELF & NETWORK SWITCH
-    const riserGroup = new THREE.Group();
-    riserGroup.position.set(-0.15, 0.44, -0.25);
-
-    const riserPlank = new THREE.Mesh(
-      new RoundedBoxGeometry(1.65, 0.035, 0.46, 3, 0.008),
-      teakWoodMat
-    );
-    riserPlank.position.set(0, 0.09, 0);
-    riserPlank.castShadow = true;
-    riserPlank.receiveShadow = true;
-    riserGroup.add(riserPlank);
-
-    // Steel Riser Legs
-    const riserLegGeo = new THREE.BoxGeometry(0.04, 0.09, 0.44);
-    const riserLegLeft = new THREE.Mesh(riserLegGeo, blackAluminumMat);
-    riserLegLeft.position.set(-0.75, 0.045, 0);
-    riserGroup.add(riserLegLeft);
-
-    const riserLegRight = new THREE.Mesh(riserLegGeo, blackAluminumMat);
-    riserLegRight.position.set(0.75, 0.045, 0);
-    riserGroup.add(riserLegRight);
-
-    // Small Network Switch Under Shelf
-    const netSwitch = new THREE.Mesh(
-      new THREE.BoxGeometry(0.35, 0.04, 0.22),
-      new THREE.MeshStandardMaterial({ color: 0x0A0B0E, roughness: 0.4 })
-    );
-    netSwitch.position.set(0, 0.02, -0.05);
-    riserGroup.add(netSwitch);
-
-    // Switch Activity LEDs
-    const ledMat = new THREE.MeshBasicMaterial({ color: 0x10B981 });
-    for (let i = -0.12; i <= 0.12; i += 0.04) {
-      const led = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.008, 0.002), ledMat);
-      led.position.set(i, 0.02, 0.061);
-      riserGroup.add(led);
-    }
-    scene.add(riserGroup);
-
-    // 8. BENQ WIDESCREEN MONITOR (Screen Portal & Light Emitter)
-    const monitorGroup = new THREE.Group();
-    monitorGroup.position.set(-0.15, 0.55, -0.25);
-
-    // Stand Base on Riser
-    const standBase = new THREE.Mesh(
-      new RoundedBoxGeometry(0.42, 0.015, 0.28, 3, 0.005),
-      blackAluminumMat
-    );
-    standBase.position.set(0, 0.02, 0);
-    standBase.castShadow = true;
-    monitorGroup.add(standBase);
-
-    // Stand Neck
-    const standNeck = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.035, 0.04, 0.35, 24),
-      blackAluminumMat
-    );
-    standNeck.position.set(0, 0.18, -0.04);
-    standNeck.castShadow = true;
-    monitorGroup.add(standNeck);
-
-    // Monitor Bezel & Frame (16:9 Widescreen)
-    const monitorFrame = new THREE.Mesh(
-      new RoundedBoxGeometry(1.22, 0.72, 0.035, 3, 0.006),
-      blackAluminumMat
-    );
-    monitorFrame.position.set(0, 0.46, 0.02);
-    monitorFrame.castShadow = true;
-    monitorGroup.add(monitorFrame);
-
-    // BenQ Logo on Chin
-    const benqChin = new THREE.Mesh(
-      new THREE.BoxGeometry(0.12, 0.025, 0.004),
-      new THREE.MeshStandardMaterial({ color: 0xCCCCCC, roughness: 0.2, metalness: 0.9 })
-    );
-    benqChin.position.set(0, 0.12, 0.04);
-    monitorGroup.add(benqChin);
-
-    // Active Website Screen Texture Canvas
+    // 7. HIGH-DEFINITION INTERACTIVE 3D SCREEN OVERLAY (Crisp Live Interface)
     const screenCanvas = document.createElement("canvas");
     screenCanvas.width = 1024;
     screenCanvas.height = 576;
@@ -525,141 +386,80 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       sCtx.fillRect(0, 0, 1024, 576);
 
       // Glowing Amber Sunrise Horizon
-      sCtx.fillStyle = "rgba(255, 122, 0, 0.35)";
+      sCtx.fillStyle = "rgba(255, 122, 0, 0.4)";
       sCtx.beginPath();
-      sCtx.ellipse(512, 280, 360, 90, 0, 0, Math.PI * 2);
+      sCtx.ellipse(512, 280, 380, 100, 0, 0, Math.PI * 2);
       sCtx.fill();
 
       // Top Status Bar
-      sCtx.fillStyle = "rgba(255,255,255,0.6)";
-      sCtx.font = "bold 18px monospace";
+      sCtx.fillStyle = "rgba(255,255,255,0.7)";
+      sCtx.font = "bold 20px monospace";
       sCtx.fillText("SOHAM ROYCHOUDHURY · ATELIER // 2026", 60, 60);
-      sCtx.fillText("SYS: RUNNING · PORT 3000", 720, 60);
+      sCtx.fillText("SYS: RUNNING · PORT 3000", 700, 60);
 
       // Main Typography
       sCtx.fillStyle = "#FFFFFF";
       sCtx.font = "bold 52px sans-serif";
       sCtx.fillText("CYBER-PASTORAL TERRACE", 60, 240);
 
-      sCtx.fillStyle = "rgba(255,255,255,0.75)";
+      sCtx.fillStyle = "rgba(255,255,255,0.85)";
       sCtx.font = "24px sans-serif";
       sCtx.fillText("AI/ML Engineer · Systems · Frontend Architect", 60, 290);
 
       // Enter Button Pill
-      sCtx.fillStyle = "rgba(255, 122, 0, 0.85)";
+      sCtx.fillStyle = "rgba(255, 122, 0, 0.9)";
       sCtx.beginPath();
-      sCtx.roundRect(60, 370, 380, 64, 32);
+      sCtx.roundRect(60, 370, 420, 68, 34);
       sCtx.fill();
 
       sCtx.fillStyle = "#000000";
-      sCtx.font = "bold 22px monospace";
-      sCtx.fillText("CLICK MONITOR TO ENTER ↗", 95, 410);
+      sCtx.font = "bold 24px monospace";
+      sCtx.fillText("CLICK MONITOR TO ENTER ↗", 95, 412);
     }
 
     const screenTexture = new THREE.CanvasTexture(screenCanvas);
     screenTextureRef.current = screenTexture;
 
     const screenMesh = new THREE.Mesh(
-      new THREE.PlaneGeometry(1.16, 0.65),
+      new THREE.PlaneGeometry(0.52, 0.30),
       new THREE.MeshBasicMaterial({ map: screenTexture })
     );
-    screenMesh.position.set(0, 0.465, 0.039);
-    monitorGroup.add(screenMesh);
+    // Positioned right on the front face of the BenQ monitor
+    screenMesh.position.set(-0.112, 0.725, -0.04);
+    scene.add(screenMesh);
 
     // Screen Hit-Box
-    const monitorHitBox = new THREE.Mesh(
-      new THREE.BoxGeometry(1.24, 0.74, 0.15),
-      hitBoxMat
-    );
-    monitorHitBox.position.set(0, 0.46, 0.05);
+    const monitorHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.34, 0.12), hitBoxMat);
+    monitorHitBox.position.set(-0.112, 0.725, -0.02);
     monitorHitBox.userData = {
       key: "monitor",
       label: "BenQ Widescreen Monitor",
       sub: "Master Portal · Click to Fly Into Website ↗",
       action: trigger3DCameraFlight,
     };
-    monitorGroup.add(monitorHitBox);
+    scene.add(monitorHitBox);
     hitBoxes.push(monitorHitBox);
 
-    scene.add(monitorGroup);
-
-    // 9. ZEBRONICS GAMING PC TOWER (Right Side)
-    const pcGroup = new THREE.Group();
-    pcGroup.position.set(1.15, 0.76, 0.0);
-
-    // Main Chassis Body
-    const pcBody = new THREE.Mesh(
-      new RoundedBoxGeometry(0.26, 0.68, 0.58, 3, 0.008),
-      new THREE.MeshStandardMaterial({ color: 0x111215, roughness: 0.35, metalness: 0.8 })
-    );
-    pcBody.castShadow = true;
-    pcBody.receiveShadow = true;
-    pcGroup.add(pcBody);
-
-    // Front Angular Faceted Mesh Panel
-    const frontFacet = new THREE.Mesh(
-      new THREE.BoxGeometry(0.258, 0.66, 0.04),
-      new THREE.MeshStandardMaterial({ color: 0x18191E, roughness: 0.7 })
-    );
-    frontFacet.position.set(0, 0, 0.29);
-    pcGroup.add(frontFacet);
-
-    // Tempered Glass Left Side Panel (Facing User/Desk)
-    const glassSide = new THREE.Mesh(
-      new THREE.BoxGeometry(0.015, 0.64, 0.54),
-      temperedGlassMat
-    );
-    glassSide.position.set(-0.132, 0, 0);
-    pcGroup.add(glassSide);
-
-    // PC Interior: Motherboard, GPU & Spinning ARGB Fan
-    const interiorGroup = new THREE.Group();
-    interiorGroup.position.set(-0.02, 0, 0);
-
-    // Motherboard PCB
-    const mobo = new THREE.Mesh(
-      new THREE.BoxGeometry(0.01, 0.52, 0.44),
-      new THREE.MeshStandardMaterial({ color: 0x081510, roughness: 0.8 })
-    );
-    mobo.position.set(0.08, 0, 0);
-    interiorGroup.add(mobo);
-
-    // GPU Block
-    const gpu = new THREE.Mesh(
-      new THREE.BoxGeometry(0.12, 0.08, 0.34),
-      new THREE.MeshStandardMaterial({ color: 0x1E2128, roughness: 0.4, metalness: 0.8 })
-    );
-    gpu.position.set(0.02, -0.06, 0.02);
-    interiorGroup.add(gpu);
-
-    // Spinning ARGB Rear Fan
+    // 8. ZEBRONICS PC TOWER: SPINNING ARGB FAN & HIT-BOX
     const fanGroup = new THREE.Group();
-    fanGroup.position.set(0.02, 0.14, -0.16);
-    const fanRing = new THREE.Mesh(
-      new THREE.TorusGeometry(0.07, 0.01, 16, 32),
-      new THREE.MeshBasicMaterial({ color: 0xFF2D55 })
-    );
+    fanGroup.position.set(0.38, 0.65, 0.02);
+    const fanRing = new THREE.Mesh(new THREE.TorusGeometry(0.065, 0.008, 16, 32), new THREE.MeshBasicMaterial({ color: 0xFF2D55 }));
     fanGroup.add(fanRing);
 
-    const bladeGeo = new THREE.BoxGeometry(0.02, 0.06, 0.004);
+    const bladeGeo = new THREE.BoxGeometry(0.016, 0.05, 0.004);
     const bladeMat = new THREE.MeshBasicMaterial({ color: 0xFF5588 });
     for (let b = 0; b < 7; b++) {
       const blade = new THREE.Mesh(bladeGeo, bladeMat);
       blade.rotation.z = (b / 7) * Math.PI * 2;
-      blade.position.set(Math.cos(blade.rotation.z) * 0.035, Math.sin(blade.rotation.z) * 0.035, 0);
+      blade.position.set(Math.cos(blade.rotation.z) * 0.03, Math.sin(blade.rotation.z) * 0.03, 0);
       fanGroup.add(blade);
     }
     fanMeshRef.current = fanGroup;
-    interiorGroup.add(fanGroup);
-
-    pcGroup.add(interiorGroup);
+    scene.add(fanGroup);
 
     // PC Hit-Box
-    const pcHitBox = new THREE.Mesh(
-      new THREE.BoxGeometry(0.32, 0.72, 0.62),
-      hitBoxMat
-    );
-    pcHitBox.position.set(0, 0, 0);
+    const pcHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.65, 0.55), hitBoxMat);
+    pcHitBox.position.set(0.40, 0.65, 0.02);
     pcHitBox.userData = {
       key: "pc_tower",
       label: "Zebronics Gaming Rig",
@@ -669,62 +469,12 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         setActiveModal("specs");
       },
     };
-    pcGroup.add(pcHitBox);
+    scene.add(pcHitBox);
     hitBoxes.push(pcHitBox);
 
-    scene.add(pcGroup);
-
-    // 10. REDGEAR MOUSEPAD & COMPACT TKL KEYBOARD (Front Center)
-    const matGroup = new THREE.Group();
-    matGroup.position.set(0, 0.422, 0.35);
-
-    // Redgear Desk Mat with Red Splash Artwork
-    const mousePad = new THREE.Mesh(
-      new RoundedBoxGeometry(1.65, 0.004, 0.65, 3, 0.008),
-      new THREE.MeshStandardMaterial({ color: 0x18191D, roughness: 0.95 })
-    );
-    mousePad.receiveShadow = true;
-    matGroup.add(mousePad);
-
-    // Red Distressed Splash Accent
-    const splashAccent = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.55, 0.45),
-      new THREE.MeshBasicMaterial({ color: 0xCC1122, transparent: true, opacity: 0.35 })
-    );
-    splashAccent.rotation.x = -Math.PI / 2;
-    splashAccent.position.set(0.45, 0.003, 0.05);
-    matGroup.add(splashAccent);
-
-    // Compact TKL Mechanical Keyboard
-    const kbGroup = new THREE.Group();
-    kbGroup.position.set(-0.15, 0.015, 0.02);
-
-    const kbBase = new THREE.Mesh(
-      new RoundedBoxGeometry(0.56, 0.022, 0.22, 3, 0.006),
-      blackAluminumMat
-    );
-    kbBase.castShadow = true;
-    kbBase.receiveShadow = true;
-    kbGroup.add(kbBase);
-
-    // Modeled Individual Keycaps Grid
-    const keyGeo = new RoundedBoxGeometry(0.026, 0.012, 0.026, 2, 0.003);
-    for (let r = 0; r < 5; r++) {
-      for (let c = 0; c < 14; c++) {
-        const kx = (c - 6.5) * 0.035;
-        const kz = (r - 2) * 0.036;
-        const keycap = new THREE.Mesh(keyGeo, mattePolycarbMat);
-        keycap.position.set(kx, 0.015, kz);
-        kbGroup.add(keycap);
-      }
-    }
-
-    // Keyboard Hit-Box
-    const kbHitBox = new THREE.Mesh(
-      new THREE.BoxGeometry(0.62, 0.08, 0.28),
-      hitBoxMat
-    );
-    kbHitBox.position.set(0, 0.02, 0);
+    // 9. COMPACT TKL KEYBOARD HIT-BOX
+    const kbHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.12, 0.22), hitBoxMat);
+    kbHitBox.position.set(-0.11, 0.42, 0.22);
     kbHitBox.userData = {
       key: "keyboard",
       label: "TKL Mechanical Keyboard",
@@ -734,128 +484,12 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         setActiveModal("terminal");
       },
     };
-    kbGroup.add(kbHitBox);
+    scene.add(kbHitBox);
     hitBoxes.push(kbHitBox);
 
-    matGroup.add(kbGroup);
-
-    // 11. LOGITECH G GAMING MOUSE (Right Side of Mat)
-    const mouseGroup = new THREE.Group();
-    mouseGroup.position.set(0.48, 0.02, 0.02);
-
-    const mouseBody = new THREE.Mesh(
-      new RoundedBoxGeometry(0.11, 0.035, 0.18, 4, 0.015),
-      mattePolycarbMat
-    );
-    mouseBody.castShadow = true;
-    mouseGroup.add(mouseBody);
-
-    // Glowing G Logo
-    const gLogo = new THREE.Mesh(
-      new THREE.CircleGeometry(0.014, 16),
-      new THREE.MeshBasicMaterial({ color: 0x00E5FF })
-    );
-    gLogo.rotation.x = -Math.PI / 2;
-    gLogo.position.set(0, 0.02, 0.02);
-    mouseGroup.add(gLogo);
-
-    matGroup.add(mouseGroup);
-    scene.add(matGroup);
-
-    // 12. OVER-EAR GAMING HEADSET (Front Left Desk)
-    const headsetGroup = new THREE.Group();
-    headsetGroup.position.set(-1.05, 0.48, 0.35);
-    headsetGroup.rotation.y = THREE.MathUtils.degToRad(35);
-
-    // Headband Dual Arch
-    const headband = new THREE.Mesh(
-      new THREE.TorusGeometry(0.12, 0.012, 16, 32, Math.PI),
-      blackAluminumMat
-    );
-    headband.rotation.x = Math.PI / 2;
-    headsetGroup.add(headband);
-
-    // Earcups Left & Right
-    const cupGeo = new THREE.CylinderGeometry(0.065, 0.065, 0.045, 24);
-    const cupLeft = new THREE.Mesh(cupGeo, mattePolycarbMat);
-    cupLeft.position.set(-0.12, 0, 0);
-    cupLeft.rotation.z = Math.PI / 2;
-    cupLeft.castShadow = true;
-    headsetGroup.add(cupLeft);
-
-    const cupRight = new THREE.Mesh(cupGeo, mattePolycarbMat);
-    cupRight.position.set(0.12, 0, 0);
-    cupRight.rotation.z = Math.PI / 2;
-    cupRight.castShadow = true;
-    headsetGroup.add(cupRight);
-
-    // Boom Microphone Arm
-    const boomMic = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.005, 0.005, 0.16, 12),
-      blackAluminumMat
-    );
-    boomMic.position.set(-0.12, -0.04, 0.08);
-    boomMic.rotation.x = Math.PI / 3;
-    headsetGroup.add(boomMic);
-
-    // Headset Hit-Box
-    const headsetHitBox = new THREE.Mesh(
-      new THREE.BoxGeometry(0.35, 0.22, 0.28),
-      hitBoxMat
-    );
-    headsetHitBox.position.set(0, 0, 0);
-    headsetHitBox.userData = {
-      key: "headset",
-      label: "Over-Ear Gaming Headset",
-      sub: "Hobbies, Rituals & Terrace Ambience",
-      action: () => {
-        playClickSound(950);
-        setActiveModal("hobbies");
-      },
-    };
-    headsetGroup.add(headsetHitBox);
-    hitBoxes.push(headsetHitBox);
-
-    scene.add(headsetGroup);
-
-    // 13. GAMEPAD (Resting on Teak Shelf Left of Monitor)
-    const gamepadGroup = new THREE.Group();
-    gamepadGroup.position.set(-0.65, 0.58, -0.22);
-    gamepadGroup.rotation.y = THREE.MathUtils.degToRad(-15);
-
-    const gpBody = new THREE.Mesh(
-      new RoundedBoxGeometry(0.22, 0.04, 0.14, 4, 0.015),
-      mattePolycarbMat
-    );
-    gpBody.castShadow = true;
-    gamepadGroup.add(gpBody);
-
-    // Thumbsticks with Red Rings
-    const redRingMat = new THREE.MeshBasicMaterial({ color: 0xFF1133 });
-    const stickGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.015, 16);
-
-    const stickLeft = new THREE.Mesh(stickGeo, mattePolycarbMat);
-    stickLeft.position.set(-0.05, 0.025, 0.02);
-    const ringLeft = new THREE.Mesh(new THREE.TorusGeometry(0.022, 0.003, 8, 16), redRingMat);
-    ringLeft.rotation.x = Math.PI / 2;
-    ringLeft.position.set(-0.05, 0.028, 0.02);
-    gamepadGroup.add(stickLeft);
-    gamepadGroup.add(ringLeft);
-
-    const stickRight = new THREE.Mesh(stickGeo, mattePolycarbMat);
-    stickRight.position.set(0.05, 0.025, -0.01);
-    const ringRight = new THREE.Mesh(new THREE.TorusGeometry(0.022, 0.003, 8, 16), redRingMat);
-    ringRight.rotation.x = Math.PI / 2;
-    ringRight.position.set(0.05, 0.028, -0.01);
-    gamepadGroup.add(stickRight);
-    gamepadGroup.add(ringRight);
-
-    // Gamepad Hit-Box
-    const gpHitBox = new THREE.Mesh(
-      new THREE.BoxGeometry(0.28, 0.08, 0.18),
-      hitBoxMat
-    );
-    gpHitBox.position.set(0, 0.02, 0);
+    // 10. GAMEPAD HIT-BOX (On Wooden Riser Left of Monitor)
+    const gpHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.12, 0.18), hitBoxMat);
+    gpHitBox.position.set(-0.35, 0.53, -0.10);
     gpHitBox.userData = {
       key: "gamepad",
       label: "Gamepad Controller",
@@ -865,34 +499,42 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         setActiveModal("projects");
       },
     };
-    gamepadGroup.add(gpHitBox);
+    scene.add(gpHitBox);
     hitBoxes.push(gpHitBox);
 
-    scene.add(gamepadGroup);
+    // 11. HEADSET HIT-BOX (Left Front Desk)
+    const hsHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.24, 0.26), hitBoxMat);
+    hsHitBox.position.set(-0.45, 0.46, 0.22);
+    hsHitBox.userData = {
+      key: "headset",
+      label: "Over-Ear Gaming Headset",
+      sub: "Hobbies, Rituals & Terrace Ambience",
+      action: () => {
+        playClickSound(950);
+        setActiveModal("hobbies");
+      },
+    };
+    scene.add(hsHitBox);
+    hitBoxes.push(hsHitBox);
 
-    // 14. ATMOSPHERIC PARTICLES (Floating Dust Motes in Light Shaft)
-    const particleCount = 120;
+    // 12. FLOATING ATMOSPHERIC PARTICLES
+    const particleCount = 80;
     const particleGeo = new THREE.BufferGeometry();
     const particlePos = new Float32Array(particleCount * 3);
     for (let i = 0; i < particleCount * 3; i += 3) {
-      particlePos[i] = (Math.random() - 0.5) * 4;
-      particlePos[i + 1] = Math.random() * 2.5 + 0.3;
-      particlePos[i + 2] = (Math.random() - 0.5) * 2.5;
+      particlePos[i] = (Math.random() - 0.5) * 2.5;
+      particlePos[i + 1] = Math.random() * 1.5 + 0.3;
+      particlePos[i + 2] = (Math.random() - 0.5) * 1.8;
     }
     particleGeo.setAttribute("position", new THREE.BufferAttribute(particlePos, 3));
-    const particleMat = new THREE.PointsMaterial({
-      color: 0xFFE5B4,
-      size: 0.02,
-      transparent: true,
-      opacity: 0.35,
-    });
+    const particleMat = new THREE.PointsMaterial({ color: 0xFFE5B4, size: 0.015, transparent: true, opacity: 0.4 });
     const particles = new THREE.Points(particleGeo, particleMat);
     scene.add(particles);
     particlesRef.current = particles;
 
     hitBoxesRef.current = hitBoxes;
 
-    // 15. RAYCASTING & INTERACTION
+    // 13. RAYCASTING & INTERACTION
     const raycaster = new THREE.Raycaster();
     const mouseVector = new THREE.Vector2();
 
@@ -945,13 +587,12 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     window.addEventListener("mousemove", onPointerMove);
     renderer.domElement.addEventListener("click", onPointerClick);
 
-    // 16. ANIMATION LOOP (Damped Orbit, Spinning Fan, Particle Float)
+    // 14. ANIMATION LOOP (Damped Head Tracking Parallax & Fan Rotation)
     let clock = new THREE.Clock();
 
     const animate = () => {
       animFrameRef.current = requestAnimationFrame(animate);
       const delta = clock.getDelta();
-      const time = clock.getElapsedTime();
 
       // Spin ARGB Fan in Zebronics PC
       if (fanMeshRef.current) {
@@ -962,16 +603,16 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       if (particlesRef.current) {
         const pos = particlesRef.current.geometry.attributes.position.array as Float32Array;
         for (let i = 1; i < pos.length; i += 3) {
-          pos[i] += delta * 0.05;
-          if (pos[i] > 3.0) pos[i] = 0.4;
+          pos[i] += delta * 0.04;
+          if (pos[i] > 2.0) pos[i] = 0.4;
         }
         particlesRef.current.geometry.attributes.position.needsUpdate = true;
       }
 
-      // Smooth Damped Orbit Parallax (Near objects shift faster than background!)
+      // Seated Chair Head-Tracking Parallax (Subtle natural head tilt!)
       if (!isFlyingIntoScreen.current && cameraRef.current) {
-        const targetX = cameraBasePos.current.x + mouseNorm.current.x * 0.45;
-        const targetY = cameraBasePos.current.y + mouseNorm.current.y * 0.28;
+        const targetX = cameraBasePos.current.x + mouseNorm.current.x * 0.12;
+        const targetY = cameraBasePos.current.y + mouseNorm.current.y * 0.08;
         camera.position.x += (targetX - camera.position.x) * 0.06;
         camera.position.y += (targetY - camera.position.y) * 0.06;
         camera.lookAt(cameraLookTarget.current);
@@ -990,7 +631,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       const mobile = w / h < 1.0;
 
       cameraRef.current.aspect = w / h;
-      cameraRef.current.fov = mobile ? 54 : 44;
+      cameraRef.current.fov = mobile ? 58 : 50;
       cameraRef.current.updateProjectionMatrix();
       rendererRef.current.setSize(w, h);
     };
@@ -1024,7 +665,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
         <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-xs font-mono text-white/70">
           <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          <span>3D PBR Studio Active</span>
+          <span>Real Photogrammetry 3D Active</span>
         </div>
       </header>
 

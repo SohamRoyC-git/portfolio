@@ -201,6 +201,10 @@ export default function Home() {
       setActiveId("monument-studio-3d");
       if (lenisRef.current) {
         lenisRef.current.stop();
+        lenisRef.current.scrollTo(0, { immediate: true });
+      }
+      if (scrollerRef.current) {
+        scrollerRef.current.scrollTop = 0;
       }
       return;
     }
@@ -244,11 +248,12 @@ export default function Home() {
       {/* Movement 00: Interactive 3D Studio Workspace (Fixed Viewport; strictly decoupled from scroller track) */}
       <div
         id="monument-studio-3d"
-        className={`fixed inset-0 w-full h-[100svh] z-30 transition-opacity duration-700 ${
+        className={`fixed inset-0 w-full h-[100svh] z-35 transition-opacity duration-700 ${
           isStudioActive ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
       >
         <Studio3DWorkspace
+          isActive={isStudioActive}
           onEnterPortfolio={handleEnterPortfolio}
           onNavigateToSection={handleNavigate}
         />

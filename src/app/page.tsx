@@ -29,6 +29,7 @@ if (typeof window !== "undefined") {
 export default function Home() {
   const [activeId, setActiveId] = useState("monument-studio-3d");
   const [isWorkspaceLocked, setIsWorkspaceLocked] = useState(true);
+  const [isStudioActive, setIsStudioActive] = useState(true);
 
   // Strict Window & Scroller Lock: Completely prevent any scrolling while in 3D Studio
   useEffect(() => {
@@ -144,7 +145,6 @@ export default function Home() {
   // Section Observer for Navigation Spy
   useEffect(() => {
     const sectionIds = [
-      "monument-studio-3d",
       "monument-hero",
       "monument-statement",
       "monument-creed",
@@ -156,7 +156,7 @@ export default function Home() {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
+          if (entry.isIntersecting && !isStudioActive) {
             setActiveId(entry.target.id);
           }
         });
@@ -174,36 +174,45 @@ export default function Home() {
     });
 
     return () => observer.disconnect();
-  }, []);
+  }, [isStudioActive]);
 
   const handleEnterPortfolio = useCallback(() => {
+    setIsStudioActive(false);
     setIsWorkspaceLocked(false);
+    setActiveId("monument-hero");
+
     if (lenisRef.current) {
       lenisRef.current.start();
-      const el = document.getElementById("hero-wrapper");
-      if (el) {
-        lenisRef.current.scrollTo(el, { duration: 1.2 });
-      }
-    } else {
-      const el = document.getElementById("hero-wrapper");
-      if (el) el.scrollIntoView({ behavior: "smooth" });
+      lenisRef.current.scrollTo(0, { immediate: true });
     }
+    if (scrollerRef.current) {
+      scrollerRef.current.scrollTop = 0;
+    }
+
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 150);
   }, []);
 
   const handleNavigate = useCallback((id: string) => {
     if (id === "monument-studio-3d") {
+      setIsStudioActive(true);
       setIsWorkspaceLocked(true);
+      setActiveId("monument-studio-3d");
       if (lenisRef.current) {
-        lenisRef.current.scrollTo(0, { duration: 1.0 });
-        setTimeout(() => {
-          if (lenisRef.current) lenisRef.current.stop();
-        }, 1100);
+        lenisRef.current.stop();
       }
       return;
     }
 
+    setIsStudioActive(false);
     setIsWorkspaceLocked(false);
-    if (lenisRef.current) lenisRef.current.start();
+    setActiveId(id);
+
+    if (lenisRef.current) {
+      lenisRef.current.start();
+    }
+
     const el = document.getElementById(id);
     if (!el) return;
 
@@ -212,6 +221,10 @@ export default function Home() {
     } else {
       el.scrollIntoView({ behavior: "smooth" });
     }
+
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 150);
   }, []);
 
   return (
@@ -228,7 +241,20 @@ export default function Home() {
       {/* Tactile In-App Pull-Down Refresh (Leaves browser bottom toolbar locked & stable) */}
       <PullToRefresh scrollerRef={scrollerRef} />
 
-      {/* 3. Cohesive Spatial Storytelling Sequence */}
+      {/* Movement 00: Interactive 3D Studio Workspace (Fixed Viewport; strictly decoupled from scroller track) */}
+      <div
+        id="monument-studio-3d"
+        className={`fixed inset-0 w-full h-[100svh] z-30 transition-opacity duration-700 ${
+          isStudioActive ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        <Studio3DWorkspace
+          onEnterPortfolio={handleEnterPortfolio}
+          onNavigateToSection={handleNavigate}
+        />
+      </div>
+
+      {/* 3. Cohesive Spatial Storytelling Sequence (Top of scroller is now #hero-wrapper) */}
       <div
         id="app-scroller"
         ref={scrollerRef}
@@ -238,37 +264,29 @@ export default function Home() {
         style={{ WebkitOverflowScrolling: "touch" }}
       >
         <main className="relative z-10">
-        {/* Movement 00: Interactive 3D Studio Workspace (Spatial Desk & Portals) */}
-        <div id="monument-studio-3d" className="relative w-full h-[100svh] z-20">
-          <Studio3DWorkspace
-            onEnterPortfolio={() => handleNavigate("monument-hero")}
-            onNavigateToSection={handleNavigate}
-          />
-        </div>
+          {/* Movement 01: Monumental Hero (Top of Portfolio Website) */}
+          <div id="hero-wrapper" className="relative w-full z-10 overflow-x-clip md:sticky md:top-0 md:h-[100svh] will-change-[transform,opacity]">
+            <MonumentalHero onExplore={() => handleNavigate("monument-statement")} onConnect={() => handleNavigate("monument-terminal")} />
+          </div>
 
-        {/* Movement 01: Monumental Hero (Sticky at top on desktop so Movement 01 wipes over it) */}
-        <div id="hero-wrapper" className="relative w-full z-10 overflow-x-clip md:sticky md:top-0 md:h-[100svh] will-change-[transform,opacity]">
-          <MonumentalHero onExplore={() => handleNavigate("monument-statement")} onConnect={() => handleNavigate("monument-terminal")} />
-        </div>
+          {/* Movement 01: Kinetic Pinned Statement (Quote) */}
+          <KineticStatement />
 
-        {/* Movement 01: Kinetic Pinned Statement (Quote) */}
-        <KineticStatement />
+          {/* Movement 02: Educational & Professional Foundations (Creed Monoliths) */}
+          <ArchitecturalCreed />
 
-        {/* Movement 02: Educational & Professional Foundations (Creed Monoliths) */}
-        <ArchitecturalCreed />
+          {/* Movement 03: Selected Commissions Showcase (Forge Automotive Split-Screen) */}
+          <GrandSpatialDiscs />
 
-        {/* Movement 03: Selected Commissions Showcase (Forge Automotive Split-Screen) */}
-        <GrandSpatialDiscs />
+          {/* Movement 03: Architectural Bento Matrix & Live Code */}
+          <ArchitecturalMatrix />
 
-        {/* Movement 03: Architectural Bento Matrix & Live Code */}
-        <ArchitecturalMatrix />
+          {/* Movement 04: The Initiation Terminal */}
+          <TerminalFinale />
 
-        {/* Movement 04: The Initiation Terminal */}
-        <TerminalFinale />
-
-        {/* Movement 05: Master Architectural Site Map & Colophon Footer */}
-        <SiteFooter onNavigate={handleNavigate} />
-      </main>
+          {/* Movement 05: Master Architectural Site Map & Colophon Footer */}
+          <SiteFooter onNavigate={handleNavigate} />
+        </main>
       </div>
     </div>
   );

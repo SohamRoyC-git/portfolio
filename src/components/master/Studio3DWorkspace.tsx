@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback, memo } from "react";
+import React, { useEffect, useRef, useState, useCallback, memo } from "react";
+import * as THREE from "three";
+import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import gsap from "gsap";
 import {
   X,
   ArrowRight,
-  ExternalLink,
-  Sparkles,
   Terminal as TerminalIcon,
   Cpu,
   Gamepad2,
@@ -15,12 +15,8 @@ import {
   Monitor,
   Volume2,
   VolumeX,
-  Camera,
-  Layers,
-  CheckCircle2,
-  Flame,
-  Code2,
   Activity,
+  Sparkles,
 } from "lucide-react";
 
 export interface Studio3DWorkspaceProps {
@@ -29,26 +25,12 @@ export interface Studio3DWorkspaceProps {
   isLocked?: boolean;
 }
 
-type SceneViewMode = "studio" | "photo";
-
-interface HotspotBox {
-  left: number;
-  top: number;
-  width: number;
-  height: number;
-  label: string;
-  sub: string;
-  icon: React.ReactNode;
-  action: () => void;
-}
-
 export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   onEnterPortfolio,
   onNavigateToSection,
   isLocked = true,
 }: Studio3DWorkspaceProps) {
-  // Scene View Mode: Studio (3D digital twin) vs Photo (authentic battle station photo)
-  const [sceneMode, setSceneMode] = useState<SceneViewMode>("studio");
+  const mountRef = useRef<HTMLDivElement>(null);
 
   // Interactive Modals
   const [activeModal, setActiveModal] = useState<"projects" | "specs" | "hobbies" | "terminal" | null>(null);
@@ -56,26 +38,42 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   // Audio Ambience
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
 
-  // Hovered Gear item
-  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  // Hovered item detection via Raycaster
+  const [hoveredItem, setHoveredItem] = useState<{
+    key: string;
+    label: string;
+    sub: string;
+    x: number;
+    y: number;
+  } | null>(null);
 
   // Terminal state
   const [terminalInput, setTerminalInput] = useState("");
-  const [terminalHistory, setTerminalHistory] = useState<Array<{ cmd: string; out: string; isUser?: boolean }>>([
-    { cmd: "system.init", out: "Soham Battlestation Kernel v4.2 · Architecture Active" },
+  const [terminalHistory, setTerminalHistory] = useState<Array<{ cmd: string; out: string }>>([
+    { cmd: "system.init", out: "Soham Battlestation 3D Kernel · PBR Studio Active" },
     { cmd: "whoami", out: "Soham Roychoudhury — AI/ML Engineer & Systems Architect" },
-    { cmd: "help", out: "Commands available: 'whoami', 'projects', 'specs', 'hobbies', 'sound on', 'sound off', 'enter', 'clear'" },
+    { cmd: "help", out: "Commands: 'whoami', 'projects', 'specs', 'hobbies', 'sound on', 'sound off', 'enter', 'clear'" },
   ]);
   const terminalBottomRef = useRef<HTMLDivElement>(null);
   const terminalInputRef = useRef<HTMLInputElement>(null);
 
-  // Refs for Continuous Dolly Zoom
-  const stageRef = useRef<HTMLDivElement>(null);
-  const monitorPortalRef = useRef<HTMLDivElement>(null);
-  const [isZooming, setIsZooming] = useState(false);
+  // Three.js instances refs
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const animFrameRef = useRef<number | null>(null);
+  const hitBoxesRef = useRef<THREE.Mesh[]>([]);
+  const screenTextureRef = useRef<THREE.CanvasTexture | null>(null);
+  const fanMeshRef = useRef<THREE.Group | null>(null);
+  const screenGlowLightRef = useRef<THREE.PointLight | null>(null);
+  const pcFanLightRef = useRef<THREE.PointLight | null>(null);
+  const particlesRef = useRef<THREE.Points | null>(null);
 
-  // Mouse Parallax coordinates
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  // Mouse / Camera Target coordinates for Smooth Damped Orbit
+  const mouseNorm = useRef({ x: 0, y: 0 });
+  const cameraBasePos = useRef(new THREE.Vector3(0, 1.45, 2.85));
+  const cameraLookTarget = useRef(new THREE.Vector3(0, 0.42, 0.05));
+  const isFlyingIntoScreen = useRef(false);
 
   // Web Audio Context & Nodes
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -83,7 +81,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   const noiseSourceRef = useRef<AudioBufferSourceNode | null>(null);
 
   // Synthesize tactile switch clicks
-  const playClickSound = useCallback((freq = 880) => {
+  const playClickSound = useCallback((freq = 900) => {
     try {
       if (!audioCtxRef.current) {
         const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
@@ -173,82 +171,37 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     } catch {}
   }, [isAudioPlaying]);
 
-  // Continuous Dolly Zoom directly into BenQ Monitor (Zero Flash, Zero Blur Pop)
-  const triggerDollyZoom = useCallback(() => {
-    if (isZooming) return;
-    playClickSound(1050);
-    setIsZooming(true);
+  // Continuous 3D Camera Flight into the BenQ Monitor Screen (Zero Flash, Zero Blur Pop)
+  const trigger3DCameraFlight = useCallback(() => {
+    if (isFlyingIntoScreen.current || !cameraRef.current) return;
+    isFlyingIntoScreen.current = true;
+    playClickSound(1100);
 
-    const monitorEl = monitorPortalRef.current;
-    const stageEl = stageRef.current;
+    const camera = cameraRef.current;
+    // Monitor screen 3D center coordinates: (x: -0.15, y: 0.76, z: -0.05)
+    const targetPos = new THREE.Vector3(-0.15, 0.76, 0.28);
+    const targetLook = new THREE.Vector3(-0.15, 0.76, -0.05);
 
-    if (!monitorEl || !stageEl) {
-      onEnterPortfolio();
-      return;
-    }
-
-    const rect = monitorEl.getBoundingClientRect();
-    const stageRect = stageEl.getBoundingClientRect();
-
-    // Center point of monitor in screen coordinates
-    const monitorCenterX = rect.left + rect.width / 2;
-    const monitorCenterY = rect.top + rect.height / 2;
-
-    // Center point relative to stage container
-    const stageOriginX = ((monitorCenterX - stageRect.left) / stageRect.width) * 100;
-    const stageOriginY = ((monitorCenterY - stageRect.top) / stageRect.height) * 100;
-
-    // Timeline for continuous dolly camera push
-    const tl = gsap.timeline({
-      onComplete: () => {
-        onEnterPortfolio();
-        setIsZooming(false);
-      },
+    gsap.to(camera.position, {
+      x: targetPos.x,
+      y: targetPos.y,
+      z: targetPos.z,
+      duration: 1.25,
+      ease: "power3.inOut",
     });
 
-    // 1. Camera push: The desk scales up rapidly toward the viewer centered on the monitor screen
-    tl.to(stageEl, {
-      scale: 3.8,
-      transformOrigin: `${stageOriginX}% ${stageOriginY}%`,
-      opacity: 0,
-      duration: 1.15,
-      ease: "power3.in",
-    }, 0);
-
-    // 2. The monitor screen seamlessly expands to fill 100vw × 100vh with ZERO flash and ZERO blur
-    tl.to(monitorEl, {
-      position: "fixed",
-      top: 0,
-      left: 0,
-      width: "100vw",
-      height: "100vh",
-      borderRadius: 0,
-      borderWidth: 0,
-      zIndex: 9999,
-      duration: 1.15,
+    gsap.to(cameraLookTarget.current, {
+      x: targetLook.x,
+      y: targetLook.y,
+      z: targetLook.z,
+      duration: 1.25,
       ease: "power3.inOut",
-    }, 0);
-  }, [isZooming, onEnterPortfolio, playClickSound]);
-
-  // Mouse move parallax handler
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const { clientX, clientY } = e;
-    const { innerWidth, innerHeight } = window;
-    const x = (clientX / innerWidth - 0.5) * 2;
-    const y = (clientY / innerHeight - 0.5) * 2;
-    setMousePos({ x, y });
-  }, []);
-
-  // Keyboard navigation & modal dismiss
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setActiveModal(null);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+      onComplete: () => {
+        onEnterPortfolio();
+        isFlyingIntoScreen.current = false;
+      },
+    });
+  }, [onEnterPortfolio, playClickSound]);
 
   // Handle Terminal Commands
   const handleTerminalSubmit = (e: React.FormEvent) => {
@@ -274,11 +227,11 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       if (isAudioPlaying) toggleAmbientSound();
       output = "Terrace organic soundscape: MUTED.";
     } else if (cmd === "enter") {
-      output = "Initiating camera dolly zoom into website...";
+      output = "Initiating 3D camera flight into portfolio...";
       setTimeout(() => {
         setActiveModal(null);
-        triggerDollyZoom();
-      }, 500);
+        trigger3DCameraFlight();
+      }, 400);
     } else if (cmd === "clear") {
       setTerminalHistory([]);
       setTerminalInput("");
@@ -289,7 +242,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       output = `Command not recognized: '${cmd}'. Type 'help' for available commands.`;
     }
 
-    setTerminalHistory((prev) => [...prev, { cmd, out: output, isUser: true }]);
+    setTerminalHistory((prev) => [...prev, { cmd, out: output }]);
     setTerminalInput("");
 
     setTimeout(() => {
@@ -297,150 +250,771 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     }, 50);
   };
 
-  // Hotspots definitions for both Studio Twin and Real Photo modes
-  const studioHotspots: Record<string, HotspotBox> = {
-    monitor: {
-      left: 28.3,
-      top: 11.5,
-      width: 36.0,
-      height: 36.1,
-      label: "BenQ Monitor",
-      sub: "Master Website Portal · Click to Enter",
-      icon: <Monitor className="w-4 h-4 text-blue-400" />,
-      action: triggerDollyZoom,
-    },
-    pc_tower: {
-      left: 65.0,
-      top: 15.0,
-      width: 25.0,
-      height: 60.0,
-      label: "Zebronics Rig",
-      sub: "Compute Specs & AI Tech Stack",
-      icon: <Cpu className="w-4 h-4 text-red-400" />,
+  // Keyboard navigation & modal dismiss
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setActiveModal(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Main Three.js Scene Setup (Option B1: High-Fidelity Procedural PBR Room)
+  useEffect(() => {
+    const container = mountRef.current;
+    if (!container) return;
+
+    const width = container.clientWidth || window.innerWidth;
+    const height = container.clientHeight || window.innerHeight;
+    const isMobile = width / height < 1.0;
+
+    // 1. SCENE
+    const scene = new THREE.Scene();
+    sceneRef.current = scene;
+    scene.background = new THREE.Color("#07080A");
+    scene.fog = new THREE.FogExp2("#07080A", 0.05);
+
+    // 2. CAMERA
+    const camera = new THREE.PerspectiveCamera(isMobile ? 54 : 44, width / height, 0.1, 40);
+    const initialPos = isMobile
+      ? new THREE.Vector3(0, 1.85, 3.8)
+      : new THREE.Vector3(0, 1.45, 2.85);
+    camera.position.copy(initialPos);
+    cameraBasePos.current.copy(initialPos);
+    cameraRef.current = camera;
+
+    // 3. RENDERER
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      powerPreference: "high-performance",
+    });
+    rendererRef.current = renderer;
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+    container.appendChild(renderer.domElement);
+
+    // 4. LIGHTING: Multi-Source Cinematic Studio
+    // Ambient Base (Deep blue-slate shadow fill)
+    const ambientLight = new THREE.AmbientLight(0x222634, 1.4);
+    scene.add(ambientLight);
+
+    // Studio Key Softbox (Warm Tungsten Key Light)
+    const keyLight = new THREE.DirectionalLight(0xFFE5D0, 2.6);
+    keyLight.position.set(-3.5, 4.8, 2.5);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.width = 2048;
+    keyLight.shadow.mapSize.height = 2048;
+    keyLight.shadow.camera.near = 0.5;
+    keyLight.shadow.camera.far = 12;
+    keyLight.shadow.camera.left = -2.5;
+    keyLight.shadow.camera.right = 2.5;
+    keyLight.shadow.camera.top = 2.5;
+    keyLight.shadow.camera.bottom = -2.5;
+    keyLight.shadow.bias = -0.0004;
+    scene.add(keyLight);
+
+    // Cool Rim Light (Sharp blue edge highlight on PC case & monitor)
+    const rimLight = new THREE.DirectionalLight(0x60A5FA, 1.1);
+    rimLight.position.set(4.0, 3.2, -0.6);
+    scene.add(rimLight);
+
+    // Emissive BenQ Monitor Glow Light (Bounces blue-white light downward onto keyboard)
+    const screenGlow = new THREE.PointLight(0x8AB4F8, 1.6, 2.2);
+    screenGlow.position.set(-0.15, 0.72, 0.25);
+    scene.add(screenGlow);
+    screenGlowLightRef.current = screenGlow;
+
+    // Internal Zebronics ARGB Fan Glow Light (Casts warm crimson/magenta through tempered glass)
+    const pcFanLight = new THREE.PointLight(0xFF3366, 2.2, 1.4);
+    pcFanLight.position.set(1.05, 0.72, 0.05);
+    scene.add(pcFanLight);
+    pcFanLightRef.current = pcFanLight;
+
+    // 5. PBR MATERIALS
+    // Dark Smoked Espresso Mahogany Desk Surface
+    const mahoganyDeskMat = new THREE.MeshStandardMaterial({
+      color: 0x221B18,
+      roughness: 0.35,
+      metalness: 0.15,
+    });
+
+    // Warm Teak Wood Riser Shelf
+    const teakWoodMat = new THREE.MeshStandardMaterial({
+      color: 0x8C5638,
+      roughness: 0.42,
+      metalness: 0.1,
+    });
+
+    // Space Black Anodized Aluminum (Legs, Stand, Keyboard Base)
+    const blackAluminumMat = new THREE.MeshStandardMaterial({
+      color: 0x15161A,
+      roughness: 0.28,
+      metalness: 0.85,
+    });
+
+    // Matte Polycarbonate (Keycaps, Bezel)
+    const mattePolycarbMat = new THREE.MeshStandardMaterial({
+      color: 0x121316,
+      roughness: 0.55,
+      metalness: 0.1,
+    });
+
+    // Real Optical Tempered Glass (Zebronics PC Side Panel)
+    const temperedGlassMat = new THREE.MeshPhysicalMaterial({
+      color: 0xFFFFFF,
+      transparent: true,
+      opacity: 0.35,
+      transmission: 0.9,
+      roughness: 0.08,
+      ior: 1.52,
+      thickness: 0.4,
+      reflectivity: 0.6,
+    });
+
+    // Invisible Hit-Box Material
+    const hitBoxMat = new THREE.MeshBasicMaterial({
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+    });
+
+    const hitBoxes: THREE.Mesh[] = [];
+
+    // 6. ARCHITECTURAL ROOM & WALLS
+    // Backing Terracotta/Coral Wall
+    const backWall = new THREE.Mesh(
+      new THREE.PlaneGeometry(12, 6.5),
+      new THREE.MeshStandardMaterial({ color: 0x8B4438, roughness: 0.85 })
+    );
+    backWall.position.set(0, 2.0, -1.8);
+    backWall.receiveShadow = true;
+    scene.add(backWall);
+
+    // Architectural Acoustic Slats on Back Wall
+    const slatGeo = new RoundedBoxGeometry(0.045, 5.5, 0.03, 2, 0.005);
+    const slatMat = new THREE.MeshStandardMaterial({ color: 0x3A1F1B, roughness: 0.6 });
+    for (let x = -5.0; x <= 5.0; x += 0.22) {
+      const slat = new THREE.Mesh(slatGeo, slatMat);
+      slat.position.set(x, 2.0, -1.78);
+      slat.receiveShadow = true;
+      scene.add(slat);
+    }
+
+    // Master Mahogany Desk Top
+    const deskTop = new THREE.Mesh(
+      new RoundedBoxGeometry(3.6, 0.08, 1.8, 4, 0.02),
+      mahoganyDeskMat
+    );
+    deskTop.position.set(0, 0.38, 0);
+    deskTop.receiveShadow = true;
+    deskTop.castShadow = true;
+    scene.add(deskTop);
+
+    // Chamfered Metal Desk Legs
+    const legGeo = new THREE.CylinderGeometry(0.035, 0.035, 1.2, 24);
+    const legPositions = [
+      [-1.65, -0.22, -0.75],
+      [1.65, -0.22, -0.75],
+      [-1.65, -0.22, 0.75],
+      [1.65, -0.22, 0.75],
+    ];
+    legPositions.forEach(([lx, ly, lz]) => {
+      const leg = new THREE.Mesh(legGeo, blackAluminumMat);
+      leg.position.set(lx, ly, lz);
+      leg.castShadow = true;
+      scene.add(leg);
+    });
+
+    // 7. TEAK MONITOR RISER SHELF & NETWORK SWITCH
+    const riserGroup = new THREE.Group();
+    riserGroup.position.set(-0.15, 0.44, -0.25);
+
+    const riserPlank = new THREE.Mesh(
+      new RoundedBoxGeometry(1.65, 0.035, 0.46, 3, 0.008),
+      teakWoodMat
+    );
+    riserPlank.position.set(0, 0.09, 0);
+    riserPlank.castShadow = true;
+    riserPlank.receiveShadow = true;
+    riserGroup.add(riserPlank);
+
+    // Steel Riser Legs
+    const riserLegGeo = new THREE.BoxGeometry(0.04, 0.09, 0.44);
+    const riserLegLeft = new THREE.Mesh(riserLegGeo, blackAluminumMat);
+    riserLegLeft.position.set(-0.75, 0.045, 0);
+    riserGroup.add(riserLegLeft);
+
+    const riserLegRight = new THREE.Mesh(riserLegGeo, blackAluminumMat);
+    riserLegRight.position.set(0.75, 0.045, 0);
+    riserGroup.add(riserLegRight);
+
+    // Small Network Switch Under Shelf
+    const netSwitch = new THREE.Mesh(
+      new THREE.BoxGeometry(0.35, 0.04, 0.22),
+      new THREE.MeshStandardMaterial({ color: 0x0A0B0E, roughness: 0.4 })
+    );
+    netSwitch.position.set(0, 0.02, -0.05);
+    riserGroup.add(netSwitch);
+
+    // Switch Activity LEDs
+    const ledMat = new THREE.MeshBasicMaterial({ color: 0x10B981 });
+    for (let i = -0.12; i <= 0.12; i += 0.04) {
+      const led = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.008, 0.002), ledMat);
+      led.position.set(i, 0.02, 0.061);
+      riserGroup.add(led);
+    }
+    scene.add(riserGroup);
+
+    // 8. BENQ WIDESCREEN MONITOR (Screen Portal & Light Emitter)
+    const monitorGroup = new THREE.Group();
+    monitorGroup.position.set(-0.15, 0.55, -0.25);
+
+    // Stand Base on Riser
+    const standBase = new THREE.Mesh(
+      new RoundedBoxGeometry(0.42, 0.015, 0.28, 3, 0.005),
+      blackAluminumMat
+    );
+    standBase.position.set(0, 0.02, 0);
+    standBase.castShadow = true;
+    monitorGroup.add(standBase);
+
+    // Stand Neck
+    const standNeck = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.035, 0.04, 0.35, 24),
+      blackAluminumMat
+    );
+    standNeck.position.set(0, 0.18, -0.04);
+    standNeck.castShadow = true;
+    monitorGroup.add(standNeck);
+
+    // Monitor Bezel & Frame (16:9 Widescreen)
+    const monitorFrame = new THREE.Mesh(
+      new RoundedBoxGeometry(1.22, 0.72, 0.035, 3, 0.006),
+      blackAluminumMat
+    );
+    monitorFrame.position.set(0, 0.46, 0.02);
+    monitorFrame.castShadow = true;
+    monitorGroup.add(monitorFrame);
+
+    // BenQ Logo on Chin
+    const benqChin = new THREE.Mesh(
+      new THREE.BoxGeometry(0.12, 0.025, 0.004),
+      new THREE.MeshStandardMaterial({ color: 0xCCCCCC, roughness: 0.2, metalness: 0.9 })
+    );
+    benqChin.position.set(0, 0.12, 0.04);
+    monitorGroup.add(benqChin);
+
+    // Active Website Screen Texture Canvas
+    const screenCanvas = document.createElement("canvas");
+    screenCanvas.width = 1024;
+    screenCanvas.height = 576;
+    const sCtx = screenCanvas.getContext("2d");
+    if (sCtx) {
+      // Atmospheric Cyber-Pastoral Terrace Background
+      const grad = sCtx.createLinearGradient(0, 0, 0, 576);
+      grad.addColorStop(0, "#080D1A");
+      grad.addColorStop(0.5, "#131C2E");
+      grad.addColorStop(1, "#05070B");
+      sCtx.fillStyle = grad;
+      sCtx.fillRect(0, 0, 1024, 576);
+
+      // Glowing Amber Sunrise Horizon
+      sCtx.fillStyle = "rgba(255, 122, 0, 0.35)";
+      sCtx.beginPath();
+      sCtx.ellipse(512, 280, 360, 90, 0, 0, Math.PI * 2);
+      sCtx.fill();
+
+      // Top Status Bar
+      sCtx.fillStyle = "rgba(255,255,255,0.6)";
+      sCtx.font = "bold 18px monospace";
+      sCtx.fillText("SOHAM ROYCHOUDHURY · ATELIER // 2026", 60, 60);
+      sCtx.fillText("SYS: RUNNING · PORT 3000", 720, 60);
+
+      // Main Typography
+      sCtx.fillStyle = "#FFFFFF";
+      sCtx.font = "bold 52px sans-serif";
+      sCtx.fillText("CYBER-PASTORAL TERRACE", 60, 240);
+
+      sCtx.fillStyle = "rgba(255,255,255,0.75)";
+      sCtx.font = "24px sans-serif";
+      sCtx.fillText("AI/ML Engineer · Systems · Frontend Architect", 60, 290);
+
+      // Enter Button Pill
+      sCtx.fillStyle = "rgba(255, 122, 0, 0.85)";
+      sCtx.beginPath();
+      sCtx.roundRect(60, 370, 380, 64, 32);
+      sCtx.fill();
+
+      sCtx.fillStyle = "#000000";
+      sCtx.font = "bold 22px monospace";
+      sCtx.fillText("CLICK MONITOR TO ENTER ↗", 95, 410);
+    }
+
+    const screenTexture = new THREE.CanvasTexture(screenCanvas);
+    screenTextureRef.current = screenTexture;
+
+    const screenMesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.16, 0.65),
+      new THREE.MeshBasicMaterial({ map: screenTexture })
+    );
+    screenMesh.position.set(0, 0.465, 0.039);
+    monitorGroup.add(screenMesh);
+
+    // Screen Hit-Box
+    const monitorHitBox = new THREE.Mesh(
+      new THREE.BoxGeometry(1.24, 0.74, 0.15),
+      hitBoxMat
+    );
+    monitorHitBox.position.set(0, 0.46, 0.05);
+    monitorHitBox.userData = {
+      key: "monitor",
+      label: "BenQ Widescreen Monitor",
+      sub: "Master Portal · Click to Fly Into Website ↗",
+      action: trigger3DCameraFlight,
+    };
+    monitorGroup.add(monitorHitBox);
+    hitBoxes.push(monitorHitBox);
+
+    scene.add(monitorGroup);
+
+    // 9. ZEBRONICS GAMING PC TOWER (Right Side)
+    const pcGroup = new THREE.Group();
+    pcGroup.position.set(1.15, 0.76, 0.0);
+
+    // Main Chassis Body
+    const pcBody = new THREE.Mesh(
+      new RoundedBoxGeometry(0.26, 0.68, 0.58, 3, 0.008),
+      new THREE.MeshStandardMaterial({ color: 0x111215, roughness: 0.35, metalness: 0.8 })
+    );
+    pcBody.castShadow = true;
+    pcBody.receiveShadow = true;
+    pcGroup.add(pcBody);
+
+    // Front Angular Faceted Mesh Panel
+    const frontFacet = new THREE.Mesh(
+      new THREE.BoxGeometry(0.258, 0.66, 0.04),
+      new THREE.MeshStandardMaterial({ color: 0x18191E, roughness: 0.7 })
+    );
+    frontFacet.position.set(0, 0, 0.29);
+    pcGroup.add(frontFacet);
+
+    // Tempered Glass Left Side Panel (Facing User/Desk)
+    const glassSide = new THREE.Mesh(
+      new THREE.BoxGeometry(0.015, 0.64, 0.54),
+      temperedGlassMat
+    );
+    glassSide.position.set(-0.132, 0, 0);
+    pcGroup.add(glassSide);
+
+    // PC Interior: Motherboard, GPU & Spinning ARGB Fan
+    const interiorGroup = new THREE.Group();
+    interiorGroup.position.set(-0.02, 0, 0);
+
+    // Motherboard PCB
+    const mobo = new THREE.Mesh(
+      new THREE.BoxGeometry(0.01, 0.52, 0.44),
+      new THREE.MeshStandardMaterial({ color: 0x081510, roughness: 0.8 })
+    );
+    mobo.position.set(0.08, 0, 0);
+    interiorGroup.add(mobo);
+
+    // GPU Block
+    const gpu = new THREE.Mesh(
+      new THREE.BoxGeometry(0.12, 0.08, 0.34),
+      new THREE.MeshStandardMaterial({ color: 0x1E2128, roughness: 0.4, metalness: 0.8 })
+    );
+    gpu.position.set(0.02, -0.06, 0.02);
+    interiorGroup.add(gpu);
+
+    // Spinning ARGB Rear Fan
+    const fanGroup = new THREE.Group();
+    fanGroup.position.set(0.02, 0.14, -0.16);
+    const fanRing = new THREE.Mesh(
+      new THREE.TorusGeometry(0.07, 0.01, 16, 32),
+      new THREE.MeshBasicMaterial({ color: 0xFF2D55 })
+    );
+    fanGroup.add(fanRing);
+
+    const bladeGeo = new THREE.BoxGeometry(0.02, 0.06, 0.004);
+    const bladeMat = new THREE.MeshBasicMaterial({ color: 0xFF5588 });
+    for (let b = 0; b < 7; b++) {
+      const blade = new THREE.Mesh(bladeGeo, bladeMat);
+      blade.rotation.z = (b / 7) * Math.PI * 2;
+      blade.position.set(Math.cos(blade.rotation.z) * 0.035, Math.sin(blade.rotation.z) * 0.035, 0);
+      fanGroup.add(blade);
+    }
+    fanMeshRef.current = fanGroup;
+    interiorGroup.add(fanGroup);
+
+    pcGroup.add(interiorGroup);
+
+    // PC Hit-Box
+    const pcHitBox = new THREE.Mesh(
+      new THREE.BoxGeometry(0.32, 0.72, 0.62),
+      hitBoxMat
+    );
+    pcHitBox.position.set(0, 0, 0);
+    pcHitBox.userData = {
+      key: "pc_tower",
+      label: "Zebronics Gaming Rig",
+      sub: "Compute Hardware & AI Tech Stack",
       action: () => {
         playClickSound(950);
         setActiveModal("specs");
       },
-    },
-    gamepad: {
-      left: 20.0,
-      top: 45.0,
-      width: 12.0,
-      height: 15.0,
-      label: "Gamepad",
-      sub: "Selected Commissions & Projects",
-      icon: <Gamepad2 className="w-4 h-4 text-purple-400" />,
-      action: () => {
-        playClickSound(950);
-        setActiveModal("projects");
-      },
-    },
-    keyboard: {
-      left: 30.0,
-      top: 60.0,
-      width: 30.0,
-      height: 25.0,
+    };
+    pcGroup.add(pcHitBox);
+    hitBoxes.push(pcHitBox);
+
+    scene.add(pcGroup);
+
+    // 10. REDGEAR MOUSEPAD & COMPACT TKL KEYBOARD (Front Center)
+    const matGroup = new THREE.Group();
+    matGroup.position.set(0, 0.422, 0.35);
+
+    // Redgear Desk Mat with Red Splash Artwork
+    const mousePad = new THREE.Mesh(
+      new RoundedBoxGeometry(1.65, 0.004, 0.65, 3, 0.008),
+      new THREE.MeshStandardMaterial({ color: 0x18191D, roughness: 0.95 })
+    );
+    mousePad.receiveShadow = true;
+    matGroup.add(mousePad);
+
+    // Red Distressed Splash Accent
+    const splashAccent = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.55, 0.45),
+      new THREE.MeshBasicMaterial({ color: 0xCC1122, transparent: true, opacity: 0.35 })
+    );
+    splashAccent.rotation.x = -Math.PI / 2;
+    splashAccent.position.set(0.45, 0.003, 0.05);
+    matGroup.add(splashAccent);
+
+    // Compact TKL Mechanical Keyboard
+    const kbGroup = new THREE.Group();
+    kbGroup.position.set(-0.15, 0.015, 0.02);
+
+    const kbBase = new THREE.Mesh(
+      new RoundedBoxGeometry(0.56, 0.022, 0.22, 3, 0.006),
+      blackAluminumMat
+    );
+    kbBase.castShadow = true;
+    kbBase.receiveShadow = true;
+    kbGroup.add(kbBase);
+
+    // Modeled Individual Keycaps Grid
+    const keyGeo = new RoundedBoxGeometry(0.026, 0.012, 0.026, 2, 0.003);
+    for (let r = 0; r < 5; r++) {
+      for (let c = 0; c < 14; c++) {
+        const kx = (c - 6.5) * 0.035;
+        const kz = (r - 2) * 0.036;
+        const keycap = new THREE.Mesh(keyGeo, mattePolycarbMat);
+        keycap.position.set(kx, 0.015, kz);
+        kbGroup.add(keycap);
+      }
+    }
+
+    // Keyboard Hit-Box
+    const kbHitBox = new THREE.Mesh(
+      new THREE.BoxGeometry(0.62, 0.08, 0.28),
+      hitBoxMat
+    );
+    kbHitBox.position.set(0, 0.02, 0);
+    kbHitBox.userData = {
+      key: "keyboard",
       label: "TKL Mechanical Keyboard",
       sub: "Interactive Hacker CLI Terminal",
-      icon: <Keyboard className="w-4 h-4 text-emerald-400" />,
       action: () => {
         playClickSound(950);
         setActiveModal("terminal");
       },
-    },
-    headset: {
-      left: 8.0,
-      top: 55.0,
-      width: 22.0,
-      height: 35.0,
-      label: "Over-Ear Headset",
+    };
+    kbGroup.add(kbHitBox);
+    hitBoxes.push(kbHitBox);
+
+    matGroup.add(kbGroup);
+
+    // 11. LOGITECH G GAMING MOUSE (Right Side of Mat)
+    const mouseGroup = new THREE.Group();
+    mouseGroup.position.set(0.48, 0.02, 0.02);
+
+    const mouseBody = new THREE.Mesh(
+      new RoundedBoxGeometry(0.11, 0.035, 0.18, 4, 0.015),
+      mattePolycarbMat
+    );
+    mouseBody.castShadow = true;
+    mouseGroup.add(mouseBody);
+
+    // Glowing G Logo
+    const gLogo = new THREE.Mesh(
+      new THREE.CircleGeometry(0.014, 16),
+      new THREE.MeshBasicMaterial({ color: 0x00E5FF })
+    );
+    gLogo.rotation.x = -Math.PI / 2;
+    gLogo.position.set(0, 0.02, 0.02);
+    mouseGroup.add(gLogo);
+
+    matGroup.add(mouseGroup);
+    scene.add(matGroup);
+
+    // 12. OVER-EAR GAMING HEADSET (Front Left Desk)
+    const headsetGroup = new THREE.Group();
+    headsetGroup.position.set(-1.05, 0.48, 0.35);
+    headsetGroup.rotation.y = THREE.MathUtils.degToRad(35);
+
+    // Headband Dual Arch
+    const headband = new THREE.Mesh(
+      new THREE.TorusGeometry(0.12, 0.012, 16, 32, Math.PI),
+      blackAluminumMat
+    );
+    headband.rotation.x = Math.PI / 2;
+    headsetGroup.add(headband);
+
+    // Earcups Left & Right
+    const cupGeo = new THREE.CylinderGeometry(0.065, 0.065, 0.045, 24);
+    const cupLeft = new THREE.Mesh(cupGeo, mattePolycarbMat);
+    cupLeft.position.set(-0.12, 0, 0);
+    cupLeft.rotation.z = Math.PI / 2;
+    cupLeft.castShadow = true;
+    headsetGroup.add(cupLeft);
+
+    const cupRight = new THREE.Mesh(cupGeo, mattePolycarbMat);
+    cupRight.position.set(0.12, 0, 0);
+    cupRight.rotation.z = Math.PI / 2;
+    cupRight.castShadow = true;
+    headsetGroup.add(cupRight);
+
+    // Boom Microphone Arm
+    const boomMic = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.005, 0.005, 0.16, 12),
+      blackAluminumMat
+    );
+    boomMic.position.set(-0.12, -0.04, 0.08);
+    boomMic.rotation.x = Math.PI / 3;
+    headsetGroup.add(boomMic);
+
+    // Headset Hit-Box
+    const headsetHitBox = new THREE.Mesh(
+      new THREE.BoxGeometry(0.35, 0.22, 0.28),
+      hitBoxMat
+    );
+    headsetHitBox.position.set(0, 0, 0);
+    headsetHitBox.userData = {
+      key: "headset",
+      label: "Over-Ear Gaming Headset",
       sub: "Hobbies, Rituals & Terrace Ambience",
-      icon: <Headphones className="w-4 h-4 text-amber-400" />,
       action: () => {
         playClickSound(950);
         setActiveModal("hobbies");
       },
-    },
-  };
+    };
+    headsetGroup.add(headsetHitBox);
+    hitBoxes.push(headsetHitBox);
 
-  const photoHotspots: Record<string, HotspotBox> = {
-    monitor: {
-      left: 27.9,
-      top: 13.5,
-      width: 31.3,
-      height: 32.8,
-      label: "BenQ Monitor",
-      sub: "Master Website Portal · Click to Enter",
-      icon: <Monitor className="w-4 h-4 text-blue-400" />,
-      action: triggerDollyZoom,
-    },
-    pc_tower: {
-      left: 61.5,
-      top: 17.5,
-      width: 23.5,
-      height: 51.5,
-      label: "Zebronics Rig",
-      sub: "Compute Specs & AI Tech Stack",
-      icon: <Cpu className="w-4 h-4 text-red-400" />,
-      action: () => {
-        playClickSound(950);
-        setActiveModal("specs");
-      },
-    },
-    gamepad: {
-      left: 25.4,
-      top: 47.9,
-      width: 10.6,
-      height: 9.2,
-      label: "Gamepad",
+    scene.add(headsetGroup);
+
+    // 13. GAMEPAD (Resting on Teak Shelf Left of Monitor)
+    const gamepadGroup = new THREE.Group();
+    gamepadGroup.position.set(-0.65, 0.58, -0.22);
+    gamepadGroup.rotation.y = THREE.MathUtils.degToRad(-15);
+
+    const gpBody = new THREE.Mesh(
+      new RoundedBoxGeometry(0.22, 0.04, 0.14, 4, 0.015),
+      mattePolycarbMat
+    );
+    gpBody.castShadow = true;
+    gamepadGroup.add(gpBody);
+
+    // Thumbsticks with Red Rings
+    const redRingMat = new THREE.MeshBasicMaterial({ color: 0xFF1133 });
+    const stickGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.015, 16);
+
+    const stickLeft = new THREE.Mesh(stickGeo, mattePolycarbMat);
+    stickLeft.position.set(-0.05, 0.025, 0.02);
+    const ringLeft = new THREE.Mesh(new THREE.TorusGeometry(0.022, 0.003, 8, 16), redRingMat);
+    ringLeft.rotation.x = Math.PI / 2;
+    ringLeft.position.set(-0.05, 0.028, 0.02);
+    gamepadGroup.add(stickLeft);
+    gamepadGroup.add(ringLeft);
+
+    const stickRight = new THREE.Mesh(stickGeo, mattePolycarbMat);
+    stickRight.position.set(0.05, 0.025, -0.01);
+    const ringRight = new THREE.Mesh(new THREE.TorusGeometry(0.022, 0.003, 8, 16), redRingMat);
+    ringRight.rotation.x = Math.PI / 2;
+    ringRight.position.set(0.05, 0.028, -0.01);
+    gamepadGroup.add(stickRight);
+    gamepadGroup.add(ringRight);
+
+    // Gamepad Hit-Box
+    const gpHitBox = new THREE.Mesh(
+      new THREE.BoxGeometry(0.28, 0.08, 0.18),
+      hitBoxMat
+    );
+    gpHitBox.position.set(0, 0.02, 0);
+    gpHitBox.userData = {
+      key: "gamepad",
+      label: "Gamepad Controller",
       sub: "Selected Commissions & Projects",
-      icon: <Gamepad2 className="w-4 h-4 text-purple-400" />,
       action: () => {
         playClickSound(950);
         setActiveModal("projects");
       },
-    },
-    keyboard: {
-      left: 30.5,
-      top: 68.5,
-      width: 24.0,
-      height: 12.5,
-      label: "TKL Mechanical Keyboard",
-      sub: "Interactive Hacker CLI Terminal",
-      icon: <Keyboard className="w-4 h-4 text-emerald-400" />,
-      action: () => {
-        playClickSound(950);
-        setActiveModal("terminal");
-      },
-    },
-    headset: {
-      left: 11.0,
-      top: 66.0,
-      width: 19.0,
-      height: 23.0,
-      label: "Over-Ear Headset",
-      sub: "Hobbies, Rituals & Terrace Ambience",
-      icon: <Headphones className="w-4 h-4 text-amber-400" />,
-      action: () => {
-        playClickSound(950);
-        setActiveModal("hobbies");
-      },
-    },
-  };
+    };
+    gamepadGroup.add(gpHitBox);
+    hitBoxes.push(gpHitBox);
 
-  const currentHotspots = sceneMode === "studio" ? studioHotspots : photoHotspots;
-  const currentMonitorBox = currentHotspots.monitor;
+    scene.add(gamepadGroup);
+
+    // 14. ATMOSPHERIC PARTICLES (Floating Dust Motes in Light Shaft)
+    const particleCount = 120;
+    const particleGeo = new THREE.BufferGeometry();
+    const particlePos = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount * 3; i += 3) {
+      particlePos[i] = (Math.random() - 0.5) * 4;
+      particlePos[i + 1] = Math.random() * 2.5 + 0.3;
+      particlePos[i + 2] = (Math.random() - 0.5) * 2.5;
+    }
+    particleGeo.setAttribute("position", new THREE.BufferAttribute(particlePos, 3));
+    const particleMat = new THREE.PointsMaterial({
+      color: 0xFFE5B4,
+      size: 0.02,
+      transparent: true,
+      opacity: 0.35,
+    });
+    const particles = new THREE.Points(particleGeo, particleMat);
+    scene.add(particles);
+    particlesRef.current = particles;
+
+    hitBoxesRef.current = hitBoxes;
+
+    // 15. RAYCASTING & INTERACTION
+    const raycaster = new THREE.Raycaster();
+    const mouseVector = new THREE.Vector2();
+
+    const onPointerMove = (e: MouseEvent) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+      mouseNorm.current.x = x;
+      mouseNorm.current.y = y;
+      mouseVector.set(x, y);
+
+      raycaster.setFromCamera(mouseVector, camera);
+      const intersects = raycaster.intersectObjects(hitBoxesRef.current);
+
+      if (intersects.length > 0 && !isFlyingIntoScreen.current) {
+        const hit = intersects[0].object;
+        const data = hit.userData;
+        container.style.cursor = "pointer";
+        setHoveredItem({
+          key: data.key,
+          label: data.label,
+          sub: data.sub,
+          x: e.clientX,
+          y: e.clientY,
+        });
+      } else {
+        container.style.cursor = "default";
+        setHoveredItem(null);
+      }
+    };
+
+    const onPointerClick = (e: MouseEvent) => {
+      if (isFlyingIntoScreen.current) return;
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouseVector.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      mouseVector.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(mouseVector, camera);
+      const intersects = raycaster.intersectObjects(hitBoxesRef.current);
+
+      if (intersects.length > 0) {
+        const hit = intersects[0].object;
+        if (hit.userData.action) {
+          hit.userData.action();
+        }
+      }
+    };
+
+    window.addEventListener("mousemove", onPointerMove);
+    renderer.domElement.addEventListener("click", onPointerClick);
+
+    // 16. ANIMATION LOOP (Damped Orbit, Spinning Fan, Particle Float)
+    let clock = new THREE.Clock();
+
+    const animate = () => {
+      animFrameRef.current = requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+      const time = clock.getElapsedTime();
+
+      // Spin ARGB Fan in Zebronics PC
+      if (fanMeshRef.current) {
+        fanMeshRef.current.rotation.z += delta * 18;
+      }
+
+      // Float Ambient Dust Motes
+      if (particlesRef.current) {
+        const pos = particlesRef.current.geometry.attributes.position.array as Float32Array;
+        for (let i = 1; i < pos.length; i += 3) {
+          pos[i] += delta * 0.05;
+          if (pos[i] > 3.0) pos[i] = 0.4;
+        }
+        particlesRef.current.geometry.attributes.position.needsUpdate = true;
+      }
+
+      // Smooth Damped Orbit Parallax (Near objects shift faster than background!)
+      if (!isFlyingIntoScreen.current && cameraRef.current) {
+        const targetX = cameraBasePos.current.x + mouseNorm.current.x * 0.45;
+        const targetY = cameraBasePos.current.y + mouseNorm.current.y * 0.28;
+        camera.position.x += (targetX - camera.position.x) * 0.06;
+        camera.position.y += (targetY - camera.position.y) * 0.06;
+        camera.lookAt(cameraLookTarget.current);
+      }
+
+      renderer.render(scene, camera);
+    };
+
+    animate();
+
+    // Resize Handler
+    const handleResize = () => {
+      if (!container || !rendererRef.current || !cameraRef.current) return;
+      const w = container.clientWidth || window.innerWidth;
+      const h = container.clientHeight || window.innerHeight;
+      const mobile = w / h < 1.0;
+
+      cameraRef.current.aspect = w / h;
+      cameraRef.current.fov = mobile ? 54 : 44;
+      cameraRef.current.updateProjectionMatrix();
+      rendererRef.current.setSize(w, h);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("mousemove", onPointerMove);
+      window.removeEventListener("resize", handleResize);
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+      if (rendererRef.current?.domElement) {
+        rendererRef.current.domElement.remove();
+        rendererRef.current.dispose();
+      }
+    };
+  }, [trigger3DCameraFlight, playClickSound]);
 
   return (
-    <div
-      className="relative w-full h-[100svh] bg-[#07080A] text-[#F8F5EE] overflow-hidden select-none flex flex-col items-center justify-center"
-      onMouseMove={handleMouseMove}
-    >
-      {/* 1. Subtle Radial Vignette Lighting */}
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_50%_45%,rgba(255,122,0,0.06)_0%,rgba(0,0,0,0.7)_70%,#07080A_100%)] z-10" />
+    <div className="relative w-full h-[100svh] bg-[#07080A] text-[#F8F5EE] overflow-hidden select-none">
+      {/* Three.js Canvas Container */}
+      <div ref={mountRef} className="absolute inset-0 w-full h-full z-10" />
 
-      {/* 2. Top Header Bar: Status Indicator & Scene Toggle */}
-      <header className="absolute top-4 left-4 right-4 z-40 flex items-center justify-between pointer-events-auto">
+      {/* Top Header Bar: Status Indicator */}
+      <header className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between pointer-events-auto">
         <div className="flex items-center gap-3 bg-black/60 backdrop-blur-md border border-white/10 px-3.5 py-1.5 rounded-full text-xs font-mono">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span className="text-white/80 font-medium">SOHAM ROYCHOUDHURY · REAL BATTLESTATION</span>
@@ -448,178 +1022,40 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           <span className="hidden sm:inline text-white/50">BENQ · ZEBRONICS · REDGEAR</span>
         </div>
 
-        {/* Scene Mode Toggle: Studio Twin vs Authentic Photo */}
-        <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md border border-white/10 p-1 rounded-full text-xs font-mono">
-          <button
-            onClick={() => {
-              playClickSound(900);
-              setSceneMode("studio");
-            }}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full transition-all ${
-              sceneMode === "studio"
-                ? "bg-white/20 text-white font-semibold shadow-sm"
-                : "text-white/50 hover:text-white"
-            }`}
-          >
-            <Layers className="w-3.5 h-3.5 text-amber-400" />
-            <span>Studio Twin</span>
-          </button>
-          <button
-            onClick={() => {
-              playClickSound(900);
-              setSceneMode("photo");
-            }}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full transition-all ${
-              sceneMode === "photo"
-                ? "bg-white/20 text-white font-semibold shadow-sm"
-                : "text-white/50 hover:text-white"
-            }`}
-          >
-            <Camera className="w-3.5 h-3.5 text-blue-400" />
-            <span>Real Photo</span>
-          </button>
+        <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-xs font-mono text-white/70">
+          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+          <span>3D PBR Studio Active</span>
         </div>
       </header>
 
-      {/* 3. The 3D Desk Stage Container */}
-      <div
-        ref={stageRef}
-        className="relative w-full max-w-[1400px] aspect-[16/9] flex items-center justify-center transition-transform duration-300 ease-out will-change-transform"
-        style={{
-          transform: `perspective(1400px) rotateX(${mousePos.y * -1.2}deg) rotateY(${mousePos.x * 1.8}deg)`,
-        }}
-      >
-        {/* Background Desk Image (Studio Twin or Real Photo) */}
-        <img
-          src={
-            sceneMode === "studio"
-              ? "/assets/soham_real_desk_studio.jpg"
-              : "/assets/soham_real_desk_photo.jpg"
-          }
-          alt="Soham Roychoudhury Real Desk Battlestation"
-          className="w-full h-full object-contain pointer-events-none drop-shadow-[0_25px_50px_rgba(0,0,0,0.9)]"
-        />
-
-        {/* 4. BenQ Monitor Screen Portal (Continuous Zoom Origin & Live Preview) */}
+      {/* Floating Hologram Tag (Only shows strictly over hovered item!) */}
+      {hoveredItem && (
         <div
-          ref={monitorPortalRef}
-          onClick={triggerDollyZoom}
-          onMouseEnter={() => setHoveredItem("monitor")}
-          onMouseLeave={() => setHoveredItem(null)}
-          style={{
-            left: `${currentMonitorBox.left}%`,
-            top: `${currentMonitorBox.top}%`,
-            width: `${currentMonitorBox.width}%`,
-            height: `${currentMonitorBox.height}%`,
-          }}
-          className={`absolute cursor-pointer rounded-[3px] overflow-hidden border border-blue-400/30 transition-all duration-300 ${
-            hoveredItem === "monitor"
-              ? "ring-2 ring-blue-400/80 shadow-[0_0_35px_rgba(59,130,246,0.6)]"
-              : "shadow-[0_0_15px_rgba(0,0,0,0.8)]"
-          }`}
+          className="fixed pointer-events-none z-50 transform -translate-x-1/2 -translate-y-full mb-4 animate-in fade-in zoom-in-95 duration-150"
+          style={{ left: hoveredItem.x, top: hoveredItem.y - 12 }}
         >
-          {/* Active Cyber-Pastoral Terrace Screen Contents */}
-          <div className="relative w-full h-full bg-[#080B11] text-[#F8F5EE] flex flex-col justify-between p-3 sm:p-4 select-none overflow-hidden group">
-            {/* Ambient Terrace Glowing Horizon */}
-            <div className="absolute inset-0 bg-gradient-to-b from-[#0F172A] via-[#0A0E18] to-[#040609] pointer-events-none" />
-            <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-48 h-28 bg-[#FF7A00]/25 rounded-full blur-2xl pointer-events-none" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-32 bg-blue-500/15 rounded-full blur-3xl pointer-events-none" />
-
-            {/* Screen Top Status Line */}
-            <div className="relative z-10 flex items-center justify-between text-[8px] sm:text-[10px] font-mono text-white/60">
-              <span className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                SYSTEM RUNNING // ATELIER 2026
-              </span>
-              <span className="tracking-wider">PORT 3000: OPEN</span>
+          <div className="flex items-center gap-2.5 bg-[#0B0D14]/95 backdrop-blur-md border border-white/20 px-3.5 py-2 rounded-xl shadow-2xl">
+            <div className="p-1.5 rounded-lg bg-white/10 text-white">
+              {hoveredItem.key === "monitor" && <Monitor className="w-4 h-4 text-blue-400" />}
+              {hoveredItem.key === "pc_tower" && <Cpu className="w-4 h-4 text-red-400" />}
+              {hoveredItem.key === "gamepad" && <Gamepad2 className="w-4 h-4 text-purple-400" />}
+              {hoveredItem.key === "keyboard" && <Keyboard className="w-4 h-4 text-emerald-400" />}
+              {hoveredItem.key === "headset" && <Headphones className="w-4 h-4 text-amber-400" />}
             </div>
-
-            {/* Screen Center Live Typography */}
-            <div className="relative z-10 my-auto text-center">
-              <p className="text-[7px] sm:text-[9px] uppercase tracking-[0.25em] text-[#FF7A00] font-mono mb-0.5">
-                Soham Roychoudhury
-              </p>
-              <h2 className="text-xs sm:text-base md:text-lg font-bold tracking-tight text-white group-hover:scale-105 transition-transform">
-                CYBER-PASTORAL TERRACE
-              </h2>
-              <p className="text-[7px] sm:text-[9px] text-white/60 mt-0.5">
-                AI/ML Engineer · Systems · Frontend Architect
-              </p>
+            <div className="text-left">
+              <p className="text-xs font-bold text-white leading-tight">{hoveredItem.label}</p>
+              <p className="text-[10px] text-white/70 font-mono leading-tight">{hoveredItem.sub}</p>
             </div>
-
-            {/* Screen Bottom CTA Banner */}
-            <div className="relative z-10 flex items-center justify-center">
-              <div className="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 border border-white/20 px-2.5 py-1 rounded-full text-[8px] sm:text-[10px] font-mono text-white tracking-wider backdrop-blur-sm transition-all group-hover:bg-[#FF7A00] group-hover:text-black group-hover:border-transparent">
-                <span>CLICK TO ENTER PORTFOLIO</span>
-                <ArrowRight className="w-2.5 h-2.5 group-hover:translate-x-0.5 transition-transform" />
-              </div>
-            </div>
-
-            {/* Subtle Screen Scanline Texture */}
-            <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:100%_3px] opacity-40" />
-
-            {/* Screen Glass Glare Diagonal Reflection */}
-            <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-transparent via-white/5 to-transparent -rotate-12 translate-x-4 opacity-50" />
           </div>
         </div>
+      )}
 
-        {/* 5. Pinpoint Interactive Hotspots (Zebronics, Gamepad, Keyboard, Headset) */}
-        {Object.entries(currentHotspots).map(([key, box]) => {
-          if (key === "monitor") return null; // Handled separately as portal above
-          const isHovered = hoveredItem === key;
-
-          return (
-            <div
-              key={key}
-              onClick={box.action}
-              onMouseEnter={() => setHoveredItem(key)}
-              onMouseLeave={() => setHoveredItem(null)}
-              style={{
-                left: `${box.left}%`,
-                top: `${box.top}%`,
-                width: `${box.width}%`,
-                height: `${box.height}%`,
-              }}
-              className={`absolute cursor-pointer transition-all duration-200 z-20 group rounded-md ${
-                isHovered
-                  ? "bg-white/10 ring-2 ring-white/60 shadow-[0_0_25px_rgba(255,255,255,0.4)]"
-                  : "bg-transparent hover:bg-white/5"
-              }`}
-            >
-              {/* Pulsing Target Dot on Hover */}
-              <div
-                className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-all duration-300 ${
-                  isHovered ? "opacity-100 scale-100" : "opacity-0 scale-75"
-                }`}
-              >
-                <div className="w-8 h-8 rounded-full border border-white/60 flex items-center justify-center animate-spin">
-                  <div className="w-2 h-2 rounded-full bg-white shadow-[0_0_10px_white]" />
-                </div>
-              </div>
-
-              {/* Floating Hologram Tag (Only shows strictly over hovered item!) */}
-              {isHovered && (
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none z-30 whitespace-nowrap animate-in fade-in zoom-in-95 duration-200">
-                  <div className="flex items-center gap-2 bg-[#0B0D14]/90 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-lg shadow-2xl">
-                    {box.icon}
-                    <div className="text-left">
-                      <p className="text-xs font-semibold text-white leading-tight">{box.label}</p>
-                      <p className="text-[10px] text-white/60 font-mono leading-tight">{box.sub}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* 6. Floating Bottom Hardware Navigation Dock */}
+      {/* Floating Bottom Hardware Navigation Dock */}
       <footer className="absolute bottom-4 left-1/2 -translate-x-1/2 z-40 max-w-full px-4 pointer-events-auto">
-        <div className="flex items-center gap-1.5 sm:gap-2 bg-black/75 backdrop-blur-xl border border-white/15 px-3 py-2 rounded-2xl shadow-2xl overflow-x-auto max-w-[95vw] scrollbar-none">
+        <div className="flex items-center gap-1.5 sm:gap-2 bg-black/80 backdrop-blur-xl border border-white/15 px-3 py-2 rounded-2xl shadow-2xl overflow-x-auto max-w-[95vw] scrollbar-none">
           {/* BenQ Monitor Enter */}
           <button
-            onClick={triggerDollyZoom}
+            onClick={trigger3DCameraFlight}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30 text-xs font-medium transition-all shrink-0"
           >
             <Monitor className="w-3.5 h-3.5" />
@@ -690,7 +1126,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
           {/* Direct Enter Website CTA */}
           <button
-            onClick={triggerDollyZoom}
+            onClick={trigger3DCameraFlight}
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#FF7A00] hover:bg-[#FF8D24] text-black font-semibold text-xs transition-all shadow-lg shadow-[#FF7A00]/20 shrink-0"
           >
             <span>Enter Website</span>
@@ -700,7 +1136,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       </footer>
 
       {/* =========================================================================
-          MODAL 1: PROJECTS & SELECTED COMMISSIONS (Triggered by Gamepad)
+          MODALS (Projects, Specs, Hobbies, CLI Terminal)
           ========================================================================= */}
       {activeModal === "projects" && (
         <div
@@ -731,8 +1167,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             </div>
 
             <div className="space-y-3.5 overflow-y-auto pr-1">
-              {/* Project 1 */}
-              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all">
+              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10">
                 <div className="flex items-center justify-between mb-1">
                   <h4 className="text-sm font-semibold text-white">In-Memory Microsecond Translation Engine</h4>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
@@ -745,13 +1180,11 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-white/60">C++</span>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-white/60">Rust</span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-white/60">Lock-Free Queues</span>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-white/60">Concurrency</span>
                 </div>
               </div>
 
-              {/* Project 2 */}
-              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all">
+              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10">
                 <div className="flex items-center justify-between mb-1">
                   <h4 className="text-sm font-semibold text-white">European Cricket Federation Real-Time Platform</h4>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
@@ -764,13 +1197,11 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-white/60">Next.js 16</span>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-white/60">WebSockets</span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-white/60">Sports Telemetry</span>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-white/60">Tailwind</span>
                 </div>
               </div>
 
-              {/* Project 3 */}
-              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all">
+              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10">
                 <div className="flex items-center justify-between mb-1">
                   <h4 className="text-sm font-semibold text-white">DeepSeek & Agentic Multi-Model Orchestrator</h4>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
@@ -784,7 +1215,6 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-white/60">PyTorch</span>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-white/60">DeepSeek</span>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-white/60">Python</span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-white/60">Agents</span>
                 </div>
               </div>
             </div>
@@ -807,9 +1237,6 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         </div>
       )}
 
-      {/* =========================================================================
-          MODAL 2: RIG SPECS & TECH STACK (Triggered by Zebronics PC)
-          ========================================================================= */}
       {activeModal === "specs" && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
@@ -839,16 +1266,14 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             </div>
 
             <div className="space-y-4 overflow-y-auto pr-1">
-              {/* Telemetry Status Bar */}
               <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-mono text-emerald-400">
                 <span className="flex items-center gap-2">
                   <Activity className="w-4 h-4 animate-pulse" />
-                  SYSTEM STATUS: OPTIMAL · THERMALS 29°C
+                  SYSTEM STATUS: OPTIMAL · THERMALS 28°C
                 </span>
                 <span>COMPUTE CORES ACTIVE</span>
               </div>
 
-              {/* Physical Rig Specs */}
               <div>
                 <h4 className="text-xs font-mono text-[#FF7A00] tracking-wider uppercase mb-2">Hardware Peripherals & Enclosure</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
@@ -866,12 +1291,11 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
                   </div>
                   <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10">
                     <p className="font-semibold text-white">Redgear Mat & Logitech G Mouse</p>
-                    <p className="text-white/60 text-[11px]">Extended distressed crimson cloth mat with high-precision optical tracking.</p>
+                    <p className="text-white/60 text-[11px]">Extended distressed crimson cloth mat with optical precision sensor.</p>
                   </div>
                 </div>
               </div>
 
-              {/* Software Engineering Stack */}
               <div>
                 <h4 className="text-xs font-mono text-blue-400 tracking-wider uppercase mb-2">Software Stack & AI Frameworks</h4>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
@@ -910,9 +1334,6 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         </div>
       )}
 
-      {/* =========================================================================
-          MODAL 3: HOBBIES, RITUALS & AMBIENT SOUND (Triggered by Headset)
-          ========================================================================= */}
       {activeModal === "hobbies" && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
@@ -942,7 +1363,6 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             </div>
 
             <div className="space-y-3.5 overflow-y-auto pr-1">
-              {/* Working Sound Generator Box */}
               <div className="p-4 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
@@ -967,7 +1387,6 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
                 </button>
               </div>
 
-              {/* Ritual 1: European Cricket */}
               <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10">
                 <h4 className="text-sm font-semibold text-white mb-0.5">European Cricket Federation Operations & Athletics</h4>
                 <p className="text-xs text-white/70">
@@ -975,19 +1394,10 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
                 </p>
               </div>
 
-              {/* Ritual 2: Custom Mechanical Keyboards */}
               <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10">
                 <h4 className="text-sm font-semibold text-white mb-0.5">Mechanical Switch Modding & Acoustic Tuning</h4>
                 <p className="text-xs text-white/70">
-                  Obsessed with tactile keystroke feedback, lubing switches with Krytox 205g0, custom brass plates, and high-frequency acoustic dampening.
-                </p>
-              </div>
-
-              {/* Ritual 3: Computational Geometry */}
-              <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10">
-                <h4 className="text-sm font-semibold text-white mb-0.5">Generative Shaders & Spatial Graphics</h4>
-                <p className="text-xs text-white/70">
-                  Crafting procedural noise algorithms, raymarching fractal landscapes, and fluid simulation mechanics.
+                  Obsessed with tactile keystroke feedback, lubing switches with Krytox 205g0, custom brass plates, and acoustic dampening.
                 </p>
               </div>
             </div>
@@ -1005,9 +1415,6 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         </div>
       )}
 
-      {/* =========================================================================
-          MODAL 4: INTERACTIVE CLI TERMINAL (Triggered by Keyboard)
-          ========================================================================= */}
       {activeModal === "terminal" && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
@@ -1017,7 +1424,6 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             className="relative w-full max-w-2xl bg-[#090B10] border border-emerald-500/30 rounded-2xl shadow-2xl p-6 overflow-hidden max-h-[85vh] flex flex-col font-mono"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Terminal Title Bar */}
             <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-3">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-red-500/80" />
@@ -1034,7 +1440,6 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
               </button>
             </div>
 
-            {/* Terminal History */}
             <div className="flex-1 overflow-y-auto space-y-2 text-xs pr-1">
               {terminalHistory.map((item, idx) => (
                 <div key={idx} className="space-y-0.5">
@@ -1050,7 +1455,6 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
               <div ref={terminalBottomRef} />
             </div>
 
-            {/* Terminal Input Line */}
             <form onSubmit={handleTerminalSubmit} className="mt-4 pt-3 border-t border-white/10 flex items-center gap-2">
               <span className="text-emerald-400 text-xs shrink-0">guest@soham:~$</span>
               <input

@@ -2,8 +2,6 @@
 
 import React, { useEffect, useRef, useState, useCallback, memo } from "react";
 import * as THREE from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import gsap from "gsap";
 import {
   X,
@@ -12,12 +10,12 @@ import {
   Cpu,
   Gamepad2,
   Headphones,
-  Keyboard,
-  Monitor,
   Volume2,
   VolumeX,
   Activity,
   Sparkles,
+  Compass,
+  Layers,
 } from "lucide-react";
 
 export interface Studio3DWorkspaceProps {
@@ -51,7 +49,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   // Terminal state
   const [terminalInput, setTerminalInput] = useState("");
   const [terminalHistory, setTerminalHistory] = useState<Array<{ cmd: string; out: string }>>([
-    { cmd: "system.init", out: "Soham Battlestation 3D Kernel · Production GLB Assets Active" },
+    { cmd: "system.init", out: "Cyber-Pastoral Prism · Spatial Architecture Kernel Active" },
     { cmd: "whoami", out: "Soham Roychoudhury — AI/ML Engineer & Systems Architect" },
     { cmd: "help", out: "Commands: 'whoami', 'projects', 'specs', 'hobbies', 'sound on', 'sound off', 'enter', 'clear'" },
   ]);
@@ -64,24 +62,25 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const animFrameRef = useRef<number | null>(null);
   const hitBoxesRef = useRef<THREE.Mesh[]>([]);
-  const screenTextureRef = useRef<THREE.CanvasTexture | null>(null);
-  const fanMeshRef = useRef<THREE.Group | null>(null);
-  const screenGlowLightRef = useRef<THREE.PointLight | null>(null);
-  const particlesRef = useRef<THREE.Points | null>(null);
+  const prismGroupRef = useRef<THREE.Group | null>(null);
+  const coreOrbRef = useRef<THREE.Mesh | null>(null);
+  const coreLightRef = useRef<THREE.PointLight | null>(null);
+  const sporesRef = useRef<THREE.Points | null>(null);
+  const ring1Ref = useRef<THREE.Mesh | null>(null);
+  const ring2Ref = useRef<THREE.Mesh | null>(null);
+  const causticLightRef = useRef<THREE.PointLight | null>(null);
 
-  // Seated Chair POV Coordinates (Eye-level seated view overlooking keyboard, mousepad, monitor, and PC)
+  // Motion physics
   const mouseNorm = useRef({ x: 0, y: 0 });
-  const cameraBasePos = useRef(new THREE.Vector3(-0.04, 0.78, 0.78));
-  const cameraLookTarget = useRef(new THREE.Vector3(-0.05, 0.56, -0.06));
-  const isFlyingIntoScreen = useRef(false);
+  const isTransitioning = useRef(false);
 
   // Web Audio Context & Nodes
   const audioCtxRef = useRef<AudioContext | null>(null);
   const ambientGainRef = useRef<GainNode | null>(null);
   const noiseSourceRef = useRef<AudioBufferSourceNode | null>(null);
 
-  // Synthesize tactile switch clicks
-  const playClickSound = useCallback((freq = 900) => {
+  // Synthesize crystalline resonance chime
+  const playGlassChime = useCallback((freq = 1200) => {
     try {
       if (!audioCtxRef.current) {
         const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
@@ -96,18 +95,18 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         const gain = ctx.createGain();
         osc.type = "sine";
         osc.frequency.setValueAtTime(freq, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(freq * 0.35, ctx.currentTime + 0.035);
-        gain.gain.setValueAtTime(0.04, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.04);
+        osc.frequency.exponentialRampToValueAtTime(freq * 0.5, ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.05, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.18);
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start();
-        osc.stop(ctx.currentTime + 0.045);
+        osc.stop(ctx.currentTime + 0.19);
       }
     } catch {}
   }, []);
 
-  // Ambient organic terrace breeze generator
+  // Ambient organic terrace mountain breeze generator
   const toggleAmbientSound = useCallback(() => {
     try {
       if (!audioCtxRef.current) {
@@ -171,37 +170,46 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     } catch {}
   }, [isAudioPlaying]);
 
-  // Continuous 3D Camera Flight into the BenQ Monitor Screen
-  const trigger3DCameraFlight = useCallback(() => {
-    if (isFlyingIntoScreen.current || !cameraRef.current) return;
-    isFlyingIntoScreen.current = true;
-    playClickSound(1100);
+  // "Genesis Unfold" Transition into Portfolio Hero
+  const triggerPrismTransition = useCallback(() => {
+    if (isTransitioning.current || !cameraRef.current || !prismGroupRef.current) return;
+    isTransitioning.current = true;
+    playGlassChime(1500);
 
     const camera = cameraRef.current;
-    // Monitor screen 3D center: (x: -0.06, y: 0.70, z: -0.07)
-    const targetPos = new THREE.Vector3(-0.06, 0.70, 0.15);
-    const targetLook = new THREE.Vector3(-0.06, 0.70, -0.07);
+    const prismGroup = prismGroupRef.current;
 
-    gsap.to(camera.position, {
-      x: targetPos.x,
-      y: targetPos.y,
-      z: targetPos.z,
-      duration: 1.25,
-      ease: "power3.inOut",
+    // 1. Crystal Facet Expansion / Bloom
+    gsap.to(prismGroup.scale, {
+      x: 1.8,
+      y: 1.8,
+      z: 1.8,
+      duration: 1.2,
+      ease: "power2.out",
     });
 
-    gsap.to(cameraLookTarget.current, {
-      x: targetLook.x,
-      y: targetLook.y,
-      z: targetLook.z,
+    // 2. Core Light Surge
+    if (coreLightRef.current) {
+      gsap.to(coreLightRef.current, {
+        intensity: 8.0,
+        duration: 0.8,
+        ease: "power2.inOut",
+      });
+    }
+
+    // 3. Camera Glide straight through the heart of the crystal
+    gsap.to(camera.position, {
+      x: 0,
+      y: 0,
+      z: 0.2,
       duration: 1.25,
       ease: "power3.inOut",
       onComplete: () => {
         onEnterPortfolio();
-        isFlyingIntoScreen.current = false;
+        isTransitioning.current = false;
       },
     });
-  }, [onEnterPortfolio, playClickSound]);
+  }, [onEnterPortfolio, playGlassChime]);
 
   // Handle Terminal Commands
   const handleTerminalSubmit = (e: React.FormEvent) => {
@@ -209,7 +217,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     const cmd = terminalInput.trim().toLowerCase();
     if (!cmd) return;
 
-    playClickSound(1200);
+    playGlassChime(1300);
 
     let output = "";
     if (cmd === "whoami") {
@@ -217,9 +225,9 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     } else if (cmd === "projects") {
       output = "1. In-Memory Translation Engine (<5ms)  2. European Cricket Ops Platform  3. DeepSeek Agent Harness";
     } else if (cmd === "specs") {
-      output = "Rig: Zebronics Geometric Chassis, BenQ Widescreen IPS, Redgear Deskpad, Compact TKL Mech Keyboard.";
+      output = "Architecture: C++20, Rust, PyTorch, DeepSeek, Next.js 16, Distributed Agent Kernels.";
     } else if (cmd === "hobbies") {
-      output = "Cricket Athletics (Latvian Cricket Fed), Keyboard Modding, Ambient Audio, Generative Art.";
+      output = "Cricket Athletics (Latvian Cricket Fed), Keyboard Modding, Ambient Acoustics, Generative Art.";
     } else if (cmd === "sound on") {
       if (!isAudioPlaying) toggleAmbientSound();
       output = "Terrace organic mountain wind soundscape: ACTIVE.";
@@ -227,10 +235,10 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       if (isAudioPlaying) toggleAmbientSound();
       output = "Terrace organic soundscape: MUTED.";
     } else if (cmd === "enter") {
-      output = "Initiating 3D camera flight into portfolio...";
+      output = "Unfolding Cyber-Pastoral Prism into portfolio...";
       setTimeout(() => {
         setActiveModal(null);
-        trigger3DCameraFlight();
+        triggerPrismTransition();
       }, 400);
     } else if (cmd === "clear") {
       setTerminalHistory([]);
@@ -261,7 +269,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Main Three.js Scene Setup (Curated GLB Assets + First-Person Seated Chair POV)
+  // Main Three.js Scene Setup (Cyber-Pastoral Prism Architecture)
   useEffect(() => {
     const container = mountRef.current;
     if (!container) return;
@@ -270,21 +278,16 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     const height = container.clientHeight || window.innerHeight;
     const isMobile = width / height < 1.0;
 
-    // 1. SCENE
+    // 1. SCENE & ATMOSPHERE
     const scene = new THREE.Scene();
     sceneRef.current = scene;
-    scene.background = new THREE.Color("#08090C");
-    scene.fog = new THREE.FogExp2("#08090C", 0.04);
+    scene.background = new THREE.Color("#05070D");
+    scene.fog = new THREE.FogExp2("#05070D", 0.035);
 
-    // 2. CAMERA (First-person seated view overlooking the entire desk setup)
-    const camera = new THREE.PerspectiveCamera(isMobile ? 56 : 48, width / height, 0.05, 30);
-    const initialPos = isMobile
-      ? new THREE.Vector3(-0.04, 0.85, 0.90)
-      : new THREE.Vector3(-0.04, 0.78, 0.78);
-    camera.position.copy(initialPos);
-    cameraBasePos.current.copy(initialPos);
-    cameraLookTarget.current.set(-0.05, 0.56, -0.06);
-    camera.lookAt(cameraLookTarget.current);
+    // 2. CAMERA
+    const camera = new THREE.PerspectiveCamera(isMobile ? 54 : 44, width / height, 0.1, 50);
+    camera.position.set(0, 0.1, isMobile ? 3.8 : 3.2);
+    camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
     // 3. RENDERER
@@ -298,557 +301,270 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.35;
+    renderer.toneMappingExposure = 1.4;
     container.appendChild(renderer.domElement);
 
-    // 4. MULTI-SOURCE STUDIO LIGHTING
-    const ambientLight = new THREE.AmbientLight(0x2A303C, 1.4);
+    // 4. LIGHTING: Multi-Source Studio & Caustic Shimmer
+    const ambientLight = new THREE.AmbientLight(0x1E2538, 1.4);
     scene.add(ambientLight);
 
-    // Warm Studio Key Light (Ceiling downlight)
-    const keyLight = new THREE.DirectionalLight(0xFFEDD5, 2.4);
-    keyLight.position.set(2.4, 4.2, 2.5);
-    keyLight.castShadow = true;
-    keyLight.shadow.mapSize.width = 2048;
-    keyLight.shadow.mapSize.height = 2048;
-    keyLight.shadow.bias = -0.0004;
-    scene.add(keyLight);
+    // Warm Dawn Key Light
+    const dawnLight = new THREE.DirectionalLight(0xFFA34D, 2.6);
+    dawnLight.position.set(3.5, 4.5, 2.5);
+    dawnLight.castShadow = true;
+    scene.add(dawnLight);
 
-    // Cool Studio Rim Light (Bevel edge definition)
-    const rimLight = new THREE.DirectionalLight(0x93C5FD, 1.3);
-    rimLight.position.set(-2.5, 3.2, -1.0);
+    // Electric Cyan Rim Light
+    const rimLight = new THREE.DirectionalLight(0x60A5FA, 2.0);
+    rimLight.position.set(-3.5, 3.0, -2.5);
     scene.add(rimLight);
 
-    // Emissive BenQ Monitor Glow (Downward illumination onto keyboard & mousepad)
-    const screenGlow = new THREE.PointLight(0x60A5FA, 2.0, 1.6);
-    screenGlow.position.set(-0.06, 0.70, 0.15);
-    scene.add(screenGlow);
-    screenGlowLightRef.current = screenGlow;
+    // Liquid Obsidian Floor Caustic Shimmer Light
+    const causticLight = new THREE.PointLight(0xFFB255, 1.8, 3.5);
+    causticLight.position.set(0, -1.2, 0.8);
+    scene.add(causticLight);
+    causticLightRef.current = causticLight;
 
-    // Zebronics ARGB Internal Fan Glow (Pulsing warm magenta/red)
-    const pcFanLight = new THREE.PointLight(0xFF2D55, 2.8, 1.4);
-    pcFanLight.position.set(0.44, 0.67, 0.02);
-    scene.add(pcFanLight);
-
-    // 5. ARCHITECTURAL ROOM SURFACES
-    // Terracotta accent wall behind desk
-    const backWall = new THREE.Mesh(
-      new THREE.PlaneGeometry(6.0, 4.0),
-      new THREE.MeshStandardMaterial({ color: 0x7A362D, roughness: 0.88 })
-    );
-    backWall.position.set(0, 1.1, -0.65);
-    backWall.receiveShadow = true;
-    scene.add(backWall);
-
-    // Deep mahogany floor
-    const floor = new THREE.Mesh(
-      new THREE.PlaneGeometry(6.0, 5.0),
-      new THREE.MeshStandardMaterial({ color: 0x120E0C, roughness: 0.7 })
-    );
+    // 5. REFLECTIVE LIQUID OBSIDIAN FLOOR
+    const floorGeo = new THREE.PlaneGeometry(16, 16);
+    const floorMat = new THREE.MeshStandardMaterial({
+      color: 0x07090E,
+      roughness: 0.18,
+      metalness: 0.82,
+    });
+    const floor = new THREE.Mesh(floorGeo, floorMat);
     floor.rotation.x = -Math.PI / 2;
-    floor.position.set(0, 0, 0);
+    floor.position.set(0, -1.35, 0);
     floor.receiveShadow = true;
     scene.add(floor);
 
-    // 6. DUAL-TIER DESK SETUP (Main Desk + Wooden Monitor Riser Shelf)
-    // Main Desk Surface (Dark teak/walnut)
-    const deskGeo = new THREE.BoxGeometry(2.3, 0.04, 1.1);
-    const deskMat = new THREE.MeshStandardMaterial({
-      color: 0x221A15,
-      roughness: 0.52,
+    // 6. MASTER PRISM GROUP (Floating Centered Centerpiece)
+    const prismGroup = new THREE.Group();
+    prismGroup.position.set(0, 0.05, 0);
+    scene.add(prismGroup);
+    prismGroupRef.current = prismGroup;
+
+    // A. Outer Sculpted Optical Glass Shell
+    const crystalGeo = new THREE.IcosahedronGeometry(1.22, 0);
+    const glassMat = new THREE.MeshPhysicalMaterial({
+      color: 0xEEF5FF,
+      transmission: 0.93,
+      opacity: 0.98,
+      transparent: true,
+      roughness: 0.06,
       metalness: 0.08,
+      ior: 1.54,
+      thickness: 0.85,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.04,
+      reflectivity: 0.92,
+      side: THREE.DoubleSide,
     });
-    const mainDesk = new THREE.Mesh(deskGeo, deskMat);
-    mainDesk.position.set(0, 0.38, 0.06);
-    mainDesk.receiveShadow = true;
-    mainDesk.castShadow = true;
-    scene.add(mainDesk);
+    const glassCrystal = new THREE.Mesh(crystalGeo, glassMat);
+    glassCrystal.castShadow = true;
+    glassCrystal.receiveShadow = true;
+    prismGroup.add(glassCrystal);
 
-    // Desk Legs
-    const legMat = new THREE.MeshStandardMaterial({ color: 0x14161A, roughness: 0.65, metalness: 0.3 });
-    const legGeo = new THREE.CylinderGeometry(0.025, 0.025, 0.38, 16);
-    [
-      [-1.05, 0.19, -0.40],
-      [1.05, 0.19, -0.40],
-      [-1.05, 0.19, 0.45],
-      [1.05, 0.19, 0.45],
-    ].forEach(([lx, ly, lz]) => {
-      const leg = new THREE.Mesh(legGeo, legMat);
-      leg.position.set(lx, ly, lz);
-      scene.add(leg);
+    // Chamfered Luminous Facet Edges
+    const edgesGeo = new THREE.EdgesGeometry(crystalGeo);
+    const edgesMat = new THREE.LineBasicMaterial({
+      color: 0xFFEDD5,
+      transparent: true,
+      opacity: 0.45,
     });
+    const crystalEdges = new THREE.LineSegments(edgesGeo, edgesMat);
+    prismGroup.add(crystalEdges);
 
-    // Wooden Monitor Riser Shelf (Dual-tier shelf)
-    const riserGeo = new THREE.BoxGeometry(1.28, 0.025, 0.28);
-    const riserMat = new THREE.MeshStandardMaterial({
-      color: 0x2C211A,
-      roughness: 0.48,
-      metalness: 0.06,
+    // B. Inner Living Terrarium: Miniature Mountain Ridge
+    const mountainGroup = new THREE.Group();
+    mountainGroup.position.set(0, -0.42, 0);
+
+    const basePlateGeo = new THREE.CylinderGeometry(0.55, 0.42, 0.12, 7);
+    const basePlateMat = new THREE.MeshStandardMaterial({
+      color: 0x181C24,
+      roughness: 0.7,
+      metalness: 0.2,
     });
-    const riserShelf = new THREE.Mesh(riserGeo, riserMat);
-    riserShelf.position.set(-0.06, 0.50, -0.14);
-    riserShelf.receiveShadow = true;
-    riserShelf.castShadow = true;
-    scene.add(riserShelf);
+    const basePlate = new THREE.Mesh(basePlateGeo, basePlateMat);
+    mountainGroup.add(basePlate);
 
-    // Aluminum Riser Feet
-    const riserFootGeo = new THREE.BoxGeometry(0.04, 0.10, 0.24);
-    const footL = new THREE.Mesh(riserFootGeo, legMat);
-    footL.position.set(-0.66, 0.45, -0.14);
-    scene.add(footL);
-    const footR = new THREE.Mesh(riserFootGeo, legMat);
-    footR.position.set(0.54, 0.45, -0.14);
-    scene.add(footR);
+    // Stepped low-poly mountain peak
+    const peakGeo = new THREE.ConeGeometry(0.38, 0.65, 5);
+    const peakMat = new THREE.MeshStandardMaterial({
+      color: 0x22362C,
+      roughness: 0.55,
+      flatShading: true,
+    });
+    const peak = new THREE.Mesh(peakGeo, peakMat);
+    peak.position.set(-0.06, 0.35, 0);
+    peak.rotation.y = 0.4;
+    mountainGroup.add(peak);
 
-    // 7. EXTENDED REDGEAR GAMING MOUSEPAD (Distressed Crimson Artwork)
-    const padCanvas = document.createElement("canvas");
-    padCanvas.width = 1024;
-    padCanvas.height = 512;
-    const pCtx = padCanvas.getContext("2d");
-    if (pCtx) {
-      // Dark carbon micro-weave
-      pCtx.fillStyle = "#121418";
-      pCtx.fillRect(0, 0, 1024, 512);
+    const subPeakGeo = new THREE.ConeGeometry(0.24, 0.45, 4);
+    const subPeakMat = new THREE.MeshStandardMaterial({
+      color: 0x2E4A3C,
+      roughness: 0.6,
+      flatShading: true,
+    });
+    const subPeak = new THREE.Mesh(subPeakGeo, subPeakMat);
+    subPeak.position.set(0.22, 0.24, 0.08);
+    mountainGroup.add(subPeak);
 
-      // Fine grid
-      pCtx.fillStyle = "rgba(255,255,255,0.025)";
-      for (let x = 0; x < 1024; x += 4) pCtx.fillRect(x, 0, 2, 512);
-      for (let y = 0; y < 512; y += 4) pCtx.fillRect(0, y, 1024, 2);
+    // Stylized Bonsai Trunk & Foliage Cloud
+    const trunkGeo = new THREE.CylinderGeometry(0.02, 0.04, 0.35, 6);
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x2D211C, roughness: 0.8 });
+    const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+    trunk.position.set(-0.16, 0.32, 0.15);
+    trunk.rotation.z = -0.35;
+    trunk.rotation.y = 0.5;
+    mountainGroup.add(trunk);
 
-      // Crimson distress artwork
-      pCtx.save();
-      const grad = pCtx.createLinearGradient(420, 0, 1024, 512);
-      grad.addColorStop(0, "rgba(220, 20, 45, 0.15)");
-      grad.addColorStop(0.4, "rgba(230, 30, 50, 0.85)");
-      grad.addColorStop(0.8, "rgba(160, 10, 25, 0.95)");
-      grad.addColorStop(1, "rgba(70, 5, 12, 0.9)");
-
-      pCtx.fillStyle = grad;
-      pCtx.beginPath();
-      pCtx.moveTo(530, 30);
-      pCtx.lineTo(990, 20);
-      pCtx.lineTo(1005, 490);
-      pCtx.lineTo(610, 470);
-      pCtx.lineTo(690, 280);
-      pCtx.closePath();
-      pCtx.fill();
-
-      // Distressed claw scratches
-      pCtx.fillStyle = "#FF2E44";
-      for (let i = 0; i < 5; i++) {
-        pCtx.beginPath();
-        pCtx.ellipse(760 + i * 40, 140 + i * 55, 110, 12, -0.65, 0, Math.PI * 2);
-        pCtx.fill();
-      }
-
-      // Redgear emblem & logo
-      pCtx.fillStyle = "rgba(255,255,255,0.85)";
-      pCtx.font = "bold 26px sans-serif";
-      pCtx.fillText("REDGEAR", 845, 62);
-      pCtx.restore();
-
-      // Perimeter stitched border
-      pCtx.strokeStyle = "rgba(255, 30, 55, 0.6)";
-      pCtx.lineWidth = 8;
-      pCtx.strokeRect(4, 4, 1016, 504);
-    }
-
-    const padTexture = new THREE.CanvasTexture(padCanvas);
-    padTexture.anisotropy = 4;
-    const mousepad = new THREE.Mesh(
-      new THREE.BoxGeometry(0.92, 0.005, 0.40),
-      new THREE.MeshStandardMaterial({ map: padTexture, roughness: 0.82, metalness: 0.05 })
-    );
-    mousepad.position.set(-0.06, 0.402, 0.18);
-    mousepad.receiveShadow = true;
-    scene.add(mousepad);
-
-    // 8. ERGONOMIC GAMING MOUSE
-    const mouseGroup = new THREE.Group();
-    mouseGroup.position.set(0.24, 0.406, 0.18);
-    mouseGroup.rotation.y = -0.06;
-
-    const mouseBody = new THREE.Mesh(
-      new THREE.BoxGeometry(0.068, 0.032, 0.118),
-      new THREE.MeshStandardMaterial({ color: 0x16181D, roughness: 0.38, metalness: 0.2 })
-    );
-    mouseBody.position.y = 0.016;
-    mouseBody.castShadow = true;
-    mouseGroup.add(mouseBody);
-
-    const mouseWheelGeo = new THREE.CylinderGeometry(0.009, 0.009, 0.008, 16);
-    mouseWheelGeo.rotateZ(Math.PI / 2);
-    const mouseWheel = new THREE.Mesh(
-      mouseWheelGeo,
-      new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.3, emissive: 0x00FFCC, emissiveIntensity: 0.35 })
-    );
-    mouseWheel.position.set(0, 0.033, -0.025);
-    mouseGroup.add(mouseWheel);
-
-    const mouseRgb = new THREE.Mesh(
-      new THREE.BoxGeometry(0.055, 0.004, 0.008),
-      new THREE.MeshBasicMaterial({ color: 0xFF0055 })
-    );
-    mouseRgb.position.set(0, 0.012, 0.052);
-    mouseGroup.add(mouseRgb);
-    scene.add(mouseGroup);
-
-    // 9. BENQ WIDESCREEN IPS MONITOR & INTERACTIVE SCREEN
-    const monitorGroup = new THREE.Group();
-    monitorGroup.position.set(-0.06, 0.70, -0.08);
-
-    // Trapezoidal Base on the wooden riser
-    const baseMesh = new THREE.Mesh(
-      new THREE.BoxGeometry(0.28, 0.014, 0.18),
-      new THREE.MeshStandardMaterial({ color: 0x181A1F, roughness: 0.5, metalness: 0.4 })
-    );
-    baseMesh.position.set(0, -0.194, 0.02);
-    baseMesh.castShadow = true;
-    monitorGroup.add(baseMesh);
-
-    // Upright Support Neck
-    const neckMesh = new THREE.Mesh(
-      new THREE.BoxGeometry(0.045, 0.22, 0.04),
-      new THREE.MeshStandardMaterial({ color: 0x1A1C22, roughness: 0.4, metalness: 0.5 })
-    );
-    neckMesh.position.set(0, -0.08, -0.02);
-    neckMesh.castShadow = true;
-    monitorGroup.add(neckMesh);
-
-    // Monitor Outer Bezel Housing
-    const bezelMesh = new THREE.Mesh(
-      new THREE.BoxGeometry(0.72, 0.42, 0.025),
-      new THREE.MeshStandardMaterial({ color: 0x0E1014, roughness: 0.4, metalness: 0.3 })
-    );
-    bezelMesh.castShadow = true;
-    monitorGroup.add(bezelMesh);
-
-    // Live High-Res Interactive Canvas Display
-    const screenCanvas = document.createElement("canvas");
-    screenCanvas.width = 1024;
-    screenCanvas.height = 576;
-    const sCtx = screenCanvas.getContext("2d");
-    if (sCtx) {
-      // Atmospheric Cyber-Pastoral Terrace Background
-      const grad = sCtx.createLinearGradient(0, 0, 0, 576);
-      grad.addColorStop(0, "#080D1A");
-      grad.addColorStop(0.5, "#141D30");
-      grad.addColorStop(1, "#06070B");
-      sCtx.fillStyle = grad;
-      sCtx.fillRect(0, 0, 1024, 576);
-
-      // Glowing Amber Sunrise Horizon
-      sCtx.fillStyle = "rgba(255, 122, 0, 0.45)";
-      sCtx.beginPath();
-      sCtx.ellipse(512, 290, 400, 110, 0, 0, Math.PI * 2);
-      sCtx.fill();
-
-      // Top Status Bar
-      sCtx.fillStyle = "rgba(255,255,255,0.75)";
-      sCtx.font = "bold 20px monospace";
-      sCtx.fillText("SOHAM ROYCHOUDHURY · ATELIER // 2026", 60, 60);
-      sCtx.fillText("SYS: RUNNING · 120 FPS", 700, 60);
-
-      // Main Typography
-      sCtx.fillStyle = "#FFFFFF";
-      sCtx.font = "bold 52px sans-serif";
-      sCtx.fillText("CYBER-PASTORAL TERRACE", 60, 240);
-
-      sCtx.fillStyle = "rgba(255,255,255,0.85)";
-      sCtx.font = "24px sans-serif";
-      sCtx.fillText("AI/ML Engineer · Systems Architect · Full-Stack Leader", 60, 290);
-
-      // Enter Button Pill
-      sCtx.fillStyle = "rgba(255, 122, 0, 0.95)";
-      sCtx.beginPath();
-      sCtx.roundRect(60, 370, 460, 68, 34);
-      sCtx.fill();
-
-      sCtx.fillStyle = "#000000";
-      sCtx.font = "bold 24px monospace";
-      sCtx.fillText("CLICK SCREEN TO ENTER ↗", 95, 412);
-    }
-
-    const screenTexture = new THREE.CanvasTexture(screenCanvas);
-    screenTextureRef.current = screenTexture;
-    const screenMesh = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.68, 0.38),
-      new THREE.MeshBasicMaterial({ map: screenTexture })
-    );
-    screenMesh.position.set(0, 0, 0.014);
-    monitorGroup.add(screenMesh);
-    scene.add(monitorGroup);
-
-    // 10. ZEBRONICS GAMING PC RIG (Angular Chassis + Tempered Glass + Spinning ARGB Fan)
-    const pcGroup = new THREE.Group();
-    pcGroup.position.set(0.46, 0.67, 0.02);
-
-    // Main Chassis Body
-    const pcBody = new THREE.Mesh(
-      new THREE.BoxGeometry(0.24, 0.56, 0.46),
-      new THREE.MeshStandardMaterial({ color: 0x111317, roughness: 0.45, metalness: 0.3 })
-    );
-    pcBody.castShadow = true;
-    pcGroup.add(pcBody);
-
-    // Front Angular Facet Panel
-    const frontPanel = new THREE.Mesh(
-      new THREE.BoxGeometry(0.235, 0.55, 0.03),
-      new THREE.MeshStandardMaterial({ color: 0x0B0C0E, roughness: 0.3, metalness: 0.5 })
-    );
-    frontPanel.position.set(0, 0, 0.24);
-    pcGroup.add(frontPanel);
-
-    // Front RGB Accent Strip
-    const frontRgb = new THREE.Mesh(
-      new THREE.BoxGeometry(0.012, 0.45, 0.005),
-      new THREE.MeshBasicMaterial({ color: 0xFF2D55 })
-    );
-    frontRgb.position.set(-0.06, 0, 0.256);
-    pcGroup.add(frontRgb);
-
-    // Optical Tempered Glass Side Panel (Facing seated user)
-    const glassPanel = new THREE.Mesh(
-      new THREE.BoxGeometry(0.006, 0.52, 0.42),
-      new THREE.MeshPhysicalMaterial({
-        color: 0x11151F,
-        transmission: 0.85,
-        opacity: 0.95,
-        transparent: true,
-        roughness: 0.08,
-        metalness: 0.1,
-        clearcoat: 1.0,
-      })
-    );
-    glassPanel.position.set(-0.122, 0, 0);
-    pcGroup.add(glassPanel);
-
-    // Internal Motherboard & GPU Block
-    const gpuMesh = new THREE.Mesh(
-      new THREE.BoxGeometry(0.08, 0.06, 0.26),
-      new THREE.MeshStandardMaterial({ color: 0x1F242C, roughness: 0.4, metalness: 0.6 })
-    );
-    gpuMesh.position.set(0, -0.05, 0);
-    pcGroup.add(gpuMesh);
-
-    // Dual RAM Sticks with Glowing RGB Diffusers
-    for (let r = 0; r < 2; r++) {
-      const ram = new THREE.Mesh(
-        new THREE.BoxGeometry(0.008, 0.05, 0.06),
-        new THREE.MeshBasicMaterial({ color: 0x00E5FF })
-      );
-      ram.position.set(-0.02, 0.12, -0.03 + r * 0.02);
-      pcGroup.add(ram);
-    }
-
-    // ARGB Spinning Cooling Fan Assembly
-    const fanAssembly = new THREE.Group();
-    fanAssembly.position.set(-0.02, 0.08, 0.08);
-
-    const fanRing = new THREE.Mesh(
-      new THREE.TorusGeometry(0.065, 0.008, 16, 32),
-      new THREE.MeshBasicMaterial({ color: 0xFF2D55 })
-    );
-    fanAssembly.add(fanRing);
-
-    const fanBladesGroup = new THREE.Group();
-    const bladeGeo = new THREE.BoxGeometry(0.016, 0.05, 0.004);
-    const bladeMat = new THREE.MeshBasicMaterial({ color: 0xFF5588 });
-    for (let b = 0; b < 7; b++) {
-      const blade = new THREE.Mesh(bladeGeo, bladeMat);
-      blade.rotation.z = (b / 7) * Math.PI * 2;
-      blade.position.set(Math.cos(blade.rotation.z) * 0.03, Math.sin(blade.rotation.z) * 0.03, 0);
-      fanBladesGroup.add(blade);
-    }
-    fanAssembly.add(fanBladesGroup);
-    fanMeshRef.current = fanBladesGroup;
-    pcGroup.add(fanAssembly);
-    scene.add(pcGroup);
-
-    // 11. LOAD & NORMALIZE CURATED HIGH-FIDELITY GLB ASSETS (DRACO DECODED)
-    const dracoLoader = new DRACOLoader();
-    dracoLoader.setDecoderPath("/draco/gltf/");
-    const gltfLoader = new GLTFLoader();
-    gltfLoader.setDRACOLoader(dracoLoader);
-
-    // Helper: auto-center geometry & normalize dimensions
-    const normalizeAndMount = (
-      rawScene: THREE.Group,
-      targetWidth: number,
-      targetPos: THREE.Vector3,
-      targetRot: THREE.Euler,
-      onMounted?: (wrapper: THREE.Group) => void
-    ) => {
-      const box = new THREE.Box3().setFromObject(rawScene);
-      const size = new THREE.Vector3();
-      box.getSize(size);
-      const center = new THREE.Vector3();
-      box.getCenter(center);
-
-      // Re-center internal mesh so origin is at (0, bottom, 0)
-      rawScene.position.x -= center.x;
-      rawScene.position.y -= box.min.y;
-      rawScene.position.z -= center.z;
-
-      const wrapper = new THREE.Group();
-      wrapper.add(rawScene);
-
-      const scale = targetWidth / Math.max(size.x, 0.01);
-      wrapper.scale.set(scale, scale, scale);
-      wrapper.position.copy(targetPos);
-      wrapper.rotation.copy(targetRot);
-
-      rawScene.traverse((child) => {
-        if ((child as THREE.Mesh).isMesh) {
-          child.castShadow = true;
-          child.receiveShadow = true;
-        }
+    const foliageColors = [0xDC2626, 0xEA580C, 0xF59E0B];
+    for (let f = 0; f < 4; f++) {
+      const folGeo = new THREE.DodecahedronGeometry(0.09 - f * 0.012, 0);
+      const folMat = new THREE.MeshStandardMaterial({
+        color: foliageColors[f % foliageColors.length],
+        roughness: 0.5,
+        emissive: foliageColors[f % foliageColors.length],
+        emissiveIntensity: 0.25,
       });
+      const foliage = new THREE.Mesh(folGeo, folMat);
+      foliage.position.set(-0.25 + f * 0.05, 0.48 + (f % 2) * 0.04, 0.18 + f * 0.03);
+      mountainGroup.add(foliage);
+    }
+    prismGroup.add(mountainGroup);
 
-      scene.add(wrapper);
-      if (onMounted) onMounted(wrapper);
-      return wrapper;
-    };
+    // C. Pulsing Amber Sun Orb & Internal Solar PointLight
+    const sunOrbGeo = new THREE.SphereGeometry(0.16, 24, 24);
+    const sunOrbMat = new THREE.MeshBasicMaterial({ color: 0xFFA028 });
+    const sunOrb = new THREE.Mesh(sunOrbGeo, sunOrbMat);
+    sunOrb.position.set(0.05, 0.06, -0.05);
+    prismGroup.add(sunOrb);
+    coreOrbRef.current = sunOrb;
 
-    // A. Mechanical TKL Keyboard (/models/keyboard.gltf)
-    gltfLoader.load(
-      "/models/keyboard.gltf",
-      (gltf) => {
-        normalizeAndMount(
-          gltf.scene,
-          0.38, // 38cm TKL keyboard width
-          new THREE.Vector3(-0.08, 0.404, 0.18),
-          new THREE.Euler(-0.02, 0.02, 0)
-        );
-      },
-      undefined,
-      (err) => console.warn("Keyboard GLTF load fallback:", err)
-    );
+    const coreLight = new THREE.PointLight(0xFF7A00, 3.6, 2.8);
+    coreLight.position.set(0.05, 0.06, -0.05);
+    prismGroup.add(coreLight);
+    coreLightRef.current = coreLight;
 
-    // B. Over-Ear Gaming Headphones (/models/headphones.gltf)
-    gltfLoader.load(
-      "/models/headphones.gltf",
-      (gltf) => {
-        normalizeAndMount(
-          gltf.scene,
-          0.19, // 19cm ear-to-ear
-          new THREE.Vector3(-0.46, 0.402, 0.16),
-          new THREE.Euler(0.10, 0.30, -1.25)
-        );
-      },
-      undefined,
-      (err) => console.warn("Headphones GLTF load fallback:", err)
-    );
+    // D. Zero-Gravity Golden Spores & Pollen Motes
+    const sporeCount = 75;
+    const sporeGeo = new THREE.BufferGeometry();
+    const sporePos = new Float32Array(sporeCount * 3);
+    for (let i = 0; i < sporeCount * 3; i += 3) {
+      const r = Math.random() * 0.85;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(Math.random() * 2 - 1);
+      sporePos[i] = r * Math.sin(phi) * Math.cos(theta);
+      sporePos[i + 1] = r * Math.sin(phi) * Math.sin(theta);
+      sporePos[i + 2] = r * Math.cos(phi);
+    }
+    sporeGeo.setAttribute("position", new THREE.BufferAttribute(sporePos, 3));
+    const sporeMat = new THREE.PointsMaterial({
+      color: 0xFFE082,
+      size: 0.024,
+      transparent: true,
+      opacity: 0.75,
+    });
+    const spores = new THREE.Points(sporeGeo, sporeMat);
+    prismGroup.add(spores);
+    sporesRef.current = spores;
 
-    // C. Gaming Controller / Gamepad (/models/controller.glb)
-    gltfLoader.load(
-      "/models/controller.glb",
-      (gltf) => {
-        normalizeAndMount(
-          gltf.scene,
-          0.18, // 18cm controller width
-          new THREE.Vector3(-0.52, 0.513, -0.12), // on wooden riser shelf clearly to the left of monitor
-          new THREE.Euler(-0.15, 0.25, -0.05)
-        );
-      },
-      undefined,
-      (err) => console.warn("Controller GLB load fallback:", err)
-    );
+    // E. Floating Exterior Orbital Rings
+    const ring1Geo = new THREE.TorusGeometry(1.65, 0.005, 16, 64);
+    const ring1Mat = new THREE.MeshBasicMaterial({ color: 0x60A5FA, transparent: true, opacity: 0.4 });
+    const ring1 = new THREE.Mesh(ring1Geo, ring1Mat);
+    ring1.rotation.x = Math.PI / 3;
+    prismGroup.add(ring1);
+    ring1Ref.current = ring1;
 
-    // 12. INTERACTIVE 3D HIT-BOXES
+    const ring2Geo = new THREE.TorusGeometry(1.95, 0.004, 16, 64);
+    const ring2Mat = new THREE.MeshBasicMaterial({ color: 0xF59E0B, transparent: true, opacity: 0.35 });
+    const ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
+    ring2.rotation.y = Math.PI / 4;
+    ring2.rotation.z = Math.PI / 6;
+    prismGroup.add(ring2);
+    ring2Ref.current = ring2;
+
+    // 7. INTERACTIVE 3D HIT-BOXES
     const hitBoxes: THREE.Mesh[] = [];
     const hitBoxMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
 
-    // Monitor Hit-Box
-    const monitorHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.44, 0.15), hitBoxMat);
-    monitorHitBox.position.set(-0.06, 0.70, -0.06);
-    monitorHitBox.userData = {
-      key: "monitor",
-      label: "BenQ Widescreen IPS Monitor",
-      sub: "Master Portal · Click to Fly Into Website ↗",
-      action: trigger3DCameraFlight,
+    // Center Core Hitbox: Triggers Genesis Unfold -> Portfolio
+    const coreHitBox = new THREE.Mesh(new THREE.SphereGeometry(1.28, 16, 16), hitBoxMat);
+    coreHitBox.position.set(0, 0.05, 0);
+    coreHitBox.userData = {
+      key: "prism_core",
+      label: "Cyber-Pastoral Prism",
+      sub: "Click Core to Unfold into Portfolio ↗",
+      action: triggerPrismTransition,
     };
-    scene.add(monitorHitBox);
-    hitBoxes.push(monitorHitBox);
+    scene.add(coreHitBox);
+    hitBoxes.push(coreHitBox);
 
-    // Zebronics PC Rig Hit-Box
-    const pcHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.65, 0.52), hitBoxMat);
-    pcHitBox.position.set(0.46, 0.67, 0.02);
-    pcHitBox.userData = {
-      key: "pc_tower",
-      label: "Zebronics Gaming Rig",
-      sub: "Compute Hardware & AI Architecture",
+    // Left Anchor: Selected Projects
+    const projectsHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.45, 0.45), hitBoxMat);
+    projectsHitBox.position.set(-1.65, 0.45, 0);
+    projectsHitBox.userData = {
+      key: "projects",
+      label: "Selected Commissions",
+      sub: "Microsecond Translation · Cricket Ops · DeepSeek Harness",
       action: () => {
-        playClickSound(950);
-        setActiveModal("specs");
-      },
-    };
-    scene.add(pcHitBox);
-    hitBoxes.push(pcHitBox);
-
-    // Keyboard Hit-Box
-    const kbHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.10, 0.22), hitBoxMat);
-    kbHitBox.position.set(-0.08, 0.42, 0.18);
-    kbHitBox.userData = {
-      key: "keyboard",
-      label: "TKL Mechanical Keyboard",
-      sub: "Interactive Hacker CLI Terminal",
-      action: () => {
-        playClickSound(950);
-        setActiveModal("terminal");
-      },
-    };
-    scene.add(kbHitBox);
-    hitBoxes.push(kbHitBox);
-
-    // Gamepad Hit-Box (on wooden riser shelf to left of monitor)
-    const gpHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.16, 0.20), hitBoxMat);
-    gpHitBox.position.set(-0.52, 0.55, -0.12);
-    gpHitBox.userData = {
-      key: "gamepad",
-      label: "Next-Gen Gamepad Controller",
-      sub: "Selected Commissions & High-Performance Projects",
-      action: () => {
-        playClickSound(950);
+        playGlassChime(1100);
         setActiveModal("projects");
       },
     };
-    scene.add(gpHitBox);
-    hitBoxes.push(gpHitBox);
+    scene.add(projectsHitBox);
+    hitBoxes.push(projectsHitBox);
 
-    // Headset Hit-Box (left desk surface)
-    const hsHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.22, 0.24), hitBoxMat);
-    hsHitBox.position.set(-0.46, 0.44, 0.16);
-    hsHitBox.userData = {
-      key: "headset",
-      label: "Over-Ear Gaming Headset",
-      sub: "Hobbies, Rituals & Terrace Ambience",
+    // Right Anchor: Rig Specs & Architecture
+    const specsHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.45, 0.45), hitBoxMat);
+    specsHitBox.position.set(1.65, 0.45, 0);
+    specsHitBox.userData = {
+      key: "specs",
+      label: "System Architecture",
+      sub: "C++ · Rust · Concurrency · Optimal 28°C Thermals",
       action: () => {
-        playClickSound(950);
+        playGlassChime(1100);
+        setActiveModal("specs");
+      },
+    };
+    scene.add(specsHitBox);
+    hitBoxes.push(specsHitBox);
+
+    // Bottom-Left Anchor: Terrace Ambience & Sound
+    const soundHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.45, 0.45), hitBoxMat);
+    soundHitBox.position.set(-1.55, -0.65, 0);
+    soundHitBox.userData = {
+      key: "sound",
+      label: "Terrace Mountain Soundscape",
+      sub: "Real-Time Web Audio Organic Mountain Breeze",
+      action: () => {
+        playGlassChime(1100);
         setActiveModal("hobbies");
       },
     };
-    scene.add(hsHitBox);
-    hitBoxes.push(hsHitBox);
+    scene.add(soundHitBox);
+    hitBoxes.push(soundHitBox);
+
+    // Bottom-Right Anchor: Interactive CLI Terminal
+    const terminalHitBox = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.45, 0.45), hitBoxMat);
+    terminalHitBox.position.set(1.55, -0.65, 0);
+    terminalHitBox.userData = {
+      key: "terminal",
+      label: "Hacker CLI Terminal",
+      sub: "Interactive Kernel Bash Shell",
+      action: () => {
+        playGlassChime(1100);
+        setActiveModal("terminal");
+      },
+    };
+    scene.add(terminalHitBox);
+    hitBoxes.push(terminalHitBox);
 
     hitBoxesRef.current = hitBoxes;
 
-    // 13. FLOATING ATMOSPHERIC PARTICLES
-    const particleCount = 80;
-    const particleGeo = new THREE.BufferGeometry();
-    const particlePos = new Float32Array(particleCount * 3);
-    for (let i = 0; i < particleCount * 3; i += 3) {
-      particlePos[i] = (Math.random() - 0.5) * 2.5;
-      particlePos[i + 1] = Math.random() * 1.5 + 0.3;
-      particlePos[i + 2] = (Math.random() - 0.5) * 1.8;
-    }
-    particleGeo.setAttribute("position", new THREE.BufferAttribute(particlePos, 3));
-    const particleMat = new THREE.PointsMaterial({ color: 0xFFE5B4, size: 0.015, transparent: true, opacity: 0.45 });
-    const particles = new THREE.Points(particleGeo, particleMat);
-    scene.add(particles);
-    particlesRef.current = particles;
-
-    // 14. RAYCASTING & INTERACTION
+    // 8. RAYCASTING & CURSOR INTERACTION
     const raycaster = new THREE.Raycaster();
     const mouseVector = new THREE.Vector2();
 
@@ -864,7 +580,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       raycaster.setFromCamera(mouseVector, camera);
       const intersects = raycaster.intersectObjects(hitBoxesRef.current);
 
-      if (intersects.length > 0 && !isFlyingIntoScreen.current) {
+      if (intersects.length > 0 && !isTransitioning.current) {
         const hit = intersects[0].object;
         const data = hit.userData;
         container.style.cursor = "pointer";
@@ -882,7 +598,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     };
 
     const onPointerClick = (e: MouseEvent) => {
-      if (isFlyingIntoScreen.current) return;
+      if (isTransitioning.current) return;
       const rect = renderer.domElement.getBoundingClientRect();
       mouseVector.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       mouseVector.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
@@ -901,35 +617,48 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     window.addEventListener("mousemove", onPointerMove);
     renderer.domElement.addEventListener("click", onPointerClick);
 
-    // 15. ANIMATION LOOP (Damped Head Tracking Parallax & Fan Rotation)
+    // 9. ANIMATION LOOP (Refractive Tilting, Orbital Harmonics, Spore Drift)
     let clock = new THREE.Clock();
 
     const animate = () => {
       animFrameRef.current = requestAnimationFrame(animate);
       const delta = clock.getDelta();
+      const elapsed = clock.getElapsedTime();
 
-      // Spin ARGB Fan in Zebronics PC
-      if (fanMeshRef.current) {
-        fanMeshRef.current.rotation.z += delta * 18;
+      // Refractive Prism Spring-Damped Tilting
+      if (!isTransitioning.current && prismGroupRef.current) {
+        const targetRotY = mouseNorm.current.x * 0.45 + elapsed * 0.08;
+        const targetRotX = -mouseNorm.current.y * 0.35 + Math.sin(elapsed * 0.6) * 0.05;
+
+        prismGroupRef.current.rotation.y += (targetRotY - prismGroupRef.current.rotation.y) * 0.06;
+        prismGroupRef.current.rotation.x += (targetRotX - prismGroupRef.current.rotation.x) * 0.06;
+        prismGroupRef.current.position.y = 0.05 + Math.sin(elapsed * 1.2) * 0.04;
       }
 
-      // Float Ambient Dust Motes
-      if (particlesRef.current) {
-        const pos = particlesRef.current.geometry.attributes.position.array as Float32Array;
-        for (let i = 1; i < pos.length; i += 3) {
-          pos[i] += delta * 0.04;
-          if (pos[i] > 2.0) pos[i] = 0.4;
+      // Orbital Rings Rotation
+      if (ring1Ref.current) ring1Ref.current.rotation.z += delta * 0.25;
+      if (ring2Ref.current) ring2Ref.current.rotation.y -= delta * 0.18;
+
+      // Internal Sun Pulse
+      if (coreOrbRef.current && coreLightRef.current && !isTransitioning.current) {
+        const pulse = 1.0 + Math.sin(elapsed * 2.5) * 0.08;
+        coreOrbRef.current.scale.set(pulse, pulse, pulse);
+        coreLightRef.current.intensity = 3.6 + Math.sin(elapsed * 2.5) * 0.6;
+      }
+
+      // Zero-Gravity Spores Swirl
+      if (sporesRef.current) {
+        const pos = sporesRef.current.geometry.attributes.position.array as Float32Array;
+        for (let i = 0; i < pos.length; i += 3) {
+          pos[i + 1] += Math.sin(elapsed + i) * 0.0006;
         }
-        particlesRef.current.geometry.attributes.position.needsUpdate = true;
+        sporesRef.current.geometry.attributes.position.needsUpdate = true;
       }
 
-      // Seated Chair Head-Tracking Parallax (Natural head tilt!)
-      if (!isFlyingIntoScreen.current && cameraRef.current) {
-        const targetX = cameraBasePos.current.x + mouseNorm.current.x * 0.08;
-        const targetY = cameraBasePos.current.y + mouseNorm.current.y * 0.05;
-        camera.position.x += (targetX - camera.position.x) * 0.07;
-        camera.position.y += (targetY - camera.position.y) * 0.07;
-        camera.lookAt(cameraLookTarget.current);
+      // Floor Caustic Light Tracks Mouse Cursor
+      if (causticLightRef.current) {
+        causticLightRef.current.position.x = mouseNorm.current.x * 2.2;
+        causticLightRef.current.position.z = 0.8 - mouseNorm.current.y * 1.4;
       }
 
       renderer.render(scene, camera);
@@ -945,7 +674,8 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       const mobile = w / h < 1.0;
 
       cameraRef.current.aspect = w / h;
-      cameraRef.current.fov = mobile ? 56 : 48;
+      cameraRef.current.fov = mobile ? 54 : 44;
+      cameraRef.current.position.z = mobile ? 3.8 : 3.2;
       cameraRef.current.updateProjectionMatrix();
       rendererRef.current.setSize(w, h);
     };
@@ -961,29 +691,29 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         rendererRef.current.dispose();
       }
     };
-  }, [trigger3DCameraFlight, playClickSound]);
+  }, [triggerPrismTransition, playGlassChime]);
 
   return (
-    <div className="relative w-full h-[100svh] bg-[#08090C] text-[#F8F5EE] overflow-hidden select-none">
+    <div className="relative w-full h-[100svh] bg-[#05070D] text-[#F8F5EE] overflow-hidden select-none">
       {/* Three.js Canvas Container */}
       <div ref={mountRef} className="absolute inset-0 w-full h-full z-10" />
 
       {/* Top Header Bar: Status Indicator */}
       <header className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between pointer-events-auto">
         <div className="flex items-center gap-3 bg-black/60 backdrop-blur-md border border-white/10 px-3.5 py-1.5 rounded-full text-xs font-mono">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-white/80 font-medium">SOHAM ROYCHOUDHURY · 3D BATTLESTATION</span>
+          <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+          <span className="text-white/80 font-medium">SOHAM ROYCHOUDHURY · CYBER-PASTORAL PRISM</span>
           <span className="hidden sm:inline text-white/40">|</span>
-          <span className="hidden sm:inline text-white/50">BENQ · ZEBRONICS · REDGEAR</span>
+          <span className="hidden sm:inline text-white/50">ATELIER // 2026</span>
         </div>
 
         <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-xs font-mono text-white/70">
           <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          <span>Curated 3D Studio Active</span>
+          <span>Spatial Art Core Active</span>
         </div>
       </header>
 
-      {/* Floating Hologram Tag (Only shows strictly over hovered item!) */}
+      {/* Floating Hologram Tag (Strictly follows cursor when over interactive anchor) */}
       {hoveredItem && (
         <div
           className="fixed pointer-events-none z-50 transform -translate-x-1/2 -translate-y-full mb-4 animate-in fade-in zoom-in-95 duration-150"
@@ -991,11 +721,11 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         >
           <div className="flex items-center gap-2.5 bg-[#0B0D14]/95 backdrop-blur-md border border-white/20 px-3.5 py-2 rounded-xl shadow-2xl">
             <div className="p-1.5 rounded-lg bg-white/10 text-white">
-              {hoveredItem.key === "monitor" && <Monitor className="w-4 h-4 text-blue-400" />}
-              {hoveredItem.key === "pc_tower" && <Cpu className="w-4 h-4 text-red-400" />}
-              {hoveredItem.key === "gamepad" && <Gamepad2 className="w-4 h-4 text-purple-400" />}
-              {hoveredItem.key === "keyboard" && <Keyboard className="w-4 h-4 text-emerald-400" />}
-              {hoveredItem.key === "headset" && <Headphones className="w-4 h-4 text-amber-400" />}
+              {hoveredItem.key === "prism_core" && <Sparkles className="w-4 h-4 text-amber-400" />}
+              {hoveredItem.key === "specs" && <Cpu className="w-4 h-4 text-red-400" />}
+              {hoveredItem.key === "projects" && <Gamepad2 className="w-4 h-4 text-purple-400" />}
+              {hoveredItem.key === "sound" && <Headphones className="w-4 h-4 text-blue-400" />}
+              {hoveredItem.key === "terminal" && <TerminalIcon className="w-4 h-4 text-emerald-400" />}
             </div>
             <div className="text-left">
               <p className="text-xs font-bold text-white leading-tight">{hoveredItem.label}</p>
@@ -1005,72 +735,135 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         </div>
       )}
 
-      {/* Floating Bottom Hardware Navigation Dock */}
-      <footer className="absolute bottom-3 left-1/2 -translate-x-1/2 z-40 max-w-full px-3 pointer-events-auto">
-        <div className="flex items-center gap-1.5 bg-black/75 backdrop-blur-xl border border-white/15 px-2.5 py-1.5 rounded-2xl shadow-2xl overflow-x-auto max-w-[95vw] scrollbar-none">
-          {/* BenQ Monitor Enter */}
-          <button
-            onClick={trigger3DCameraFlight}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30 text-xs font-medium transition-all shrink-0"
-          >
-            <Monitor className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Monitor</span>
-            <span className="text-[10px] opacity-70 font-mono">(Enter)</span>
-          </button>
-
-          {/* Zebronics PC Specs */}
+      {/* Floating Screen Waypoints: Left & Right Tactical Badges */}
+      <div className="absolute inset-x-6 top-1/2 -translate-y-1/2 z-30 pointer-events-none hidden md:flex items-center justify-between">
+        {/* Left Badges */}
+        <div className="space-y-4 pointer-events-auto">
           <button
             onClick={() => {
-              playClickSound(950);
-              setActiveModal("specs");
-            }}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/15 text-white/90 border border-white/10 text-xs font-medium transition-all shrink-0"
-          >
-            <Cpu className="w-3.5 h-3.5 text-red-400" />
-            <span>PC Rig</span>
-          </button>
-
-          {/* Gamepad Projects */}
-          <button
-            onClick={() => {
-              playClickSound(950);
+              playGlassChime(1100);
               setActiveModal("projects");
             }}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/15 text-white/90 border border-white/10 text-xs font-medium transition-all shrink-0"
+            className="flex items-center gap-3 px-3.5 py-2 rounded-xl bg-black/60 hover:bg-black/80 backdrop-blur-md border border-white/10 hover:border-purple-500/40 text-left transition-all group"
+          >
+            <div className="p-2 rounded-lg bg-purple-500/20 text-purple-400 group-hover:scale-105 transition-transform">
+              <Gamepad2 className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-white group-hover:text-purple-300">Selected Commissions</p>
+              <p className="text-[10px] font-mono text-white/50">Microsecond Engine & Cricket Ops</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => {
+              playGlassChime(1100);
+              setActiveModal("hobbies");
+            }}
+            className="flex items-center gap-3 px-3.5 py-2 rounded-xl bg-black/60 hover:bg-black/80 backdrop-blur-md border border-white/10 hover:border-blue-500/40 text-left transition-all group"
+          >
+            <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400 group-hover:scale-105 transition-transform">
+              <Headphones className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-white group-hover:text-blue-300">Terrace Ambience</p>
+              <p className="text-[10px] font-mono text-white/50">Web Audio Mountain Breeze</p>
+            </div>
+          </button>
+        </div>
+
+        {/* Right Badges */}
+        <div className="space-y-4 pointer-events-auto">
+          <button
+            onClick={() => {
+              playGlassChime(1100);
+              setActiveModal("specs");
+            }}
+            className="flex items-center gap-3 px-3.5 py-2 rounded-xl bg-black/60 hover:bg-black/80 backdrop-blur-md border border-white/10 hover:border-red-500/40 text-right transition-all group"
+          >
+            <div>
+              <p className="text-xs font-semibold text-white group-hover:text-red-300">System Architecture</p>
+              <p className="text-[10px] font-mono text-white/50">C++ · Rust · Concurrency</p>
+            </div>
+            <div className="p-2 rounded-lg bg-red-500/20 text-red-400 group-hover:scale-105 transition-transform">
+              <Cpu className="w-4 h-4" />
+            </div>
+          </button>
+
+          <button
+            onClick={() => {
+              playGlassChime(1100);
+              setActiveModal("terminal");
+            }}
+            className="flex items-center gap-3 px-3.5 py-2 rounded-xl bg-black/60 hover:bg-black/80 backdrop-blur-md border border-white/10 hover:border-emerald-500/40 text-right transition-all group"
+          >
+            <div>
+              <p className="text-xs font-semibold text-white group-hover:text-emerald-300">Hacker CLI Terminal</p>
+              <p className="text-[10px] font-mono text-white/50">Interactive Bash Shell</p>
+            </div>
+            <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400 group-hover:scale-105 transition-transform">
+              <TerminalIcon className="w-4 h-4" />
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* Floating Bottom Navigation Dock */}
+      <footer className="absolute bottom-4 left-1/2 -translate-x-1/2 z-40 max-w-full px-3 pointer-events-auto">
+        <div className="flex items-center gap-1.5 sm:gap-2 bg-black/75 backdrop-blur-xl border border-white/15 px-3 py-1.5 rounded-2xl shadow-2xl overflow-x-auto max-w-[95vw] scrollbar-none">
+          {/* Projects Button */}
+          <button
+            onClick={() => {
+              playGlassChime(1100);
+              setActiveModal("projects");
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-white/90 border border-white/10 text-xs font-medium transition-all shrink-0"
           >
             <Gamepad2 className="w-3.5 h-3.5 text-purple-400" />
             <span>Projects</span>
           </button>
 
-          {/* Headset Hobbies & Sound */}
+          {/* Specs Button */}
           <button
             onClick={() => {
-              playClickSound(950);
+              playGlassChime(1100);
+              setActiveModal("specs");
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-white/90 border border-white/10 text-xs font-medium transition-all shrink-0"
+          >
+            <Cpu className="w-3.5 h-3.5 text-red-400" />
+            <span>Specs</span>
+          </button>
+
+          {/* Sound & Hobbies */}
+          <button
+            onClick={() => {
+              playGlassChime(1100);
               setActiveModal("hobbies");
             }}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/15 text-white/90 border border-white/10 text-xs font-medium transition-all shrink-0"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-white/90 border border-white/10 text-xs font-medium transition-all shrink-0"
           >
-            <Headphones className="w-3.5 h-3.5 text-amber-400" />
+            <Headphones className="w-3.5 h-3.5 text-blue-400" />
             <span>Hobbies</span>
           </button>
 
-          {/* Mechanical Keyboard Terminal */}
+          {/* Terminal */}
           <button
             onClick={() => {
-              playClickSound(950);
+              playGlassChime(1100);
               setActiveModal("terminal");
             }}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/15 text-white/90 border border-white/10 text-xs font-medium transition-all shrink-0"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-white/90 border border-white/10 text-xs font-medium transition-all shrink-0"
           >
             <TerminalIcon className="w-3.5 h-3.5 text-emerald-400" />
-            <span>CLI Terminal</span>
+            <span>Terminal</span>
           </button>
 
-          {/* Ambient Soundscape Toggle */}
+          {/* Ambient Breeze Soundscape Toggle */}
           <button
             onClick={toggleAmbientSound}
             aria-label="Toggle Terrace Wind Ambience"
-            className={`p-1.5 rounded-xl border transition-all shrink-0 ${
+            className={`p-2 rounded-xl border transition-all shrink-0 ${
               isAudioPlaying
                 ? "bg-[#FF7A00]/20 text-[#FF7A00] border-[#FF7A00]/40"
                 : "bg-white/5 hover:bg-white/15 text-white/60 border-white/10"
@@ -1079,12 +872,12 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             {isAudioPlaying ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
           </button>
 
-          {/* Direct Enter Website CTA */}
+          {/* Direct Genesis Unfold Enter Website CTA */}
           <button
-            onClick={trigger3DCameraFlight}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#FF7A00] hover:bg-[#FF8D24] text-black font-semibold text-xs transition-all shadow-lg shadow-[#FF7A00]/20 shrink-0"
+            onClick={triggerPrismTransition}
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-[#FF7A00] hover:bg-[#FF8D24] text-black font-semibold text-xs transition-all shadow-lg shadow-[#FF7A00]/25 shrink-0"
           >
-            <span>Enter Website</span>
+            <span>Unfold Portfolio</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -1207,8 +1000,8 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
                   <Cpu className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">ZEBRONICS BATTLESTATION // SPECS & ARCHITECTURE</h3>
-                  <p className="text-xs font-mono text-white/60">Hardware Engine & Production Software Stack</p>
+                  <h3 className="text-lg font-bold text-white">SYSTEM ARCHITECTURE // HARDWARE & STACK</h3>
+                  <p className="text-xs font-mono text-white/60">Bare-Metal Systems Engine & AI Pipelines</p>
                 </div>
               </div>
               <button
@@ -1230,29 +1023,29 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
               </div>
 
               <div>
-                <h4 className="text-xs font-mono text-[#FF7A00] tracking-wider uppercase mb-2">Hardware Peripherals & Enclosure</h4>
+                <h4 className="text-xs font-mono text-[#FF7A00] tracking-wider uppercase mb-2">Systems Engineering Principles</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                   <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10">
-                    <p className="font-semibold text-white">Zebronics Angular Gaming Chassis</p>
-                    <p className="text-white/60 text-[11px]">Tempered glass side panel with high-airflow ARGB cooling array.</p>
+                    <p className="font-semibold text-white">Zero-Allocation Concurrency</p>
+                    <p className="text-white/60 text-[11px]">Lock-free ring buffers, cache-line alignment, and SIMD vectorization.</p>
                   </div>
                   <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10">
-                    <p className="font-semibold text-white">BenQ Widescreen IPS Monitor</p>
-                    <p className="text-white/60 text-[11px]">Color-calibrated precision panel mounted on teak wood shelf riser.</p>
+                    <p className="font-semibold text-white">Real-Time Telemetry Streaming</p>
+                    <p className="text-white/60 text-[11px]">Sub-millisecond WebSocket fan-out and binary protocol serialization.</p>
                   </div>
                   <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10">
-                    <p className="font-semibold text-white">Compact TKL Mechanical Keyboard</p>
-                    <p className="text-white/60 text-[11px]">Linear lubricated tactile switches with acoustic dampening foam.</p>
+                    <p className="font-semibold text-white">Autonomous Agent Orchestration</p>
+                    <p className="text-white/60 text-[11px]">Recursive local model inference and verifiable sandbox execution.</p>
                   </div>
                   <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10">
-                    <p className="font-semibold text-white">Redgear Mat & Logitech Precision Mouse</p>
-                    <p className="text-white/60 text-[11px]">Extended distressed crimson cloth mat with optical precision sensor.</p>
+                    <p className="font-semibold text-white">Spatial WebGL & Shader Mechanics</p>
+                    <p className="text-white/60 text-[11px]">Custom refraction shaders, physical glass IOR, and 120 FPS render loops.</p>
                   </div>
                 </div>
               </div>
 
               <div>
-                <h4 className="text-xs font-mono text-blue-400 tracking-wider uppercase mb-2">Software Stack & AI Frameworks</h4>
+                <h4 className="text-xs font-mono text-blue-400 tracking-wider uppercase mb-2">Production Software Stack</h4>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
                   <div className="p-2.5 rounded-lg bg-white/[0.02] border border-white/10 font-mono text-white/80">
                     ✦ Next.js 16 (App Router)
@@ -1300,11 +1093,11 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           >
             <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30">
                   <Headphones className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">LIFE RITUALS & HOBBIES</h3>
+                  <h3 className="text-lg font-bold text-white">TERRACE RITUALS & HOBBIES</h3>
                   <p className="text-xs font-mono text-white/60">Music, Sports Operations, Acoustics & Lifestyle</p>
                 </div>
               </div>
@@ -1384,7 +1177,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
                 <div className="w-3 h-3 rounded-full bg-red-500/80" />
                 <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
                 <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
-                <span className="text-xs text-white/60 ml-2">soham@battlestation: ~ (bash)</span>
+                <span className="text-xs text-white/60 ml-2">soham@prism-kernel: ~ (bash)</span>
               </div>
               <button
                 onClick={() => setActiveModal(null)}

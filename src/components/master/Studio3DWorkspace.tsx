@@ -1,21 +1,26 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useCallback, memo } from "react";
-import * as THREE from "three";
-import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
+import React, { useState, useEffect, useRef, useCallback, memo } from "react";
 import gsap from "gsap";
 import {
   X,
   ArrowRight,
-  BookOpen,
-  Coffee,
-  Laptop,
-  Terminal as TerminalIcon,
-  Lightbulb,
-  Volume2,
-  VolumeX,
   ExternalLink,
   Sparkles,
+  Terminal as TerminalIcon,
+  Cpu,
+  Gamepad2,
+  Headphones,
+  Keyboard,
+  Monitor,
+  Volume2,
+  VolumeX,
+  Camera,
+  Layers,
+  CheckCircle2,
+  Flame,
+  Code2,
+  Activity,
 } from "lucide-react";
 
 export interface Studio3DWorkspaceProps {
@@ -24,43 +29,53 @@ export interface Studio3DWorkspaceProps {
   isLocked?: boolean;
 }
 
-type CameraFocusMode = "overview" | "laptop" | "books" | "mug" | "lamp" | "speaker" | "keyboard";
+type SceneViewMode = "studio" | "photo";
+
+interface HotspotBox {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  label: string;
+  sub: string;
+  icon: React.ReactNode;
+  action: () => void;
+}
 
 export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   onEnterPortfolio,
   onNavigateToSection,
   isLocked = true,
 }: Studio3DWorkspaceProps) {
-  const mountRef = useRef<HTMLDivElement>(null);
-  const [focusMode, setFocusMode] = useState<CameraFocusMode>("overview");
-  const [hoveredObject, setHoveredObject] = useState<string | null>(null);
-  const [activeModal, setActiveModal] = useState<"projects" | "hobbies" | "terminal" | null>(null);
+  // Scene View Mode: Studio (3D digital twin) vs Photo (authentic battle station photo)
+  const [sceneMode, setSceneMode] = useState<SceneViewMode>("studio");
 
-  // Desk state toggles
-  const [isLampOn, setIsLampOn] = useState(true);
+  // Interactive Modals
+  const [activeModal, setActiveModal] = useState<"projects" | "specs" | "hobbies" | "terminal" | null>(null);
+
+  // Audio Ambience
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+
+  // Hovered Gear item
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
   // Terminal state
   const [terminalInput, setTerminalInput] = useState("");
-  const [terminalHistory, setTerminalHistory] = useState<Array<{ cmd: string; out: string }>>([
-    { cmd: "whoami", out: "Soham Roychoudhury — AI/ML Engineer & Frontend Architect" },
-    { cmd: "status", out: "Atelier systems active. Studio lighting calibrated." },
+  const [terminalHistory, setTerminalHistory] = useState<Array<{ cmd: string; out: string; isUser?: boolean }>>([
+    { cmd: "system.init", out: "Soham Battlestation Kernel v4.2 · Architecture Active" },
+    { cmd: "whoami", out: "Soham Roychoudhury — AI/ML Engineer & Systems Architect" },
+    { cmd: "help", out: "Commands available: 'whoami', 'projects', 'specs', 'hobbies', 'sound on', 'sound off', 'enter', 'clear'" },
   ]);
+  const terminalBottomRef = useRef<HTMLDivElement>(null);
+  const terminalInputRef = useRef<HTMLInputElement>(null);
 
-  // Cursor coordinates
-  const [cursorPos, setCursorPos] = useState({ x: -100, y: -100 });
-  const [cursorVisible, setCursorVisible] = useState(false);
+  // Refs for Continuous Dolly Zoom
+  const stageRef = useRef<HTMLDivElement>(null);
+  const monitorPortalRef = useRef<HTMLDivElement>(null);
+  const [isZooming, setIsZooming] = useState(false);
 
-  // Three.js instances refs
-  const sceneRef = useRef<THREE.Scene | null>(null);
-  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
-  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
-  const animFrameRef = useRef<number | null>(null);
-  const hitBoxesRef = useRef<THREE.Mesh[]>([]);
-  const steamParticlesRef = useRef<THREE.Points | null>(null);
-  const lampLightRef = useRef<THREE.SpotLight | null>(null);
-  const lampBulbMeshRef = useRef<THREE.Mesh | null>(null);
-  const speakerLedRef = useRef<THREE.Mesh | null>(null);
+  // Mouse Parallax coordinates
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   // Web Audio Context & Nodes
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -68,7 +83,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   const noiseSourceRef = useRef<AudioBufferSourceNode | null>(null);
 
   // Synthesize tactile switch clicks
-  const playClickSound = useCallback((freq = 900) => {
+  const playClickSound = useCallback((freq = 880) => {
     try {
       if (!audioCtxRef.current) {
         const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
@@ -107,7 +122,6 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       if (ctx.state === "suspended") ctx.resume();
 
       if (isAudioPlaying) {
-        // Fade out
         if (ambientGainRef.current) {
           ambientGainRef.current.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.3);
           setTimeout(() => {
@@ -118,11 +132,10 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
                 noiseSourceRef.current = null;
               }
             } catch {}
-          }, 400);
+          }, 350);
         }
         setIsAudioPlaying(false);
       } else {
-        // Synthesize 5 seconds looped organic pink/white mountain wind
         const bufferSize = ctx.sampleRate * 4;
         const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
         const output = noiseBuffer.getChannelData(0);
@@ -140,7 +153,6 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         whiteNoise.loop = true;
         noiseSourceRef.current = whiteNoise;
 
-        // Bandpass filter for organic wind resonance
         const filter = ctx.createBiquadFilter();
         filter.type = "bandpass";
         filter.frequency.setValueAtTime(380, ctx.currentTime);
@@ -161,1036 +173,633 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     } catch {}
   }, [isAudioPlaying]);
 
-  // Camera Target States (Dark Obsidian Studio)
-  const cameraTargets = useRef({
-    overview: {
-      pos: new THREE.Vector3(0, 1.55, 3.2),
-      lookAt: new THREE.Vector3(0, 0.45, 0),
-    },
-    overviewMobile: {
-      pos: new THREE.Vector3(0, 1.85, 4.4),
-      lookAt: new THREE.Vector3(0, 0.45, 0),
-    },
-    laptop: {
-      pos: new THREE.Vector3(0, 0.68, 1.1),
-      lookAt: new THREE.Vector3(0, 0.68, 0.05),
-    },
-    books: {
-      pos: new THREE.Vector3(-0.95, 0.68, 1.15),
-      lookAt: new THREE.Vector3(-0.95, 0.48, 0.1),
-    },
-    mug: {
-      pos: new THREE.Vector3(0.92, 0.65, 1.15),
-      lookAt: new THREE.Vector3(0.92, 0.46, 0.1),
-    },
-    lamp: {
-      pos: new THREE.Vector3(-1.3, 0.75, 1.15),
-      lookAt: new THREE.Vector3(-1.3, 0.6, -0.2),
-    },
-    speaker: {
-      pos: new THREE.Vector3(1.25, 0.72, 1.15),
-      lookAt: new THREE.Vector3(1.25, 0.55, -0.2),
-    },
-    keyboard: {
-      pos: new THREE.Vector3(0, 0.78, 0.95),
-      lookAt: new THREE.Vector3(0, 0.42, 0.35),
-    },
-  });
+  // Continuous Dolly Zoom directly into BenQ Monitor (Zero Flash, Zero Blur Pop)
+  const triggerDollyZoom = useCallback(() => {
+    if (isZooming) return;
+    playClickSound(1050);
+    setIsZooming(true);
 
-  const currentLookAt = useRef(new THREE.Vector3(0, 0.45, 0));
+    const monitorEl = monitorPortalRef.current;
+    const stageEl = stageRef.current;
 
-  // Camera Transition
-  const transitionCameraTo = useCallback((targetMode: CameraFocusMode) => {
-    if (!cameraRef.current) return;
-    const isMobile = window.innerWidth / window.innerHeight < 1.0;
-    const target =
-      targetMode === "overview" && isMobile
-        ? cameraTargets.current.overviewMobile
-        : cameraTargets.current[targetMode];
+    if (!monitorEl || !stageEl) {
+      onEnterPortfolio();
+      return;
+    }
 
-    setFocusMode(targetMode);
+    const rect = monitorEl.getBoundingClientRect();
+    const stageRect = stageEl.getBoundingClientRect();
 
-    gsap.to(cameraRef.current.position, {
-      x: target.pos.x,
-      y: target.pos.y,
-      z: target.pos.z,
-      duration: 1.3,
-      ease: "power3.inOut",
+    // Center point of monitor in screen coordinates
+    const monitorCenterX = rect.left + rect.width / 2;
+    const monitorCenterY = rect.top + rect.height / 2;
+
+    // Center point relative to stage container
+    const stageOriginX = ((monitorCenterX - stageRect.left) / stageRect.width) * 100;
+    const stageOriginY = ((monitorCenterY - stageRect.top) / stageRect.height) * 100;
+
+    // Timeline for continuous dolly camera push
+    const tl = gsap.timeline({
+      onComplete: () => {
+        onEnterPortfolio();
+        setIsZooming(false);
+      },
     });
 
-    gsap.to(currentLookAt.current, {
-      x: target.lookAt.x,
-      y: target.lookAt.y,
-      z: target.lookAt.z,
-      duration: 1.3,
+    // 1. Camera push: The desk scales up rapidly toward the viewer centered on the monitor screen
+    tl.to(stageEl, {
+      scale: 3.8,
+      transformOrigin: `${stageOriginX}% ${stageOriginY}%`,
+      opacity: 0,
+      duration: 1.15,
+      ease: "power3.in",
+    }, 0);
+
+    // 2. The monitor screen seamlessly expands to fill 100vw × 100vh with ZERO flash and ZERO blur
+    tl.to(monitorEl, {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100vw",
+      height: "100vh",
+      borderRadius: 0,
+      borderWidth: 0,
+      zIndex: 9999,
+      duration: 1.15,
       ease: "power3.inOut",
-    });
+    }, 0);
+  }, [isZooming, onEnterPortfolio, playClickSound]);
+
+  // Mouse move parallax handler
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const { clientX, clientY } = e;
+    const { innerWidth, innerHeight } = window;
+    const x = (clientX / innerWidth - 0.5) * 2;
+    const y = (clientY / innerHeight - 0.5) * 2;
+    setMousePos({ x, y });
   }, []);
 
-  // Toggle Lamp Lighting
-  const handleToggleLamp = useCallback(() => {
-    playClickSound(1200);
-    setIsLampOn((prev) => {
-      const next = !prev;
-      if (lampLightRef.current) {
-        gsap.to(lampLightRef.current, {
-          intensity: next ? 4.2 : 0,
-          duration: 0.25,
-          ease: "power2.out",
-        });
-      }
-      if (lampBulbMeshRef.current) {
-        const mat = lampBulbMeshRef.current.material as THREE.MeshStandardMaterial;
-        gsap.to(mat, {
-          emissiveIntensity: next ? 2.5 : 0,
-          duration: 0.25,
-        });
-      }
-      return next;
-    });
-  }, [playClickSound]);
-
-  // Main Three.js Scene Setup (Dark Obsidian Studio)
-  useEffect(() => {
-    const container = mountRef.current;
-    if (!container) return;
-
-    const width = container.clientWidth || window.innerWidth;
-    const height = container.clientHeight || window.innerHeight;
-    const isMobile = width / height < 1.0;
-
-    // 1. SCENE
-    const scene = new THREE.Scene();
-    sceneRef.current = scene;
-    scene.background = new THREE.Color("#08090C");
-    scene.fog = new THREE.FogExp2("#08090C", 0.04);
-
-    // 2. CAMERA
-    const camera = new THREE.PerspectiveCamera(isMobile ? 52 : 44, width / height, 0.1, 40);
-    const initialPos = isMobile
-      ? cameraTargets.current.overviewMobile.pos
-      : cameraTargets.current.overview.pos;
-    camera.position.copy(initialPos);
-    cameraRef.current = camera;
-
-    // 3. RENDERER
-    const renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      powerPreference: "high-performance",
-    });
-    rendererRef.current = renderer;
-    renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
-    container.appendChild(renderer.domElement);
-
-    // 4. LIGHTING (Cinematic Dark Obsidian Studio with Rich Depth)
-    // Ambient Moody Base with soft blue-slate depth
-    const ambientLight = new THREE.AmbientLight(0x282E3C, 1.25);
-    scene.add(ambientLight);
-
-    // Top Studio Softbox (softly lights the desk surface and slat geometry)
-    const topSoftbox = new THREE.DirectionalLight(0xE0E8F8, 1.1);
-    topSoftbox.position.set(0, 6, 1);
-    scene.add(topSoftbox);
-
-    // Studio Key Light (Cool Charcoal Moonlight / Top-Left Key)
-    const keyLight = new THREE.DirectionalLight(0xDCE8FF, 2.4);
-    keyLight.position.set(-4.5, 5.5, 2.5);
-    keyLight.castShadow = true;
-    keyLight.shadow.mapSize.width = 2048;
-    keyLight.shadow.mapSize.height = 2048;
-    keyLight.shadow.camera.near = 0.5;
-    keyLight.shadow.camera.far = 15;
-    keyLight.shadow.camera.left = -3;
-    keyLight.shadow.camera.right = 3;
-    keyLight.shadow.camera.top = 3;
-    keyLight.shadow.camera.bottom = -3;
-    keyLight.shadow.bias = -0.0004;
-    scene.add(keyLight);
-
-    // Rim Fill Light (Deep Graphite Blue highlighting right side)
-    const rimLight = new THREE.DirectionalLight(0x557095, 0.9);
-    rimLight.position.set(4.5, 3.5, -0.5);
-    scene.add(rimLight);
-
-    // Screen Luminous Glow (Blue-White Screen Bounce onto Laptop Base)
-    const screenGlow = new THREE.PointLight(0x8AB4F8, 0.85, 2.4);
-    screenGlow.position.set(0, 0.72, 0.22);
-    scene.add(screenGlow);
-
-    // Desk Lamp SpotLight (Warm Tungsten Spotlight)
-    const lampSpot = new THREE.SpotLight(0xFFA545, 4.8);
-    lampSpot.position.set(-1.3, 0.88, -0.15);
-    lampSpot.target.position.set(-0.5, 0.38, 0.1);
-    lampSpot.angle = 0.8;
-    lampSpot.penumbra = 0.85;
-    lampSpot.decay = 1.8;
-    lampSpot.distance = 4;
-    lampSpot.castShadow = true;
-    lampSpot.shadow.bias = -0.0005;
-    scene.add(lampSpot);
-    scene.add(lampSpot.target);
-    lampLightRef.current = lampSpot;
-
-    // 5. MATERIALS (Dark Obsidian Luxury Palette)
-    // Dark Charcoal Smoked Walnut Desk with subtle metallic chamfer
-    const obsidianDeskMaterial = new THREE.MeshStandardMaterial({
-      color: 0x22242B,
-      roughness: 0.32,
-      metalness: 0.35,
-    });
-
-    // Anodized Space Black Aluminum (MacBook, Lamp)
-    const spaceBlackAluminum = new THREE.MeshStandardMaterial({
-      color: 0x141518,
-      roughness: 0.28,
-      metalness: 0.85,
-    });
-
-    // Dark Charcoal Acoustic Slats
-    const acousticSlatMaterial = new THREE.MeshStandardMaterial({
-      color: 0x1A1C22,
-      roughness: 0.55,
-      metalness: 0.2,
-    });
-
-    // Matte Ceramic Charcoal (Mug)
-    const charcoalCeramicMaterial = new THREE.MeshStandardMaterial({
-      color: 0x1F2128,
-      roughness: 0.25,
-      metalness: 0.1,
-    });
-
-    // Invisible Hit-Box Material
-    const hitBoxMaterial = new THREE.MeshBasicMaterial({
-      transparent: true,
-      opacity: 0,
-      depthWrite: false,
-    });
-
-    const hitBoxes: THREE.Mesh[] = [];
-
-    // 6. ARCHITECTURAL ROOM
-    // Acoustic Vertical Slatted Wall (Dark Obsidian Aesthetic)
-    const wallGroup = new THREE.Group();
-    const wallBacking = new THREE.Mesh(
-      new THREE.PlaneGeometry(12, 6.5),
-      new THREE.MeshStandardMaterial({ color: 0x0A0B0E, roughness: 0.95 })
-    );
-    wallBacking.position.set(0, 2.2, -1.8);
-    wallGroup.add(wallBacking);
-
-    const slatGeo = new RoundedBoxGeometry(0.045, 6.0, 0.03, 2, 0.006);
-    for (let x = -5.0; x <= 5.0; x += 0.14) {
-      const slat = new THREE.Mesh(slatGeo, acousticSlatMaterial);
-      slat.position.set(x, 2.2, -1.78);
-      slat.receiveShadow = true;
-      wallGroup.add(slat);
-    }
-    scene.add(wallGroup);
-
-    // Left Architectural Window Frame (Studio Light Portal)
-    const windowFrame = new THREE.Mesh(
-      new THREE.BoxGeometry(0.12, 5.5, 0.12),
-      new THREE.MeshStandardMaterial({ color: 0x1D212A, roughness: 0.3 })
-    );
-    windowFrame.position.set(-4.5, 2.5, 0.5);
-    scene.add(windowFrame);
-
-    // The Master Obsidian Desk
-    const deskTop = new THREE.Mesh(
-      new RoundedBoxGeometry(3.6, 0.08, 1.8, 4, 0.02),
-      obsidianDeskMaterial
-    );
-    deskTop.position.set(0, 0.38, 0);
-    deskTop.receiveShadow = true;
-    deskTop.castShadow = true;
-    scene.add(deskTop);
-
-    // Chamfered Metal Desk Legs
-    const legGeo = new THREE.CylinderGeometry(0.03, 0.03, 1.2, 16);
-    const legPositions = [
-      [-1.65, -0.22, -0.75],
-      [1.65, -0.22, -0.75],
-      [-1.65, -0.22, 0.75],
-      [1.65, -0.22, 0.75],
-    ];
-    legPositions.forEach(([lx, ly, lz]) => {
-      const leg = new THREE.Mesh(legGeo, spaceBlackAluminum);
-      leg.position.set(lx, ly, lz);
-      leg.castShadow = true;
-      scene.add(leg);
-    });
-
-    // 7. OBJECT 1: SPACE BLACK MACBOOK PRO
-    const laptopGroup = new THREE.Group();
-    laptopGroup.position.set(0, 0.42, 0.05);
-
-    const laptopBase = new THREE.Mesh(
-      new RoundedBoxGeometry(0.56, 0.016, 0.38, 4, 0.006),
-      spaceBlackAluminum
-    );
-    laptopBase.castShadow = true;
-    laptopBase.receiveShadow = true;
-    laptopGroup.add(laptopBase);
-
-    const keyboardWell = new THREE.Mesh(
-      new THREE.BoxGeometry(0.48, 0.002, 0.2),
-      new THREE.MeshStandardMaterial({ color: 0x0B0C0E, roughness: 0.9 })
-    );
-    keyboardWell.position.set(0, 0.009, -0.04);
-    laptopGroup.add(keyboardWell);
-
-    const trackpad = new THREE.Mesh(
-      new RoundedBoxGeometry(0.2, 0.002, 0.12, 2, 0.004),
-      new THREE.MeshStandardMaterial({ color: 0x16181C, roughness: 0.35, metalness: 0.7 })
-    );
-    trackpad.position.set(0, 0.009, 0.11);
-    laptopGroup.add(trackpad);
-
-    const lidGroup = new THREE.Group();
-    lidGroup.position.set(0, 0.008, -0.185);
-    lidGroup.rotation.x = THREE.MathUtils.degToRad(-16);
-
-    const screenLid = new THREE.Mesh(
-      new RoundedBoxGeometry(0.56, 0.38, 0.012, 4, 0.005),
-      spaceBlackAluminum
-    );
-    screenLid.position.set(0, 0.19, 0);
-    screenLid.castShadow = true;
-    lidGroup.add(screenLid);
-
-    // Active Website Screen Texture
-    const screenCanvas = document.createElement("canvas");
-    screenCanvas.width = 1024;
-    screenCanvas.height = 680;
-    const sCtx = screenCanvas.getContext("2d");
-    if (sCtx) {
-      const grad = sCtx.createLinearGradient(0, 0, 0, 680);
-      grad.addColorStop(0, "#0E1422");
-      grad.addColorStop(0.5, "#1B2436");
-      grad.addColorStop(1, "#07090E");
-      sCtx.fillStyle = grad;
-      sCtx.fillRect(0, 0, 1024, 680);
-
-      sCtx.fillStyle = "rgba(255,255,255,0.45)";
-      sCtx.font = "bold 20px monospace";
-      sCtx.fillText("SOHAM ROYCHOUDHURY · ATELIER // 2026", 80, 100);
-
-      sCtx.fillStyle = "#FFFFFF";
-      sCtx.font = "bold 54px sans-serif";
-      sCtx.fillText("CYBER-PASTORAL TERRACE", 80, 240);
-
-      sCtx.fillStyle = "rgba(255,255,255,0.65)";
-      sCtx.font = "24px sans-serif";
-      sCtx.fillText("Artificial Intelligence · Frontend Architect · Systems", 80, 290);
-
-      sCtx.fillStyle = "rgba(255,255,255,0.18)";
-      sCtx.beginPath();
-      sCtx.roundRect(80, 360, 330, 60, 30);
-      sCtx.fill();
-      sCtx.strokeStyle = "rgba(255,255,255,0.45)";
-      sCtx.lineWidth = 2;
-      sCtx.stroke();
-
-      sCtx.fillStyle = "#FFFFFF";
-      sCtx.font = "bold 19px monospace";
-      sCtx.fillText("CLICK TO ENTER WEBSITE ↗", 110, 398);
-    }
-
-    const screenTexture = new THREE.CanvasTexture(screenCanvas);
-    screenTexture.generateMipmaps = true;
-    screenTexture.minFilter = THREE.LinearMipmapLinearFilter;
-
-    const screenMaterial = new THREE.MeshStandardMaterial({
-      map: screenTexture,
-      roughness: 0.15,
-      metalness: 0.05,
-      emissive: 0xFFFFFF,
-      emissiveMap: screenTexture,
-      emissiveIntensity: 0.42,
-    });
-
-    const screenMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.53, 0.35), screenMaterial);
-    screenMesh.position.set(0, 0.19, 0.007);
-    lidGroup.add(screenMesh);
-    laptopGroup.add(lidGroup);
-    scene.add(laptopGroup);
-
-    // Dedicated Laptop HitBox
-    const hitBoxLaptop = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.42, 0.45), hitBoxMaterial);
-    hitBoxLaptop.position.set(0, 0.58, 0.05);
-    hitBoxLaptop.userData = { id: "laptop", label: "ENTER WEBSITE 💻" };
-    scene.add(hitBoxLaptop);
-    hitBoxes.push(hitBoxLaptop);
-
-    // 8. OBJECT 2: STACK OF BOOKS (PROJECTS)
-    const booksGroup = new THREE.Group();
-    booksGroup.position.set(-0.95, 0.42, 0.1);
-
-    const book1 = new THREE.Mesh(
-      new RoundedBoxGeometry(0.34, 0.058, 0.46, 3, 0.008),
-      new THREE.MeshStandardMaterial({ color: 0x853222, roughness: 0.55 })
-    );
-    book1.position.set(0, 0.029, 0);
-    book1.rotation.y = THREE.MathUtils.degToRad(8);
-    book1.castShadow = true;
-    book1.receiveShadow = true;
-    booksGroup.add(book1);
-
-    const book2 = new THREE.Mesh(
-      new RoundedBoxGeometry(0.32, 0.05, 0.44, 3, 0.008),
-      new THREE.MeshStandardMaterial({ color: 0x2A3E33, roughness: 0.65 })
-    );
-    book2.position.set(0.02, 0.082, 0.01);
-    book2.rotation.y = THREE.MathUtils.degToRad(-4);
-    book2.castShadow = true;
-    book2.receiveShadow = true;
-    booksGroup.add(book2);
-
-    const book3 = new THREE.Mesh(
-      new RoundedBoxGeometry(0.3, 0.044, 0.41, 3, 0.008),
-      new THREE.MeshStandardMaterial({ color: 0x131518, roughness: 0.4, metalness: 0.3 })
-    );
-    book3.position.set(-0.01, 0.128, -0.01);
-    book3.rotation.y = THREE.MathUtils.degToRad(12);
-    book3.castShadow = true;
-    book3.receiveShadow = true;
-    booksGroup.add(book3);
-    scene.add(booksGroup);
-
-    // Dedicated Books HitBox
-    const hitBoxBooks = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.22, 0.5), hitBoxMaterial);
-    hitBoxBooks.position.set(-0.95, 0.52, 0.1);
-    hitBoxBooks.userData = { id: "books", label: "VIEW PROJECTS 📚" };
-    scene.add(hitBoxBooks);
-    hitBoxes.push(hitBoxBooks);
-
-    // 9. OBJECT 3: CHARCOAL CERAMIC MUG (HOBBIES)
-    const mugGroup = new THREE.Group();
-    mugGroup.position.set(0.92, 0.42, 0.1);
-
-    const mugBody = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.078, 0.068, 0.16, 32),
-      charcoalCeramicMaterial
-    );
-    mugBody.position.set(0, 0.08, 0);
-    mugBody.castShadow = true;
-    mugBody.receiveShadow = true;
-    mugGroup.add(mugBody);
-
-    const handle = new THREE.Mesh(
-      new THREE.TorusGeometry(0.048, 0.013, 16, 24, Math.PI * 1.1),
-      charcoalCeramicMaterial
-    );
-    handle.position.set(0.078, 0.08, 0);
-    handle.rotation.z = Math.PI / 2;
-    handle.castShadow = true;
-    mugGroup.add(handle);
-
-    const coffeeLiquid = new THREE.Mesh(
-      new THREE.CircleGeometry(0.07, 32),
-      new THREE.MeshStandardMaterial({ color: 0x140B07, roughness: 0.1, metalness: 0.1 })
-    );
-    coffeeLiquid.position.set(0, 0.152, 0);
-    coffeeLiquid.rotation.x = -Math.PI / 2;
-    mugGroup.add(coffeeLiquid);
-
-    // Steam particles (Strictly visual, never raycasted!)
-    const steamGeo = new THREE.BufferGeometry();
-    const steamCount = 45;
-    const steamPos = new Float32Array(steamCount * 3);
-    for (let i = 0; i < steamCount; i++) {
-      steamPos[i * 3] = (Math.random() - 0.5) * 0.05;
-      steamPos[i * 3 + 1] = 0.16 + Math.random() * 0.28;
-      steamPos[i * 3 + 2] = (Math.random() - 0.5) * 0.05;
-    }
-    steamGeo.setAttribute("position", new THREE.BufferAttribute(steamPos, 3));
-
-    const steamMat = new THREE.PointsMaterial({
-      color: 0xFFFFFF,
-      size: 0.015,
-      transparent: true,
-      opacity: 0.25,
-      blending: THREE.AdditiveBlending,
-    });
-    const steamParticles = new THREE.Points(steamGeo, steamMat);
-    mugGroup.add(steamParticles);
-    steamParticlesRef.current = steamParticles;
-    scene.add(mugGroup);
-
-    // Dedicated Mug HitBox (Tight cylinder bounds so it never triggers outside the mug!)
-    const hitBoxMug = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.24, 16), hitBoxMaterial);
-    hitBoxMug.position.set(0.92, 0.52, 0.1);
-    hitBoxMug.userData = { id: "mug", label: "HOBBIES & LIFE ☕" };
-    scene.add(hitBoxMug);
-    hitBoxes.push(hitBoxMug);
-
-    // 10. OBJECT 4: ARCHITECTURAL DESK LAMP (DAY / WARM NIGHT LIGHTING TOGGLE)
-    const lampGroup = new THREE.Group();
-    lampGroup.position.set(-1.35, 0.42, -0.2);
-
-    const lampBase = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.09, 0.1, 0.02, 32),
-      spaceBlackAluminum
-    );
-    lampBase.position.set(0, 0.01, 0);
-    lampBase.castShadow = true;
-    lampGroup.add(lampBase);
-
-    // Curved stem
-    const lampStem = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.008, 0.008, 0.45, 16),
-      spaceBlackAluminum
-    );
-    lampStem.position.set(0, 0.24, 0);
-    lampGroup.add(lampStem);
-
-    // Angled lamp head shade
-    const lampShade = new THREE.Mesh(
-      new THREE.ConeGeometry(0.08, 0.12, 24, 1, true),
-      spaceBlackAluminum
-    );
-    lampShade.position.set(0.05, 0.46, 0.05);
-    lampShade.rotation.x = Math.PI * 0.7;
-    lampShade.rotation.z = -Math.PI * 0.15;
-    lampShade.castShadow = true;
-    lampGroup.add(lampShade);
-
-    // Glowing bulb mesh
-    const bulbMat = new THREE.MeshStandardMaterial({
-      color: 0xFFA545,
-      emissive: 0xFFA545,
-      emissiveIntensity: 2.5,
-      roughness: 0.2,
-    });
-    const bulbMesh = new THREE.Mesh(new THREE.SphereGeometry(0.025, 16, 16), bulbMat);
-    bulbMesh.position.set(0.05, 0.44, 0.05);
-    lampGroup.add(bulbMesh);
-    lampBulbMeshRef.current = bulbMesh;
-    scene.add(lampGroup);
-
-    // Dedicated Lamp HitBox
-    const hitBoxLamp = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.58, 16), hitBoxMaterial);
-    hitBoxLamp.position.set(-1.35, 0.65, -0.2);
-    hitBoxLamp.userData = { id: "lamp", label: "TOGGLE LIGHTING 💡" };
-    scene.add(hitBoxLamp);
-    hitBoxes.push(hitBoxLamp);
-
-    // 11. OBJECT 5: AUDIO SPEAKER / AMBIENT TERRACE DECK
-    const speakerGroup = new THREE.Group();
-    speakerGroup.position.set(1.3, 0.42, -0.2);
-
-    const speakerCabinet = new THREE.Mesh(
-      new RoundedBoxGeometry(0.22, 0.18, 0.2, 3, 0.01),
-      spaceBlackAluminum
-    );
-    speakerCabinet.position.set(0, 0.09, 0);
-    speakerCabinet.castShadow = true;
-    speakerGroup.add(speakerCabinet);
-
-    // Bronze audio grille
-    const grille = new THREE.Mesh(
-      new THREE.CircleGeometry(0.065, 32),
-      new THREE.MeshStandardMaterial({ color: 0x8C6B45, roughness: 0.4, metalness: 0.6 })
-    );
-    grille.position.set(0, 0.09, 0.101);
-    speakerGroup.add(grille);
-
-    // Glowing LED indicator
-    const ledMat = new THREE.MeshStandardMaterial({
-      color: 0x10B981,
-      emissive: 0x10B981,
-      emissiveIntensity: 1.5,
-    });
-    const ledMesh = new THREE.Mesh(new THREE.SphereGeometry(0.008, 12, 12), ledMat);
-    ledMesh.position.set(0.08, 0.15, 0.102);
-    speakerGroup.add(ledMesh);
-    speakerLedRef.current = ledMesh;
-    scene.add(speakerGroup);
-
-    // Dedicated Speaker HitBox
-    const hitBoxSpeaker = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.26, 0.28), hitBoxMaterial);
-    hitBoxSpeaker.position.set(1.3, 0.52, -0.2);
-    hitBoxSpeaker.userData = { id: "speaker", label: "TERRACE SOUNDSCAPE 🔊" };
-    scene.add(hitBoxSpeaker);
-    hitBoxes.push(hitBoxSpeaker);
-
-    // 12. OBJECT 6: SPACE GRAY KEYBOARD & MOUSE
-    const keyboardGroup = new THREE.Group();
-    keyboardGroup.position.set(0, 0.42, 0.45);
-
-    const keyboardBase = new THREE.Mesh(
-      new RoundedBoxGeometry(0.48, 0.012, 0.16, 3, 0.005),
-      spaceBlackAluminum
-    );
-    keyboardBase.castShadow = true;
-    keyboardGroup.add(keyboardBase);
-
-    const keysPlate = new THREE.Mesh(
-      new THREE.BoxGeometry(0.46, 0.003, 0.14),
-      new THREE.MeshStandardMaterial({ color: 0x0A0B0E, roughness: 0.9 })
-    );
-    keysPlate.position.set(0, 0.008, 0);
-    keyboardGroup.add(keysPlate);
-    scene.add(keyboardGroup);
-
-    // Dedicated Keyboard HitBox
-    const hitBoxKeyboard = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.06, 0.2), hitBoxMaterial);
-    hitBoxKeyboard.position.set(0, 0.44, 0.45);
-    hitBoxKeyboard.userData = { id: "keyboard", label: "TERMINAL CONSOLE ⌨️" };
-    scene.add(hitBoxKeyboard);
-    hitBoxes.push(hitBoxKeyboard);
-
-    // Magic Mouse
-    const mouse = new THREE.Mesh(
-      new RoundedBoxGeometry(0.08, 0.02, 0.13, 4, 0.008),
-      new THREE.MeshStandardMaterial({ color: 0x1A1C20, roughness: 0.25, metalness: 0.6 })
-    );
-    mouse.position.set(0.48, 0.42, 0.45);
-    mouse.castShadow = true;
-    scene.add(mouse);
-
-    hitBoxesRef.current = hitBoxes;
-
-    // 13. PRECISE RAYCASTER (Checked against dedicated hitBoxes only!)
-    const raycaster = new THREE.Raycaster();
-    const mousePos = new THREE.Vector2(-999, -999);
-
-    const handlePointerMove = (e: MouseEvent) => {
-      const rect = container.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-      const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-      mousePos.set(x, y);
-
-      setCursorPos({ x: e.clientX, y: e.clientY });
-      setCursorVisible(true);
-
-      if (focusMode === "overview" && cameraRef.current) {
-        const targetX = x * 0.14;
-        const targetY = (isMobile ? 1.85 : 1.55) + y * 0.08;
-        cameraRef.current.position.x += (targetX - cameraRef.current.position.x) * 0.05;
-        cameraRef.current.position.y += (targetY - cameraRef.current.position.y) * 0.05;
-      }
-    };
-
-    const handlePointerLeave = () => {
-      mousePos.set(-999, -999);
-      setCursorVisible(false);
-      setHoveredObject(null);
-    };
-
-    const handleClick = () => {
-      if (!sceneRef.current || !cameraRef.current) return;
-
-      raycaster.setFromCamera(mousePos, cameraRef.current);
-      const intersects = raycaster.intersectObjects(hitBoxesRef.current, false);
-
-      if (intersects.length > 0) {
-        const actionId = intersects[0].object.userData?.id;
-        if (!actionId) return;
-
-        playClickSound(950);
-
-        if (actionId === "laptop") {
-          transitionCameraTo("laptop");
-          setTimeout(() => {
-            onEnterPortfolio();
-          }, 1200);
-        } else if (actionId === "books") {
-          transitionCameraTo("books");
-          setActiveModal("projects");
-        } else if (actionId === "mug") {
-          transitionCameraTo("mug");
-          setActiveModal("hobbies");
-        } else if (actionId === "lamp") {
-          handleToggleLamp();
-        } else if (actionId === "speaker") {
-          toggleAmbientSound();
-        } else if (actionId === "keyboard") {
-          transitionCameraTo("keyboard");
-          setActiveModal("terminal");
-        }
-      }
-    };
-
-    container.addEventListener("mousemove", handlePointerMove);
-    container.addEventListener("mouseleave", handlePointerLeave);
-    container.addEventListener("click", handleClick);
-
-    // 14. ANIMATION LOOP
-    let clock = new THREE.Clock();
-
-    const animate = () => {
-      animFrameRef.current = requestAnimationFrame(animate);
-      const elapsed = clock.getElapsedTime();
-
-      // Gentle steam animation
-      if (steamParticlesRef.current) {
-        const positions = steamParticlesRef.current.geometry.attributes.position.array as Float32Array;
-        for (let i = 0; i < steamCount; i++) {
-          positions[i * 3 + 1] += 0.0016;
-          positions[i * 3] += Math.sin(elapsed * 2.2 + i) * 0.00025;
-          if (positions[i * 3 + 1] > 0.44) {
-            positions[i * 3 + 1] = 0.16;
-            positions[i * 3] = (Math.random() - 0.5) * 0.05;
-          }
-        }
-        steamParticlesRef.current.geometry.attributes.position.needsUpdate = true;
-      }
-
-      // Raycast hover check against strict hit-boxes
-      raycaster.setFromCamera(mousePos, camera);
-      const intersects = raycaster.intersectObjects(hitBoxesRef.current, false);
-
-      if (intersects.length > 0) {
-        const label = intersects[0].object.userData?.label;
-        if (label) {
-          setHoveredObject(label);
-          if (container) container.style.cursor = "pointer";
-        }
-      } else {
-        setHoveredObject(null);
-        if (container) container.style.cursor = "default";
-      }
-
-      camera.lookAt(currentLookAt.current);
-      renderer.render(scene, camera);
-    };
-
-    animate();
-
-    // 15. RESIZE LISTENER
-    const handleResize = () => {
-      if (!container || !camera || !renderer) return;
-      const w = container.clientWidth || window.innerWidth;
-      const h = container.clientHeight || window.innerHeight;
-      const mobile = w / h < 1.0;
-      camera.fov = mobile ? 52 : 44;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      container.removeEventListener("mousemove", handlePointerMove);
-      container.removeEventListener("mouseleave", handlePointerLeave);
-      container.removeEventListener("click", handleClick);
-      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
-      renderer.dispose();
-      if (renderer.domElement.parentElement) {
-        renderer.domElement.parentElement.removeChild(renderer.domElement);
-      }
-    };
-  }, [playClickSound, transitionCameraTo, onEnterPortfolio, focusMode, handleToggleLamp, toggleAmbientSound]);
-
-  const handleCloseModal = useCallback(() => {
-    setActiveModal(null);
-    transitionCameraTo("overview");
-  }, [transitionCameraTo]);
-
-  // Handle ESC key to close modal
+  // Keyboard navigation & modal dismiss
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        if (activeModal) {
-          handleCloseModal();
-        } else if (focusMode !== "overview") {
-          transitionCameraTo("overview");
-        }
+        setActiveModal(null);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activeModal, focusMode, handleCloseModal, transitionCameraTo]);
+  }, []);
 
-  // Terminal Command Executor
+  // Handle Terminal Commands
   const handleTerminalSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const cmd = terminalInput.trim().toLowerCase();
     if (!cmd) return;
 
-    let out = "";
-    if (cmd === "help") {
-      out = "Available commands: whoami, skills, projects, hobbies, clear, contact, exit";
-    } else if (cmd === "whoami") {
-      out = "Soham Roychoudhury — AI/ML Engineer & Frontend Architect (NSEC 2024-2028)";
-    } else if (cmd === "skills") {
-      out = "Core: Python, PyTorch, TypeScript, Next.js, Three.js, WebGL, GSAP, Tailwind v4";
+    playClickSound(1200);
+
+    let output = "";
+    if (cmd === "whoami") {
+      output = "Soham Roychoudhury · AI Engineer & Frontend Architect. NSEC IT 2026 · European Cricket Ops.";
     } else if (cmd === "projects") {
-      out = "Selected: Forge Automotive Digital Twin, Autonomous Agent Fabric, Cyber-Pastoral Terrace";
+      output = "1. In-Memory Translation Engine (<5ms)  2. European Cricket Ops Platform  3. DeepSeek Agent Harness";
+    } else if (cmd === "specs") {
+      output = "Rig: Zebronics Geometric Chassis, BenQ Widescreen IPS, Redgear Deskpad, Compact TKL Mech Keyboard.";
     } else if (cmd === "hobbies") {
-      out = "Rituals: Specialty V60/AeroPress brewing, 35mm rangefinders, ambient tape synths, bonsai botany";
+      output = "Cricket Athletics (Latvian Cricket Fed), Keyboard Modding, Ambient Audio, Generative Art.";
+    } else if (cmd === "sound on") {
+      if (!isAudioPlaying) toggleAmbientSound();
+      output = "Terrace organic mountain wind soundscape: ACTIVE.";
+    } else if (cmd === "sound off") {
+      if (isAudioPlaying) toggleAmbientSound();
+      output = "Terrace organic soundscape: MUTED.";
+    } else if (cmd === "enter") {
+      output = "Initiating camera dolly zoom into website...";
+      setTimeout(() => {
+        setActiveModal(null);
+        triggerDollyZoom();
+      }, 500);
     } else if (cmd === "clear") {
       setTerminalHistory([]);
       setTerminalInput("");
       return;
-    } else if (cmd === "exit") {
-      handleCloseModal();
-      return;
+    } else if (cmd === "help") {
+      output = "Commands: whoami | projects | specs | hobbies | sound on | sound off | enter | clear";
     } else {
-      out = `Command not recognized: "${cmd}". Type "help" for active commands.`;
+      output = `Command not recognized: '${cmd}'. Type 'help' for available commands.`;
     }
 
-    setTerminalHistory((prev) => [...prev, { cmd: terminalInput, out }]);
+    setTerminalHistory((prev) => [...prev, { cmd, out: output, isUser: true }]);
     setTerminalInput("");
+
+    setTimeout(() => {
+      terminalBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 50);
   };
+
+  // Hotspots definitions for both Studio Twin and Real Photo modes
+  const studioHotspots: Record<string, HotspotBox> = {
+    monitor: {
+      left: 28.3,
+      top: 11.5,
+      width: 36.0,
+      height: 36.1,
+      label: "BenQ Monitor",
+      sub: "Master Website Portal · Click to Enter",
+      icon: <Monitor className="w-4 h-4 text-blue-400" />,
+      action: triggerDollyZoom,
+    },
+    pc_tower: {
+      left: 65.0,
+      top: 15.0,
+      width: 25.0,
+      height: 60.0,
+      label: "Zebronics Rig",
+      sub: "Compute Specs & AI Tech Stack",
+      icon: <Cpu className="w-4 h-4 text-red-400" />,
+      action: () => {
+        playClickSound(950);
+        setActiveModal("specs");
+      },
+    },
+    gamepad: {
+      left: 20.0,
+      top: 45.0,
+      width: 12.0,
+      height: 15.0,
+      label: "Gamepad",
+      sub: "Selected Commissions & Projects",
+      icon: <Gamepad2 className="w-4 h-4 text-purple-400" />,
+      action: () => {
+        playClickSound(950);
+        setActiveModal("projects");
+      },
+    },
+    keyboard: {
+      left: 30.0,
+      top: 60.0,
+      width: 30.0,
+      height: 25.0,
+      label: "TKL Mechanical Keyboard",
+      sub: "Interactive Hacker CLI Terminal",
+      icon: <Keyboard className="w-4 h-4 text-emerald-400" />,
+      action: () => {
+        playClickSound(950);
+        setActiveModal("terminal");
+      },
+    },
+    headset: {
+      left: 8.0,
+      top: 55.0,
+      width: 22.0,
+      height: 35.0,
+      label: "Over-Ear Headset",
+      sub: "Hobbies, Rituals & Terrace Ambience",
+      icon: <Headphones className="w-4 h-4 text-amber-400" />,
+      action: () => {
+        playClickSound(950);
+        setActiveModal("hobbies");
+      },
+    },
+  };
+
+  const photoHotspots: Record<string, HotspotBox> = {
+    monitor: {
+      left: 27.9,
+      top: 13.5,
+      width: 31.3,
+      height: 32.8,
+      label: "BenQ Monitor",
+      sub: "Master Website Portal · Click to Enter",
+      icon: <Monitor className="w-4 h-4 text-blue-400" />,
+      action: triggerDollyZoom,
+    },
+    pc_tower: {
+      left: 61.5,
+      top: 17.5,
+      width: 23.5,
+      height: 51.5,
+      label: "Zebronics Rig",
+      sub: "Compute Specs & AI Tech Stack",
+      icon: <Cpu className="w-4 h-4 text-red-400" />,
+      action: () => {
+        playClickSound(950);
+        setActiveModal("specs");
+      },
+    },
+    gamepad: {
+      left: 25.4,
+      top: 47.9,
+      width: 10.6,
+      height: 9.2,
+      label: "Gamepad",
+      sub: "Selected Commissions & Projects",
+      icon: <Gamepad2 className="w-4 h-4 text-purple-400" />,
+      action: () => {
+        playClickSound(950);
+        setActiveModal("projects");
+      },
+    },
+    keyboard: {
+      left: 30.5,
+      top: 68.5,
+      width: 24.0,
+      height: 12.5,
+      label: "TKL Mechanical Keyboard",
+      sub: "Interactive Hacker CLI Terminal",
+      icon: <Keyboard className="w-4 h-4 text-emerald-400" />,
+      action: () => {
+        playClickSound(950);
+        setActiveModal("terminal");
+      },
+    },
+    headset: {
+      left: 11.0,
+      top: 66.0,
+      width: 19.0,
+      height: 23.0,
+      label: "Over-Ear Headset",
+      sub: "Hobbies, Rituals & Terrace Ambience",
+      icon: <Headphones className="w-4 h-4 text-amber-400" />,
+      action: () => {
+        playClickSound(950);
+        setActiveModal("hobbies");
+      },
+    },
+  };
+
+  const currentHotspots = sceneMode === "studio" ? studioHotspots : photoHotspots;
+  const currentMonitorBox = currentHotspots.monitor;
 
   return (
     <div
-      className="relative w-full h-[100svh] overflow-hidden select-none bg-[#08090C]"
-      onWheel={(e) => {
-        if (isLocked) {
-          e.stopPropagation();
-        }
-      }}
-      onTouchMove={(e) => {
-        if (isLocked) {
-          e.stopPropagation();
-        }
-      }}
+      className="relative w-full h-[100svh] bg-[#07080A] text-[#F8F5EE] overflow-hidden select-none flex flex-col items-center justify-center"
+      onMouseMove={handleMouseMove}
     >
-      {/* Three.js Canvas Container */}
-      <div ref={mountRef} className="w-full h-full" />
+      {/* 1. Subtle Radial Vignette Lighting */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_50%_45%,rgba(255,122,0,0.06)_0%,rgba(0,0,0,0.7)_70%,#07080A_100%)] z-10" />
 
-      {/* Dynamic Floating 3D Cursor Badge */}
-      {cursorVisible && hoveredObject && (
-        <div
-          className="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-12 transition-transform duration-75 ease-out"
-          style={{
-            left: `${cursorPos.x}px`,
-            top: `${cursorPos.y}px`,
-          }}
-        >
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/20 bg-black/90 backdrop-blur-md text-white font-mono text-[9px] tracking-[0.2em] uppercase shadow-[0_8px_24px_rgba(0,0,0,0.7)]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#FF7A00] animate-pulse" />
-            <span>{hoveredObject}</span>
-          </div>
+      {/* 2. Top Header Bar: Status Indicator & Scene Toggle */}
+      <header className="absolute top-4 left-4 right-4 z-40 flex items-center justify-between pointer-events-auto">
+        <div className="flex items-center gap-3 bg-black/60 backdrop-blur-md border border-white/10 px-3.5 py-1.5 rounded-full text-xs font-mono">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-white/80 font-medium">SOHAM ROYCHOUDHURY · REAL BATTLESTATION</span>
+          <span className="hidden sm:inline text-white/40">|</span>
+          <span className="hidden sm:inline text-white/50">BENQ · ZEBRONICS · REDGEAR</span>
         </div>
-      )}
 
-      {/* Top Floating Return Action (Appears when zoomed into an object) */}
-      {focusMode !== "overview" && (
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30 pointer-events-auto animate-in fade-in duration-300">
+        {/* Scene Mode Toggle: Studio Twin vs Authentic Photo */}
+        <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md border border-white/10 p-1 rounded-full text-xs font-mono">
           <button
             onClick={() => {
-              handleCloseModal();
-              transitionCameraTo("overview");
+              playClickSound(900);
+              setSceneMode("studio");
             }}
-            className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-white/25 bg-black/85 hover:bg-white hover:text-black text-white text-[10px] font-mono tracking-[0.2em] uppercase backdrop-blur-md shadow-2xl transition-all duration-200 cursor-pointer"
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full transition-all ${
+              sceneMode === "studio"
+                ? "bg-white/20 text-white font-semibold shadow-sm"
+                : "text-white/50 hover:text-white"
+            }`}
           >
-            <span>← Back to Room Overview</span>
+            <Layers className="w-3.5 h-3.5 text-amber-400" />
+            <span>Studio Twin</span>
+          </button>
+          <button
+            onClick={() => {
+              playClickSound(900);
+              setSceneMode("photo");
+            }}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full transition-all ${
+              sceneMode === "photo"
+                ? "bg-white/20 text-white font-semibold shadow-sm"
+                : "text-white/50 hover:text-white"
+            }`}
+          >
+            <Camera className="w-3.5 h-3.5 text-blue-400" />
+            <span>Real Photo</span>
           </button>
         </div>
-      )}
+      </header>
 
-      {/* Bottom Interactive Spatial HUD & Navigation Pill Bar */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 pointer-events-auto flex items-center gap-1.5 sm:gap-2.5 p-1.5 sm:p-2 rounded-full border border-white/15 bg-black/80 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] max-w-[95vw] overflow-x-auto">
-        {/* Laptop Action */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            playClickSound(950);
-            transitionCameraTo("laptop");
-            setTimeout(onEnterPortfolio, 1200);
-          }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-white/15 text-white/80 hover:text-white text-[9px] sm:text-[10px] font-mono tracking-wider transition-colors whitespace-nowrap cursor-pointer"
-        >
-          <span>💻</span>
-          <span className="font-semibold text-white">Laptop</span>
-          <span className="text-white/40 hidden sm:inline">(Portfolio)</span>
-        </button>
+      {/* 3. The 3D Desk Stage Container */}
+      <div
+        ref={stageRef}
+        className="relative w-full max-w-[1400px] aspect-[16/9] flex items-center justify-center transition-transform duration-300 ease-out will-change-transform"
+        style={{
+          transform: `perspective(1400px) rotateX(${mousePos.y * -1.2}deg) rotateY(${mousePos.x * 1.8}deg)`,
+        }}
+      >
+        {/* Background Desk Image (Studio Twin or Real Photo) */}
+        <img
+          src={
+            sceneMode === "studio"
+              ? "/assets/soham_real_desk_studio.jpg"
+              : "/assets/soham_real_desk_photo.jpg"
+          }
+          alt="Soham Roychoudhury Real Desk Battlestation"
+          className="w-full h-full object-contain pointer-events-none drop-shadow-[0_25px_50px_rgba(0,0,0,0.9)]"
+        />
 
-        {/* Books Action */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            playClickSound(950);
-            transitionCameraTo("books");
-            setActiveModal("projects");
+        {/* 4. BenQ Monitor Screen Portal (Continuous Zoom Origin & Live Preview) */}
+        <div
+          ref={monitorPortalRef}
+          onClick={triggerDollyZoom}
+          onMouseEnter={() => setHoveredItem("monitor")}
+          onMouseLeave={() => setHoveredItem(null)}
+          style={{
+            left: `${currentMonitorBox.left}%`,
+            top: `${currentMonitorBox.top}%`,
+            width: `${currentMonitorBox.width}%`,
+            height: `${currentMonitorBox.height}%`,
           }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-white/15 text-white/80 hover:text-white text-[9px] sm:text-[10px] font-mono tracking-wider transition-colors whitespace-nowrap cursor-pointer"
-        >
-          <span>📚</span>
-          <span className="font-semibold text-white">Books</span>
-          <span className="text-white/40 hidden sm:inline">(Projects)</span>
-        </button>
-
-        {/* Mug Action */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            playClickSound(950);
-            transitionCameraTo("mug");
-            setActiveModal("hobbies");
-          }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-white/15 text-white/80 hover:text-white text-[9px] sm:text-[10px] font-mono tracking-wider transition-colors whitespace-nowrap cursor-pointer"
-        >
-          <span>☕</span>
-          <span className="font-semibold text-white">Mug</span>
-          <span className="text-white/40 hidden sm:inline">(Hobbies)</span>
-        </button>
-
-        {/* Lamp Toggle Action */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleToggleLamp();
-          }}
-          className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full transition-colors whitespace-nowrap cursor-pointer text-[9px] sm:text-[10px] font-mono tracking-wider ${
-            isLampOn ? "bg-amber-500/20 text-amber-300 border border-amber-500/30" : "hover:bg-white/15 text-white/60"
+          className={`absolute cursor-pointer rounded-[3px] overflow-hidden border border-blue-400/30 transition-all duration-300 ${
+            hoveredItem === "monitor"
+              ? "ring-2 ring-blue-400/80 shadow-[0_0_35px_rgba(59,130,246,0.6)]"
+              : "shadow-[0_0_15px_rgba(0,0,0,0.8)]"
           }`}
-          title="Toggle Warm Desk Lamp"
         >
-          <Lightbulb className="w-3 h-3 text-current" />
-          <span className="hidden sm:inline">{isLampOn ? "Lamp: On" : "Lamp: Off"}</span>
-        </button>
+          {/* Active Cyber-Pastoral Terrace Screen Contents */}
+          <div className="relative w-full h-full bg-[#080B11] text-[#F8F5EE] flex flex-col justify-between p-3 sm:p-4 select-none overflow-hidden group">
+            {/* Ambient Terrace Glowing Horizon */}
+            <div className="absolute inset-0 bg-gradient-to-b from-[#0F172A] via-[#0A0E18] to-[#040609] pointer-events-none" />
+            <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-48 h-28 bg-[#FF7A00]/25 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-32 bg-blue-500/15 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Audio Speaker Toggle Action */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleAmbientSound();
-          }}
-          className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full transition-colors whitespace-nowrap cursor-pointer text-[9px] sm:text-[10px] font-mono tracking-wider ${
-            isAudioPlaying ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" : "hover:bg-white/15 text-white/60"
-          }`}
-          title="Toggle Ambient Mountain Soundscape"
-        >
-          {isAudioPlaying ? <Volume2 className="w-3 h-3 text-current animate-pulse" /> : <VolumeX className="w-3 h-3 text-current" />}
-          <span className="hidden sm:inline">{isAudioPlaying ? "Audio: On" : "Audio"}</span>
-        </button>
+            {/* Screen Top Status Line */}
+            <div className="relative z-10 flex items-center justify-between text-[8px] sm:text-[10px] font-mono text-white/60">
+              <span className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                SYSTEM RUNNING // ATELIER 2026
+              </span>
+              <span className="tracking-wider">PORT 3000: OPEN</span>
+            </div>
 
-        {/* Terminal Action */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            playClickSound(950);
-            transitionCameraTo("keyboard");
-            setActiveModal("terminal");
-          }}
-          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full hover:bg-white/15 text-white/80 hover:text-white text-[9px] sm:text-[10px] font-mono tracking-wider transition-colors whitespace-nowrap cursor-pointer"
-          title="Open Atelier Terminal"
-        >
-          <TerminalIcon className="w-3 h-3 text-current" />
-          <span className="hidden sm:inline">CLI</span>
-        </button>
+            {/* Screen Center Live Typography */}
+            <div className="relative z-10 my-auto text-center">
+              <p className="text-[7px] sm:text-[9px] uppercase tracking-[0.25em] text-[#FF7A00] font-mono mb-0.5">
+                Soham Roychoudhury
+              </p>
+              <h2 className="text-xs sm:text-base md:text-lg font-bold tracking-tight text-white group-hover:scale-105 transition-transform">
+                CYBER-PASTORAL TERRACE
+              </h2>
+              <p className="text-[7px] sm:text-[9px] text-white/60 mt-0.5">
+                AI/ML Engineer · Systems · Frontend Architect
+              </p>
+            </div>
 
-        {/* Enter Full Website Action */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            playClickSound(1000);
-            transitionCameraTo("laptop");
-            setTimeout(onEnterPortfolio, 1200);
-          }}
-          className="flex items-center gap-1 px-3 sm:px-4 py-1.5 rounded-full bg-white text-black hover:bg-[#FF7A00] hover:text-white text-[9px] sm:text-[10px] font-mono tracking-wider uppercase font-semibold transition-colors whitespace-nowrap cursor-pointer ml-1 shadow-lg"
-        >
-          <span>Enter Website ↗</span>
-        </button>
+            {/* Screen Bottom CTA Banner */}
+            <div className="relative z-10 flex items-center justify-center">
+              <div className="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 border border-white/20 px-2.5 py-1 rounded-full text-[8px] sm:text-[10px] font-mono text-white tracking-wider backdrop-blur-sm transition-all group-hover:bg-[#FF7A00] group-hover:text-black group-hover:border-transparent">
+                <span>CLICK TO ENTER PORTFOLIO</span>
+                <ArrowRight className="w-2.5 h-2.5 group-hover:translate-x-0.5 transition-transform" />
+              </div>
+            </div>
+
+            {/* Subtle Screen Scanline Texture */}
+            <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:100%_3px] opacity-40" />
+
+            {/* Screen Glass Glare Diagonal Reflection */}
+            <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-transparent via-white/5 to-transparent -rotate-12 translate-x-4 opacity-50" />
+          </div>
+        </div>
+
+        {/* 5. Pinpoint Interactive Hotspots (Zebronics, Gamepad, Keyboard, Headset) */}
+        {Object.entries(currentHotspots).map(([key, box]) => {
+          if (key === "monitor") return null; // Handled separately as portal above
+          const isHovered = hoveredItem === key;
+
+          return (
+            <div
+              key={key}
+              onClick={box.action}
+              onMouseEnter={() => setHoveredItem(key)}
+              onMouseLeave={() => setHoveredItem(null)}
+              style={{
+                left: `${box.left}%`,
+                top: `${box.top}%`,
+                width: `${box.width}%`,
+                height: `${box.height}%`,
+              }}
+              className={`absolute cursor-pointer transition-all duration-200 z-20 group rounded-md ${
+                isHovered
+                  ? "bg-white/10 ring-2 ring-white/60 shadow-[0_0_25px_rgba(255,255,255,0.4)]"
+                  : "bg-transparent hover:bg-white/5"
+              }`}
+            >
+              {/* Pulsing Target Dot on Hover */}
+              <div
+                className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-all duration-300 ${
+                  isHovered ? "opacity-100 scale-100" : "opacity-0 scale-75"
+                }`}
+              >
+                <div className="w-8 h-8 rounded-full border border-white/60 flex items-center justify-center animate-spin">
+                  <div className="w-2 h-2 rounded-full bg-white shadow-[0_0_10px_white]" />
+                </div>
+              </div>
+
+              {/* Floating Hologram Tag (Only shows strictly over hovered item!) */}
+              {isHovered && (
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none z-30 whitespace-nowrap animate-in fade-in zoom-in-95 duration-200">
+                  <div className="flex items-center gap-2 bg-[#0B0D14]/90 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-lg shadow-2xl">
+                    {box.icon}
+                    <div className="text-left">
+                      <p className="text-xs font-semibold text-white leading-tight">{box.label}</p>
+                      <p className="text-[10px] text-white/60 font-mono leading-tight">{box.sub}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
-      {/* ----------------- MODAL 1: PROJECTS SHOWCASE (WHEN BOOKS ARE CLICKED) ----------------- */}
+      {/* 6. Floating Bottom Hardware Navigation Dock */}
+      <footer className="absolute bottom-4 left-1/2 -translate-x-1/2 z-40 max-w-full px-4 pointer-events-auto">
+        <div className="flex items-center gap-1.5 sm:gap-2 bg-black/75 backdrop-blur-xl border border-white/15 px-3 py-2 rounded-2xl shadow-2xl overflow-x-auto max-w-[95vw] scrollbar-none">
+          {/* BenQ Monitor Enter */}
+          <button
+            onClick={triggerDollyZoom}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30 text-xs font-medium transition-all shrink-0"
+          >
+            <Monitor className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Monitor</span>
+            <span className="text-[10px] opacity-70 font-mono">(Enter)</span>
+          </button>
+
+          {/* Zebronics PC Specs */}
+          <button
+            onClick={() => {
+              playClickSound(950);
+              setActiveModal("specs");
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-white/90 border border-white/10 text-xs font-medium transition-all shrink-0"
+          >
+            <Cpu className="w-3.5 h-3.5 text-red-400" />
+            <span>PC Rig</span>
+          </button>
+
+          {/* Gamepad Projects */}
+          <button
+            onClick={() => {
+              playClickSound(950);
+              setActiveModal("projects");
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-white/90 border border-white/10 text-xs font-medium transition-all shrink-0"
+          >
+            <Gamepad2 className="w-3.5 h-3.5 text-purple-400" />
+            <span>Projects</span>
+          </button>
+
+          {/* Headset Hobbies & Sound */}
+          <button
+            onClick={() => {
+              playClickSound(950);
+              setActiveModal("hobbies");
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-white/90 border border-white/10 text-xs font-medium transition-all shrink-0"
+          >
+            <Headphones className="w-3.5 h-3.5 text-amber-400" />
+            <span>Hobbies</span>
+          </button>
+
+          {/* Mechanical Keyboard Terminal */}
+          <button
+            onClick={() => {
+              playClickSound(950);
+              setActiveModal("terminal");
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-white/90 border border-white/10 text-xs font-medium transition-all shrink-0"
+          >
+            <TerminalIcon className="w-3.5 h-3.5 text-emerald-400" />
+            <span>CLI Terminal</span>
+          </button>
+
+          {/* Ambient Soundscape Toggle */}
+          <button
+            onClick={toggleAmbientSound}
+            aria-label="Toggle Terrace Wind Ambience"
+            className={`p-2 rounded-xl border transition-all shrink-0 ${
+              isAudioPlaying
+                ? "bg-[#FF7A00]/20 text-[#FF7A00] border-[#FF7A00]/40"
+                : "bg-white/5 hover:bg-white/15 text-white/60 border-white/10"
+            }`}
+          >
+            {isAudioPlaying ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+          </button>
+
+          {/* Direct Enter Website CTA */}
+          <button
+            onClick={triggerDollyZoom}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#FF7A00] hover:bg-[#FF8D24] text-black font-semibold text-xs transition-all shadow-lg shadow-[#FF7A00]/20 shrink-0"
+          >
+            <span>Enter Website</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </footer>
+
+      {/* =========================================================================
+          MODAL 1: PROJECTS & SELECTED COMMISSIONS (Triggered by Gamepad)
+          ========================================================================= */}
       {activeModal === "projects" && (
         <div
-          onClick={handleCloseModal}
-          className="absolute inset-0 z-40 flex items-center justify-end p-4 sm:p-8 bg-black/60 backdrop-blur-md animate-in fade-in duration-300"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={() => setActiveModal(null)}
         >
           <div
+            className="relative w-full max-w-2xl bg-[#0D0F16] border border-white/15 rounded-2xl shadow-2xl p-6 overflow-hidden max-h-[85vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg bg-[#0F1116]/95 border border-white/15 rounded-2xl p-6 sm:p-8 text-white shadow-[0_24px_80px_rgba(0,0,0,0.9)] overflow-y-auto max-h-[90vh]"
           >
-            <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
               <div className="flex items-center gap-2.5">
-                <BookOpen className="w-4 h-4 text-[#FF7A00]" />
-                <h3 className="font-mono text-xs tracking-[0.22em] uppercase text-white/90">
-                  SELECTED COMMISSIONS // BOOKS
-                </h3>
+                <div className="p-2 rounded-lg bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                  <Gamepad2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">SELECTED COMMISSIONS // 2024–2026</h3>
+                  <p className="text-xs font-mono text-white/60">High-Performance Systems & AI Architectures</p>
+                </div>
               </div>
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleCloseModal();
-                }}
-                className="p-2 rounded-full hover:bg-white/10 text-white/70 hover:text-white transition-colors cursor-pointer"
-                aria-label="Close"
+                onClick={() => setActiveModal(null)}
+                aria-label="Close modal"
+                className="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-white/60 hover:text-white transition-colors"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <p className="text-xs text-white/60 mb-6 font-sans leading-relaxed">
-              Each volume on the desk represents an engineering commission spanning distributed intelligence, automotive digital twins, and frontend architectures.
-            </p>
-
-            <div className="space-y-4">
-              <div className="p-4 rounded-xl border border-white/10 bg-white/[0.03] hover:border-white/30 transition-all">
+            <div className="space-y-3.5 overflow-y-auto pr-1">
+              {/* Project 1 */}
+              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-[9px] font-mono tracking-widest text-[#FF7A00] uppercase">Vol. I · Neural Core</span>
-                  <span className="text-[9px] font-mono text-white/40">2026</span>
+                  <h4 className="text-sm font-semibold text-white">In-Memory Microsecond Translation Engine</h4>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    &lt; 5ms Latency
+                  </span>
                 </div>
-                <h4 className="font-serif text-base text-white mb-1">Forge Automotive Digital Twin</h4>
-                <p className="text-xs text-white/50 mb-3">
-                  Real-time telemetry and 3D spatial twin for next-generation electric hypercars with low-latency WebGL shaders.
+                <p className="text-xs text-white/70 mb-2">
+                  Engineered concurrent lock-free queue and zero-allocation memory pipeline in C++ and Rust for high-frequency live linguistic translation.
                 </p>
-                <div className="flex gap-2">
-                  <span className="px-2 py-0.5 rounded bg-white/10 text-[8px] font-mono uppercase">Three.js</span>
-                  <span className="px-2 py-0.5 rounded bg-white/10 text-[8px] font-mono uppercase">WebGL</span>
-                  <span className="px-2 py-0.5 rounded bg-white/10 text-[8px] font-mono uppercase">Next.js</span>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-white/60">C++</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-white/60">Rust</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-white/60">Lock-Free Queues</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-white/60">Concurrency</span>
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl border border-white/10 bg-white/[0.03] hover:border-white/30 transition-all">
+              {/* Project 2 */}
+              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-[9px] font-mono tracking-widest text-emerald-400 uppercase">Vol. II · Distributed Systems</span>
-                  <span className="text-[9px] font-mono text-white/40">2025</span>
+                  <h4 className="text-sm font-semibold text-white">European Cricket Federation Real-Time Platform</h4>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                    Production Ops
+                  </span>
                 </div>
-                <h4 className="font-serif text-base text-white mb-1">Autonomous Agent Coordination Fabric</h4>
-                <p className="text-xs text-white/50 mb-3">
-                  Decentralized multi-agent orchestrator managing parallel execution pipelines and real-time reactive streaming.
+                <p className="text-xs text-white/70 mb-2">
+                  Official operational hub and live broadcast telemetry platform for the Latvian Cricket Federation, powering real-time match engine and international fixture tracking.
                 </p>
-                <div className="flex gap-2">
-                  <span className="px-2 py-0.5 rounded bg-white/10 text-[8px] font-mono uppercase">Python</span>
-                  <span className="px-2 py-0.5 rounded bg-white/10 text-[8px] font-mono uppercase">gRPC</span>
-                  <span className="px-2 py-0.5 rounded bg-white/10 text-[8px] font-mono uppercase">TypeScript</span>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-white/60">Next.js 16</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-white/60">WebSockets</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-white/60">Sports Telemetry</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-white/60">Tailwind</span>
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl border border-white/10 bg-white/[0.03] hover:border-white/30 transition-all">
+              {/* Project 3 */}
+              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-[9px] font-mono tracking-widest text-sky-400 uppercase">Vol. III · Creative Engineering</span>
-                  <span className="text-[9px] font-mono text-white/40">2025</span>
+                  <h4 className="text-sm font-semibold text-white">DeepSeek & Agentic Multi-Model Orchestrator</h4>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                    Autonomous AI
+                  </span>
                 </div>
-                <h4 className="font-serif text-base text-white mb-1">Cyber-Pastoral Terrace Portfolio</h4>
-                <p className="text-xs text-white/50 mb-3">
-                  Monumental editorial web experience blending Ghibli-inspired terrace serenity with razor-sharp Swiss typography.
+                <p className="text-xs text-white/70 mb-2">
+                  Autonomous task delegation harness running local LLM reasoning benchmarks, recursive code generation, and multi-agent coordination.
                 </p>
-                <div className="flex gap-2">
-                  <span className="px-2 py-0.5 rounded bg-white/10 text-[8px] font-mono uppercase">GSAP</span>
-                  <span className="px-2 py-0.5 rounded bg-white/10 text-[8px] font-mono uppercase">Tailwind v4</span>
-                  <span className="px-2 py-0.5 rounded bg-white/10 text-[8px] font-mono uppercase">Lenis</span>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-white/60">PyTorch</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-white/60">DeepSeek</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-white/60">Python</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-white/60">Agents</span>
                 </div>
               </div>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-white/10">
+            <div className="mt-5 pt-3 border-t border-white/10 flex items-center justify-between">
+              <span className="text-xs text-white/50 font-mono">Press ESC to close</span>
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleCloseModal();
-                  onEnterPortfolio();
+                onClick={() => {
+                  setActiveModal(null);
                   if (onNavigateToSection) onNavigateToSection("monument-exhibition");
+                  else onEnterPortfolio();
                 }}
-                className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-white text-black font-mono text-[10px] tracking-[0.2em] uppercase hover:bg-[#FF7A00] hover:text-white transition-colors cursor-pointer"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-all"
               >
-                <span>Jump to Exhibition in Portfolio</span>
+                <span>View Full Exhibition in Portfolio</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -1198,144 +807,266 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         </div>
       )}
 
-      {/* ----------------- MODAL 2: HOBBIES & LIFE (WHEN COFFEE MUG IS CLICKED) ----------------- */}
-      {activeModal === "hobbies" && (
+      {/* =========================================================================
+          MODAL 2: RIG SPECS & TECH STACK (Triggered by Zebronics PC)
+          ========================================================================= */}
+      {activeModal === "specs" && (
         <div
-          onClick={handleCloseModal}
-          className="absolute inset-0 z-40 flex items-center justify-end p-4 sm:p-8 bg-black/60 backdrop-blur-md animate-in fade-in duration-300"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={() => setActiveModal(null)}
         >
           <div
+            className="relative w-full max-w-2xl bg-[#0D0F16] border border-white/15 rounded-2xl shadow-2xl p-6 overflow-hidden max-h-[85vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg bg-[#0F1116]/95 border border-white/15 rounded-2xl p-6 sm:p-8 text-white shadow-[0_24px_80px_rgba(0,0,0,0.9)] overflow-y-auto max-h-[90vh]"
           >
-            <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
               <div className="flex items-center gap-2.5">
-                <Coffee className="w-4 h-4 text-[#FF7A00]" />
-                <h3 className="font-mono text-xs tracking-[0.22em] uppercase text-white/90">
-                  LIFE BEYOND CODE // THE DESK
-                </h3>
+                <div className="p-2 rounded-lg bg-red-500/20 text-red-400 border border-red-500/30">
+                  <Cpu className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">ZEBRONICS BATTLESTATION // SPECS & ARCHITECTURE</h3>
+                  <p className="text-xs font-mono text-white/60">Hardware Engine & Production Software Stack</p>
+                </div>
               </div>
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleCloseModal();
-                }}
-                className="p-2 rounded-full hover:bg-white/10 text-white/70 hover:text-white transition-colors cursor-pointer"
-                aria-label="Close"
+                onClick={() => setActiveModal(null)}
+                aria-label="Close modal"
+                className="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-white/60 hover:text-white transition-colors"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <p className="text-xs text-white/60 mb-6 font-sans leading-relaxed">
-              The coffee mug on the desk represents intentional living, slow rituals, and creative disciplines outside of terminal windows.
-            </p>
-
-            <div className="space-y-4">
-              <div className="p-4 rounded-xl border border-white/10 bg-white/[0.03]">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-base">☕</span>
-                  <h4 className="font-serif text-base text-white">Specialty Pour-Overs & Roasts</h4>
-                </div>
-                <p className="text-xs text-white/50 leading-relaxed">
-                  Precision hand-brewing with V60 and AeroPress. Dialing in grind distribution, water chemistry, and light-roast Ethiopian Yirgacheffe notes.
-                </p>
+            <div className="space-y-4 overflow-y-auto pr-1">
+              {/* Telemetry Status Bar */}
+              <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-mono text-emerald-400">
+                <span className="flex items-center gap-2">
+                  <Activity className="w-4 h-4 animate-pulse" />
+                  SYSTEM STATUS: OPTIMAL · THERMALS 29°C
+                </span>
+                <span>COMPUTE CORES ACTIVE</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-white/10 bg-white/[0.03]">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-base">📷</span>
-                  <h4 className="font-serif text-base text-white">Analog 35mm Photography</h4>
+              {/* Physical Rig Specs */}
+              <div>
+                <h4 className="text-xs font-mono text-[#FF7A00] tracking-wider uppercase mb-2">Hardware Peripherals & Enclosure</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                  <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10">
+                    <p className="font-semibold text-white">Zebronics Angular Gaming Chassis</p>
+                    <p className="text-white/60 text-[11px]">Tempered glass side panel with high-airflow ARGB cooling array.</p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10">
+                    <p className="font-semibold text-white">BenQ Widescreen IPS Monitor</p>
+                    <p className="text-white/60 text-[11px]">Color-calibrated precision panel mounted on teak wood shelf riser.</p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10">
+                    <p className="font-semibold text-white">Compact TKL Mechanical Keyboard</p>
+                    <p className="text-white/60 text-[11px]">Linear lubricated tactile switches with acoustic dampening foam.</p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10">
+                    <p className="font-semibold text-white">Redgear Mat & Logitech G Mouse</p>
+                    <p className="text-white/60 text-[11px]">Extended distressed crimson cloth mat with high-precision optical tracking.</p>
+                  </div>
                 </div>
-                <p className="text-xs text-white/50 leading-relaxed">
-                  Shooting mechanical rangefinders on Kodak Portra 400 and Ilford HP5. Capturing quiet urban streetscapes, golden-hour light shadows, and architectural forms.
-                </p>
               </div>
 
-              <div className="p-4 rounded-xl border border-white/10 bg-white/[0.03]">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-base">🎧</span>
-                  <h4 className="font-serif text-base text-white">Ambient Soundscapes & Modular Synths</h4>
+              {/* Software Engineering Stack */}
+              <div>
+                <h4 className="text-xs font-mono text-blue-400 tracking-wider uppercase mb-2">Software Stack & AI Frameworks</h4>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                  <div className="p-2.5 rounded-lg bg-white/[0.02] border border-white/10 font-mono text-white/80">
+                    ✦ Next.js 16 (App Router)
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-white/[0.02] border border-white/10 font-mono text-white/80">
+                    ✦ React 19 & TypeScript
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-white/[0.02] border border-white/10 font-mono text-white/80">
+                    ✦ Three.js & WebGL 2.0
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-white/[0.02] border border-white/10 font-mono text-white/80">
+                    ✦ PyTorch & DeepSeek
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-white/[0.02] border border-white/10 font-mono text-white/80">
+                    ✦ C++ & Rust Systems
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-white/[0.02] border border-white/10 font-mono text-white/80">
+                    ✦ GSAP & Lenis Smooth
+                  </div>
                 </div>
-                <p className="text-xs text-white/50 leading-relaxed">
-                  Curating warm drone textures, tape loops, and generative ambient acoustics that power deep programming focus sessions.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-xl border border-white/10 bg-white/[0.03]">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-base">🌱</span>
-                  <h4 className="font-serif text-base text-white">Cyber-Pastoralism & Botany</h4>
-                </div>
-                <p className="text-xs text-white/50 leading-relaxed">
-                  Cultivating desktop bonsai and terrace ferns, bridging the high-tech realm of artificial neural networks with the serene calm of the living world.
-                </p>
               </div>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-white/10">
-              <p className="text-[10px] font-mono text-white/40 tracking-wider uppercase text-center">
-                • You can edit or add more hobbies anytime in Studio3DWorkspace.tsx •
-              </p>
+            <div className="mt-5 pt-3 border-t border-white/10 flex items-center justify-between">
+              <span className="text-xs text-white/50 font-mono">Press ESC to close</span>
+              <button
+                onClick={() => setActiveModal(null)}
+                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-all"
+              >
+                Close Specs
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ----------------- MODAL 3: INTERACTIVE TERMINAL CONSOLE (KEYBOARD) ----------------- */}
-      {activeModal === "terminal" && (
+      {/* =========================================================================
+          MODAL 3: HOBBIES, RITUALS & AMBIENT SOUND (Triggered by Headset)
+          ========================================================================= */}
+      {activeModal === "hobbies" && (
         <div
-          onClick={handleCloseModal}
-          className="absolute inset-0 z-40 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-300"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={() => setActiveModal(null)}
         >
           <div
+            className="relative w-full max-w-2xl bg-[#0D0F16] border border-white/15 rounded-2xl shadow-2xl p-6 overflow-hidden max-h-[85vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-xl bg-[#090A0E] border border-white/20 rounded-xl p-5 text-white shadow-2xl font-mono text-xs"
           >
-            <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4 text-white/50">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
-                <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
-                <span className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
-                <span className="ml-2 text-white/80 font-bold">atelier@soham-pro: ~ (zsh)</span>
+            <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                  <Headphones className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">LIFE RITUALS & HOBBIES</h3>
+                  <p className="text-xs font-mono text-white/60">Music, Sports Operations, Acoustics & Lifestyle</p>
+                </div>
               </div>
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleCloseModal();
-                }}
-                className="p-1 hover:text-white cursor-pointer"
-                aria-label="Close"
+                onClick={() => setActiveModal(null)}
+                aria-label="Close modal"
+                className="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-white/60 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3.5 overflow-y-auto pr-1">
+              {/* Working Sound Generator Box */}
+              <div className="p-4 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Volume2 className="w-4 h-4 text-amber-400" />
+                    <span className="text-sm font-semibold text-white">Organic Terrace Mountain Wind Generator</span>
+                  </div>
+                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
+                    isAudioPlaying ? "bg-emerald-500/20 text-emerald-300" : "bg-white/10 text-white/50"
+                  }`}>
+                    {isAudioPlaying ? "PLAYING" : "MUTED"}
+                  </span>
+                </div>
+                <p className="text-xs text-white/70 mb-3">
+                  Synthesized in real-time using Web Audio API pink/white noise filtered through organic mountain resonance.
+                </p>
+                <button
+                  onClick={toggleAmbientSound}
+                  className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#FF7A00] hover:bg-[#FF8D24] text-black text-xs font-semibold transition-all"
+                >
+                  {isAudioPlaying ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+                  <span>{isAudioPlaying ? "Stop Soundscape" : "Start Terrace Breeze"}</span>
+                </button>
+              </div>
+
+              {/* Ritual 1: European Cricket */}
+              <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10">
+                <h4 className="text-sm font-semibold text-white mb-0.5">European Cricket Federation Operations & Athletics</h4>
+                <p className="text-xs text-white/70">
+                  Active operations contributor for the Latvian Cricket Federation, coordinating international match fixtures, live broadcast graphics, and competitive team management.
+                </p>
+              </div>
+
+              {/* Ritual 2: Custom Mechanical Keyboards */}
+              <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10">
+                <h4 className="text-sm font-semibold text-white mb-0.5">Mechanical Switch Modding & Acoustic Tuning</h4>
+                <p className="text-xs text-white/70">
+                  Obsessed with tactile keystroke feedback, lubing switches with Krytox 205g0, custom brass plates, and high-frequency acoustic dampening.
+                </p>
+              </div>
+
+              {/* Ritual 3: Computational Geometry */}
+              <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10">
+                <h4 className="text-sm font-semibold text-white mb-0.5">Generative Shaders & Spatial Graphics</h4>
+                <p className="text-xs text-white/70">
+                  Crafting procedural noise algorithms, raymarching fractal landscapes, and fluid simulation mechanics.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5 pt-3 border-t border-white/10 flex items-center justify-between">
+              <span className="text-xs text-white/50 font-mono">Press ESC to close</span>
+              <button
+                onClick={() => setActiveModal(null)}
+                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-all"
+              >
+                Close Hobbies
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          MODAL 4: INTERACTIVE CLI TERMINAL (Triggered by Keyboard)
+          ========================================================================= */}
+      {activeModal === "terminal" && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={() => setActiveModal(null)}
+        >
+          <div
+            className="relative w-full max-w-2xl bg-[#090B10] border border-emerald-500/30 rounded-2xl shadow-2xl p-6 overflow-hidden max-h-[85vh] flex flex-col font-mono"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Terminal Title Bar */}
+            <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-red-500/80" />
+                <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+                <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
+                <span className="text-xs text-white/60 ml-2">soham@battlestation: ~ (bash)</span>
+              </div>
+              <button
+                onClick={() => setActiveModal(null)}
+                aria-label="Close terminal"
+                className="p-1 rounded bg-white/5 hover:bg-white/15 text-white/60 hover:text-white transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="space-y-2 max-h-64 overflow-y-auto pr-2 mb-4 scrollbar-thin">
-              <p className="text-white/40">// Interactive Studio CLI. Type &quot;help&quot; for commands.</p>
+            {/* Terminal History */}
+            <div className="flex-1 overflow-y-auto space-y-2 text-xs pr-1">
               {terminalHistory.map((item, idx) => (
-                <div key={idx} className="space-y-1">
-                  <p className="text-emerald-400 font-semibold">$ {item.cmd}</p>
-                  <p className="text-white/70 pl-2 leading-relaxed whitespace-pre-wrap">{item.out}</p>
+                <div key={idx} className="space-y-0.5">
+                  <div className="flex items-center gap-2 text-emerald-400">
+                    <span className="text-white/40">guest@soham:~$</span>
+                    <span>{item.cmd}</span>
+                  </div>
+                  <div className="text-white/80 whitespace-pre-wrap pl-4 border-l border-white/10">
+                    {item.out}
+                  </div>
                 </div>
               ))}
+              <div ref={terminalBottomRef} />
             </div>
 
-            <form onSubmit={handleTerminalSubmit} className="flex items-center gap-2 border-t border-white/10 pt-3">
-              <span className="text-emerald-400 font-bold">$</span>
+            {/* Terminal Input Line */}
+            <form onSubmit={handleTerminalSubmit} className="mt-4 pt-3 border-t border-white/10 flex items-center gap-2">
+              <span className="text-emerald-400 text-xs shrink-0">guest@soham:~$</span>
               <input
+                ref={terminalInputRef}
                 type="text"
                 value={terminalInput}
                 onChange={(e) => setTerminalInput(e.target.value)}
-                placeholder="type command (e.g. whoami, skills, projects, clear)..."
-                className="flex-1 bg-transparent text-white focus:outline-none font-mono text-xs placeholder:text-white/25"
                 autoFocus
+                placeholder="Type 'help', 'whoami', 'projects', 'specs', or 'enter'..."
+                className="flex-1 bg-transparent text-white text-xs outline-none border-none placeholder:text-white/30"
               />
               <button
                 type="submit"
-                className="px-3 py-1 rounded bg-white/10 hover:bg-white/20 text-[10px] uppercase tracking-wider text-white cursor-pointer"
+                className="px-2.5 py-1 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-[10px]"
               >
-                Run
+                RUN
               </button>
             </form>
           </div>
@@ -1344,5 +1075,3 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     </div>
   );
 });
-
-Studio3DWorkspace.displayName = "Studio3DWorkspace";

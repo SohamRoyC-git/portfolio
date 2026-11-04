@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState, useCallback, memo } from "react";
 import * as THREE from "three";
 import gsap from "gsap";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export interface Studio3DWorkspaceProps {
   onEnterPortfolio: () => void;
@@ -921,15 +921,8 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         shockwaveMesh.visible = false;
         shockwaveMat.uniforms.uProgress.value = 1.0;
 
-        if (holdDuration >= maxHoldDuration) {
-          // After full intake: Singularity void with pulsating celestial photon light at hold point
-          if (!isAbsorbedRef.current) {
-            isAbsorbedRef.current = true;
-            if (typeof navigator !== "undefined" && navigator.vibrate) {
-              navigator.vibrate([25, 60, 35]);
-            }
-            setInteractionHint("ZERO-ENTROPY CORE · ALL COMPLEXITY CONDENSED · RELEASE FOR SUPERNOVA");
-          }
+        if (isAbsorbedRef.current) {
+          // After all particles are absorbed: Singularity void with pulsating celestial photon light
           const pulseScale = 1.0 + Math.sin(elapsed * 4.2) * 0.12;
           blackHoleGroup.scale.lerp(new THREE.Vector3(pulseScale, pulseScale, pulseScale), 0.15);
           eventHorizonMesh.scale.set(1.0, 1.0, 1.0);
@@ -984,6 +977,8 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       const scaleArr = particleScales;
       const isWarping = isTransitioningRef.current;
       const brushRadius = isMobile ? 0.24 : 0.18;
+
+      let swallowedCount = 0;
 
       for (let i = 0; i < PARTICLE_COUNT; i++) {
         const i3 = i * 3;
@@ -1047,39 +1042,40 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             (bh.x - tx) * (bh.x - tx) + (bh.y - ty) * (bh.y - ty) + (bh.z - tz) * (bh.z - tz)
           );
 
-          const maxHold = isMobile ? 2.0 : 2.8;
-          const hProg = Math.min(1.0, holdDuration / maxHold);
-          // Gravitational horizon expands progressively over time (cascading intake)
-          const rGrav = 0.22 + hProg * 2.8;
+          // Gravitational horizon expands progressively across the entire screen
+          const rGrav = 0.35 + holdDuration * 2.2;
 
-          if (hProg >= 1.0 || dist < 0.015) {
-            // Swallowed cleanly inside the singularity void core (no circling, no ring!)
+          if (dist < 0.018) {
+            // Swallowed cleanly inside the singularity void core
             px = bh.x;
             py = bh.y;
             pz = bh.z;
             vx = 0;
             vy = 0;
             vz = 0;
-            scl = Math.max(0.0, scl - delta * 4.0);
-          } else if (distStream <= rGrav || dist < 0.40) {
+            scl = 0.0;
+            swallowedCount++;
+          } else if (distStream <= rGrav || dist < 0.60) {
             // Captured: pulled DIRECTLY into the black hole center (no orbital tangential swirl)
             const uX = dx / dist;
             const uY = dy / dist;
             const uZ = dz / dist;
 
-            // Direct inward gravitational acceleration straight into the dark core
-            const inwardAccel = 0.020 + hProg * 0.028 + 0.006 / (dist + 0.03);
+            // Inward relativistic acceleration that increases as particles plunge towards the core
+            const inwardAccel = 0.024 + Math.min(holdDuration * 0.015, 0.035) + 0.008 / (dist + 0.025);
             vx += uX * inwardAccel * (delta * 60);
             vy += uY * inwardAccel * (delta * 60);
             vz += uZ * inwardAccel * (delta * 60);
 
-            // Smoothly shrink scale as particle plunges through the event horizon
-            if (dist < 0.16) {
-              scl = Math.max(0.0, dist / 0.16);
+            // Smooth scale attenuation ONLY right at the doorstep of the singularity core (0.15 to 0.018)
+            if (dist < 0.15) {
+              scl = Math.max(0.0, (dist - 0.018) / 0.132);
+            } else {
+              scl = 1.0;
             }
-            vx *= 0.88;
-            vy *= 0.88;
-            vz *= 0.88;
+            vx *= 0.89;
+            vy *= 0.89;
+            vz *= 0.89;
           } else {
             // Outside gravitational reach: continues natural flow along Lorenz attractor towards intake
             const springK = 2.4;
@@ -1226,6 +1222,16 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         scaleArr[i] = scl;
       }
 
+      // Engage singularity void only after particles have actually arrived at core
+      if (isHolding && swallowedCount >= PARTICLE_COUNT * 0.96) {
+        if (!isAbsorbedRef.current) {
+          isAbsorbedRef.current = true;
+          if (typeof navigator !== "undefined" && navigator.vibrate) {
+            navigator.vibrate([25, 60, 35]);
+          }
+        }
+      }
+
       particleGeo.attributes.position.needsUpdate = true;
       if (particleGeo.attributes.scale) {
         particleGeo.attributes.scale.needsUpdate = true;
@@ -1295,56 +1301,16 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         className="absolute inset-0 bg-[#FFFDF5] pointer-events-none opacity-0 z-50 transition-opacity"
       />
 
-      {/* Top Header Bar: Clean Minimal Telemetry */}
-      <header className="absolute top-5 left-5 right-5 z-30 flex items-center justify-between pointer-events-none">
-        <div className="flex items-center gap-3 bg-black/50 backdrop-blur-md border border-white/10 px-3.5 py-1.5 rounded-full text-xs font-mono">
-          <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-          <span className="text-white/80 font-medium">SOHAM ROYCHOUDHURY · LORENZ ATTRACTOR</span>
-          <span className="hidden sm:inline text-white/40">|</span>
-          <span className="hidden sm:inline text-white/50">NON-LINEAR DYNAMICAL CORE</span>
-        </div>
-
-        <div className="hidden sm:flex items-center gap-2 bg-black/50 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-xs font-mono text-white/70">
-          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          <span>3D Kinetic Chaos Stream</span>
-        </div>
-      </header>
-
-      {/* Center Interactive Action Pill Banner */}
-      <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
-        <div className="bg-black/35 backdrop-blur-md border border-white/10 px-4 py-1.5 rounded-full text-[11px] font-mono text-white/70 tracking-wider">
-          {interactionHint}
-        </div>
-      </div>
-
-      {/* Bottom Interface: Subtle Architectural Telemetry & Lightspeed Warp Button */}
-      <footer className="absolute bottom-6 left-6 right-6 z-40 flex items-center justify-between pointer-events-none">
-        {/* Left Telemetry (Desktop Only) */}
-        <div className="hidden md:flex flex-col gap-0.5 text-[10px] font-mono text-white/35 tracking-wider">
-          <div className="flex items-center gap-2">
-            <span className="text-amber-400/80 font-semibold">[ 01 // PHASE SPACE ]</span>
-            <span>σ: 10.0 · ρ: 28.0 · β: 2.67</span>
-          </div>
-          <div className="text-white/20">DETERMINISTIC CHAOS · ORDER BORN FROM PERTURBATION</div>
-        </div>
-
-        {/* Center Warp Button (Interactive) */}
-        <div className="pointer-events-auto mx-auto md:mx-0 md:absolute md:left-1/2 md:-translate-x-1/2">
-          <button
-            onClick={triggerWarpTransition}
-            className="group flex items-center gap-2.5 px-6 py-2.5 rounded-full bg-white/5 hover:bg-white/15 border border-white/15 hover:border-white/30 text-white/80 hover:text-white text-xs font-mono tracking-widest uppercase transition-all backdrop-blur-xl shadow-xl hover:scale-105 active:scale-95"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-300 animate-pulse" />
-            <span>Traverse to Archive · Hyperspace Warp</span>
-            <ArrowRight className="w-3.5 h-3.5 text-white/50 group-hover:text-white group-hover:translate-x-0.5 transition-transform" />
-          </button>
-        </div>
-
-        {/* Right Telemetry (Desktop Only) */}
-        <div className="hidden md:flex flex-col items-end gap-0.5 text-[10px] font-mono text-white/35 tracking-wider">
-          <div className="text-white/40">SYSTEM: DYNAMICAL EQUILIBRIUM</div>
-          <div className="text-white/20">6,400 STARDUST EMBERS · VELVET OBSIDIAN MIST</div>
-        </div>
+      {/* Subtle, Minimal Bottom Hyperspace Button (Distraction-Free Cinematic Canvas) */}
+      <footer className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 pointer-events-auto">
+        <button
+          onClick={triggerWarpTransition}
+          className="group flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/70 hover:text-white text-xs font-mono tracking-wider transition-all backdrop-blur-md shadow-lg active:scale-95"
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-400/80 animate-pulse" />
+          <span>Hyperspace Jump</span>
+          <ArrowRight className="w-3.5 h-3.5 text-white/40 group-hover:text-white group-hover:translate-x-0.5 transition-transform" />
+        </button>
       </footer>
     </div>
   );

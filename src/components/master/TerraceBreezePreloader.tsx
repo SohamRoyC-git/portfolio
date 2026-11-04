@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback, memo } from "react";
+import * as THREE from "three";
 import gsap from "gsap";
 
-// 5x7 Dot Matrix Bitmap Font Map (Dieter Rams / Braun Monolith Edition)
+// 5x7 Dot Matrix Font Map for the chunky counter & letters
 const DOT_MAP: Record<string, number[][]> = {
   "0": [
     [1, 1, 1, 1, 1],
@@ -205,7 +206,7 @@ const DOT_MAP: Record<string, number[][]> = {
   ],
 };
 
-// Web Audio API Synthesizer (Instant mechanical clicks & cinematic zoom whoosh)
+// Web Audio API Synthesizer (Instant mechanical clicks & cinematic sub-whoosh)
 class PreloaderSoundEngine {
   private ctx: AudioContext | null = null;
 
@@ -234,7 +235,7 @@ class PreloaderSoundEngine {
       osc.frequency.setValueAtTime(2400, this.ctx.currentTime);
       osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.015);
 
-      gain.gain.setValueAtTime(0.035, this.ctx.currentTime);
+      gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.02);
 
       osc.connect(filter);
@@ -255,101 +256,56 @@ class PreloaderSoundEngine {
       const filter = this.ctx.createBiquadFilter();
 
       osc.type = "sine";
-      osc.frequency.setValueAtTime(110, this.ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(35, this.ctx.currentTime + 0.9);
+      osc.frequency.setValueAtTime(120, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(35, this.ctx.currentTime + 1.1);
 
       filter.type = "lowpass";
       filter.frequency.setValueAtTime(450, this.ctx.currentTime);
-      filter.frequency.exponentialRampToValueAtTime(60, this.ctx.currentTime + 0.9);
+      filter.frequency.exponentialRampToValueAtTime(60, this.ctx.currentTime + 1.1);
 
-      gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 1.0);
+      gain.gain.setValueAtTime(0.14, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 1.2);
 
       osc.connect(filter);
       filter.connect(gain);
       gain.connect(this.ctx.destination);
 
       osc.start();
-      osc.stop(this.ctx.currentTime + 1.1);
+      osc.stop(this.ctx.currentTime + 1.25);
     } catch {}
   }
 }
 
 const sounds = new PreloaderSoundEngine();
 
-// Responsive 5x7 Dot Matrix Character Component
-const DotChar: React.FC<{
-  char: string;
-  variant?: "hero" | "standard" | "compact";
-  className?: string;
-}> = ({ char, variant = "standard", className = "" }) => {
-  const pattern = DOT_MAP[char.toUpperCase()] || DOT_MAP[" "];
-
-  // Dynamic responsive dot sizing per variant
-  const getDims = () => {
-    if (variant === "hero") {
-      return {
-        dotClass: "w-[4.8px] h-[4.8px] sm:w-[6.8px] sm:h-[6.8px] md:w-[7.5px] md:h-[7.5px]",
-        gapClass: "gap-[1.8px] sm:gap-[2.6px]",
-      };
-    }
-    if (variant === "compact") {
-      return {
-        dotClass: "w-[3.4px] h-[3.4px] sm:w-[5.2px] sm:h-[5.2px] md:w-[6px] md:h-[6px]",
-        gapClass: "gap-[1.4px] sm:gap-[2.2px]",
-      };
-    }
-    return {
-      dotClass: "w-[4px] h-[4px] sm:w-[5.8px] sm:h-[5.8px]",
-      gapClass: "gap-[1.6px] sm:gap-[2.4px]",
-    };
-  };
-
-  const { dotClass, gapClass } = getDims();
-
-  return (
-    <div
-      className={`inline-grid grid-cols-5 ${gapClass} ${className}`}
-      style={{ gridTemplateColumns: "repeat(5, min-content)" }}
-    >
-      {pattern.flatMap((row, rIdx) =>
-        row.map((active, cIdx) => (
-          <div
-            key={`${rIdx}-${cIdx}`}
-            className={`${dotClass} rounded-full transition-all duration-150 ${
-              active
-                ? "bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)] scale-100"
-                : "bg-white/[0.06] scale-90"
-            }`}
-          />
-        ))
-      )}
-    </div>
-  );
-};
-
 export const TerraceBreezePreloader: React.FC = memo(() => {
   const [progress, setProgress] = useState(0);
   const [isReady, setIsReady] = useState(false);
   const [isZooming, setIsZooming] = useState(false);
   const [visible, setVisible] = useState(true);
-  const [stage, setStage] = useState<"name" | "loading" | "enter">("name");
 
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const sceneRef = useRef<HTMLDivElement | null>(null);
-  const laptopScreenRef = useRef<HTMLDivElement | null>(null);
-  const laptopBezelRef = useRef<HTMLDivElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const bloomVeilRef = useRef<HTMLDivElement | null>(null);
-  const lastProgressRef = useRef(0);
 
-  // Status message for genuine telemetry
-  const getTelemetry = (p: number) => {
-    if (p < 25) return "INITIALIZING PORTFOLIO ENGINE";
-    if (p < 55) return "BUFFERING TERRACE VIDEO STREAM";
-    if (p < 85) return "MOUNTING 3D ASSETS & GEOMETRY";
-    if (p < 100) return "CALIBRATING LIVING ENVIRONMENT";
-    return "ATELIER SYSTEM VERIFIED & READY";
-  };
+  // References for 3D state
+  const threeRef = useRef<{
+    scene: THREE.Scene;
+    camera: THREE.PerspectiveCamera;
+    renderer: THREE.WebGLRenderer;
+    screenTexture: THREE.CanvasTexture;
+    screenCanvas: HTMLCanvasElement;
+    screenCtx: CanvasRenderingContext2D;
+    laptopLid: THREE.Group;
+    matrixCols: number[];
+    reqId: number;
+    mouseTarget: { x: number; y: number };
+  } | null>(null);
+
+  const progressRef = useRef(0);
+  progressRef.current = progress;
+  const isReadyRef = useRef(false);
+  isReadyRef.current = isReady;
 
   // 1. GENUINE ASSET PRELOADING ENGINE
   useEffect(() => {
@@ -370,7 +326,7 @@ export const TerraceBreezePreloader: React.FC = memo(() => {
       "/assets/linkedin_qr.svg",
     ];
 
-    let totalWeight = criticalImages.length + 4; // +3 weight for video, +1 for fonts
+    let totalWeight = criticalImages.length + 4; // +3 video, +1 fonts
     let loadedWeight = 0;
 
     const updateWeight = (weightToAdd: number) => {
@@ -379,8 +335,7 @@ export const TerraceBreezePreloader: React.FC = memo(() => {
       const targetPercent = Math.min(100, Math.round((loadedWeight / totalWeight) * 100));
       setProgress((prev) => {
         const next = Math.max(prev, targetPercent);
-        if (next !== lastProgressRef.current) {
-          lastProgressRef.current = next;
+        if (next !== prev) {
           sounds.playMechanicalClick();
         }
         return next;
@@ -439,7 +394,6 @@ export const TerraceBreezePreloader: React.FC = memo(() => {
       });
     }
 
-    // Fallback timer: guarantees transition within 4.5s max
     const fallbackTimer = setTimeout(() => {
       if (!videoHandled) handleVideoReady();
       setProgress(100);
@@ -453,21 +407,9 @@ export const TerraceBreezePreloader: React.FC = memo(() => {
     };
   }, []);
 
-  // Stage Transitions: Name (0-1.8s) -> Loading (1.8s-100%) -> Enter (100%)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setStage((prev) => (prev === "name" ? "loading" : prev));
-    }, 1800);
-    return () => clearTimeout(timer);
-  }, []);
-
   useEffect(() => {
     if (progress >= 100) {
       setIsReady(true);
-      const enterTimer = setTimeout(() => {
-        setStage("enter");
-      }, 500);
-      return () => clearTimeout(enterTimer);
     }
   }, [progress]);
 
@@ -481,11 +423,469 @@ export const TerraceBreezePreloader: React.FC = memo(() => {
     }
   }, [visible]);
 
-  // 2. THE CINEMATIC 3D DOLLY ZOOM INTO THE LAPTOP SCREEN
+  // 2. BUILD THE THREE.JS 3D ROOM & 3D LAPTOP SCENE
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const isMobile = width < 768;
+
+    // A. Scene Setup with Atmospheric Room Fog
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x050508, 0.08);
+
+    // B. Perspective 3D Camera
+    // Initial camera position: Seated at the workstation looking down slightly at the laptop
+    const camera = new THREE.PerspectiveCamera(
+      isMobile ? 52 : 40,
+      width / height,
+      0.1,
+      100
+    );
+    camera.position.set(0, isMobile ? 1.6 : 1.35, isMobile ? 4.8 : 3.8);
+    camera.lookAt(0, 0.65, 0);
+
+    // C. WebGL Renderer with High Dynamic Range & Tone Mapping
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      alpha: false,
+      powerPreference: "high-performance",
+    });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    // D. 3D Lighting in the Room
+    // Ambient soft room shadow
+    const ambientLight = new THREE.AmbientLight(0x0c0e18, 0.8);
+    scene.add(ambientLight);
+
+    // Desk Lamp: Warm amber spotlight casting shadows from the upper right
+    const deskLampSpot = new THREE.SpotLight(0xffb84d, 3.2, 14, Math.PI / 4, 0.5, 1.2);
+    deskLampSpot.position.set(2.8, 3.2, 1.6);
+    deskLampSpot.castShadow = true;
+    deskLampSpot.shadow.bias = -0.001;
+    scene.add(deskLampSpot);
+
+    // Subtle cool rim fill from the left
+    const coolRimLight = new THREE.DirectionalLight(0x406085, 0.5);
+    coolRimLight.position.set(-3.5, 2.5, -2.0);
+    scene.add(coolRimLight);
+
+    // Laptop Screen Light: Real-time point light emitting from the monitor onto the keys and desk!
+    const screenGlowLight = new THREE.PointLight(0xffffff, 2.2, 3.2, 1.2);
+    screenGlowLight.position.set(0, 0.85, 0.35);
+    scene.add(screenGlowLight);
+
+    // E. 3D Meshes: The Room & Desk
+    // 1. Desk Surface
+    const deskGeo = new THREE.BoxGeometry(12, 0.4, 6);
+    const deskMat = new THREE.MeshStandardMaterial({
+      color: 0x0a0c10,
+      roughness: 0.65,
+      metalness: 0.2,
+    });
+    const deskMesh = new THREE.Mesh(deskGeo, deskMat);
+    deskMesh.position.set(0, -0.2, 0);
+    deskMesh.receiveShadow = true;
+    scene.add(deskMesh);
+
+    // 2. Leather/Matte Desk Pad
+    const padGeo = new THREE.BoxGeometry(3.6, 0.015, 2.3);
+    const padMat = new THREE.MeshStandardMaterial({
+      color: 0x121418,
+      roughness: 0.9,
+      metalness: 0.05,
+    });
+    const padMesh = new THREE.Mesh(padGeo, padMat);
+    padMesh.position.set(0, 0.008, 0.15);
+    padMesh.receiveShadow = true;
+    scene.add(padMesh);
+
+    // 3. 3D Coffee Mug Silhouette (Echoes the living terrace hero mug!)
+    const mugGroup = new THREE.Group();
+    const mugGeo = new THREE.CylinderGeometry(0.16, 0.14, 0.38, 24);
+    const mugMat = new THREE.MeshStandardMaterial({
+      color: 0x16181f,
+      roughness: 0.55,
+      metalness: 0.1,
+    });
+    const mugMesh = new THREE.Mesh(mugGeo, mugMat);
+    mugMesh.position.set(0, 0.19, 0);
+    mugMesh.castShadow = true;
+    mugGroup.add(mugMesh);
+
+    const handleGeo = new THREE.TorusGeometry(0.1, 0.028, 12, 24, Math.PI);
+    const handleMesh = new THREE.Mesh(handleGeo, mugMat);
+    handleMesh.position.set(0.16, 0.19, 0);
+    handleMesh.rotation.z = -Math.PI / 2;
+    mugGroup.add(handleMesh);
+
+    mugGroup.position.set(1.5, 0.01, 0.3);
+    scene.add(mugGroup);
+
+    // F. 3D LAPTOP MODEL (Authentic Anodized Aluminum Physical Machine)
+    const laptopGroup = new THREE.Group();
+
+    // 1. Laptop Base / Keyboard Deck
+    const baseGeo = new THREE.BoxGeometry(2.35, 0.05, 1.55);
+    const alumMat = new THREE.MeshStandardMaterial({
+      color: 0x181a20,
+      roughness: 0.32,
+      metalness: 0.88,
+    });
+    const baseMesh = new THREE.Mesh(baseGeo, alumMat);
+    baseMesh.position.set(0, 0.04, 0.3);
+    baseMesh.castShadow = true;
+    baseMesh.receiveShadow = true;
+    laptopGroup.add(baseMesh);
+
+    // Keyboard well cutout & keys bed
+    const kbBedGeo = new THREE.BoxGeometry(2.0, 0.008, 0.82);
+    const kbBedMat = new THREE.MeshStandardMaterial({
+      color: 0x0c0d11,
+      roughness: 0.8,
+      metalness: 0.2,
+    });
+    const kbBedMesh = new THREE.Mesh(kbBedGeo, kbBedMat);
+    kbBedMesh.position.set(0, 0.068, 0.16);
+    laptopGroup.add(kbBedMesh);
+
+    // Individual Key rows with subtle edge bevels
+    const keyGeo = new THREE.BoxGeometry(0.12, 0.012, 0.12);
+    const keyMat = new THREE.MeshStandardMaterial({
+      color: 0x121317,
+      roughness: 0.5,
+      metalness: 0.5,
+    });
+    for (let r = 0; r < 5; r++) {
+      for (let c = 0; c < 13; c++) {
+        const key = new THREE.Mesh(keyGeo, keyMat);
+        key.position.set(-0.84 + c * 0.14, 0.076, -0.15 + r * 0.155);
+        laptopGroup.add(key);
+      }
+    }
+
+    // Large Glass Trackpad
+    const trackGeo = new THREE.BoxGeometry(0.72, 0.004, 0.44);
+    const trackMat = new THREE.MeshStandardMaterial({
+      color: 0x1f2229,
+      roughness: 0.25,
+      metalness: 0.85,
+    });
+    const trackMesh = new THREE.Mesh(trackGeo, trackMat);
+    trackMesh.position.set(0, 0.068, 0.72);
+    laptopGroup.add(trackMesh);
+
+    // 2. Laptop Lid / Display Assembly (Angled back at ~105° in real 3D space!)
+    const lidGroup = new THREE.Group();
+    lidGroup.position.set(0, 0.065, -0.47); // Pinned precisely to the rear hinge!
+    // Natural open angle (-15 deg from vertical = 105 deg open)
+    lidGroup.rotation.x = -15 * (Math.PI / 180);
+
+    // Aluminum Back Chassis & Bezel
+    const lidBackGeo = new THREE.BoxGeometry(2.35, 1.48, 0.035);
+    const lidBackMesh = new THREE.Mesh(lidBackGeo, alumMat);
+    lidBackMesh.position.set(0, 0.74, 0);
+    lidBackMesh.castShadow = true;
+    lidGroup.add(lidBackMesh);
+
+    // Webcam notch dot at top center
+    const camGeo = new THREE.CircleGeometry(0.012, 16);
+    const camMat = new THREE.MeshBasicMaterial({ color: 0x050608 });
+    const camMesh = new THREE.Mesh(camGeo, camMat);
+    camMesh.position.set(0, 1.43, 0.019);
+    lidGroup.add(camMesh);
+
+    // G. THE DYNAMIC 60FPS MATRIX & PORT SCANNER CANVAS TEXTURE
+    const screenCanvas = document.createElement("canvas");
+    screenCanvas.width = 1280;
+    screenCanvas.height = 800;
+    const screenCtx = screenCanvas.getContext("2d")!;
+
+    const screenTexture = new THREE.CanvasTexture(screenCanvas);
+    screenTexture.minFilter = THREE.LinearFilter;
+    screenTexture.magFilter = THREE.LinearFilter;
+
+    // Physical Glass Screen Plane (16:10 Ratio)
+    const screenGeo = new THREE.PlaneGeometry(2.26, 1.39);
+    const screenMat = new THREE.MeshBasicMaterial({
+      map: screenTexture,
+      toneMapped: false,
+    });
+    const screenMesh = new THREE.Mesh(screenGeo, screenMat);
+    screenMesh.position.set(0, 0.73, 0.0185);
+    lidGroup.add(screenMesh);
+
+    laptopGroup.add(lidGroup);
+    scene.add(laptopGroup);
+
+    // Matrix Rain Stream state
+    const cols = 48;
+    const matrixCols: number[] = Array.from({ length: cols }, () =>
+      Math.floor(Math.random() * -40)
+    );
+
+    // Mouse parallax tracking
+    const mouseTarget = { x: 0, y: 0 };
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseTarget.x = (e.clientX / window.innerWidth - 0.5) * 2;
+      mouseTarget.y = -(e.clientY / window.innerHeight - 0.5) * 2;
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+
+    // Window Resize Handler
+    const handleResize = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      camera.aspect = w / h;
+      camera.fov = w < 768 ? 52 : 40;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    };
+    window.addEventListener("resize", handleResize);
+
+    // H. 60 FPS RENDER & SCREEN PAINT LOOP
+    let startTime = performance.now();
+
+    const drawScreenCanvas = (time: number) => {
+      const elapsed = (time - startTime) / 1000;
+      const p = progressRef.current;
+      const ready = isReadyRef.current;
+
+      // 1. Deep Obsidian Screen Background
+      screenCtx.fillStyle = "#06070A";
+      screenCtx.fillRect(0, 0, 1280, 800);
+
+      // 2. Matrix Rain Columns in the Background
+      screenCtx.font = "14px monospace";
+      for (let i = 0; i < cols; i++) {
+        const x = i * 26 + 12;
+        const y = matrixCols[i] * 18;
+
+        // Draw fading tail glyphs
+        for (let j = 0; j < 12; j++) {
+          const tailY = y - j * 18;
+          if (tailY > 0 && tailY < 780) {
+            const alpha = Math.max(0, 1 - j / 12) * 0.22;
+            screenCtx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+            const glyph = String.fromCharCode(0x30a0 + ((i + j) % 96));
+            screenCtx.fillText(glyph, x, tailY);
+          }
+        }
+
+        // Bright leading head glyph
+        if (y > 0 && y < 780) {
+          screenCtx.fillStyle = "rgba(255, 255, 255, 0.85)";
+          screenCtx.shadowColor = "#FFFFFF";
+          screenCtx.shadowBlur = 8;
+          screenCtx.fillText("0x" + ((i * 7) % 99).toString(16).toUpperCase(), x, y);
+          screenCtx.shadowBlur = 0;
+        }
+
+        matrixCols[i] += 0.85;
+        if (matrixCols[i] * 18 > 800) {
+          matrixCols[i] = Math.floor(Math.random() * -20);
+        }
+      }
+
+      // 3. Screen Top Header Bar: Monograph Branding
+      screenCtx.fillStyle = "rgba(255, 255, 255, 0.35)";
+      screenCtx.font = "13px monospace";
+      screenCtx.fillText("• SOHAM ROYCHOUDHURY", 48, 54);
+      screenCtx.fillText("SYSTEM INITIALIZATION // KERNEL v6.12", 840, 54);
+
+      screenCtx.strokeStyle = "rgba(255, 255, 255, 0.12)";
+      screenCtx.beginPath();
+      screenCtx.moveTo(48, 72);
+      screenCtx.lineTo(1232, 72);
+      screenCtx.stroke();
+
+      // 4. Left Panel: Living Network Port Scanning & Telemetry Box
+      screenCtx.fillStyle = "rgba(10, 12, 16, 0.85)";
+      screenCtx.fillRect(48, 110, 480, 580);
+      screenCtx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+      screenCtx.strokeRect(48, 110, 480, 580);
+
+      // Terminal Header
+      screenCtx.fillStyle = "rgba(255, 255, 255, 0.9)";
+      screenCtx.font = "bold 13px monospace";
+      screenCtx.fillText(">> ACTIVE PORT TELEMETRY", 72, 146);
+
+      // Ports List
+      const ports = [
+        { port: "0080 [HTTP]", label: "BUFFERING ASSETS...", status: p > 20 ? "OK" : "PENDING" },
+        { port: "0443 [TLS/SSL]", label: "CRYPTO HANDSHAKE", status: p > 45 ? "SECURE" : "WAIT" },
+        { port: "3000 [NEXT.JS]", label: "REACT APP MOUNT", status: p > 70 ? "ACTIVE" : "MOUNT" },
+        { port: "8080 [STREAM]", label: "PIXEL ART VIDEO", status: p >= 100 ? "READY" : "BUFFER" },
+      ];
+
+      screenCtx.font = "12px monospace";
+      ports.forEach((pt, idx) => {
+        const py = 190 + idx * 46;
+        screenCtx.fillStyle = "rgba(255, 255, 255, 0.6)";
+        screenCtx.fillText(`PORT ${pt.port}:`, 72, py);
+
+        screenCtx.fillStyle = "rgba(255, 255, 255, 0.4)";
+        screenCtx.fillText(pt.label, 230, py);
+
+        screenCtx.fillStyle = pt.status === "OK" || pt.status === "SECURE" || pt.status === "READY" || pt.status === "ACTIVE"
+          ? "#FFFFFF"
+          : "rgba(255, 255, 255, 0.3)";
+        screenCtx.fillText(`[ ${pt.status} ]`, 440, py);
+      });
+
+      // Asset Pipeline Progress Bar inside the Left Box
+      screenCtx.fillStyle = "rgba(255, 255, 255, 0.5)";
+      screenCtx.fillText("PIPELINE BUFFER:", 72, 400);
+
+      screenCtx.fillStyle = "rgba(255, 255, 255, 0.1)";
+      screenCtx.fillRect(72, 415, 430, 8);
+
+      screenCtx.fillStyle = "#FFFFFF";
+      screenCtx.fillRect(72, 415, (430 * p) / 100, 8);
+
+      screenCtx.fillStyle = "rgba(255, 255, 255, 0.4)";
+      screenCtx.font = "11px monospace";
+      screenCtx.fillText(`CACHE: ${Math.round(p)}% OF 100% COMPLETE`, 72, 448);
+      screenCtx.fillText(`VIDEO READY STATE: ${p >= 100 ? "4 (ENOUGH_DATA)" : "3 (CAN_PLAY)"}`, 72, 474);
+      screenCtx.fillText(`FONTS SUBSYSTEM: READY`, 72, 500);
+
+      // 5. Right Panel: Chunky Dot Matrix Visual Centerpiece
+      // In the first 1.6s, show S O H A M; then morph into 000% -> 100%; then ENTER >
+      const showName = elapsed < 1.6 && !ready;
+      const pStr = String(Math.min(100, Math.max(0, p))).padStart(3, "0");
+
+      const drawDotString = (str: string, startX: number, startY: number, dotSize: number, gap: number) => {
+        let curX = startX;
+        for (let s = 0; s < str.length; s++) {
+          const ch = str[s];
+          const pattern = DOT_MAP[ch] || DOT_MAP[" "];
+
+          for (let r = 0; r < 7; r++) {
+            for (let c = 0; c < 5; c++) {
+              const active = pattern[r][c] === 1;
+              const dx = curX + c * (dotSize + gap);
+              const dy = startY + r * (dotSize + gap);
+
+              screenCtx.beginPath();
+              screenCtx.arc(dx, dy, dotSize / 2, 0, Math.PI * 2);
+
+              if (active) {
+                screenCtx.fillStyle = "#FFFFFF";
+                screenCtx.shadowColor = "rgba(255, 255, 255, 0.9)";
+                screenCtx.shadowBlur = 10;
+                screenCtx.fill();
+                screenCtx.shadowBlur = 0;
+              } else {
+                screenCtx.fillStyle = "rgba(255, 255, 255, 0.05)";
+                screenCtx.fill();
+              }
+            }
+          }
+          curX += 5 * (dotSize + gap) + gap * 2.5;
+        }
+      };
+
+      if (showName) {
+        drawDotString("SOHAM", 640, 310, 11, 4.5);
+      } else if (!ready || p < 100) {
+        drawDotString(`${pStr}%`, 600, 310, 11, 4.5);
+      } else {
+        // Ready State: ENTER >
+        drawDotString("ENTER >", 580, 290, 11, 4.5);
+
+        // Flashing Trigger Prompt
+        const blink = Math.sin(time * 0.006) > 0;
+        screenCtx.fillStyle = blink ? "#FFFFFF" : "rgba(255, 255, 255, 0.35)";
+        screenCtx.font = "bold 15px monospace";
+        screenCtx.fillText(">>> [ PRESS ENTER OR CLICK TO INITIATE ] <<<", 630, 430);
+      }
+
+      // Screen Bottom Status Line
+      screenCtx.fillStyle = "rgba(255, 255, 255, 0.3)";
+      screenCtx.font = "12px monospace";
+      screenCtx.fillText("ATELIER HARDWARE ENGINE // DIRECT 3D SPATIAL PIPELINE", 48, 755);
+      screenCtx.fillText(`FPS: 60 // RENDER: THREE.JS`, 980, 755);
+
+      screenTexture.needsUpdate = true;
+    };
+
+    let animationFrameId: number;
+    const animate = (time: number) => {
+      // 1. Mouse-Driven Spatial Parallax (Subtle 3D orbit)
+      const targetCamX = mouseTarget.x * 0.35;
+      const targetCamY = (isMobile ? 1.6 : 1.35) + mouseTarget.y * 0.2;
+      camera.position.x += (targetCamX - camera.position.x) * 0.04;
+      camera.position.y += (targetCamY - camera.position.y) * 0.04;
+      camera.lookAt(0, 0.65, 0);
+
+      // 2. Render Screen Canvas Texture
+      drawScreenCanvas(time);
+
+      // 3. Render Three.js 3D WebGL Scene
+      renderer.render(scene, camera);
+
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    animationFrameId = requestAnimationFrame(animate);
+
+    threeRef.current = {
+      scene,
+      camera,
+      renderer,
+      screenTexture,
+      screenCanvas,
+      screenCtx,
+      laptopLid: lidGroup,
+      matrixCols,
+      reqId: animationFrameId,
+      mouseTarget,
+    };
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("resize", handleResize);
+
+      // Clean disposal of WebGL resources to prevent memory leaks
+      renderer.dispose();
+      deskGeo.dispose();
+      deskMat.dispose();
+      padGeo.dispose();
+      padMat.dispose();
+      mugGeo.dispose();
+      mugMat.dispose();
+      handleGeo.dispose();
+      baseGeo.dispose();
+      alumMat.dispose();
+      kbBedGeo.dispose();
+      kbBedMat.dispose();
+      keyGeo.dispose();
+      keyMat.dispose();
+      trackGeo.dispose();
+      trackMat.dispose();
+      lidBackGeo.dispose();
+      screenGeo.dispose();
+      screenMat.dispose();
+      screenTexture.dispose();
+    };
+  }, []);
+
+  // 3. TRUE 3D CAMERA DOLLY ZOOM INTO THE LAPTOP DISPLAY
   const handleTriggerEnter = useCallback(() => {
-    if (isZooming) return;
+    if (isZooming || !threeRef.current) return;
     setIsZooming(true);
     sounds.playCinematicWhoosh();
+
+    const { camera, laptopLid } = threeRef.current;
 
     const tl = gsap.timeline({
       onComplete: () => {
@@ -500,53 +900,53 @@ export const TerraceBreezePreloader: React.FC = memo(() => {
       },
     });
 
-    // A. 3D Camera Dolly Zoom into the laptop glass (scale 9.0x centered on display)
-    if (sceneRef.current) {
-      tl.to(
-        sceneRef.current,
-        {
-          scale: 9.0,
-          transformOrigin: "center 48%",
-          duration: 1.6,
-          ease: "power3.inOut",
-        },
-        0
-      );
-    }
+    // 1. The 3D Camera physically dollies forward along the Z and Y axes right into the screen
+    // The screen center sits at: Y ~0.80, Z ~-0.45. We dolly camera to right in front of the glass!
+    tl.to(
+      camera.position,
+      {
+        x: 0,
+        y: 0.81,
+        z: -0.15,
+        duration: 1.6,
+        ease: "power3.inOut",
+      },
+      0
+    );
 
-    // B. Bezel and dark room elements dissolve away as we breach through the glass
-    if (laptopBezelRef.current) {
-      tl.to(
-        laptopBezelRef.current,
-        {
-          opacity: 0,
-          duration: 0.7,
-          ease: "power2.in",
-        },
-        0.5
-      );
-    }
+    // 2. Camera tilts slightly to align parallel to the tilted 105° laptop screen lid
+    tl.to(
+      camera.rotation,
+      {
+        x: -15 * (Math.PI / 180),
+        y: 0,
+        z: 0,
+        duration: 1.6,
+        ease: "power3.inOut",
+      },
+      0
+    );
 
-    // C. Optical bloom veil flashes as we enter the sunlit terrace
+    // 3. Optical White Flash / Bloom Veil as we penetrate through the glass
     if (bloomVeilRef.current) {
       tl.fromTo(
         bloomVeilRef.current,
         { opacity: 0 },
-        { opacity: 0.95, duration: 0.6, ease: "power2.in" },
-        0.7
+        { opacity: 0.95, duration: 0.5, ease: "power2.in" },
+        0.85
       );
     }
 
-    // D. Seamless crossfade to reveal living hero video
+    // 4. Smooth crossfade of the Three.js canvas revealing the live terrace hero video
     if (containerRef.current) {
       tl.to(
         containerRef.current,
         {
           opacity: 0,
-          duration: 0.5,
+          duration: 0.6,
           ease: "power2.out",
         },
-        1.15
+        1.25
       );
     }
   }, [isZooming]);
@@ -568,9 +968,6 @@ export const TerraceBreezePreloader: React.FC = memo(() => {
 
   if (!visible) return null;
 
-  // Format 3-digit percentage for dot-matrix
-  const pStr = String(Math.min(100, Math.max(0, progress))).padStart(3, "0");
-
   return (
     <div
       ref={containerRef}
@@ -581,170 +978,26 @@ export const TerraceBreezePreloader: React.FC = memo(() => {
       onWheel={(e) => {
         if (!isZooming) e.stopPropagation();
       }}
-      className={`fixed inset-0 z-[99999] bg-[#050507] text-white select-none overflow-hidden flex items-center justify-center touch-none ${
+      className={`fixed inset-0 z-[99999] bg-[#050508] select-none overflow-hidden touch-none ${
         isReady ? "cursor-pointer" : "cursor-default"
       }`}
-      aria-label="Atelier Monolith Preloader"
+      aria-label="Atelier 3D Monolith Preloader"
     >
-      {/* 1. Dark Room Atmosphere & Studio Accents */}
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_100%_80%_at_50%_40%,#09090D_0%,#050507_70%,#020203_100%)]" />
+      {/* The Master Three.js WebGL 3D Canvas */}
+      <canvas ref={canvasRef} className="w-full h-full block" />
 
-      {/* Warm Minimalist Desk Lamp Rim Glow in upper corner */}
-      <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-[radial-gradient(circle,rgba(255,184,77,0.08)_0%,rgba(255,184,77,0.02)_50%,transparent_75%)] pointer-events-none blur-3xl" />
-
-      {/* The Master 3D Zoomable Scene Container */}
-      <div
-        ref={sceneRef}
-        className="relative w-full h-full flex items-center justify-center will-change-[transform,opacity]"
-      >
-        {/* Desk Surface & Horizon Line in lower third */}
-        <div className="absolute bottom-0 left-0 right-0 h-[38%] pointer-events-none bg-gradient-to-t from-[#030304] via-[#090A0E] to-transparent border-t border-white/[0.04]">
-          {/* Subtle Brushed Desk Sheen */}
-          <div className="absolute inset-0 opacity-20 bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.04)_50%,transparent_100%)]" />
-
-          {/* Atmospheric Silhouette: Ceramic Coffee Mug on the Desk (Echoes Terrace Hero Mug!) */}
-          <div className="absolute bottom-12 right-[8%] sm:right-[16%] md:right-[20%] opacity-60 flex flex-col items-center">
-            {/* Soft Steam Curl */}
-            <div className="w-1.5 h-6 bg-gradient-to-t from-white/20 to-transparent blur-[1px] animate-pulse mb-1 -ml-1 rounded-full" />
-            {/* Ceramic Mug Body */}
-            <div className="relative w-7 h-8 sm:w-9 sm:h-10 bg-gradient-to-b from-[#18191E] to-[#0E0F12] rounded-b-lg border-t border-white/10 shadow-[0_6px_16px_rgba(0,0,0,0.8)]">
-              {/* Mug Handle */}
-              <div className="absolute -right-2 top-1.5 w-3 h-4 rounded-r-md border-2 border-[#18191E] border-l-0" />
-            </div>
+      {/* Floating HUD Interaction Cue when ready */}
+      {isReady && !isZooming && (
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 pointer-events-none animate-in fade-in zoom-in-95 duration-500">
+          <div className="inline-flex items-center gap-2.5 sm:gap-3 px-4 sm:px-6 py-2 sm:py-2.5 rounded-full border border-white/25 bg-black/60 text-white font-mono text-[9px] sm:text-[11px] tracking-[0.2em] sm:tracking-[0.24em] uppercase backdrop-blur-md shadow-[0_8px_30px_rgba(0,0,0,0.8)] animate-pulse whitespace-nowrap">
+            <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white shadow-[0_0_8px_#FFF] shrink-0" />
+            <span className="hidden sm:inline">Press Enter or Click to Step Inside</span>
+            <span className="inline sm:hidden">Tap Anywhere to Step Inside</span>
           </div>
         </div>
+      )}
 
-        {/* 2. THE LAPTOP (Straight-on Front Elevation, Prominent & Centered) */}
-        <div className="relative z-10 w-[94vw] max-w-[820px] md:w-[74vw] lg:w-[64vw] flex flex-col items-center">
-          {/* Laptop Upper Display Frame & Chamfered Bezel */}
-          <div
-            ref={laptopBezelRef}
-            className="w-full relative rounded-t-2xl sm:rounded-t-3xl bg-[#15161B] border border-white/10 pt-2.5 sm:pt-3 px-2.5 sm:px-3 pb-1 shadow-[0_25px_80px_rgba(0,0,0,0.95)]"
-          >
-            {/* Top Bezel: Centered Camera Notch Dot */}
-            <div className="w-full flex items-center justify-center pb-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#0A0B0D] border border-white/20 shadow-inner" />
-            </div>
-
-            {/* LAPTOP SCREEN (16:10 Ratio, Obsidian Glass with Dieter Rams Monolith Display) */}
-            <div
-              ref={laptopScreenRef}
-              className="relative w-full aspect-[16/10] bg-[#07080A] rounded-lg sm:rounded-xl overflow-hidden border border-white/[0.08] shadow-[inset_0_0_20px_rgba(0,0,0,0.9)] flex flex-col justify-between p-3.5 sm:p-7 md:p-9"
-            >
-              {/* Subtle Screen Diagonal Glass Glare */}
-              <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-transparent via-white/[0.015] to-white/[0.04]" />
-
-              {/* Inactive Background Dot Grid (Authentic Flip-Disc / LED Pegboard Texture) */}
-              <div
-                className="absolute inset-0 pointer-events-none opacity-[0.035]"
-                style={{
-                  backgroundImage:
-                    "radial-gradient(circle, #FFFFFF 1.5px, transparent 1.5px)",
-                  backgroundSize: "14px 14px",
-                }}
-              />
-
-              {/* Screen Header Bar: Mono Architectural Monograph */}
-              <div className="relative z-10 w-full flex items-center justify-between text-[8px] sm:text-[10px] font-mono tracking-[0.24em] uppercase text-white/45">
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                  <span className="text-white/80 font-medium truncate max-w-[140px] sm:max-w-none">
-                    SOHAM ROYCHOUDHURY
-                  </span>
-                </div>
-                <div className="tracking-[0.2em] text-white/40 hidden xs:block">
-                  ATELIER 2026 // MONOLITH
-                </div>
-              </div>
-
-              {/* Screen Centerpiece: Interactive Morphing Dot Matrix Display */}
-              <div className="relative z-10 my-auto w-full flex flex-col items-center justify-center">
-                {/* STAGE 1: Morphing Name "SOHAM" */}
-                {stage === "name" && (
-                  <div className="flex items-center justify-center gap-2 sm:gap-4 md:gap-5 animate-in fade-in zoom-in-95 duration-500">
-                    {["S", "O", "H", "A", "M"].map((ch, idx) => (
-                      <DotChar
-                        key={`name-${idx}`}
-                        char={ch}
-                        variant="hero"
-                        className="drop-shadow-[0_0_8px_rgba(255,255,255,0.7)]"
-                      />
-                    ))}
-                  </div>
-                )}
-
-                {/* STAGE 2: Giant Dot-Matrix Percentage & Directional Arrow */}
-                {stage === "loading" && (
-                  <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-5 sm:gap-4">
-                    {/* Left: Directional Dot-Matrix Arrow & Telemetry Status */}
-                    <div className="flex flex-col items-start gap-2.5 sm:gap-3">
-                      <div className="flex items-center gap-2.5 sm:gap-3">
-                        <DotChar char=">" variant="compact" />
-                        <span className="font-mono text-[8px] sm:text-[11px] tracking-[0.22em] uppercase text-white/75">
-                          {getTelemetry(progress)}
-                        </span>
-                      </div>
-                      <div className="h-[1px] w-24 sm:w-32 bg-white/15" />
-                    </div>
-
-                    {/* Right: Giant Dot-Matrix Percentage (000% -> 100%) */}
-                    <div className="flex items-center gap-1.5 sm:gap-2.5 md:gap-3.5">
-                      <DotChar char={pStr[0]} variant="hero" />
-                      <DotChar char={pStr[1]} variant="hero" />
-                      <DotChar char={pStr[2]} variant="hero" />
-                      <DotChar char="%" variant="hero" />
-                    </div>
-                  </div>
-                )}
-
-                {/* STAGE 3: Final Ready Prompt "ENTER >" */}
-                {stage === "enter" && (
-                  <div className="flex flex-col items-center gap-3 sm:gap-4 animate-in fade-in zoom-in-95 duration-400">
-                    <div className="flex items-center justify-center gap-1.5 sm:gap-3 md:gap-3.5">
-                      {["E", "N", "T", "E", "R", " ", ">"].map((ch, idx) => (
-                        <DotChar
-                          key={`enter-${idx}`}
-                          char={ch}
-                          variant="compact"
-                          className="drop-shadow-[0_0_10px_rgba(255,255,255,0.9)]"
-                        />
-                      ))}
-                    </div>
-
-                    {/* Minimalist Pill CTA */}
-                    <div className="mt-2 sm:mt-3 inline-flex items-center gap-2.5 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full border border-white/20 bg-white/10 text-white font-mono text-[8.5px] sm:text-[10px] tracking-[0.22em] uppercase backdrop-blur-md animate-pulse">
-                      <span className="w-1.5 h-1.5 rounded-full bg-white" />
-                      <span className="hidden sm:inline">
-                        Press Enter or Click to Initiate
-                      </span>
-                      <span className="inline sm:hidden">
-                        Tap Anywhere to Step Inside
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Screen Footer: Sub-telemetry */}
-              <div className="relative z-10 w-full flex items-center justify-between text-[7.5px] sm:text-[9px] font-mono tracking-[0.2em] uppercase text-white/35 border-t border-white/[0.08] pt-2 sm:pt-3">
-                <span>HARDWARE ACCELERATED</span>
-                <span>SYSTEM STATE: {progress}%</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Laptop Lower Deck / Keyboard Lip & Hinge */}
-          <div className="w-[101.5%] h-5 sm:h-7 bg-[#111216] rounded-b-xl border-x border-b border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.95)] flex items-center justify-center relative">
-            {/* Center Thumb Notch for opening */}
-            <div className="w-16 h-1 bg-[#1E2026] rounded-full" />
-
-            {/* Keyboard Backlight Spill Glow on the desk surface */}
-            <div className="absolute top-full left-1/2 -translate-x-1/2 w-[85%] h-8 bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,rgba(255,255,255,0.06)_0%,transparent_85%)] pointer-events-none" />
-          </div>
-        </div>
-      </div>
-
-      {/* 3. Optical White Flash / Bloom Veil upon zoom penetration */}
+      {/* Optical White Flash / Bloom Veil upon 3D zoom penetration */}
       <div
         ref={bloomVeilRef}
         className="absolute inset-0 pointer-events-none z-50 bg-white opacity-0"

@@ -104,464 +104,188 @@ const DOT_MAP: Record<string, number[][]> = {
     [1, 0, 0, 1, 1],
     [0, 0, 0, 0, 0],
   ],
-  S: [
-    [0, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0],
-    [1, 1, 1, 1, 0],
-    [0, 0, 0, 0, 1],
-    [0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1],
-    [0, 1, 1, 1, 0],
-  ],
-  O: [
-    [0, 1, 1, 1, 0],
-    [1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1],
-    [0, 1, 1, 1, 0],
-  ],
-  H: [
-    [1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1],
-  ],
-  A: [
-    [0, 1, 1, 1, 0],
-    [1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1],
-  ],
-  M: [
-    [1, 0, 0, 0, 1],
-    [1, 1, 0, 1, 1],
-    [1, 0, 1, 0, 1],
-    [1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1],
-  ],
-  E: [
-    [1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0],
-    [1, 1, 1, 1, 0],
-    [1, 0, 0, 0, 0],
-    [1, 0, 0, 0, 0],
-    [1, 0, 0, 0, 0],
-    [1, 1, 1, 1, 1],
-  ],
-  N: [
-    [1, 0, 0, 0, 1],
-    [1, 1, 0, 0, 1],
-    [1, 0, 1, 0, 1],
-    [1, 0, 0, 1, 1],
-    [1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1],
-  ],
-  T: [
-    [1, 1, 1, 1, 1],
-    [0, 0, 1, 0, 0],
-    [0, 0, 1, 0, 0],
-    [0, 0, 1, 0, 0],
-    [0, 0, 1, 0, 0],
-    [0, 0, 1, 0, 0],
-    [0, 0, 1, 0, 0],
-  ],
-  R: [
-    [1, 1, 1, 1, 0],
-    [1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1],
-    [1, 1, 1, 1, 0],
-    [1, 0, 1, 0, 0],
-    [1, 0, 0, 1, 0],
-    [1, 0, 0, 0, 1],
-  ],
-  ">": [
-    [0, 0, 0, 0, 0],
-    [0, 0, 1, 0, 0],
-    [0, 0, 0, 1, 0],
-    [1, 1, 1, 1, 1],
-    [0, 0, 0, 1, 0],
-    [0, 0, 1, 0, 0],
-    [0, 0, 0, 0, 0],
-  ],
-  " ": [
-    [0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0],
-  ],
 };
 
-// Web Audio API Synthesizer (Instant subtle clicks & cinematic sub-whoosh)
-class PreloaderSoundEngine {
-  private ctx: AudioContext | null = null;
-
-  private init() {
-    if (!this.ctx && typeof window !== "undefined") {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (AudioCtx) this.ctx = new AudioCtx();
-    }
-    if (this.ctx && this.ctx.state === "suspended") {
-      this.ctx.resume().catch(() => {});
-    }
-  }
-
-  playMechanicalClick() {
-    try {
-      this.init();
-      if (!this.ctx) return;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      const filter = this.ctx.createBiquadFilter();
-
-      filter.type = "highpass";
-      filter.frequency.setValueAtTime(1400, this.ctx.currentTime);
-
-      osc.type = "triangle";
-      osc.frequency.setValueAtTime(2200, this.ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(700, this.ctx.currentTime + 0.015);
-
-      gain.gain.setValueAtTime(0.025, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.02);
-
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(this.ctx.destination);
-
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.025);
-    } catch {}
-  }
-
-  playCinematicWhoosh() {
-    try {
-      this.init();
-      if (!this.ctx) return;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      const filter = this.ctx.createBiquadFilter();
-
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(115, this.ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(32, this.ctx.currentTime + 1.1);
-
-      filter.type = "lowpass";
-      filter.frequency.setValueAtTime(450, this.ctx.currentTime);
-      filter.frequency.exponentialRampToValueAtTime(60, this.ctx.currentTime + 1.1);
-
-      gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 1.2);
-
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(this.ctx.destination);
-
-      osc.start();
-      osc.stop(this.ctx.currentTime + 1.25);
-    } catch {}
-  }
-}
-
-const sounds = new PreloaderSoundEngine();
-
-// Clean Dot Matrix Character Component
-const DotChar: React.FC<{
+const DotChar = memo(function DotChar({
+  char,
+  size = 4,
+  gap = 1.8,
+}: {
   char: string;
   size?: number;
   gap?: number;
-  className?: string;
-}> = ({ char, size = 3.5, gap = 1.4, className = "" }) => {
-  const pattern = DOT_MAP[char.toUpperCase()] || DOT_MAP[" "];
+}) {
+  const matrix = DOT_MAP[char] || DOT_MAP["0"];
 
   return (
     <div
-      className={`inline-grid grid-cols-5 ${className}`}
+      className="inline-grid select-none"
       style={{
-        display: "grid",
         gridTemplateColumns: `repeat(5, ${size}px)`,
         gridTemplateRows: `repeat(7, ${size}px)`,
         gap: `${gap}px`,
       }}
     >
-      {pattern.flatMap((row, rIdx) =>
-        row.map((active, cIdx) => (
+      {matrix.flatMap((row, r) =>
+        row.map((on, c) => (
           <div
-            key={`${rIdx}-${cIdx}`}
-            style={{ width: `${size}px`, height: `${size}px` }}
-            className={`rounded-full transition-all duration-150 ${
-              active
-                ? "bg-white shadow-[0_0_6px_rgba(255,255,255,0.9)] scale-100"
-                : "bg-white/[0.08] scale-90"
-            }`}
+            key={`${r}-${c}`}
+            className="rounded-full transition-all duration-150"
+            style={{
+              width: `${size}px`,
+              height: `${size}px`,
+              backgroundColor: on ? "#FFFFFF" : "rgba(255, 255, 255, 0.06)",
+              boxShadow: on ? "0 0 6px rgba(255, 255, 255, 0.7)" : "none",
+            }}
           />
         ))
       )}
     </div>
   );
-};
+});
 
-export const TerraceBreezePreloader: React.FC = memo(() => {
+DotChar.displayName = "DotChar";
+
+export interface TerraceBreezePreloaderProps {
+  onComplete?: () => void;
+}
+
+export const TerraceBreezePreloader = memo(function TerraceBreezePreloader({
+  onComplete,
+}: TerraceBreezePreloaderProps) {
   const [progress, setProgress] = useState(0);
   const [isReady, setIsReady] = useState(false);
-  const [isZooming, setIsZooming] = useState(false);
+  const [isEntering, setIsEntering] = useState(false);
   const [visible, setVisible] = useState(true);
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const roomStageRef = useRef<HTMLDivElement | null>(null);
-  const laptopScreenRef = useRef<HTMLDivElement | null>(null);
-  const bloomVeilRef = useRef<HTMLDivElement | null>(null);
-  const lastProgressRef = useRef(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
 
-  // Status message for minimalistic elegance
-  const getStatus = (p: number) => {
-    if (p < 30) return "Warming workstation light...";
-    if (p < 65) return "Buffering living terrace textures...";
-    if (p < 95) return "Synchronizing spatial coordinates...";
-    return "The terrace is peaceful and ready.";
-  };
-
-  // 1. GENUINE ASSET PRELOADING ENGINE
-  useEffect(() => {
-    let mounted = true;
-    const criticalImages = [
-      "/assets/soham_headshot.png",
-      "/assets/disc_indiacenter.png",
-      "/assets/disc_izieat.png",
-      "/assets/disc_lcf.png",
-      "/assets/disc_varti.png",
-      "/assets/lcf_logo.png",
-      "/assets/varti_logo.png",
-      "/assets/terrace_laptop_desk.jpg",
-      "/assets/logos/izieat.png",
-      "/assets/logos/latvia_cricket.png",
-      "/assets/logos/india_center.png",
-      "/assets/logos/varti_international.png",
-      "/assets/linkedin_qr.svg",
-    ];
-
-    let totalWeight = criticalImages.length + 4; // +3 video, +1 fonts
-    let loadedWeight = 0;
-
-    const updateWeight = (weightToAdd: number) => {
-      if (!mounted) return;
-      loadedWeight += weightToAdd;
-      const targetPercent = Math.min(100, Math.round((loadedWeight / totalWeight) * 100));
-      setProgress((prev) => {
-        const next = Math.max(prev, targetPercent);
-        if (next !== lastProgressRef.current) {
-          lastProgressRef.current = next;
-          sounds.playMechanicalClick();
-        }
-        return next;
-      });
-    };
-
-    // A. Preload Fonts
-    if (typeof document !== "undefined" && document.fonts) {
-      document.fonts.ready.then(() => updateWeight(1));
-    } else {
-      updateWeight(1);
-    }
-
-    // B. Preload Images
-    criticalImages.forEach((src) => {
-      const img = new Image();
-      img.src = src;
-      img.onload = () => updateWeight(1);
-      img.onerror = () => updateWeight(1);
-    });
-
-    // C. Genuine Hero Video Buffer Verification
-    let videoHandled = false;
-    const handleVideoReady = () => {
-      if (videoHandled) return;
-      videoHandled = true;
-      updateWeight(3);
-    };
-
-    const video = document.createElement("video");
-    video.src = "/assets/hero_pixel_art_loop.mp4";
-    video.preload = "auto";
-    video.muted = true;
-    video.playsInline = true;
-
-    video.addEventListener("canplaythrough", handleVideoReady, { once: true });
-    video.addEventListener("loadeddata", () => {
-      if (video.readyState >= 3) handleVideoReady();
-    });
+  // Synthesize tactile split-flap tick sounds
+  const playTickSound = useCallback(() => {
     try {
-      video.load();
+      if (!audioCtxRef.current) {
+        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioCtx) audioCtxRef.current = new AudioCtx();
+      }
+      if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
+        audioCtxRef.current.resume();
+      }
+      if (audioCtxRef.current) {
+        const ctx = audioCtxRef.current;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(1400, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(320, ctx.currentTime + 0.025);
+        gain.gain.setValueAtTime(0.015, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.025);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.03);
+      }
     } catch {}
-
-    // Check existing DOM hero video elements
-    if (typeof document !== "undefined") {
-      const domVideos = Array.from(document.querySelectorAll<HTMLVideoElement>("video"));
-      domVideos.forEach((v) => {
-        if (v.readyState >= 3) {
-          handleVideoReady();
-        } else {
-          v.addEventListener("canplaythrough", handleVideoReady, { once: true });
-          v.addEventListener("loadeddata", () => {
-            if (v.readyState >= 3) handleVideoReady();
-          });
-        }
-      });
-    }
-
-    const fallbackTimer = setTimeout(() => {
-      if (!videoHandled) handleVideoReady();
-      setProgress(100);
-      setIsReady(true);
-    }, 4500);
-
-    return () => {
-      mounted = false;
-      clearTimeout(fallbackTimer);
-      video.removeEventListener("canplaythrough", handleVideoReady);
-    };
   }, []);
 
-  useEffect(() => {
-    if (progress >= 100) {
-      setIsReady(true);
-    }
-  }, [progress]);
-
-  // Lock Lenis scroll while preloader is active
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const lenis = (window as any).lenis;
-      if (lenis && visible) {
-        lenis.stop();
+  // Resonant deep enter chime
+  const playEnterSound = useCallback(() => {
+    try {
+      if (!audioCtxRef.current) {
+        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioCtx) audioCtxRef.current = new AudioCtx();
       }
-    }
-  }, [visible]);
-
-  // 2. INTERACTIVE 3D MOUSE PARALLAX ON THE PHOTOREALISTIC WORKSTATION
-  useEffect(() => {
-    if (!roomStageRef.current) return;
-    const stage = roomStageRef.current;
-
-    let targetRotX = 0;
-    let targetRotY = 0;
-    let currentRotX = 0;
-    let currentRotY = 0;
-    let animId: number;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (isZooming) return;
-      const x = (e.clientX / window.innerWidth - 0.5) * 2;
-      const y = -(e.clientY / window.innerHeight - 0.5) * 2;
-      targetRotY = x * 2.8; // subtle horizontal 3D tilt
-      targetRotX = -y * 1.8; // subtle vertical 3D tilt
-    };
-
-    const updateParallax = () => {
-      if (!isZooming) {
-        currentRotX += (targetRotX - currentRotX) * 0.06;
-        currentRotY += (targetRotY - currentRotY) * 0.06;
-        stage.style.transform = `perspective(1400px) rotateX(${currentRotX.toFixed(
-          3
-        )}deg) rotateY(${currentRotY.toFixed(3)}deg) scale(1.01)`;
+      if (audioCtxRef.current) {
+        const ctx = audioCtxRef.current;
+        const now = ctx.currentTime;
+        // Warm low sub chime
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.exponentialRampToValueAtTime(110, now + 0.8);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.9);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(now + 0.95);
       }
-      animId = requestAnimationFrame(updateParallax);
-    };
+    } catch {}
+  }, []);
 
-    window.addEventListener("mousemove", handleMouseMove);
-    animId = requestAnimationFrame(updateParallax);
+  // Calm, single-line poetic status indicator
+  const getStatus = (p: number) => {
+    if (p < 25) return "CALIBRATING SPATIAL STUDIO CANVAS...";
+    if (p < 55) return "SYNTHESIZING 3D WORKSPACE GEOMETRY...";
+    if (p < 85) return "CALIBRATING NATURAL SUNLIGHT CAUSTICS...";
+    if (p < 100) return "HARMONIZING ATELIER SOUNDSCAPE...";
+    return "THE WORKSPACE IS PEACEFUL AND READY [ 100% ]";
+  };
 
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      cancelAnimationFrame(animId);
-    };
-  }, [isZooming]);
+  // Buffer and progress simulation
+  useEffect(() => {
+    let current = 0;
+    let tickCount = 0;
 
-  // 3. THE CINEMATIC 3D DOLLY ZOOM INTO THE LAPTOP SCREEN
+    const interval = setInterval(() => {
+      current += Math.floor(Math.random() * 4) + 2;
+      tickCount++;
+      if (tickCount % 4 === 0) playTickSound();
+
+      if (current >= 100) {
+        current = 100;
+        clearInterval(interval);
+        setProgress(100);
+        setIsReady(true);
+      } else {
+        setProgress(current);
+      }
+    }, 40);
+
+    return () => clearInterval(interval);
+  }, [playTickSound]);
+
+  // Handle entry transition into the 3D studio
   const handleTriggerEnter = useCallback(() => {
-    if (isZooming) return;
-    setIsZooming(true);
-    sounds.playCinematicWhoosh();
+    if (isEntering) return;
+    setIsEntering(true);
+    playEnterSound();
 
-    const tl = gsap.timeline({
-      onComplete: () => {
-        setVisible(false);
-        if (typeof window !== "undefined") {
-          const lenis = (window as any).lenis;
-          if (lenis) lenis.start();
-          import("gsap/dist/ScrollTrigger").then(({ ScrollTrigger }) => {
-            ScrollTrigger.refresh();
-          });
-        }
-      },
-    });
-
-    // A. Dolly zoom straight into the laptop screen center
-    // The screen is centered at X: 50%, Y: 54.8% of the 3D room render.
-    // Scaling by 3.98x makes the 25.15% width screen fill exactly 100vw!
-    if (roomStageRef.current) {
-      tl.to(
-        roomStageRef.current,
-        {
-          scale: 4.02,
-          transformOrigin: "50% 54.8%",
-          duration: 1.6,
-          ease: "power3.inOut",
-        },
-        0
-      );
-    }
-
-    // B. Optical White Flash / Bloom Veil as the camera breaches through the glass
-    if (bloomVeilRef.current) {
-      tl.fromTo(
-        bloomVeilRef.current,
-        { opacity: 0 },
-        { opacity: 0.95, duration: 0.5, ease: "power2.in" },
-        0.85
-      );
-    }
-
-    // C. Seamless crossfade to reveal living hero video
     if (containerRef.current) {
-      tl.to(
-        containerRef.current,
-        {
-          opacity: 0,
-          duration: 0.55,
-          ease: "power2.out",
+      gsap.to(containerRef.current, {
+        opacity: 0,
+        scale: 1.02,
+        duration: 0.85,
+        ease: "power2.inOut",
+        onComplete: () => {
+          setVisible(false);
+          if (onComplete) onComplete();
+          if (typeof window !== "undefined") {
+            const lenis = (window as any).lenis;
+            if (lenis) lenis.start();
+            import("gsap/dist/ScrollTrigger").then(({ ScrollTrigger }) => {
+              ScrollTrigger.refresh();
+            });
+          }
         },
-        1.15
-      );
+      });
     }
-  }, [isZooming]);
+  }, [isEntering, playEnterSound, onComplete]);
 
-  // Global keydown trigger on desktop
+  // Global keydown trigger
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (isReady && !isZooming) {
+      if (isReady && !isEntering) {
         if (e.key === "Enter" || e.code === "Space") {
           e.preventDefault();
+          handleTriggerEnter();
         }
-        handleTriggerEnter();
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isReady, isZooming, handleTriggerEnter]);
+  }, [isReady, isEntering, handleTriggerEnter]);
 
   if (!visible) return null;
 
@@ -571,127 +295,65 @@ export const TerraceBreezePreloader: React.FC = memo(() => {
     <div
       ref={containerRef}
       onClick={isReady ? handleTriggerEnter : undefined}
-      onTouchMove={(e) => {
-        if (!isZooming) e.stopPropagation();
-      }}
-      onWheel={(e) => {
-        if (!isZooming) e.stopPropagation();
-      }}
-      className={`fixed inset-0 z-[99999] bg-[#0E0F12] select-none overflow-hidden touch-none flex items-center justify-center ${
+      className={`fixed inset-0 z-[99999] bg-[#07080A] text-white flex flex-col justify-between p-6 sm:p-10 select-none overflow-hidden touch-none ${
         isReady ? "cursor-pointer" : "cursor-default"
       }`}
-      aria-label="Atelier 3D Workspace Preloader"
+      aria-label="Atelier Preloader"
     >
-      {/* 1. MASTER 3D WORKSPACE ROOM (Photorealistic 3D Render matching Wisq Reference) */}
-      <div
-        ref={roomStageRef}
-        className="relative w-full h-full flex items-center justify-center will-change-[transform]"
-        style={{
-          transformStyle: "preserve-3d",
-        }}
-      >
-        {/* Aspect-ratio locked canvas covering the viewport seamlessly without distortion */}
-        <div
-          className="relative shrink-0 flex items-center justify-center pointer-events-auto"
-          style={{
-            width: "max(100vw, calc(100vh * (1376 / 768)))",
-            height: "max(100vh, calc(100vw * (768 / 1376)))",
-            minWidth: "100%",
-            minHeight: "100%",
-          }}
-        >
-          <img
-            src="/assets/3d_room_workspace.jpg"
-            alt="3D Workstation Studio"
-            className="w-full h-full object-cover pointer-events-none select-none"
-          />
+      {/* Background Ambient Radial Glow */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_80%_60%_at_50%_45%,rgba(255,255,255,0.035),transparent_70%)]" />
 
-          {/* 2. THE EMBEDDED LAPTOP SCREEN (Pixel-perfect aligned to the 3D laptop monitor) */}
-          {/* Exact coordinates measured: left: 37.43%, top: 40.23%, width: 25.15%, height: 29.17% */}
-          <div
-            ref={laptopScreenRef}
-            className="absolute rounded-[4px] sm:rounded-[6px] overflow-hidden bg-[#07080A] text-white flex flex-col justify-between p-3 sm:p-5 md:p-6 shadow-[inset_0_0_12px_rgba(0,0,0,0.9)] border border-black/40"
-            style={{
-              left: "37.43%",
-              top: "40.23%",
-              width: "25.15%",
-              height: "29.17%",
-            }}
-          >
-            {/* Subtle Screen Diagonal Glass Glare */}
-            <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-transparent via-white/[0.02] to-white/[0.05]" />
-
-            {/* Quiet Screen Header */}
-            <div className="relative z-10 w-full flex items-center justify-between text-[7px] sm:text-[9px] md:text-[10px] font-mono tracking-[0.22em] uppercase text-white/45">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-white animate-pulse" />
-                <span className="text-white/80 font-medium truncate max-w-[90px] sm:max-w-none">
-                  SOHAM ROYCHOUDHURY
-                </span>
-              </div>
-              <div className="tracking-[0.2em] text-white/35 hidden sm:block">
-                ATELIER // 2026
-              </div>
-            </div>
-
-            {/* MINIMALISTIC CENTERPIECE: Elegant Breathing Room with Dot-Matrix Counter */}
-            <div className="relative z-10 my-auto w-full flex flex-col items-center justify-center px-2">
-              {/* Dot Matrix Percentage Counter */}
-              <div className="flex items-center justify-center gap-1 sm:gap-2 md:gap-2.5 mb-2 sm:mb-3">
-                <DotChar char={pStr[0]} size={3.2} gap={1.2} />
-                <DotChar char={pStr[1]} size={3.2} gap={1.2} />
-                <DotChar char={pStr[2]} size={3.2} gap={1.2} />
-                <DotChar char="%" size={3.2} gap={1.2} />
-              </div>
-
-              {/* Minimal Hairline Progress Bar */}
-              <div className="w-full max-w-[140px] sm:max-w-[200px] md:max-w-[240px] h-[1px] sm:h-[1.5px] bg-white/15 rounded-full overflow-hidden mb-2 sm:mb-3">
-                <div
-                  className="h-full bg-white transition-all duration-300 ease-out shadow-[0_0_8px_rgba(255,255,255,0.8)]"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-
-              {/* Serene Single-Line Status Indicator */}
-              <div className="text-[6.5px] sm:text-[8.5px] md:text-[9.5px] font-mono tracking-[0.18em] uppercase text-white/50 text-center truncate max-w-[90%]">
-                {getStatus(progress)}
-              </div>
-
-              {/* Tactile Enter Action Cue (Fades in at 100%) */}
-              {isReady && (
-                <div className="mt-2 sm:mt-3 inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full border border-white/25 bg-white/10 text-white font-mono text-[6.5px] sm:text-[8px] md:text-[9px] tracking-[0.2em] uppercase backdrop-blur-sm animate-pulse shadow-[0_2px_12px_rgba(0,0,0,0.5)]">
-                  <span className="w-1 h-1 rounded-full bg-white" />
-                  <span className="hidden sm:inline">Click or Press Enter</span>
-                  <span className="inline sm:hidden">Tap to Step Outside</span>
-                </div>
-              )}
-            </div>
-
-            {/* Screen Footer */}
-            <div className="relative z-10 w-full flex items-center justify-between text-[6.5px] sm:text-[8px] font-mono tracking-[0.18em] uppercase text-white/30 border-t border-white/[0.08] pt-1.5 sm:pt-2">
-              <span>HARDWARE OPTIMIZED</span>
-              <span>100% BUFFERED</span>
-            </div>
-          </div>
+      {/* Top Header: Atelier Identity */}
+      <div className="relative z-10 w-full flex items-center justify-between text-[8px] sm:text-[10px] font-mono tracking-[0.24em] uppercase text-white/40">
+        <div className="flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+          <span className="text-white/80 font-medium">SOHAM ROYCHOUDHURY</span>
+        </div>
+        <div className="tracking-[0.22em] text-white/35">
+          ATELIER // 2026
         </div>
       </div>
 
-      {/* 3. Floating Screen-Wide Interaction Pill Cue for Mobile & Desktop */}
-      {isReady && !isZooming && (
-        <div className="absolute bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 z-30 pointer-events-none animate-in fade-in zoom-in-95 duration-500">
-          <div className="inline-flex items-center gap-2.5 sm:gap-3 px-5 sm:px-7 py-2 sm:py-2.5 rounded-full border border-black/15 bg-white/85 text-black font-sans font-medium text-[9px] sm:text-[11px] tracking-[0.2em] uppercase backdrop-blur-md shadow-[0_12px_40px_rgba(0,0,0,0.25)] animate-pulse whitespace-nowrap">
-            <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-black shrink-0" />
-            <span className="hidden sm:inline">Press Enter or Click to Step Outside</span>
-            <span className="inline sm:hidden">Tap to Step Outside</span>
-          </div>
+      {/* Centerpiece: Clean Tactile Dot-Matrix Counter & Hairline Bar */}
+      <div className="relative z-10 my-auto w-full flex flex-col items-center justify-center max-w-xl mx-auto px-4">
+        {/* Dot Matrix Readout */}
+        <div className="flex items-center justify-center gap-2 sm:gap-3 mb-6 sm:mb-8">
+          <DotChar char={pStr[0]} size={4.5} gap={1.8} />
+          <DotChar char={pStr[1]} size={4.5} gap={1.8} />
+          <DotChar char={pStr[2]} size={4.5} gap={1.8} />
+          <DotChar char="%" size={4.5} gap={1.8} />
         </div>
-      )}
 
-      {/* 4. Optical White Flash / Bloom Veil upon 3D zoom penetration */}
-      <div
-        ref={bloomVeilRef}
-        className="absolute inset-0 pointer-events-none z-50 bg-white opacity-0"
-      />
+        {/* Minimal Hairline Progress Bar */}
+        <div className="w-full max-w-[220px] sm:max-w-[280px] h-[1.5px] bg-white/10 rounded-full overflow-hidden mb-5">
+          <div
+            className="h-full bg-white transition-all duration-300 ease-out shadow-[0_0_10px_rgba(255,255,255,0.85)]"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+
+        {/* Calm Poetic Status Telemetry */}
+        <div className="text-[8px] sm:text-[9.5px] font-mono tracking-[0.2em] uppercase text-white/45 text-center truncate max-w-full mb-8">
+          {getStatus(progress)}
+        </div>
+
+        {/* Tactile Entry Pill Button (Appears gracefully at 100%) */}
+        {isReady && (
+          <div className="animate-in fade-in zoom-in-95 duration-500">
+            <div className="inline-flex items-center gap-2.5 px-6 sm:px-8 py-2.5 sm:py-3 rounded-full border border-white/20 bg-white/10 text-white font-mono text-[8.5px] sm:text-[10px] tracking-[0.24em] uppercase backdrop-blur-md shadow-[0_4px_24px_rgba(0,0,0,0.6)] hover:bg-white hover:text-black transition-all duration-300">
+              <span className="w-1.5 h-1.5 rounded-full bg-current animate-ping" />
+              <span className="hidden sm:inline">Click or Press Enter to Step Inside</span>
+              <span className="inline sm:hidden">Tap to Step Inside</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Footer Details */}
+      <div className="relative z-10 w-full flex items-center justify-between text-[7px] sm:text-[8.5px] font-mono tracking-[0.2em] uppercase text-white/25 border-t border-white/[0.06] pt-3">
+        <span>HARDWARE ACCELERATED</span>
+        <span>STANDALONE EXPERIENCE</span>
+      </div>
     </div>
   );
 });

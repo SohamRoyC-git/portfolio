@@ -64,6 +64,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
   }, [menuOpen]);
 
   const links = [
+    { id: "monument-studio-3d", num: "00", label: "3D STUDIO", sub: "Interactive Spatial Desk & Portals" },
     { id: "monument-hero", num: "01", label: "INDEX", sub: "Terrace Perspective & Master Identity" },
     { id: "monument-statement", num: "02", label: "STATEMENT", sub: "Kinetic Intention & Digital Philosophy" },
     { id: "monument-creed", num: "03", label: "CREED", sub: "Education & Professional Foundations" },

@@ -16,6 +16,7 @@ import { ArchitecturalMatrix } from "@/components/master/ArchitecturalMatrix";
 import { TerminalFinale } from "@/components/master/TerminalFinale";
 import { SiteFooter } from "@/components/master/SiteFooter";
 import { TerraceBreezePreloader } from "@/components/master/TerraceBreezePreloader";
+import { Studio3DWorkspace } from "@/components/master/Studio3DWorkspace";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -26,7 +27,7 @@ if (typeof window !== "undefined") {
 }
 
 export default function Home() {
-  const [activeId, setActiveId] = useState("monument-hero");
+  const [activeId, setActiveId] = useState("monument-studio-3d");
   const lenisRef = useRef<Lenis | null>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
 
@@ -103,6 +104,7 @@ export default function Home() {
   // Section Observer for Navigation Spy
   useEffect(() => {
     const sectionIds = [
+      "monument-studio-3d",
       "monument-hero",
       "monument-statement",
       "monument-creed",
@@ -167,7 +169,15 @@ export default function Home() {
         style={{ WebkitOverflowScrolling: "touch" }}
       >
         <main className="relative z-10">
-        {/* Movement 00: Monumental Hero (Sticky at top on desktop so Movement 01 wipes over it) */}
+        {/* Movement 00: Interactive 3D Studio Workspace (Spatial Desk & Portals) */}
+        <div id="monument-studio-3d" className="relative w-full h-[100svh] z-20">
+          <Studio3DWorkspace
+            onEnterPortfolio={() => handleNavigate("monument-hero")}
+            onNavigateToSection={handleNavigate}
+          />
+        </div>
+
+        {/* Movement 01: Monumental Hero (Sticky at top on desktop so Movement 01 wipes over it) */}
         <div id="hero-wrapper" className="relative w-full z-10 overflow-x-clip md:sticky md:top-0 md:h-[100svh] will-change-[transform,opacity]">
           <MonumentalHero onExplore={() => handleNavigate("monument-statement")} onConnect={() => handleNavigate("monument-terminal")} />
         </div>

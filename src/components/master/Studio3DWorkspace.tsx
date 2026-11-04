@@ -50,6 +50,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   const prevMouseLocalPosRef = useRef(new THREE.Vector3(0, 0, 0));
   const mouseVelocityRef = useRef(new THREE.Vector2(0, 0));
   const mouseNormRef = useRef({ x: 0, y: 0 });
+  const gyroTiltRef = useRef({ x: 0, y: 0 });
 
   // Black hole phases: absorption (0-2.5s), singularity void (>2.5s), reverse unspooling
   const isAbsorbedRef = useRef(false);
@@ -318,8 +319,8 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     const scene = new THREE.Scene();
     sceneRef.current = scene;
 
-    const camera = new THREE.PerspectiveCamera(isMobile ? 54 : 45, width / height, 0.1, 100);
-    camera.position.set(0, 0, isMobile ? 3.8 : 3.2);
+    const camera = new THREE.PerspectiveCamera(isMobile ? 56 : 45, width / height, 0.1, 100);
+    camera.position.set(0, 0, isMobile ? 3.5 : 3.2);
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
@@ -335,7 +336,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     renderer.toneMappingExposure = 1.35;
     container.appendChild(renderer.domElement);
 
-    // 3. CINEMATIC VOLUMETRIC STUDIO SMOKE BACKGROUND (Fullscreen Shader Quad)
+    // 3. VELVET OBSIDIAN STUDIO MIST BACKGROUND (Fullscreen Volumetric Shader Quad)
     const smokeQuadGeo = new THREE.PlaneGeometry(2, 2);
     const smokeMat = new THREE.ShaderMaterial({
       depthWrite: false,
@@ -382,26 +383,29 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
         void main() {
           vec2 p = (vUv - 0.5) * vec2(uResolution.x / uResolution.y, 1.0);
-          float t = uTime * 0.035;
+          float t = uTime * 0.022; // Silky, slow volumetric evolution
 
-          vec2 smokeCoord = p * 1.35 + vec2(sin(t * 0.4) * 0.20, t * 0.16);
+          vec2 smokeCoord = p * 1.15 + vec2(sin(t * 0.35) * 0.15, t * 0.12);
           float s1 = fbm(smokeCoord);
-          float s2 = fbm(smokeCoord + vec2(s1 * 0.7, s1 * 0.4));
+          float s2 = fbm(smokeCoord + vec2(s1 * 0.6, s1 * 0.4));
 
-          vec3 darkBg = vec3(0.022, 0.024, 0.030);
-          vec3 smokeColor = vec3(0.065, 0.062, 0.056);
+          // Velvet Obsidian Studio Mist (Deep, luxurious dark tones with soft champagne core depth)
+          vec3 deepObsidian = vec3(0.024, 0.025, 0.032); // #06070B rich dark base
+          vec3 velvetSmoke  = vec3(0.052, 0.050, 0.046); // warm charcoal-taupe mist
+          vec3 coreAmbient  = vec3(0.078, 0.068, 0.054); // warm champagne depth glow
 
-          float vignette = 1.0 - smoothstep(0.3, 1.4, length(p));
-          vec3 col = mix(darkBg, smokeColor, s2 * 0.65) * vignette;
+          float dist = length(p);
+          float vignette = 1.0 - smoothstep(0.25, 1.35, dist);
 
-          // Subtle ambient celestial star particles in smoke
-          float starNoise = hash(floor(p * 180.0));
-          if (starNoise > 0.996) {
-            float blink = sin(uTime * 3.0 + starNoise * 100.0) * 0.5 + 0.5;
-            col += vec3(0.9, 0.85, 0.75) * blink * 0.35;
-          }
+          // Subtle ambient central depth glow behind the attractor (no digital dots or blinking stars!)
+          float coreGlow = exp(-dist * 2.2) * 0.55;
 
-          float grain = (hash(vUv * 500.0 + fract(uTime)) - 0.5) * 0.018;
+          vec3 col = mix(deepObsidian, velvetSmoke, s2 * 0.65);
+          col += coreAmbient * coreGlow * (0.85 + 0.15 * s1);
+          col *= vignette;
+
+          // Pure tactile micro analog film grain
+          float grain = (hash(vUv * 640.0 + fract(uTime * 0.5)) - 0.5) * 0.010;
           col += grain;
 
           gl_FragColor = vec4(col, 1.0);
@@ -572,8 +576,9 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       }
     }
 
-    // 7. PARTICLES INITIALIZATION: ELEGANT RIBBON FLOW (IMURUN Reference Style)
-    const PARTICLE_COUNT = isMobile ? 18000 : 28000;
+    // 7. PARTICLES INITIALIZATION: GOLDEN MIDDLE GROUND (12,000 Desktop / 7,500 Mobile)
+    // Distinct, sparkling individual stardust embers with crystal-clear negative space
+    const PARTICLE_COUNT = isMobile ? 7500 : 12000;
     const currentPositions = new Float32Array(PARTICLE_COUNT * 3);
     const targetPositions = new Float32Array(PARTICLE_COUNT * 3);
     const velocities = new Float32Array(PARTICLE_COUNT * 3);
@@ -607,8 +612,8 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       // Calibrated speed: 50 to 75 steps per second (clearly visible, elegant flow)
       particleSpeeds[i] = Math.random() * 25.0 + 50.0;
 
-      // Delicate cross-sectional ribbon width around the curve
-      particleRadii[i] = Math.random() * 0.016 + 0.003;
+      // Delicate cross-sectional ribbon width around the curve (ample breathing room)
+      particleRadii[i] = Math.random() * 0.020 + 0.004;
       particleAngles[i] = Math.random() * Math.PI * 2;
 
       const baseIdx = Math.floor(particleIndices[i]) % LORENZ_STEPS;
@@ -639,7 +644,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       particleColors[i3 + 1] = shade[1] + (Math.random() - 0.5) * 0.02;
       particleColors[i3 + 2] = shade[2] + (Math.random() - 0.5) * 0.02;
 
-      particleSizes[i] = Math.random() * 1.4 + 1.2;
+      particleSizes[i] = Math.random() * 1.6 + 1.3;
       particleScales[i] = 1.0;
     }
 
@@ -715,7 +720,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           float d = length(coord);
           if (d > 0.5) discard;
 
-          float alpha = smoothstep(0.5, 0.04, d) * (0.94 + vWarp * 0.06) * vScale;
+          float alpha = smoothstep(0.5, 0.02, d) * (0.86 + vWarp * 0.14) * vScale;
           // Warp stars turn into brilliant white/champagne lightspeed needles
           vec3 finalColor = mix(vColor, vec3(1.0, 1.0, 1.0), vWarp * 0.94);
           gl_FragColor = vec4(finalColor, alpha);
@@ -763,25 +768,30 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       }
     };
 
-    // POINTER DOWN: Record position & initiate 2.5s Black Hole Absorption
+    // POINTER DOWN: Record position & initiate Cascading Accretion Black Hole Intake
     const holdTimerRef = { id: 0 as any };
     const onPointerDown = (e: PointerEvent) => {
       updateMousePos(e.clientX, e.clientY);
       pointerDownPosRef.current = { x: e.clientX, y: e.clientY };
       holdStartRef.current = performance.now();
 
-      // Trigger Black Hole after 140ms
+      // Mobile haptic vibration on touch engagement
+      if (typeof navigator !== "undefined" && navigator.vibrate) {
+        navigator.vibrate(18);
+      }
+
+      // Trigger Black Hole after 120ms
       holdTimerRef.id = setTimeout(() => {
         isHoldingRef.current = true;
         isAbsorbedRef.current = false;
         isUnspoolingRef.current = false;
         blackHolePosRef.current.copy(mouseLocalPosRef.current);
         startBlackHoleSound();
-        setInteractionHint("BLACK HOLE ACTIVE · ABSORBING ATTRACTOR INTO SINGULARITY");
-      }, 140);
+        setInteractionHint("BLACK HOLE ENGAGED · INTAKE OF ACCRETION STREAM");
+      }, 120);
     };
 
-    // POINTER UP: Multi-Phase Cosmic Supernova & Nebular Bloom, or Hyperspace Jump
+    // POINTER UP: Reverse Unspooling Supernova & Nebular Bloom, or Hyperspace Jump
     const onPointerUp = (e: PointerEvent) => {
       clearTimeout(holdTimerRef.id);
       const pressDuration = performance.now() - holdStartRef.current;
@@ -789,16 +799,20 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       const dy = Math.abs(e.clientY - pointerDownPosRef.current.y);
 
       if (isHoldingRef.current) {
-        // Was holding: Release into Multi-Phase Cosmic Supernova & Nebular Bloom!
+        // Was holding: Release into Reverse Unspooling Supernova Bloom!
         isHoldingRef.current = false;
         isAbsorbedRef.current = false;
         isUnspoolingRef.current = true;
         unspoolStartTimeRef.current = performance.now();
         stopBlackHoleSound();
         playCosmicReleaseSound();
-        setInteractionHint("SUPERNOVA RELEASE · SPIRAL NEBULAR BLOOM TO EQUILIBRIUM");
 
-        // Set outward velocity with Coriolis vortex swirl around singularity
+        if (typeof navigator !== "undefined" && navigator.vibrate) {
+          navigator.vibrate([35, 40, 20]);
+        }
+        setInteractionHint("SUPERNOVA RELEASE · STREAM REVERSING TO EQUILIBRIUM");
+
+        // Set outward velocity unwinding along reverse accretion vortex
         const bh = blackHolePosRef.current;
         for (let i = 0; i < PARTICLE_COUNT; i++) {
           const i3 = i * 3;
@@ -823,17 +837,17 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           const uY = dirY / dist;
           const uZ = dirZ / dist;
 
-          // Tangential Coriolis swirl vector around z-axis: (-uY, uX, 0)
-          const swirlStrength = 0.014 + (i % 7) * 0.002;
-          const swirlX = -uY * swirlStrength;
-          const swirlY = uX * swirlStrength;
+          // Reverse accretion swirl vector: unwinds along natural stream curve
+          const revSwirlStrength = 0.016 + (i % 7) * 0.002;
+          const revSwirlX = -uY * revSwirlStrength;
+          const revSwirlY = uX * revSwirlStrength;
 
-          // Outward burst speed: perfectly calibrated to screen space (0.025 to 0.045 units/frame)
+          // Outward burst speed: perfectly calibrated to screen space (0.024 to 0.038 units/frame)
           const stagger = 0.88 + (i % 19) * 0.012;
-          const burstSpeed = (Math.min(dist * 0.032, 0.038) + 0.014) * stagger;
+          const burstSpeed = (Math.min(dist * 0.032, 0.038) + 0.012) * stagger;
 
-          velocities[i3] = uX * burstSpeed + swirlX;
-          velocities[i3 + 1] = uY * burstSpeed + swirlY;
+          velocities[i3] = uX * burstSpeed + revSwirlX;
+          velocities[i3 + 1] = uY * burstSpeed + revSwirlY;
           velocities[i3 + 2] = uZ * burstSpeed + (Math.random() - 0.5) * 0.006;
 
           // Micro-flare scale on detonation
@@ -868,10 +882,10 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       particleMat.uniforms.uWarpProgress.value = warpProgressRef.current;
       pulsatingLightMat.uniforms.uTime.value = elapsed;
 
-      // A. DYNAMIC 3D PERSPECTIVE TILT TOWARDS CURSOR
+      // A. DYNAMIC 3D PERSPECTIVE TILT TOWARDS CURSOR & GYROSCOPE
       if (attractorGroupRef.current) {
-        const targetTiltX = -mouseNormRef.current.y * 0.42;
-        const targetTiltY = mouseNormRef.current.x * 0.48;
+        const targetTiltX = -mouseNormRef.current.y * 0.42 + gyroTiltRef.current.y * 0.32;
+        const targetTiltY = mouseNormRef.current.x * 0.48 + gyroTiltRef.current.x * 0.36;
         attractorGroupRef.current.rotation.x += (targetTiltX - attractorGroupRef.current.rotation.x) * 0.06;
         attractorGroupRef.current.rotation.y += (targetTiltY - attractorGroupRef.current.rotation.y) * 0.06;
       }
@@ -882,6 +896,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       const bh = blackHolePosRef.current;
       const holdDuration = isHolding ? (performance.now() - holdStartRef.current) / 1000.0 : 0;
       const timeSinceUnspool = isUnspooling ? (performance.now() - unspoolStartTimeRef.current) / 1000.0 : 999.0;
+      const maxHoldDuration = isMobile ? 2.0 : 2.8;
 
       if (isHolding) {
         blackHoleGroup.visible = true;
@@ -889,10 +904,13 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         shockwaveMesh.visible = false;
         shockwaveMat.uniforms.uProgress.value = 1.0;
 
-        if (holdDuration >= 2.5) {
-          // After 2.5s: Fully absorbed singularity void! Pulsating celestial photon light at hold point
+        if (holdDuration >= maxHoldDuration) {
+          // After full intake: Singularity void with pulsating celestial photon light at hold point
           if (!isAbsorbedRef.current) {
             isAbsorbedRef.current = true;
+            if (typeof navigator !== "undefined" && navigator.vibrate) {
+              navigator.vibrate([25, 60, 35]);
+            }
             setInteractionHint("SINGULARITY VOID · PULSATING CORE · RELEASE FOR SUPERNOVA");
           }
           const pulseScale = 1.0 + Math.sin(elapsed * 4.2) * 0.12;
@@ -900,7 +918,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           eventHorizonMesh.scale.set(1.0, 1.0, 1.0);
           pulsatingLightMesh.scale.set(1.0, 1.0, 1.0);
         } else {
-          // Sucking in phase (0 to 2.5s)
+          // Sucking in phase: Event horizon expands as it feeds on the incoming stream
           const targetScale = Math.min(holdDuration / 0.8, 1.0) * (1.0 + Math.sin(elapsed * 8.0) * 0.05);
           blackHoleGroup.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.18);
           eventHorizonMesh.scale.set(1.0, 1.0, 1.0);
@@ -940,7 +958,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       const velArr = velocities;
       const scaleArr = particleScales;
       const isWarping = isTransitioningRef.current;
-      const brushRadius = isMobile ? 0.22 : 0.18;
+      const brushRadius = isMobile ? 0.24 : 0.18;
 
       for (let i = 0; i < PARTICLE_COUNT; i++) {
         const i3 = i * 3;
@@ -969,35 +987,87 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             py = Math.sin(theta) * r;
           }
         } else if (isHolding) {
-          // BLACK HOLE INWARD ABSORPTION (2.5 SECONDS)
+          // CASCADING ACCRETION STREAM INTAKE (SLOW, CINEMATIC, INTEGRATED INTO SCENE)
+          // Stream coordinates continue advancing along Lorenz manifold
+          let pIdx = particleIndices[i] + particleSpeeds[i] * delta;
+          if (pIdx >= LORENZ_STEPS) pIdx -= LORENZ_STEPS;
+          particleIndices[i] = pIdx;
+
+          const idxA = Math.floor(pIdx) % LORENZ_STEPS;
+          const idxB = (idxA + 1) % LORENZ_STEPS;
+          const frac = pIdx - Math.floor(pIdx);
+
+          const idxA3 = idxA * 3;
+          const idxB3 = idxB * 3;
+          const bx = lorenzPath[idxA3] + (lorenzPath[idxB3] - lorenzPath[idxA3]) * frac;
+          const by = lorenzPath[idxA3 + 1] + (lorenzPath[idxB3 + 1] - lorenzPath[idxA3 + 1]) * frac;
+          const bz = lorenzPath[idxA3 + 2] + (lorenzPath[idxB3 + 2] - lorenzPath[idxA3 + 2]) * frac;
+
+          const r = particleRadii[i];
+          const theta = particleAngles[i];
+          const tx = bx + Math.cos(theta) * r;
+          const ty = by + Math.sin(theta) * r;
+          const tz = bz;
+
+          targetArr[i3] = tx;
+          targetArr[i3 + 1] = ty;
+          targetArr[i3 + 2] = tz;
+
           const dx = bh.x - px;
           const dy = bh.y - py;
           const dz = bh.z - pz;
-          const dist = Math.sqrt(dx * dx + dy * dy + dz * dz) + 0.01;
+          const dist = Math.sqrt(dx * dx + dy * dy + dz * dz) + 0.001;
 
-          if (holdDuration >= 2.5 || dist < 0.025) {
-            // Fully absorbed into the singularity core!
+          const distStream = Math.sqrt(
+            (bh.x - tx) * (bh.x - tx) + (bh.y - ty) * (bh.y - ty) + (bh.z - tz) * (bh.z - tz)
+          );
+
+          const maxHold = isMobile ? 2.0 : 2.8;
+          const hProg = Math.min(1.0, holdDuration / maxHold);
+          // Gravitational horizon expands progressively over time (cascading intake)
+          const rGrav = 0.22 + hProg * 2.8;
+
+          if (hProg >= 1.0 || dist < 0.024) {
+            // Fully swallowed inside event horizon!
             px = bh.x;
             py = bh.y;
             pz = bh.z;
             vx = 0;
             vy = 0;
             vz = 0;
-            scl = Math.max(0.0, scl - delta * 4.0);
-          } else {
-            // Pure direct inward suction accelerating smoothly over 2.5s
-            const accel = 6.2 + (holdDuration / 2.5) * 8.5;
-            const pull = accel / (dist + 0.04);
-            vx += (dx / dist) * pull * delta;
-            vy += (dy / dist) * pull * delta;
-            vz += (dz / dist) * pull * delta;
+            scl = Math.max(0.0, scl - delta * 3.6);
+          } else if (distStream <= rGrav || dist < 0.35) {
+            // Captured in the swirling accretion stream into the singularity!
+            const uX = dx / dist;
+            const uY = dy / dist;
+            const uZ = dz / dist;
+
+            // Relativistic accretion vortex swirl around black hole core
+            const swirlSpeed = 0.012 / (dist + 0.08);
+            const swirlX = -uY * swirlSpeed;
+            const swirlY = uX * swirlSpeed;
+
+            // Inward suction rate accelerates near singularity
+            const suctionRate = 0.014 + hProg * 0.022 + 0.003 / (dist + 0.04);
+            vx += (uX * suctionRate + swirlX) * (delta * 60);
+            vy += (uY * suctionRate + swirlY) * (delta * 60);
+            vz += (uZ * suctionRate) * (delta * 60);
 
             if (dist < 0.12) {
               scl = Math.max(0.0, dist / 0.12);
             }
-            vx *= 0.92;
-            vy *= 0.92;
-            vz *= 0.92;
+            vx *= 0.90;
+            vy *= 0.90;
+            vz *= 0.90;
+          } else {
+            // Outside gravitational reach: continues natural flow along Lorenz attractor towards intake
+            const springK = 2.4;
+            vx += (tx - px) * springK * delta;
+            vy += (ty - py) * springK * delta;
+            vz += (tz - pz) * springK * delta;
+            vx *= 0.91;
+            vy *= 0.91;
+            vz *= 0.91;
           }
         } else if (isUnspooling) {
           // MULTI-STAGE COSMIC SUPERNOVA & NEBULAR BLOOM (Elegantly timed across 2.4s)
@@ -1136,21 +1206,36 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       const mobile = w / h < 1.0;
 
       cameraRef.current.aspect = w / h;
-      cameraRef.current.fov = mobile ? 54 : 45;
-      cameraRef.current.position.z = mobile ? 3.8 : 3.2;
+      cameraRef.current.fov = mobile ? 56 : 45;
+      cameraRef.current.position.z = mobile ? 3.5 : 3.2;
       cameraRef.current.updateProjectionMatrix();
 
       smokeMat.uniforms.uResolution.value.set(w, h);
       rendererRef.current.setSize(w, h);
     };
 
+    // Mobile Gyroscope 3D Tilt Parallax
+    const handleDeviceOrientation = (e: DeviceOrientationEvent) => {
+      if (e.gamma !== null && e.beta !== null) {
+        const gx = Math.max(-1.0, Math.min(1.0, e.gamma / 30.0));
+        const gy = Math.max(-1.0, Math.min(1.0, (e.beta - 40.0) / 30.0));
+        gyroTiltRef.current = { x: gx, y: gy };
+      }
+    };
+
     window.addEventListener("resize", handleResize);
+    if (typeof window !== "undefined" && window.DeviceOrientationEvent) {
+      window.addEventListener("deviceorientation", handleDeviceOrientation);
+    }
 
     return () => {
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("resize", handleResize);
+      if (typeof window !== "undefined" && window.DeviceOrientationEvent) {
+        window.removeEventListener("deviceorientation", handleDeviceOrientation);
+      }
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
       if (warpFlashRef.current) gsap.killTweensOf(warpFlashRef.current);
       if (cameraRef.current) gsap.killTweensOf(cameraRef.current.position);

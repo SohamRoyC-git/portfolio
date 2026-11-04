@@ -57,6 +57,13 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   const isUnspoolingRef = useRef(false);
   const unspoolStartTimeRef = useRef(0);
 
+  // Typography Gravitational Lensing, Event Horizon Suction & Supernova Flash
+  const textLensingRef = useRef(0);
+  const textAlphaRef = useRef(1.0);
+  const textFlareRef = useRef(0);
+  const textMeshRef = useRef<THREE.Mesh | null>(null);
+  const textReturnTriggeredRef = useRef(false);
+
   // Hyperspace transition state (sustained 3.8 seconds)
   const isTransitioningRef = useRef(false);
   const warpProgressRef = useRef(0);
@@ -238,6 +245,13 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         cameraRef.current.lookAt(0, 0, 0);
       }
       gsap.killTweensOf(warpProgressRef);
+      gsap.killTweensOf(textLensingRef);
+      gsap.killTweensOf(textAlphaRef);
+      gsap.killTweensOf(textFlareRef);
+      textLensingRef.current = 0;
+      textAlphaRef.current = 1.0;
+      textFlareRef.current = 0;
+      textReturnTriggeredRef.current = false;
       warpProgressRef.current = 0;
       isTransitioningRef.current = false;
       isHoldingRef.current = false;
@@ -435,6 +449,126 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     const attractorGroup = new THREE.Group();
     scene.add(attractorGroup);
     attractorGroupRef.current = attractorGroup;
+
+    // 4B. GIANT ARCHITECTURAL HOLLOW TYPOGRAPHY (WELCOME ... TO ... MY PORTFOLIO)
+    const textCanvas = document.createElement("canvas");
+    textCanvas.width = 2560;
+    textCanvas.height = 1440;
+    const tCtx = textCanvas.getContext("2d");
+    if (tCtx) {
+      tCtx.clearRect(0, 0, 2560, 1440);
+
+      // Hollow architectural outline: 2.6px fine champagne stroke, transparent fill
+      tCtx.strokeStyle = "rgba(240, 226, 208, 0.40)";
+      tCtx.lineWidth = 2.6;
+      tCtx.textAlign = "center";
+      tCtx.textBaseline = "middle";
+
+      // 1. Top Line: W E L C O M E (Stretched edge-to-edge from W to E)
+      const welcomeFontSize = isMobile ? 125 : 165;
+      tCtx.font = `900 ${welcomeFontSize}px 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`;
+      const welcomeChars = ["W", "E", "L", "C", "O", "M", "E"];
+      const startX = isMobile ? 130 : 160;
+      const endX = isMobile ? 2430 : 2400;
+      const stepX = (endX - startX) / (welcomeChars.length - 1);
+      const topY = isMobile ? 160 : 190;
+      for (let i = 0; i < welcomeChars.length; i++) {
+        tCtx.strokeText(welcomeChars[i], startX + i * stepX, topY);
+      }
+
+      // 2. Center Word: T O (Nested directly behind the Lorenz attractor butterfly knot)
+      const toFontSize = isMobile ? 135 : 160;
+      tCtx.font = `900 ${toFontSize}px 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`;
+      tCtx.strokeText("T O", 1280, 720);
+
+      // 3. Bottom Line: M Y   P O R T F O L I O (Stretched edge-to-edge from M to O)
+      const portfolioFontSize = isMobile ? 95 : 125;
+      tCtx.font = `900 ${portfolioFontSize}px 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`;
+      const portfolioItems = ["M", "Y", " ", "P", "O", "R", "T", "F", "O", "L", "I", "O"];
+      const pStartX = isMobile ? 130 : 160;
+      const pEndX = isMobile ? 2430 : 2400;
+      const pStepX = (pEndX - pStartX) / (portfolioItems.length - 1);
+      const bottomY = isMobile ? 1280 : 1250;
+      for (let i = 0; i < portfolioItems.length; i++) {
+        if (portfolioItems[i] !== " ") {
+          tCtx.strokeText(portfolioItems[i], pStartX + i * pStepX, bottomY);
+        }
+      }
+    }
+
+    const textTexture = new THREE.CanvasTexture(textCanvas);
+    textTexture.minFilter = THREE.LinearFilter;
+    textTexture.magFilter = THREE.LinearFilter;
+
+    // Subdivided plane mesh for non-linear spacetime gravitational warping
+    const textGeo = new THREE.PlaneGeometry(isMobile ? 2.6 : 4.85, isMobile ? 4.1 : 2.73, 64, 36);
+    const textMat = new THREE.ShaderMaterial({
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.NormalBlending,
+      uniforms: {
+        uTexture: { value: textTexture },
+        uBlackHole: { value: new THREE.Vector2(0, 0) },
+        uLensing: { value: 0.0 },
+        uTextAlpha: { value: 1.0 },
+        uFlare: { value: 0.0 },
+      },
+      vertexShader: `
+        uniform vec2 uBlackHole;
+        uniform float uLensing;
+        varying vec2 vUv;
+
+        void main() {
+          vUv = uv;
+          vec3 pos = position;
+
+          if (uLensing > 0.0001) {
+            vec2 toBh = uBlackHole - pos.xy;
+            float dist = length(toBh);
+
+            // Gravitational Einstein warp:
+            // Non-linear suction towards the singularity point (uBlackHole)
+            float pull = pow(uLensing, 1.4);
+            pos.xy += toBh * min(1.0, pull * (0.85 + 0.35 / (dist + 0.2)));
+            
+            // Dip into gravitational well
+            pos.z -= pull * exp(-dist * 1.8) * 0.45;
+          }
+
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform sampler2D uTexture;
+        uniform float uLensing;
+        uniform float uTextAlpha;
+        uniform float uFlare;
+        varying vec2 vUv;
+
+        void main() {
+          vec4 col = texture2D(uTexture, vUv);
+          if (col.a < 0.01) discard;
+
+          // Supernova flash luminosity flare on return
+          vec3 hotChampagne = vec3(1.0, 0.97, 0.90);
+          col.rgb = mix(col.rgb, hotChampagne, uFlare * 0.8);
+
+          // Progressive opacity fade as text collapses into the singularity
+          float alpha = col.a * uTextAlpha;
+          if (uLensing > 0.8) {
+            alpha *= max(0.0, (1.0 - uLensing) / 0.2);
+          }
+
+          gl_FragColor = vec4(col.rgb, alpha);
+        }
+      `,
+    });
+
+    const textMesh = new THREE.Mesh(textGeo, textMat);
+    textMesh.position.set(0, 0, -0.32);
+    textMesh.renderOrder = 5;
+    attractorGroup.add(textMesh);
+    textMeshRef.current = textMesh;
 
     // 5. BLACK HOLE VISUAL ENTITY (Event Horizon Void + Pulsating Celestial Photon Ring)
     const blackHoleGroup = new THREE.Group();
@@ -808,7 +942,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       }, 120);
     };
 
-    // POINTER UP: 3D Volumetric Supernova Burst & Slow Celestial Condensation, or Hyperspace Jump
+    // POINTER UP: Reverse Accretion River Supernova & Spacetime Typography Restoration
     const onPointerUp = (e: PointerEvent) => {
       clearTimeout(holdTimerRef.id);
       const pressDuration = performance.now() - holdStartRef.current;
@@ -816,65 +950,53 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       const dy = Math.abs(e.clientY - pointerDownPosRef.current.y);
 
       if (isHoldingRef.current) {
-        // Was holding: Detonate 3D Volumetric Supernova into Slow Condensation!
+        // Was holding: Initiate Sequential Reverse Accretion River!
         isHoldingRef.current = false;
         isAbsorbedRef.current = false;
         isUnspoolingRef.current = true;
         unspoolStartTimeRef.current = performance.now();
+        textReturnTriggeredRef.current = false;
         stopBlackHoleSound();
         playCosmicReleaseSound();
 
         if (typeof navigator !== "undefined" && navigator.vibrate) {
           navigator.vibrate([35, 40, 20]);
         }
-        setInteractionHint("SUPERNOVA RELEASE · STARDUST SLOWLY CONDENSING INTO EQUILIBRIUM");
+        setInteractionHint("REVERSE ACCRETION RIVER · STARDUST STREAMING OUT OF SINGULARITY");
 
-        // True 3D volumetric starburst outward from singularity
+        gsap.killTweensOf(textLensingRef);
+        gsap.killTweensOf(textAlphaRef);
+        gsap.killTweensOf(textFlareRef);
+
+        // If text was sucked in (or in process of being sucked in), keep it collapsed until particles flow back!
+        if (textLensingRef.current > 0.3) {
+          textLensingRef.current = 1.0;
+          textAlphaRef.current = 0.0;
+        } else {
+          // If released early before text started suction:
+          gsap.to(textLensingRef, { current: 0.0, duration: 0.5, ease: "power2.out" });
+          gsap.to(textAlphaRef, { current: 1.0, duration: 0.5, ease: "power2.out" });
+        }
+
+        // Initialize particles at the singularity point with zero velocity and zero scale
+        // They will emerge sequentially as a continuous flowing river of stardust
         const bh = blackHolePosRef.current;
         for (let i = 0; i < PARTICLE_COUNT; i++) {
           const i3 = i * 3;
-          const tx = targetPositions[i3];
-          const ty = targetPositions[i3 + 1];
-          const tz = targetPositions[i3 + 2];
-
-          let dirX = tx - bh.x;
-          let dirY = ty - bh.y;
-          let dirZ = tz - bh.z;
-          let dist = Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
-
-          if (dist < 0.001) {
-            const angle = Math.random() * Math.PI * 2;
-            dirX = Math.cos(angle);
-            dirY = Math.sin(angle);
-            dirZ = (Math.random() - 0.5) * 0.4;
-            dist = 1.0;
-          }
-
-          // Full 3D spherical dispersion cone (depth and radial dispersion)
-          const angle = Math.atan2(dirY, dirX) + (Math.random() - 0.5) * 0.55;
-          const elevation = (Math.random() - 0.5) * Math.PI * 0.70;
-          const cosElev = Math.cos(elevation);
-          const uX = Math.cos(angle) * cosElev;
-          const uY = Math.sin(angle) * cosElev;
-          const uZ = Math.sin(elevation);
-
-          // Calibrated volumetric burst speed (0.020 to 0.045 units/frame)
-          const stagger = 0.85 + (i % 23) * 0.014;
-          const burstSpeed = (Math.min(dist * 0.034, 0.044) + 0.016) * stagger;
-
-          velocities[i3] = uX * burstSpeed;
-          velocities[i3 + 1] = uY * burstSpeed;
-          velocities[i3 + 2] = uZ * burstSpeed;
-
-          // Micro-flare scale on detonation
-          particleScales[i] = 0.45 + Math.random() * 0.40;
+          currentPositions[i3] = bh.x;
+          currentPositions[i3 + 1] = bh.y;
+          currentPositions[i3 + 2] = bh.z;
+          velocities[i3] = 0;
+          velocities[i3 + 1] = 0;
+          velocities[i3 + 2] = 0;
+          particleScales[i] = 0.0;
         }
 
-        // Full 3.8s sequence allows stardust to slowly, gracefully coalesce into Lorenz wings
+        // Slower 4.6s timeline gives plenty of time for river unspooling followed by typography restoration
         setTimeout(() => {
           isUnspoolingRef.current = false;
           setInteractionHint("MOVE TO DISTURB · HOLD TO CONDENSE MANIFOLD · WARP TO ARCHIVE");
-        }, 3800);
+        }, 4600);
       } else if (pressDuration < 220 && dx < 15 && dy < 15) {
         // Quick single click/tap: Star Wars Lightspeed Hyperspace Jump!
         triggerWarpTransition();
@@ -1043,9 +1165,9 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           );
 
           // Gravitational horizon expands progressively across the entire screen
-          const rGrav = 0.35 + holdDuration * 2.2;
+          const rGrav = 0.30 + holdDuration * 1.6;
 
-          if (dist < 0.018) {
+          if (dist < 0.022) {
             // Swallowed cleanly inside the singularity void core
             px = bh.x;
             py = bh.y;
@@ -1062,20 +1184,21 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             const uZ = dz / dist;
 
             // Inward relativistic acceleration that increases as particles plunge towards the core
-            const inwardAccel = 0.024 + Math.min(holdDuration * 0.015, 0.035) + 0.008 / (dist + 0.025);
+            // Slower, weighted, cinematic suction
+            const inwardAccel = 0.016 + Math.min(holdDuration * 0.010, 0.022) + 0.005 / (dist + 0.040);
             vx += uX * inwardAccel * (delta * 60);
             vy += uY * inwardAccel * (delta * 60);
             vz += uZ * inwardAccel * (delta * 60);
 
-            // Smooth scale attenuation ONLY right at the doorstep of the singularity core (0.15 to 0.018)
-            if (dist < 0.15) {
-              scl = Math.max(0.0, (dist - 0.018) / 0.132);
+            // Smooth scale attenuation ONLY right at the doorstep of the singularity core (0.16 to 0.022)
+            if (dist < 0.16) {
+              scl = Math.max(0.0, (dist - 0.022) / 0.138);
             } else {
               scl = 1.0;
             }
-            vx *= 0.89;
-            vy *= 0.89;
-            vz *= 0.89;
+            vx *= 0.90;
+            vy *= 0.90;
+            vz *= 0.90;
           } else {
             // Outside gravitational reach: continues natural flow along Lorenz attractor towards intake
             const springK = 2.4;
@@ -1087,8 +1210,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             vz *= 0.91;
           }
         } else if (isUnspooling) {
-          // CELESTIAL SUPERNOVA & SLOW LORENZ MANIFOLD REFORMATION (3.8s Timeline)
-          // Advance stream index along Lorenz trajectory at 22-40 steps/s
+          // REVERSE ACCRETION RIVER (Slower, Sequential Ribbon of Light Flowing Back into Both Lobes)
           let pIdx = particleIndices[i] + particleSpeeds[i] * delta;
           if (pIdx >= LORENZ_STEPS) pIdx -= LORENZ_STEPS;
           particleIndices[i] = pIdx;
@@ -1113,46 +1235,46 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           targetArr[i3 + 1] = ty;
           targetArr[i3 + 2] = tz;
 
-          if (timeSinceUnspool < 0.65) {
-            // STAGE 1: SUPERNOVA DETONATION & 3D VOLUMETRIC DISPERSION (0.0s - 0.65s)
-            // Outward burst coasting through space, scale blossoming to full
-            vx *= 0.955;
-            vy *= 0.955;
-            vz *= 0.955;
-            scl = Math.min(1.0, scl + delta * 3.5);
-          } else if (timeSinceUnspool < 1.35) {
-            // STAGE 2: CELESTIAL STARDUST DRIFT & SUSPENDED NEBULA (0.65s - 1.35s)
-            // Stardust embers hover and drift gracefully in 3D depth with atmospheric damping
-            vx *= 0.940;
-            vy *= 0.940;
-            vz *= 0.940;
-            scl = 1.0;
+          // Slower staggered launch across 2.2s: stardust flows out as a continuous ribbon of light
+          const launchTime = (i / PARTICLE_COUNT) * 2.2;
+
+          if (timeSinceUnspool < launchTime) {
+            // Particle still waiting inside singularity core
+            px = bh.x;
+            py = bh.y;
+            pz = bh.z;
+            vx = 0;
+            vy = 0;
+            vz = 0;
+            scl = 0.0;
           } else {
-            // STAGE 3 & 4: SLOW CELESTIAL CONDENSATION (1.35s to 3.8s - 2.45s Duration)
-            // NO SLINGSHOT: Stardust slowly, serenely condenses and materializes into the Lorenz wings!
-            const progress = Math.min(1.0, (timeSinceUnspool - 1.35) / 2.45);
-            // Ultra-smooth quintic S-curve: zero jerk, zero snap at start and finish
-            const blend = progress * progress * progress * (progress * (progress * 6.0 - 15.0) + 10.0);
+            // Stardust ember travelling along curved accretion river back to the Lorenz manifold
+            const travelProg = Math.min(1.0, (timeSinceUnspool - launchTime) / 1.8);
+            // Smooth quintic S-curve
+            const s = travelProg * travelProg * travelProg * (travelProg * (travelProg * 6.0 - 15.0) + 10.0);
 
-            // Gentle condensation spring (rising softly from 0 to 1.15, avoiding any whip)
-            const springK = 1.15 * blend;
-            vx += (tx - px) * springK * delta;
-            vy += (ty - py) * springK * delta;
-            vz += (tz - pz) * springK * delta;
+            // Arced ribbon path retracing the curved intake stream
+            const arcFactor = Math.sin(travelProg * Math.PI);
+            const arcX = -(ty - bh.y) * 0.28 * arcFactor;
+            const arcY = (tx - bh.x) * 0.28 * arcFactor;
+            const arcZ = (tz - bh.z) * 0.18 * arcFactor;
 
-            // Critical damping prevents any oscillation or overshoot
-            const damping = 0.935 - 0.025 * blend;
-            vx *= damping;
-            vy *= damping;
-            vz *= damping;
+            const targetX = bh.x + (tx - bh.x) * s + arcX;
+            const targetY = bh.y + (ty - bh.y) * s + arcY;
+            const targetZ = bh.z + (tz - bh.z) * s + arcZ;
 
-            // Direct soft ease: particles slowly coalesce onto the manifold coordinates
-            const easeRate = 0.038 * blend * (delta * 60);
-            px += (tx - px) * easeRate;
-            py += (ty - py) * easeRate;
-            pz += (tz - pz) * easeRate;
+            const easeRate = 0.14 * (delta * 60);
+            px += (targetX - px) * easeRate;
+            py += (targetY - py) * easeRate;
+            pz += (targetZ - pz) * easeRate;
 
-            scl = 1.0;
+            scl = Math.min(1.0, travelProg * 2.2);
+
+            if (travelProg >= 1.0) {
+              vx = (tx - px) * 2.0 * delta;
+              vy = (ty - py) * 2.0 * delta;
+              vz = (tz - pz) * 2.0 * delta;
+            }
           }
         } else {
           // ACTIVE LORENZ ATTRACTOR FLIGHT (ELEGANT 22-40 STEPS/SEC MOTION)
@@ -1222,14 +1344,78 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         scaleArr[i] = scl;
       }
 
-      // Engage singularity void only after particles have actually arrived at core
-      if (isHolding && swallowedCount >= PARTICLE_COUNT * 0.96) {
+      // Engage typography suction ONLY after all particles have actually arrived at core
+      if (isHolding && swallowedCount >= PARTICLE_COUNT * 0.95) {
         if (!isAbsorbedRef.current) {
           isAbsorbedRef.current = true;
           if (typeof navigator !== "undefined" && navigator.vibrate) {
             navigator.vibrate([25, 60, 35]);
           }
+          setInteractionHint("SPACETIME COLLAPSE · LETTERS WARPING INTO SINGULARITY");
+
+          // Slower text warp and suction into the black hole!
+          gsap.killTweensOf(textLensingRef);
+          gsap.killTweensOf(textAlphaRef);
+          gsap.to(textLensingRef, {
+            current: 1.0,
+            duration: 1.8,
+            ease: "power2.inOut",
+          });
+          gsap.to(textAlphaRef, {
+            current: 0.0,
+            duration: 1.8,
+            ease: "power2.inOut",
+          });
         }
+      }
+
+      // STAGE 2 OF SUPERNOVA: Typography emerges and unwarps out of singularity AFTER particles flow back
+      if (isUnspooling && timeSinceUnspool >= 2.2 && !textReturnTriggeredRef.current) {
+        textReturnTriggeredRef.current = true;
+        setInteractionHint("SPACETIME RESTORATION · TYPOGRAPHY WARPING OUT OF SINGULARITY");
+
+        gsap.killTweensOf(textLensingRef);
+        gsap.killTweensOf(textAlphaRef);
+        gsap.killTweensOf(textFlareRef);
+
+        // Alpha fades in smoothly as letters emerge from singularity point
+        gsap.to(textAlphaRef, {
+          current: 1.0,
+          duration: 1.6,
+          ease: "power2.out",
+        });
+
+        // Lensing relaxes from 1.0 down to 0.0, expanding and unwarping the letters
+        gsap.to(textLensingRef, {
+          current: 0.0,
+          duration: 1.9,
+          ease: "power2.out",
+          onComplete: () => {
+            textLensingRef.current = 0.0;
+          },
+        });
+
+        // Champagne flare as letters settle into equilibrium
+        gsap.to(textFlareRef, {
+          current: 1.0,
+          duration: 0.22,
+          ease: "power2.out",
+          onComplete: () => {
+            gsap.to(textFlareRef, {
+              current: 0.0,
+              duration: 0.85,
+              ease: "power2.inOut",
+            });
+          },
+        });
+      }
+
+      // Update Typography Shader Uniforms
+      if (textMat) {
+        textMat.uniforms.uBlackHole.value.set(bh.x, bh.y);
+        textMat.uniforms.uLensing.value = textLensingRef.current;
+        textMat.uniforms.uTextAlpha.value = textAlphaRef.current;
+        textMat.uniforms.uFlare.value = textFlareRef.current;
       }
 
       particleGeo.attributes.position.needsUpdate = true;
@@ -1283,6 +1469,9 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       if (warpFlashRef.current) gsap.killTweensOf(warpFlashRef.current);
       if (cameraRef.current) gsap.killTweensOf(cameraRef.current.position);
       gsap.killTweensOf(warpProgressRef);
+      gsap.killTweensOf(textLensingRef);
+      gsap.killTweensOf(textAlphaRef);
+      gsap.killTweensOf(textFlareRef);
       if (rendererRef.current?.domElement) {
         rendererRef.current.domElement.remove();
         rendererRef.current.dispose();

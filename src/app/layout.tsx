@@ -1,9 +1,16 @@
 import type { Metadata } from "next";
-import { Inter, Cormorant_Garamond } from "next/font/google";
+import { Inter, Cormorant_Garamond, Orbitron } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 
 // Strictly Font 1: Inter (Black 900 for bold headers/numbers, plus weights for structure)
+const orbitron = Orbitron({
+  variable: "--font-orbitron",
+  subsets: ["latin"],
+  weight: ["700", "800", "900"],
+  display: "swap",
+});
+
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
@@ -63,7 +70,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`h-full w-full overflow-hidden ${inter.variable} ${cormorantGaramond.variable} ${bnRiley.variable} ${citadelScript.variable} ${helveticaCompressed.variable}`}
+      className={`h-full w-full overflow-hidden ${inter.variable} ${orbitron.variable} ${cormorantGaramond.variable} ${bnRiley.variable} ${citadelScript.variable} ${helveticaCompressed.variable}`}
       suppressHydrationWarning
     >
       <body

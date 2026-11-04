@@ -450,55 +450,91 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     scene.add(attractorGroup);
     attractorGroupRef.current = attractorGroup;
 
-    // 4B. GIANT ARCHITECTURAL HOLLOW TYPOGRAPHY (WELCOME ... TO ... MY PORTFOLIO)
+    // 4B. GIANT ARCHITECTURAL HYBRID TYPOGRAPHY (BOLD CINEMATIC DISPLAY: ORBITRON / MICHROMA)
+    // Hybrid Contrast: Solid filled "WELCOME" & "MY PORTFOLIO", Hollow wireframe "TO"
     const textCanvas = document.createElement("canvas");
     textCanvas.width = 2560;
     textCanvas.height = 1440;
     const tCtx = textCanvas.getContext("2d");
-    if (tCtx) {
-      tCtx.clearRect(0, 0, 2560, 1440);
 
-      // Hollow architectural outline: 2.6px fine champagne stroke, transparent fill
-      tCtx.strokeStyle = "rgba(240, 226, 208, 0.40)";
-      tCtx.lineWidth = 2.6;
+    const renderTypographyCanvas = () => {
+      if (!tCtx) return;
+      tCtx.clearRect(0, 0, 2560, 1440);
       tCtx.textAlign = "center";
       tCtx.textBaseline = "middle";
 
-      // 1. Top Line: W E L C O M E (Stretched edge-to-edge from W to E)
-      const welcomeFontSize = isMobile ? 125 : 165;
-      tCtx.font = `900 ${welcomeFontSize}px 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`;
+      const fontFamily = "'Orbitron', 'Michroma', 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+
+      // 1. Top Line: W E L C O M E (Solid Filled Champagne Ecru with Crisp Hairline Edge)
+      const welcomeFontSize = isMobile ? 120 : 172;
+      tCtx.font = `900 ${welcomeFontSize}px ${fontFamily}`;
       const welcomeChars = ["W", "E", "L", "C", "O", "M", "E"];
-      const startX = isMobile ? 130 : 160;
-      const endX = isMobile ? 2430 : 2400;
+      const startX = isMobile ? 130 : 180;
+      const endX = isMobile ? 2430 : 2380;
       const stepX = (endX - startX) / (welcomeChars.length - 1);
-      const topY = isMobile ? 160 : 190;
+      const topY = isMobile ? 175 : 225;
+
+      // Solid champagne gradient fill for commanding presence
+      const topGrad = tCtx.createLinearGradient(0, topY - welcomeFontSize * 0.6, 0, topY + welcomeFontSize * 0.6);
+      topGrad.addColorStop(0, "rgba(255, 250, 242, 0.96)");
+      topGrad.addColorStop(1, "rgba(235, 215, 192, 0.82)");
+      tCtx.fillStyle = topGrad;
+      tCtx.strokeStyle = "rgba(255, 255, 255, 0.40)";
+      tCtx.lineWidth = 2.2;
+
       for (let i = 0; i < welcomeChars.length; i++) {
-        tCtx.strokeText(welcomeChars[i], startX + i * stepX, topY);
+        const x = startX + i * stepX;
+        tCtx.fillText(welcomeChars[i], x, topY);
+        tCtx.strokeText(welcomeChars[i], x, topY);
       }
 
-      // 2. Center Word: T O (Nested directly behind the Lorenz attractor butterfly knot)
-      const toFontSize = isMobile ? 135 : 160;
-      tCtx.font = `900 ${toFontSize}px 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`;
-      tCtx.strokeText("T O", 1280, 720);
+      // 2. Center Word: T O (Hollow Wireframe - Butterfly Knot Cuts Cleanly Through)
+      const toFontSize = isMobile ? 135 : 165;
+      tCtx.font = `900 ${toFontSize}px ${fontFamily}`;
+      tCtx.strokeStyle = "rgba(240, 226, 208, 0.55)";
+      tCtx.lineWidth = 3.2;
+      // Stretched spacing for "T O" to frame the central Lorenz knot
+      tCtx.strokeText("T", 1140, 720);
+      tCtx.strokeText("O", 1420, 720);
 
-      // 3. Bottom Line: M Y   P O R T F O L I O (Stretched edge-to-edge from M to O)
-      const portfolioFontSize = isMobile ? 95 : 125;
-      tCtx.font = `900 ${portfolioFontSize}px 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`;
+      // 3. Bottom Line: M Y   P O R T F O L I O (Solid Filled Champagne Ecru)
+      const portfolioFontSize = isMobile ? 90 : 132;
+      tCtx.font = `900 ${portfolioFontSize}px ${fontFamily}`;
       const portfolioItems = ["M", "Y", " ", "P", "O", "R", "T", "F", "O", "L", "I", "O"];
-      const pStartX = isMobile ? 130 : 160;
-      const pEndX = isMobile ? 2430 : 2400;
+      const pStartX = isMobile ? 130 : 180;
+      const pEndX = isMobile ? 2430 : 2380;
       const pStepX = (pEndX - pStartX) / (portfolioItems.length - 1);
-      const bottomY = isMobile ? 1280 : 1250;
+      const bottomY = isMobile ? 1270 : 1230;
+
+      const botGrad = tCtx.createLinearGradient(0, bottomY - portfolioFontSize * 0.6, 0, bottomY + portfolioFontSize * 0.6);
+      botGrad.addColorStop(0, "rgba(255, 250, 242, 0.96)");
+      botGrad.addColorStop(1, "rgba(235, 215, 192, 0.82)");
+      tCtx.fillStyle = botGrad;
+      tCtx.strokeStyle = "rgba(255, 255, 255, 0.40)";
+      tCtx.lineWidth = 2.0;
+
       for (let i = 0; i < portfolioItems.length; i++) {
         if (portfolioItems[i] !== " ") {
-          tCtx.strokeText(portfolioItems[i], pStartX + i * pStepX, bottomY);
+          const x = pStartX + i * pStepX;
+          tCtx.fillText(portfolioItems[i], x, bottomY);
+          tCtx.strokeText(portfolioItems[i], x, bottomY);
         }
       }
-    }
+    };
+
+    renderTypographyCanvas();
 
     const textTexture = new THREE.CanvasTexture(textCanvas);
     textTexture.minFilter = THREE.LinearFilter;
     textTexture.magFilter = THREE.LinearFilter;
+
+    // Font readiness hook to redraw once Orbitron finishes font loading
+    if (typeof document !== "undefined" && document.fonts) {
+      document.fonts.ready.then(() => {
+        renderTypographyCanvas();
+        textTexture.needsUpdate = true;
+      });
+    }
 
     // Subdivided plane mesh for non-linear spacetime gravitational warping
     const textGeo = new THREE.PlaneGeometry(isMobile ? 2.6 : 4.85, isMobile ? 4.1 : 2.73, 64, 36);

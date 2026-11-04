@@ -40,6 +40,7 @@ body {
   --font-optizither: var(--font-riley), "BN Riley", "Optizither", serif;
   --font-citadel: var(--font-citadel), "Citadel Script Std", cursive;
   --font-helvetica: var(--font-helvetica), "Helvetica Compressed", sans-serif;
+  --font-orbitron: var(--font-orbitron), "Orbitron", "Michroma", -apple-system, sans-serif;
 }
 
 .font-editorial {

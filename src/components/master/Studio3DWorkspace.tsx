@@ -63,6 +63,8 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   const textFlareRef = useRef(0);
   const textMeshRef = useRef<THREE.Mesh | null>(null);
   const textReturnTriggeredRef = useRef(false);
+  const planeWRef = useRef(4.85);
+  const planeHRef = useRef(2.73);
 
   // Hyperspace transition state (sustained 3.8 seconds)
   const isTransitioningRef = useRef(false);
@@ -450,7 +452,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     scene.add(attractorGroup);
     attractorGroupRef.current = attractorGroup;
 
-    // 4B. CASA MOMO INSPIRED TWO-CORNER DIAGONAL EDITORIAL TYPOGRAPHY
+    // 4B. CASA MOMO INSPIRED TWO-CORNER DIAGONAL EDITORIAL TYPOGRAPHY (FIXED ON SCREEN)
     // Top-Left: "WELCOME TO", Bottom-Right: "MY PORTFOLIO", Center completely open for Lorenz Attractor
     const textCanvas = document.createElement("canvas");
     textCanvas.width = 2560;
@@ -465,43 +467,43 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
       // Solid Warm Ivory Fill (#F5EEDA) matching the CASA MOMO boutique reference
       tCtx.fillStyle = "#F5EEDA";
-      tCtx.strokeStyle = "rgba(245, 238, 218, 0.35)";
-      tCtx.lineWidth = 1.2;
+      tCtx.strokeStyle = "rgba(245, 238, 218, 0.40)";
+      tCtx.lineWidth = 1.4;
 
       if (isMobile) {
-        // MOBILE PORTRAIT (Stacked for natural vertical cadence)
+        // MOBILE PORTRAIT (Large commanding architectural scale)
         tCtx.textAlign = "left";
         tCtx.textBaseline = "top";
-        tCtx.font = `normal 115px ${fontFamily}`;
+        tCtx.font = `normal 140px ${fontFamily}`;
         tCtx.fillText("WELCOME", 120, 130);
         tCtx.strokeText("WELCOME", 120, 130);
-        tCtx.fillText("TO", 120, 260);
-        tCtx.strokeText("TO", 120, 260);
+        tCtx.fillText("TO", 120, 290);
+        tCtx.strokeText("TO", 120, 290);
 
         tCtx.textAlign = "right";
         tCtx.textBaseline = "bottom";
-        tCtx.font = `normal 105px ${fontFamily}`;
-        tCtx.fillText("MY", 2440, 1180);
-        tCtx.strokeText("MY", 2440, 1180);
+        tCtx.font = `normal 130px ${fontFamily}`;
+        tCtx.fillText("MY", 2440, 1150);
+        tCtx.strokeText("MY", 2440, 1150);
         tCtx.fillText("PORTFOLIO", 2440, 1310);
         tCtx.strokeText("PORTFOLIO", 2440, 1310);
       } else {
-        // DESKTOP: Bold Two-Corner Diagonal (CASA MOMO Spatial Poise)
+        // DESKTOP: Giant Two-Corner Diagonal (Grand CASA MOMO Presence)
         // Top-Left Anchor: "WELCOME TO"
         tCtx.textAlign = "left";
         tCtx.textBaseline = "top";
-        const welcomeFontSize = 175;
+        const welcomeFontSize = 205;
         tCtx.font = `normal ${welcomeFontSize}px ${fontFamily}`;
-        tCtx.fillText("WELCOME TO", 150, 160);
-        tCtx.strokeText("WELCOME TO", 150, 160);
+        tCtx.fillText("WELCOME TO", 140, 130);
+        tCtx.strokeText("WELCOME TO", 140, 130);
 
         // Bottom-Right Counterbalance: "MY PORTFOLIO"
         tCtx.textAlign = "right";
         tCtx.textBaseline = "bottom";
-        const portfolioFontSize = 175;
+        const portfolioFontSize = 200;
         tCtx.font = `normal ${portfolioFontSize}px ${fontFamily}`;
-        tCtx.fillText("MY PORTFOLIO", 2410, 1280);
-        tCtx.strokeText("MY PORTFOLIO", 2410, 1280);
+        tCtx.fillText("MY PORTFOLIO", 2420, 1310);
+        tCtx.strokeText("MY PORTFOLIO", 2420, 1310);
       }
     };
 
@@ -513,7 +515,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
     // Font readiness hook to redraw once BN Riley is loaded into document.fonts
     if (typeof document !== "undefined" && document.fonts) {
-      document.fonts.load("175px 'BN Riley'").then(() => {
+      document.fonts.load("230px 'BN Riley'").then(() => {
         renderTypographyCanvas();
         textTexture.needsUpdate = true;
       });
@@ -523,8 +525,15 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       });
     }
 
-    // Subdivided plane mesh for non-linear spacetime gravitational warping
-    const textGeo = new THREE.PlaneGeometry(isMobile ? 2.6 : 4.85, isMobile ? 4.1 : 2.73, 64, 36);
+    // Viewport-Locked Screen Geometry: Attached directly to camera so letters stay 100% rock-solid fixed on screen
+    const vFovRad = (camera.fov * Math.PI) / 180;
+    const camDist = isMobile ? 3.8 : 3.3;
+    const planeH = 2 * Math.tan(vFovRad / 2) * camDist;
+    const planeW = planeH * (width / height);
+    planeWRef.current = planeW;
+    planeHRef.current = planeH;
+
+    const textGeo = new THREE.PlaneGeometry(planeW, planeH, 64, 36);
     const textMat = new THREE.ShaderMaterial({
       transparent: true,
       depthWrite: false,
@@ -535,6 +544,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         uLensing: { value: 0.0 },
         uTextAlpha: { value: 1.0 },
         uFlare: { value: 0.0 },
+        uWarpProgress: { value: 0.0 },
       },
       vertexShader: `
         uniform vec2 uBlackHole;
@@ -549,12 +559,9 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             vec2 toBh = uBlackHole - pos.xy;
             float dist = length(toBh);
 
-            // Gravitational Einstein warp:
-            // Non-linear suction towards the singularity point (uBlackHole)
+            // Gravitational Einstein warp pulling fixed screen text into the singularity
             float pull = pow(uLensing, 1.4);
             pos.xy += toBh * min(1.0, pull * (0.85 + 0.35 / (dist + 0.2)));
-            
-            // Dip into gravitational well
             pos.z -= pull * exp(-dist * 1.8) * 0.45;
           }
 
@@ -566,6 +573,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         uniform float uLensing;
         uniform float uTextAlpha;
         uniform float uFlare;
+        uniform float uWarpProgress;
         varying vec2 vUv;
 
         void main() {
@@ -573,7 +581,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           if (col.a < 0.01) discard;
 
           // Supernova flash luminosity flare on return
-          vec3 hotChampagne = vec3(1.0, 0.97, 0.90);
+          vec3 hotChampagne = vec3(1.0, 0.98, 0.92);
           col.rgb = mix(col.rgb, hotChampagne, uFlare * 0.8);
 
           // Progressive opacity fade as text collapses into the singularity
@@ -582,15 +590,21 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             alpha *= max(0.0, (1.0 - uLensing) / 0.2);
           }
 
+          // In hyperspace warp: dissolve text into the lightspeed stars
+          if (uWarpProgress > 0.01) {
+            alpha *= clamp(1.0 - uWarpProgress * 1.5, 0.0, 1.0);
+          }
+
           gl_FragColor = vec4(col.rgb, alpha);
         }
       `,
     });
 
     const textMesh = new THREE.Mesh(textGeo, textMat);
-    textMesh.position.set(0, 0, -0.32);
-    textMesh.renderOrder = 5;
-    attractorGroup.add(textMesh);
+    textMesh.position.set(0, 0, -camDist);
+    textMesh.renderOrder = 2; // drawn behind 3D foreground particles
+    camera.add(textMesh);
+    scene.add(camera);
     textMeshRef.current = textMesh;
 
     // 5. BLACK HOLE VISUAL ENTITY (Event Horizon Void + Pulsating Celestial Photon Ring)
@@ -1435,10 +1449,13 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
       // Update Typography Shader Uniforms
       if (textMat) {
-        textMat.uniforms.uBlackHole.value.set(bh.x, bh.y);
+        const textBhX = (mouseNormRef.current.x * planeWRef.current) * 0.5;
+        const textBhY = (mouseNormRef.current.y * planeHRef.current) * 0.5;
+        textMat.uniforms.uBlackHole.value.set(textBhX, textBhY);
         textMat.uniforms.uLensing.value = textLensingRef.current;
         textMat.uniforms.uTextAlpha.value = textAlphaRef.current;
         textMat.uniforms.uFlare.value = textFlareRef.current;
+        textMat.uniforms.uWarpProgress.value = warpProgressRef.current;
       }
 
       particleGeo.attributes.position.needsUpdate = true;
@@ -1461,6 +1478,18 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       cameraRef.current.fov = mobile ? 56 : 45;
       cameraRef.current.position.z = mobile ? 3.5 : 3.0;
       cameraRef.current.updateProjectionMatrix();
+
+      const vFovRad = (cameraRef.current.fov * Math.PI) / 180;
+      const camDist = mobile ? 3.8 : 3.3;
+      const newH = 2 * Math.tan(vFovRad / 2) * camDist;
+      const newW = newH * (w / h);
+      planeWRef.current = newW;
+      planeHRef.current = newH;
+      if (textMeshRef.current) {
+        textMeshRef.current.geometry.dispose();
+        textMeshRef.current.geometry = new THREE.PlaneGeometry(newW, newH, 64, 36);
+        textMeshRef.current.position.set(0, 0, -camDist);
+      }
 
       smokeMat.uniforms.uResolution.value.set(w, h);
       rendererRef.current.setSize(w, h);

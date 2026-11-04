@@ -12,7 +12,6 @@ import {
   Headphones,
   Volume2,
   VolumeX,
-  Activity,
   Sparkles,
 } from "lucide-react";
 
@@ -28,6 +27,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   isLocked = true,
 }: Studio3DWorkspaceProps) {
   const mountRef = useRef<HTMLDivElement>(null);
+  const warpFlashRef = useRef<HTMLDivElement>(null);
 
   // Interactive Modals
   const [activeModal, setActiveModal] = useState<"projects" | "specs" | "hobbies" | "terminal" | null>(null);
@@ -36,23 +36,23 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
 
   // Interaction HUD & Status
-  const [interactionHint, setInteractionHint] = useState<string>("MOVE TO SCATTER · HOLD FOR BLACK HOLE · CLICK TO WARP");
+  const [interactionHint, setInteractionHint] = useState<string>("MOVE TO SCATTER · HOLD FOR BLACK HOLE · CLICK TO HYPERSPACE");
 
   // Terminal state
   const [terminalInput, setTerminalInput] = useState("");
   const [terminalHistory, setTerminalHistory] = useState<Array<{ cmd: string; out: string }>>([
-    { cmd: "system.init", out: "Kinetic CPU Particle Core · Studio Smoke Atmosphere Active" },
+    { cmd: "system.init", out: "Kinetic CPU Particle Core · 4-Way Bus Architecture Active" },
     { cmd: "whoami", out: "Soham Roychoudhury — AI/ML Engineer & Systems Architect" },
     { cmd: "help", out: "Commands: 'whoami', 'projects', 'specs', 'hobbies', 'sound on', 'sound off', 'enter', 'clear'" },
   ]);
   const terminalBottomRef = useRef<HTMLDivElement>(null);
-  const terminalInputRef = useRef<HTMLInputElement>(null);
 
   // Three.js instances refs
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const animFrameRef = useRef<number | null>(null);
+  const cpuGroupRef = useRef<THREE.Group | null>(null);
   const particlesRef = useRef<THREE.Points | null>(null);
 
   // Simulation physics state
@@ -60,8 +60,12 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   const holdStartRef = useRef(0);
   const pointerDownPosRef = useRef({ x: 0, y: 0 });
   const blackHolePosRef = useRef(new THREE.Vector3(0, 0, 0));
-  const mouseWorldPosRef = useRef(new THREE.Vector3(0, 0, 0));
+  const mouseLocalPosRef = useRef(new THREE.Vector3(0, 0, 0));
+  const mouseNormRef = useRef({ x: 0, y: 0 });
   const isTransitioningRef = useRef(false);
+  const isExplodingRef = useRef(false);
+  const explosionStartTimeRef = useRef(0);
+  const warpProgressRef = useRef(0);
 
   // Web Audio Context & Nodes
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -143,16 +147,46 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       const blastOsc = ctx.createOscillator();
       const blastGain = ctx.createGain();
       blastOsc.type = "sine";
-      blastOsc.frequency.setValueAtTime(160, ctx.currentTime);
-      blastOsc.frequency.exponentialRampToValueAtTime(25, ctx.currentTime + 0.22);
+      blastOsc.frequency.setValueAtTime(170, ctx.currentTime);
+      blastOsc.frequency.exponentialRampToValueAtTime(28, ctx.currentTime + 0.22);
 
-      blastGain.gain.setValueAtTime(0.18, ctx.currentTime);
+      blastGain.gain.setValueAtTime(0.20, ctx.currentTime);
       blastGain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.24);
 
       blastOsc.connect(blastGain);
       blastGain.connect(ctx.destination);
       blastOsc.start();
       blastOsc.stop(ctx.currentTime + 0.25);
+    } catch {}
+  }, [getAudioContext]);
+
+  // Audio: Star Wars Hyperspace Hyperdrive Spool (plays on warp jump)
+  const playHyperspaceSound = useCallback(() => {
+    try {
+      const ctx = getAudioContext();
+      if (!ctx) return;
+
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(120, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(2400, ctx.currentTime + 1.25);
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = "bandpass";
+      filter.frequency.setValueAtTime(320, ctx.currentTime);
+      filter.frequency.exponentialRampToValueAtTime(3400, ctx.currentTime + 1.25);
+      filter.Q.setValueAtTime(2.2, ctx.currentTime);
+
+      gain.gain.setValueAtTime(0.01, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.24, ctx.currentTime + 0.8);
+      gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 1.3);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 1.35);
     } catch {}
   }, [getAudioContext]);
 
@@ -234,27 +268,48 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     } catch {}
   }, [isAudioPlaying, getAudioContext]);
 
-  // Warp Flight into Portfolio Website
+  // Star Wars Galactic Warp Hyperspace Jump into Portfolio Website
   const triggerWarpTransition = useCallback(() => {
     if (isTransitioningRef.current || !cameraRef.current) return;
     isTransitioningRef.current = true;
-    playTactileClick(1400);
+    playHyperspaceSound();
+    setInteractionHint("HYPERSPACE JUMP ENGAGED · WARPING TO PORTFOLIO");
 
     const camera = cameraRef.current;
 
+    // Animate warp progress uniform (streaks particles into hyperspace speed trails)
+    gsap.to(warpProgressRef, {
+      current: 1.0,
+      duration: 1.25,
+      ease: "power3.in",
+    });
+
     // Camera surges forward through the particle field
     gsap.to(camera.position, {
-      x: 0,
-      y: 0,
-      z: -0.8,
+      z: -1.4,
       duration: 1.35,
-      ease: "power3.inOut",
-      onComplete: () => {
+      ease: "power3.in",
+    });
+
+    // White/champagne hyperspace flash overlay
+    if (warpFlashRef.current) {
+      gsap.to(warpFlashRef.current, {
+        opacity: 1,
+        duration: 0.45,
+        delay: 0.95,
+        ease: "power2.inOut",
+        onComplete: () => {
+          onEnterPortfolio();
+          isTransitioningRef.current = false;
+        },
+      });
+    } else {
+      setTimeout(() => {
         onEnterPortfolio();
         isTransitioningRef.current = false;
-      },
-    });
-  }, [onEnterPortfolio, playTactileClick]);
+      }, 1300);
+    }
+  }, [onEnterPortfolio, playHyperspaceSound]);
 
   // Handle Terminal Commands
   const handleTerminalSubmit = (e: React.FormEvent) => {
@@ -314,7 +369,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Main Three.js Particle Physics Engine (CPU Structure + Studio Smoke Shader)
+  // Main Three.js Particle Physics Engine (CPU Structure + 4-Way Bus + Studio Smoke)
   useEffect(() => {
     const container = mountRef.current;
     if (!container) return;
@@ -327,8 +382,8 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     const scene = new THREE.Scene();
     sceneRef.current = scene;
 
-    const camera = new THREE.PerspectiveCamera(isMobile ? 54 : 45, width / height, 0.1, 100);
-    camera.position.set(0, 0, isMobile ? 3.4 : 2.8);
+    const camera = new THREE.PerspectiveCamera(isMobile ? 52 : 44, width / height, 0.1, 100);
+    camera.position.set(0, 0, isMobile ? 3.6 : 3.0);
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
@@ -417,16 +472,83 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     const smokeQuad = new THREE.Mesh(smokeQuadGeo, smokeMat);
     scene.add(smokeQuad);
 
-    // 4. PROCEDURAL HIGH-TECH CPU POINT-CLOUD GENERATION
-    // Particle count: 60,000 for locked 60-120fps performance
+    // 4. 3D CPU ROOT GROUP (For dynamic 3D tilt & perspective parallax)
+    const cpuGroup = new THREE.Group();
+    scene.add(cpuGroup);
+    cpuGroupRef.current = cpuGroup;
+
+    // 5. BLACK HOLE VISUAL ENTITY (Event Horizon Void + Glowing Accretion Photon Sphere)
+    const blackHoleGroup = new THREE.Group();
+    blackHoleGroup.visible = false;
+    blackHoleGroup.scale.set(0, 0, 0);
+    cpuGroup.add(blackHoleGroup);
+
+    // 5A. Dark Event Horizon Void (Pure black disk that masks background smoke and particles)
+    const eventHorizonGeo = new THREE.CircleGeometry(0.095, 48);
+    const eventHorizonMat = new THREE.MeshBasicMaterial({
+      color: 0x000000,
+      depthWrite: true,
+      depthTest: true,
+    });
+    const eventHorizonMesh = new THREE.Mesh(eventHorizonGeo, eventHorizonMat);
+    eventHorizonMesh.renderOrder = 20;
+    blackHoleGroup.add(eventHorizonMesh);
+
+    // 5B. Luminous Accretion Ring (Photon Sphere with swirling champagne/gold fire)
+    const accretionGeo = new THREE.PlaneGeometry(0.42, 0.42);
+    const accretionMat = new THREE.ShaderMaterial({
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      uniforms: {
+        uTime: { value: 0 },
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float uTime;
+        varying vec2 vUv;
+
+        void main() {
+          vec2 p = vUv - vec2(0.5);
+          float r = length(p) * 2.0; // 0 to 1
+          if (r < 0.42 || r > 1.0) discard;
+
+          float angle = atan(p.y, p.x);
+          // High-energy relativistic swirling photon stream
+          float swirl = sin(angle * 7.0 - uTime * 9.0) * 0.5 + 0.5;
+          float ringFalloff = smoothstep(0.42, 0.58, r) * (1.0 - smoothstep(0.75, 1.0, r));
+
+          // Monochromatic Champagne / Gold Photon Colors
+          vec3 innerHot = vec3(1.0, 0.98, 0.92);  // Intense champagne white
+          vec3 outerAmber = vec3(0.92, 0.74, 0.42); // Warm golden beige
+          vec3 col = mix(outerAmber, innerHot, ringFalloff * 0.8 + swirl * 0.2);
+
+          float alpha = ringFalloff * (0.85 + swirl * 0.15);
+          gl_FragColor = vec4(col, alpha);
+        }
+      `,
+    });
+    const accretionMesh = new THREE.Mesh(accretionGeo, accretionMat);
+    accretionMesh.renderOrder = 21;
+    blackHoleGroup.add(accretionMesh);
+
+    // 6. PROCEDURAL COMPACT CPU POINT-CLOUD WITH 4-WAY EXTENDED BUS LINES
     const PARTICLE_COUNT = isMobile ? 35000 : 60000;
     const currentPositions = new Float32Array(PARTICLE_COUNT * 3);
     const targetPositions = new Float32Array(PARTICLE_COUNT * 3);
     const velocities = new Float32Array(PARTICLE_COUNT * 3);
     const particleColors = new Float32Array(PARTICLE_COUNT * 3);
     const particleSizes = new Float32Array(PARTICLE_COUNT);
+    const particlePhases = new Float32Array(PARTICLE_COUNT);
+    const particleTypes = new Uint8Array(PARTICLE_COUNT); // 0: die, 1: N/S trace, 2: E/W trace, 3: pad, 4: dust
 
-    // Light Sand / Champagne / Warm Beige Color Palette Variations
+    // Monochromatic Light Sand / Champagne / Warm Beige Color Palette Variations
     const SAND_SHADES = [
       [0.98, 0.95, 0.90], // Light Champagne (#FFF8F0)
       [0.94, 0.88, 0.78], // Cream Sand (#F5E6D3)
@@ -436,13 +558,20 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     ];
 
     let pIdx = 0;
-    function addCpuPoint(x: number, y: number, z: number, shade: number[]) {
+    function addCpuPoint(
+      x: number,
+      y: number,
+      z: number,
+      shade: number[],
+      type: number,
+      sizeMultiplier = 1.0
+    ) {
       if (pIdx >= PARTICLE_COUNT) return;
       const i3 = pIdx * 3;
-      // Start in subtle initial scattered formation, will spring into CPU
-      currentPositions[i3] = x + (Math.random() - 0.5) * 0.6;
-      currentPositions[i3 + 1] = y + (Math.random() - 0.5) * 0.6;
-      currentPositions[i3 + 2] = z + (Math.random() - 0.5) * 0.6;
+
+      currentPositions[i3] = x + (Math.random() - 0.5) * 0.2;
+      currentPositions[i3 + 1] = y + (Math.random() - 0.5) * 0.2;
+      currentPositions[i3 + 2] = z + (Math.random() - 0.5) * 0.2;
 
       targetPositions[i3] = x;
       targetPositions[i3 + 1] = y;
@@ -452,83 +581,195 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       velocities[i3 + 1] = 0;
       velocities[i3 + 2] = 0;
 
-      // Color variation
-      particleColors[i3] = shade[0] + (Math.random() - 0.5) * 0.04;
-      particleColors[i3 + 1] = shade[1] + (Math.random() - 0.5) * 0.04;
-      particleColors[i3 + 2] = shade[2] + (Math.random() - 0.5) * 0.04;
+      // Color variation within champagne palette
+      particleColors[i3] = shade[0] + (Math.random() - 0.5) * 0.03;
+      particleColors[i3 + 1] = shade[1] + (Math.random() - 0.5) * 0.03;
+      particleColors[i3 + 2] = shade[2] + (Math.random() - 0.5) * 0.03;
 
-      particleSizes[pIdx] = Math.random() * 2.2 + 1.2;
+      particleSizes[pIdx] = (Math.random() * 1.8 + 1.2) * sizeMultiplier;
+      particlePhases[pIdx] = Math.random() * Math.PI * 2;
+      particleTypes[pIdx] = type;
+
       pIdx++;
     }
 
-    // A. Central Compute Die (Multi-core matrix) - 40% of particles
-    const dieSize = 0.95;
-    const dieCount = Math.floor(PARTICLE_COUNT * 0.40);
-    for (let i = 0; i < dieCount; i++) {
-      const coreX = Math.floor(Math.random() * 4);
-      const coreY = Math.floor(Math.random() * 4);
-      const coreOriginX = -dieSize * 0.5 + coreX * (dieSize / 4) + 0.02;
-      const coreOriginY = -dieSize * 0.5 + coreY * (dieSize / 4) + 0.02;
-      const x = coreOriginX + Math.random() * (dieSize / 4 - 0.04);
-      const y = coreOriginY + Math.random() * (dieSize / 4 - 0.04);
-      const z = (Math.random() - 0.5) * 0.035;
+    // A. CENTRAL COMPUTE DIE (Compact focal core giving generous breathing room)
+    // Scale: 0.52 x 0.52 total chip die footprint
+    const dieHalf = 0.26;
+    const coreCount = Math.floor(PARTICLE_COUNT * 0.28);
+    for (let i = 0; i < coreCount; i++) {
+      // 4 Multi-core silicon quadrants
+      const quadX = Math.random() > 0.5 ? 1 : -1;
+      const quadY = Math.random() > 0.5 ? 1 : -1;
+      const coreCenterX = quadX * 0.13;
+      const coreCenterY = quadY * 0.13;
+
+      // Silicon logic gate lines: dense parallel micro-gate stripes
+      const lineIndex = Math.floor(Math.random() * 12);
+      const rowY = coreCenterY - 0.09 + lineIndex * 0.016;
+      const rowX = coreCenterX + (Math.random() - 0.5) * 0.18;
+      const z = 0.03 + (Math.random() - 0.5) * 0.015;
+
       const shade = SAND_SHADES[Math.floor(Math.random() * 3)];
-      addCpuPoint(x, y, z, shade);
+      addCpuPoint(rowX, rowY, z, shade, 0, 1.0);
     }
 
-    // B. Radiating Bus Lines & Interconnect Traces - 25% of particles
-    const traceCount = Math.floor(PARTICLE_COUNT * 0.25);
-    for (let i = 0; i < traceCount; i++) {
-      const angle = (Math.floor(Math.random() * 32) / 32) * Math.PI * 2;
-      const r = 0.52 + Math.random() * 0.48;
-      const x = Math.cos(angle) * r + (Math.random() - 0.5) * 0.015;
-      const y = Math.sin(angle) * r + (Math.random() - 0.5) * 0.015;
-      const z = (Math.random() - 0.5) * 0.03;
-      const shade = SAND_SHADES[Math.floor(Math.random() * SAND_SHADES.length)];
-      addCpuPoint(x, y, z, shade);
+    // Gold Pin 1 Corner Alignment Notch (Top-Left of Die)
+    for (let i = 0; i < 180; i++) {
+      const u = Math.random();
+      const v = Math.random() * (1 - u);
+      const x = -dieHalf + u * 0.06;
+      const y = dieHalf - v * 0.06;
+      addCpuPoint(x, y, 0.045, SAND_SHADES[0], 0, 1.2);
     }
 
-    // C. Substrate & Outer Heat Spreader Frame - 22% of particles
-    const frameCount = Math.floor(PARTICLE_COUNT * 0.22);
-    const frameSize = 1.75;
-    for (let i = 0; i < frameCount; i++) {
+    // Die Perimeter Bevel & Heat Spreader Lip
+    const borderCount = Math.floor(PARTICLE_COUNT * 0.08);
+    for (let i = 0; i < borderCount; i++) {
       const side = Math.floor(Math.random() * 4);
+      const t = (Math.random() - 0.5) * (dieHalf * 2);
       let x = 0, y = 0;
-      const t = (Math.random() - 0.5) * frameSize;
-      const offset = frameSize * 0.5 * (Math.random() > 0.5 ? 1 : -1);
-      if (side === 0 || side === 1) {
-        x = t;
-        y = offset + (Math.random() - 0.5) * 0.05;
-      } else {
-        x = offset + (Math.random() - 0.5) * 0.05;
-        y = t;
+      if (side === 0) { x = t; y = dieHalf; }
+      else if (side === 1) { x = t; y = -dieHalf; }
+      else if (side === 2) { x = dieHalf; y = t; }
+      else { x = -dieHalf; y = t; }
+      addCpuPoint(x + (Math.random() - 0.5) * 0.01, y + (Math.random() - 0.5) * 0.01, 0.02, SAND_SHADES[1], 0, 1.1);
+    }
+
+    // B. 4-WAY EXTENDED BUS INTERCONNECT TRACES (North, South, East, West)
+    // Clean, distinct parallel particle ribbons shooting outwards from all four sides
+    const traceParticles = Math.floor(PARTICLE_COUNT * 0.44);
+    const particlesPerDir = Math.floor(traceParticles / 4);
+
+    // North Traces (Y > +0.32 up to +1.32)
+    for (let i = 0; i < particlesPerDir; i++) {
+      const lane = Math.floor(Math.random() * 18) - 9; // -9 to +8
+      const t = Math.random(); // 0 to 1 along length
+      let lx = lane * 0.026;
+      let ly = 0.32 + t * 1.00;
+
+      // Outer traces make authentic 45-degree circuit bends
+      if (Math.abs(lane) > 4) {
+        const sign = lane > 0 ? 1 : -1;
+        if (t > 0.35 && t < 0.60) {
+          const bendT = (t - 0.35) / 0.25;
+          lx += sign * bendT * 0.16;
+        } else if (t >= 0.60) {
+          lx += sign * 0.16;
+        }
       }
-      const z = (Math.random() - 0.5) * 0.05;
-      const shade = Math.random() > 0.5 ? SAND_SHADES[0] : SAND_SHADES[4];
-      addCpuPoint(x, y, z, shade);
+
+      const z = (Math.random() - 0.5) * 0.02;
+      const shade = SAND_SHADES[Math.floor(Math.random() * SAND_SHADES.length)];
+      addCpuPoint(lx, ly, z, shade, 1, 0.95);
     }
 
-    // D. Outer Pin Grid Array (PGA / BGA Contacts) - 10% of particles
-    const pinCount = Math.floor(PARTICLE_COUNT * 0.10);
+    // South Traces (Y < -0.32 down to -1.32)
+    for (let i = 0; i < particlesPerDir; i++) {
+      const lane = Math.floor(Math.random() * 18) - 9;
+      const t = Math.random();
+      let lx = lane * 0.026;
+      let ly = -0.32 - t * 1.00;
+
+      if (Math.abs(lane) > 4) {
+        const sign = lane > 0 ? 1 : -1;
+        if (t > 0.35 && t < 0.60) {
+          const bendT = (t - 0.35) / 0.25;
+          lx += sign * bendT * 0.16;
+        } else if (t >= 0.60) {
+          lx += sign * 0.16;
+        }
+      }
+
+      const z = (Math.random() - 0.5) * 0.02;
+      const shade = SAND_SHADES[Math.floor(Math.random() * SAND_SHADES.length)];
+      addCpuPoint(lx, ly, z, shade, 1, 0.95);
+    }
+
+    // East Traces (X > +0.32 out to +1.38)
+    for (let i = 0; i < particlesPerDir; i++) {
+      const lane = Math.floor(Math.random() * 18) - 9;
+      const t = Math.random();
+      let lx = 0.32 + t * 1.06;
+      let ly = lane * 0.026;
+
+      if (Math.abs(lane) > 4) {
+        const sign = lane > 0 ? 1 : -1;
+        if (t > 0.35 && t < 0.60) {
+          const bendT = (t - 0.35) / 0.25;
+          ly += sign * bendT * 0.16;
+        } else if (t >= 0.60) {
+          ly += sign * 0.16;
+        }
+      }
+
+      const z = (Math.random() - 0.5) * 0.02;
+      const shade = SAND_SHADES[Math.floor(Math.random() * SAND_SHADES.length)];
+      addCpuPoint(lx, ly, z, shade, 2, 0.95);
+    }
+
+    // West Traces (X < -0.32 out to -1.38)
+    for (let i = 0; i < particlesPerDir; i++) {
+      const lane = Math.floor(Math.random() * 18) - 9;
+      const t = Math.random();
+      let lx = -0.32 - t * 1.06;
+      let ly = lane * 0.026;
+
+      if (Math.abs(lane) > 4) {
+        const sign = lane > 0 ? 1 : -1;
+        if (t > 0.35 && t < 0.60) {
+          const bendT = (t - 0.35) / 0.25;
+          ly += sign * bendT * 0.16;
+        } else if (t >= 0.60) {
+          ly += sign * 0.16;
+        }
+      }
+
+      const z = (Math.random() - 0.5) * 0.02;
+      const shade = SAND_SHADES[Math.floor(Math.random() * SAND_SHADES.length)];
+      addCpuPoint(lx, ly, z, shade, 2, 0.95);
+    }
+
+    // C. TERMINAL VIA PADS / SOLDER BALL TEST POINTS (At the outer tips of traces)
+    const padCount = Math.floor(PARTICLE_COUNT * 0.06);
+    for (let i = 0; i < padCount; i++) {
+      const side = Math.floor(Math.random() * 4);
+      const lane = Math.floor(Math.random() * 18) - 9;
+      const sign = lane > 0 ? 1 : -1;
+      const bendOffset = Math.abs(lane) > 4 ? sign * 0.16 : 0;
+      let cx = 0, cy = 0;
+
+      if (side === 0) { cx = lane * 0.026 + bendOffset; cy = 1.32; }
+      else if (side === 1) { cx = lane * 0.026 + bendOffset; cy = -1.32; }
+      else if (side === 2) { cx = 1.38; cy = lane * 0.026 + bendOffset; }
+      else { cx = -1.38; cy = lane * 0.026 + bendOffset; }
+
+      const theta = Math.random() * Math.PI * 2;
+      const r = Math.random() * 0.028;
+      addCpuPoint(cx + Math.cos(theta) * r, cy + Math.sin(theta) * r, 0.015, SAND_SHADES[0], 3, 1.25);
+    }
+
+    // D. SUBSTRATE PIN GRID ARRAY (PGA / BGA Contacts underneath)
+    const pinCount = Math.floor(PARTICLE_COUNT * 0.06);
     for (let i = 0; i < pinCount; i++) {
-      const px = (Math.floor(Math.random() * 26) - 13) * 0.065;
-      const py = (Math.floor(Math.random() * 26) - 13) * 0.065;
-      if (Math.abs(px) < 0.55 && Math.abs(py) < 0.55) continue;
-      addCpuPoint(px, py, -0.04 + (Math.random() - 0.5) * 0.02, SAND_SHADES[3]);
+      const px = (Math.floor(Math.random() * 16) - 8) * 0.045;
+      const py = (Math.floor(Math.random() * 16) - 8) * 0.045;
+      if (Math.abs(px) < 0.18 && Math.abs(py) < 0.18) continue;
+      addCpuPoint(px, py, -0.06 + (Math.random() - 0.5) * 0.015, SAND_SHADES[4], 0, 0.9);
     }
 
-    // E. Ambient Floating Dust Halo - Remaining particles
+    // E. AMBIENT CHAMPAGNE FLOATING DUST (Fills negative breathing space)
     while (pIdx < PARTICLE_COUNT) {
-      const r = Math.random() * 2.2;
+      const r = 0.8 + Math.random() * 1.6;
       const theta = Math.random() * Math.PI * 2;
       const phi = (Math.random() - 0.5) * Math.PI;
       const x = r * Math.cos(theta) * Math.cos(phi);
       const y = r * Math.sin(theta) * Math.cos(phi);
-      const z = r * Math.sin(phi) * 0.3;
-      addCpuPoint(x, y, z, SAND_SHADES[4]);
+      const z = r * Math.sin(phi) * 0.35;
+      addCpuPoint(x, y, z, SAND_SHADES[4], 4, 0.8);
     }
 
-    // 5. POINT CLOUD GEOMETRY & CUSTOM CIRCULAR SHADER MATERIAL
+    // 7. POINT CLOUD GEOMETRY & SHADER MATERIAL WITH STAR WARS WARP STRETCH
     const particleGeo = new THREE.BufferGeometry();
     particleGeo.setAttribute("position", new THREE.BufferAttribute(currentPositions, 3));
     particleGeo.setAttribute("color", new THREE.BufferAttribute(particleColors, 3));
@@ -538,78 +779,106 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       transparent: true,
       depthWrite: false,
       blending: THREE.NormalBlending,
+      uniforms: {
+        uTime: { value: 0 },
+        uWarpProgress: { value: 0 },
+      },
       vertexShader: `
+        uniform float uTime;
+        uniform float uWarpProgress;
         attribute float size;
         attribute vec3 color;
         varying vec3 vColor;
+        varying float vWarp;
+
         void main() {
           vColor = color;
+          vWarp = uWarpProgress;
           vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-          gl_PointSize = clamp(size * (7.0 / -mvPosition.z), 1.5, 8.0);
+
+          // During Star Wars warp, scale particles up dynamically as they race to screen
+          float warpScale = 1.0 + uWarpProgress * 2.8;
+          float ptSize = size * warpScale * (7.2 / -mvPosition.z);
+          gl_PointSize = clamp(ptSize, 1.5, 26.0);
           gl_Position = projectionMatrix * mvPosition;
         }
       `,
       fragmentShader: `
+        uniform float uWarpProgress;
         varying vec3 vColor;
+        varying float vWarp;
+
         void main() {
-          // Circular particle with crisp edge falloff
-          float d = length(gl_PointCoord - vec2(0.5));
+          vec2 coord = gl_PointCoord - vec2(0.5);
+          // Stretch into speed trails during galactic hyperspace jump
+          if (vWarp > 0.05) {
+            coord.x *= (1.0 + vWarp * 1.6);
+          }
+          float d = length(coord);
           if (d > 0.5) discard;
-          float alpha = smoothstep(0.5, 0.15, d) * 0.92;
-          gl_FragColor = vec4(vColor, alpha);
+
+          float alpha = smoothstep(0.5, 0.12, d) * (0.92 + vWarp * 0.08);
+          // Particles glow into pure luminous champagne star-trails in hyperspace
+          vec3 finalColor = mix(vColor, vec3(1.0, 0.98, 0.92), vWarp * 0.65);
+          gl_FragColor = vec4(finalColor, alpha);
         }
       `,
     });
 
     const particles = new THREE.Points(particleGeo, particleMat);
-    scene.add(particles);
+    cpuGroup.add(particles);
     particlesRef.current = particles;
 
-    // 6. INTERACTION RAYCASTING PLANE
+    // 8. INTERACTION RAYCASTING WITH 3D LOCAL TRANSFORMATION
     const rayPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
     const raycaster = new THREE.Raycaster();
     const mouseVector = new THREE.Vector2();
 
-    // Map screen mouse coordinates to 3D world plane
-    const updateMouseWorldPos = (clientX: number, clientY: number) => {
+    // Map screen mouse coordinates to 3D local coordinates inside the tilted CPU group
+    const updateMousePos = (clientX: number, clientY: number) => {
       const rect = renderer.domElement.getBoundingClientRect();
-      mouseVector.x = ((clientX - rect.left) / rect.width) * 2 - 1;
-      mouseVector.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+      const nx = ((clientX - rect.left) / rect.width) * 2 - 1;
+      const ny = -((clientY - rect.top) / rect.height) * 2 + 1;
+      mouseVector.x = nx;
+      mouseVector.y = ny;
+      mouseNormRef.current = { x: nx, y: ny };
 
       raycaster.setFromCamera(mouseVector, camera);
       const intersectionPoint = new THREE.Vector3();
       raycaster.ray.intersectPlane(rayPlane, intersectionPoint);
 
-      if (intersectionPoint) {
-        mouseWorldPosRef.current.copy(intersectionPoint);
+      if (intersectionPoint && cpuGroupRef.current) {
+        // Transform world coordinate into tilted CPU local space!
+        const localPos = cpuGroupRef.current.worldToLocal(intersectionPoint.clone());
+        mouseLocalPosRef.current.copy(localPos);
       }
     };
 
-    // POINTER MOVE: Scatter particles around cursor
+    // POINTER MOVE: Update tilt & local position
     const onPointerMove = (e: PointerEvent) => {
-      updateMouseWorldPos(e.clientX, e.clientY);
+      updateMousePos(e.clientX, e.clientY);
       if (isHoldingRef.current) {
-        blackHolePosRef.current.copy(mouseWorldPosRef.current);
+        blackHolePosRef.current.copy(mouseLocalPosRef.current);
       }
     };
 
     // POINTER DOWN: Record position & schedule Black Hole hold
     const holdTimerRef = { id: 0 as any };
     const onPointerDown = (e: PointerEvent) => {
-      updateMouseWorldPos(e.clientX, e.clientY);
+      updateMousePos(e.clientX, e.clientY);
       pointerDownPosRef.current = { x: e.clientX, y: e.clientY };
       holdStartRef.current = performance.now();
 
-      // If user holds for more than 160ms, ignite the Black Hole Singularity!
+      // If user holds for more than 150ms, ignite the True Black Hole Singularity!
       holdTimerRef.id = setTimeout(() => {
         isHoldingRef.current = true;
-        blackHolePosRef.current.copy(mouseWorldPosRef.current);
+        blackHolePosRef.current.copy(mouseLocalPosRef.current);
         startBlackHoleSound();
-        setInteractionHint("BLACK HOLE ACTIVE · SUCKING PARTICLES IN · RELEASE TO EXPLODE");
-      }, 160);
+        setInteractionHint("BLACK HOLE ACTIVE · SUCKING ALL PARTICLES IN · RELEASE TO EXPLODE");
+      }, 150);
     };
 
-    // POINTER UP: If holding -> Detonate Supernova! If quick click -> Warp into Portfolio!
+    // POINTER UP: If holding -> Detonate Violent 3D Scatter! If click -> Star Wars Hyperspace!
     const onPointerUp = (e: PointerEvent) => {
       clearTimeout(holdTimerRef.id);
       const pressDuration = performance.now() - holdStartRef.current;
@@ -617,12 +886,14 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       const dy = Math.abs(e.clientY - pointerDownPosRef.current.y);
 
       if (isHoldingRef.current) {
-        // Was holding: Detonate Supernova Shockwave!
+        // Was holding: Detonate Supernova 3D Scatter Explosion!
         isHoldingRef.current = false;
+        isExplodingRef.current = true;
+        explosionStartTimeRef.current = performance.now();
         stopBlackHoleSoundAndBlast();
-        setInteractionHint("SUPERNOVA SHOCKWAVE RELEASED · REFORMING CPU");
+        setInteractionHint("SUPERNOVA SHOCKWAVE DETONATED · MAGNETIC RE-STRUCTURING");
 
-        // Apply outward explosive velocity impulse to all particles
+        // Apply violent 3D omnidirectional scatter impulse (No liquid ripple!)
         const bh = blackHolePosRef.current;
         for (let i = 0; i < PARTICLE_COUNT; i++) {
           const i3 = i * 3;
@@ -633,19 +904,24 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           const edx = px - bh.x;
           const edy = py - bh.y;
           const edz = pz - bh.z;
-          const dist = Math.sqrt(edx * edx + edy * edy + edz * edz) + 0.05;
+          const dist = Math.sqrt(edx * edx + edy * edy + edz * edz) + 0.01;
 
-          const blastForce = (Math.random() * 4.5 + 2.5) / dist;
-          velocities[i3] += (edx / dist) * blastForce;
-          velocities[i3 + 1] += (edy / dist) * blastForce;
-          velocities[i3 + 2] += (edz / dist) * blastForce;
+          // Chaotic 3D outward burst vectors
+          const rx = (Math.random() - 0.5) * 2.0;
+          const ry = (Math.random() - 0.5) * 2.0;
+          const rz = (Math.random() - 0.5) * 2.0;
+          const blastMag = Math.random() * 6.5 + 4.5;
+
+          velocities[i3] = ((edx / dist) * 0.5 + rx * 0.5) * blastMag;
+          velocities[i3 + 1] = ((edy / dist) * 0.5 + ry * 0.5) * blastMag;
+          velocities[i3 + 2] = ((edz / dist) * 0.5 + rz * 0.5) * blastMag;
         }
 
         setTimeout(() => {
-          setInteractionHint("MOVE TO SCATTER · HOLD FOR BLACK HOLE · CLICK TO WARP");
-        }, 2000);
+          setInteractionHint("MOVE TO SCATTER · HOLD FOR BLACK HOLE · CLICK TO HYPERSPACE");
+        }, 2200);
       } else if (pressDuration < 220 && dx < 15 && dy < 15) {
-        // Quick single click/tap on particle structure: Trigger Genesis Warp!
+        // Quick single click/tap on CPU particle structure: Star Wars Galactic Warp!
         triggerWarpTransition();
       }
     };
@@ -654,7 +930,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     renderer.domElement.addEventListener("pointerdown", onPointerDown);
     window.addEventListener("pointerup", onPointerUp);
 
-    // 7. HIGH-PERFORMANCE PHYSICS SIMULATION LOOP (60 - 120 FPS)
+    // 9. HIGH-PERFORMANCE PHYSICS SIMULATION LOOP (60 - 120 FPS)
     let clock = new THREE.Clock();
 
     const animate = () => {
@@ -662,21 +938,52 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       const delta = Math.min(clock.getDelta(), 0.033);
       const elapsed = clock.getElapsedTime();
 
-      // Update studio smoke background shader
+      // Update shader uniforms
       smokeMat.uniforms.uTime.value = elapsed;
+      particleMat.uniforms.uTime.value = elapsed;
+      particleMat.uniforms.uWarpProgress.value = warpProgressRef.current;
+      accretionMat.uniforms.uTime.value = elapsed;
 
-      // Physics constants
+      // A. DYNAMIC 3D PERSPECTIVE TILT TOWARDS CURSOR
+      if (cpuGroupRef.current) {
+        const targetTiltX = -mouseNormRef.current.y * 0.32;
+        const targetTiltY = mouseNormRef.current.x * 0.40;
+        cpuGroupRef.current.rotation.x += (targetTiltX - cpuGroupRef.current.rotation.x) * 0.07;
+        cpuGroupRef.current.rotation.y += (targetTiltY - cpuGroupRef.current.rotation.y) * 0.07;
+        // Subtle ambient roll
+        cpuGroupRef.current.rotation.z = Math.sin(elapsed * 0.25) * 0.015;
+      }
+
+      // B. BLACK HOLE VISUAL ANIMATION
       const isHolding = isHoldingRef.current;
       const bh = blackHolePosRef.current;
-      const mw = mouseWorldPosRef.current;
+      if (isHolding) {
+        blackHoleGroup.visible = true;
+        blackHoleGroup.position.copy(bh);
+        // Ominous pulsing event horizon
+        const targetScale = 1.0 + Math.sin(elapsed * 12.0) * 0.06;
+        blackHoleGroup.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.18);
+        accretionMesh.rotation.z += delta * 5.0;
+      } else {
+        blackHoleGroup.scale.lerp(new THREE.Vector3(0, 0, 0), 0.22);
+        if (blackHoleGroup.scale.x < 0.01) {
+          blackHoleGroup.visible = false;
+        }
+      }
+
+      // C. PHYSICS INTEGRATION
+      const mw = mouseLocalPosRef.current;
       const posArr = currentPositions;
       const targetArr = targetPositions;
       const velArr = velocities;
+      const isExploding = isExplodingRef.current;
+      const isWarping = isTransitioningRef.current;
+      const timeSinceBlast = isExploding ? (performance.now() - explosionStartTimeRef.current) / 1000.0 : 999.0;
 
-      const scatterRadius = 0.38;
+      // Reduced, pinpoint cursor repulsion radius
+      const scatterRadius = isMobile ? 0.16 : 0.14;
       const scatterRadiusSq = scatterRadius * scatterRadius;
 
-      // Single fast loop over all particles
       for (let i = 0; i < PARTICLE_COUNT; i++) {
         const i3 = i * 3;
         let px = posArr[i3];
@@ -686,52 +993,101 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         let vy = velArr[i3 + 1];
         let vz = velArr[i3 + 2];
 
-        if (isHolding) {
-          // BLACK HOLE MODE: Sucks all particles into swirling singularity
+        if (isWarping) {
+          // STAR WARS HYPERSPACE WARP: Particles race forward into camera with lightspeed acceleration!
+          const warpFactor = warpProgressRef.current;
+          vz += (14.0 + Math.random() * 14.0) * warpFactor * delta;
+          vx += px * 1.6 * warpFactor * delta;
+          vy += py * 1.6 * warpFactor * delta;
+        } else if (isHolding) {
+          // TRUE BLACK HOLE SINGULARITY: Pure inward suction straight to cursor (NO swirl!)
           const dx = bh.x - px;
           const dy = bh.y - py;
           const dz = bh.z - pz;
-          const dist = Math.sqrt(dx * dx + dy * dy + dz * dz) + 0.04;
+          const dist = Math.sqrt(dx * dx + dy * dy + dz * dz) + 0.02;
 
-          // Inward gravitational pull + tangential vortex spin
-          const pull = 4.2 / dist;
-          const spin = 2.0 / dist;
+          // Pure radial inward pull
+          const pull = 8.5 / (dist + 0.05);
+          vx += (dx / dist) * pull * delta;
+          vy += (dy / dist) * pull * delta;
+          vz += (dz / dist) * pull * delta;
 
-          vx += (dx / dist * pull - dy / dist * spin) * delta;
-          vy += (dy / dist * pull + dx / dist * spin) * delta;
-          vz += (dz / dist * pull) * delta;
-
-          // Damping to prevent infinite orbital acceleration
-          vx *= 0.94;
-          vy *= 0.94;
-          vz *= 0.94;
+          // Extreme damping at the center to compress into super-dense core
+          if (dist < 0.05) {
+            vx *= 0.82;
+            vy *= 0.82;
+            vz *= 0.82;
+          } else {
+            vx *= 0.94;
+            vy *= 0.94;
+            vz *= 0.94;
+          }
+        } else if (isExploding && timeSinceBlast < 0.38) {
+          // PHASE 1 EXPLOSION: Pure ballistic 3D scatter across screen
+          vx *= 0.97;
+          vy *= 0.97;
+          vz *= 0.97;
         } else {
-          // IDLE / RETURN MODE: Elastic spring back to CPU formation
+          // NORMAL IDLE & RE-STRUCTURING MODE
           const tx = targetArr[i3];
           const ty = targetArr[i3 + 1];
           const tz = targetArr[i3 + 2];
 
-          // Harmonic spring return
-          vx += (tx - px) * 6.5 * delta;
-          vy += (ty - py) * 8.0 * delta;
-          vz += (tz - pz) * 6.5 * delta;
+          // Progressive magnetic snap-back if recovering from explosion
+          let springK = 7.5;
+          if (isExploding) {
+            if (timeSinceBlast >= 2.0) {
+              isExplodingRef.current = false;
+            } else {
+              const progress = (timeSinceBlast - 0.38) / 1.62;
+              springK = progress * progress * 8.5;
+            }
+          }
 
-          // Cursor Scatter / Repulsion
+          vx += (tx - px) * springK * delta;
+          vy += (ty - py) * (springK * 1.1) * delta;
+          vz += (tz - pz) * springK * delta;
+
+          // CONTINUOUS AMBIENT KINETIC CURRENTS (Particles constantly move along traces & die)
+          const phase = particlePhases[i];
+          const pType = particleTypes[i];
+          if (pType === 1) {
+            // N/S traces: micro-current pulses along Y
+            vy += Math.sin(elapsed * 4.0 + phase) * 0.06 * delta;
+          } else if (pType === 2) {
+            // E/W traces: micro-current pulses along X
+            vx += Math.sin(elapsed * 4.0 + phase) * 0.06 * delta;
+          } else if (pType === 0) {
+            // Die core: micro clock-cycle vibration
+            vx += Math.cos(elapsed * 8.0 + phase) * 0.02 * delta;
+            vy += Math.sin(elapsed * 8.0 + phase) * 0.02 * delta;
+          }
+
+          // TIGHT CURSOR REPULSION & LAMINAR FLOW AROUND STATIONARY CURSOR
           const mdx = px - mw.x;
           const mdy = py - mw.y;
           const distSq = mdx * mdx + mdy * mdy;
 
           if (distSq < scatterRadiusSq) {
             const mDist = Math.sqrt(distSq) + 0.001;
-            const repForce = (scatterRadius - mDist) * 9.5;
+            // Precise, sharp quadratic repulsion
+            const factor = 1.0 - mDist / scatterRadius;
+            const repForce = factor * factor * 16.0;
             vx += (mdx / mDist) * repForce * delta;
             vy += (mdy / mDist) * repForce * delta;
+
+            // Stream / glide continuously around stationary cursor
+            const tangX = -mdy / mDist;
+            const tangY = mdx / mDist;
+            const flowSpeed = 0.85 * factor;
+            vx += tangX * flowSpeed * delta;
+            vy += tangY * flowSpeed * delta;
           }
 
           // Kinetic friction damping
-          vx *= 0.92;
-          vy *= 0.92;
-          vz *= 0.92;
+          vx *= 0.91;
+          vy *= 0.91;
+          vz *= 0.91;
         }
 
         // Apply velocities
@@ -744,12 +1100,6 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       }
 
       particleGeo.attributes.position.needsUpdate = true;
-
-      // Subtle atmospheric rotation
-      if (particlesRef.current && !isHolding) {
-        particlesRef.current.rotation.z = Math.sin(elapsed * 0.2) * 0.02;
-      }
-
       renderer.render(scene, camera);
     };
 
@@ -763,8 +1113,8 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       const mobile = w / h < 1.0;
 
       cameraRef.current.aspect = w / h;
-      cameraRef.current.fov = mobile ? 54 : 45;
-      cameraRef.current.position.z = mobile ? 3.4 : 2.8;
+      cameraRef.current.fov = mobile ? 52 : 44;
+      cameraRef.current.position.z = mobile ? 3.6 : 3.0;
       cameraRef.current.updateProjectionMatrix();
 
       smokeMat.uniforms.uResolution.value.set(w, h);
@@ -791,18 +1141,24 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       {/* Three.js Canvas Container */}
       <div ref={mountRef} className="absolute inset-0 w-full h-full z-10 cursor-crosshair" />
 
+      {/* Star Wars Hyperspace Flash Overlay */}
+      <div
+        ref={warpFlashRef}
+        className="absolute inset-0 bg-[#FFFBF0] pointer-events-none opacity-0 z-50 transition-opacity"
+      />
+
       {/* Top Header Bar: Telemetry Status Indicator */}
       <header className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between pointer-events-auto">
         <div className="flex items-center gap-3 bg-black/60 backdrop-blur-md border border-white/10 px-3.5 py-1.5 rounded-full text-xs font-mono">
           <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-          <span className="text-white/80 font-medium">SOHAM ROYCHOUDHURY · CPU PARTICLE CORE</span>
+          <span className="text-white/80 font-medium">SOHAM ROYCHOUDHURY · CPU CORE</span>
           <span className="hidden sm:inline text-white/40">|</span>
-          <span className="hidden sm:inline text-white/50">STUDIO SMOKE ATMOSPHERE</span>
+          <span className="hidden sm:inline text-white/50">4-WAY BUS ARCHITECTURE</span>
         </div>
 
         <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-xs font-mono text-white/70">
           <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          <span>GPU Kinetic Physics Active</span>
+          <span>3D Kinetic Tilt & Graviton Physics</span>
         </div>
       </header>
 
@@ -950,12 +1306,12 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             {isAudioPlaying ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
           </button>
 
-          {/* Direct Warp Enter Website CTA */}
+          {/* Direct Hyperspace Warp Enter Website CTA */}
           <button
             onClick={triggerWarpTransition}
             className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-[#F5E6D3] hover:bg-[#FFF8F0] text-black font-semibold text-xs transition-all shadow-lg shadow-[#F5E6D3]/20 shrink-0"
           >
-            <span>Warp to Portfolio</span>
+            <span>Hyperspace Jump</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -1050,12 +1406,11 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
               <button
                 onClick={() => {
                   setActiveModal(null);
-                  if (onNavigateToSection) onNavigateToSection("monument-exhibition");
-                  else onEnterPortfolio();
+                  if (onNavigateToSection) onNavigateToSection("work-matrix");
                 }}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-all"
+                className="text-xs font-semibold text-purple-400 hover:text-purple-300 flex items-center gap-1"
               >
-                <span>View Full Exhibition in Portfolio</span>
+                <span>Inspect in Portfolio</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -1069,7 +1424,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           onClick={() => setActiveModal(null)}
         >
           <div
-            className="relative w-full max-w-2xl bg-[#0D0F16] border border-white/15 rounded-2xl shadow-2xl p-6 overflow-hidden max-h-[85vh] flex flex-col"
+            className="relative w-full max-w-xl bg-[#0D0F16] border border-white/15 rounded-2xl shadow-2xl p-6 overflow-hidden max-h-[85vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
@@ -1078,8 +1433,8 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
                   <Cpu className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">SYSTEM ARCHITECTURE // HARDWARE & STACK</h3>
-                  <p className="text-xs font-mono text-white/60">Bare-Metal Systems Engine & AI Pipelines</p>
+                  <h3 className="text-lg font-bold text-white">SYSTEM ARCHITECTURE & HARDWARE</h3>
+                  <p className="text-xs font-mono text-white/60">Engineering Stack · Real-Time Microsecond Kernel</p>
                 </div>
               </div>
               <button
@@ -1091,59 +1446,25 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
               </button>
             </div>
 
-            <div className="space-y-4 overflow-y-auto pr-1">
-              <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-mono text-emerald-400">
-                <span className="flex items-center gap-2">
-                  <Activity className="w-4 h-4 animate-pulse" />
-                  SYSTEM STATUS: OPTIMAL · THERMALS 28°C
-                </span>
-                <span>COMPUTE CORES ACTIVE</span>
+            <div className="space-y-3 font-mono text-xs text-white/80 overflow-y-auto pr-1">
+              <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 space-y-1.5">
+                <p className="text-red-400 font-semibold">// LOW-LEVEL SYSTEMS & ENGINE RUNTIME</p>
+                <p className="text-white/60">C++20 · Rust 1.80 · Memory Pooling · Lock-Free Ring Buffers · Zero-Alloc Pipelines</p>
               </div>
 
-              <div>
-                <h4 className="text-xs font-mono text-[#FF7A00] tracking-wider uppercase mb-2">Systems Engineering Principles</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                  <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10">
-                    <p className="font-semibold text-white">Zero-Allocation Concurrency</p>
-                    <p className="text-white/60 text-[11px]">Lock-free ring buffers, cache-line alignment, and SIMD vectorization.</p>
-                  </div>
-                  <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10">
-                    <p className="font-semibold text-white">Real-Time Telemetry Streaming</p>
-                    <p className="text-white/60 text-[11px]">Sub-millisecond WebSocket fan-out and binary protocol serialization.</p>
-                  </div>
-                  <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10">
-                    <p className="font-semibold text-white">Autonomous Agent Orchestration</p>
-                    <p className="text-white/60 text-[11px]">Recursive local model inference and verifiable sandbox execution.</p>
-                  </div>
-                  <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10">
-                    <p className="font-semibold text-white">Kinetic GPU Physics Simulation</p>
-                    <p className="text-white/60 text-[11px]">Sub-millisecond vector math, harmonic damping, and 120 FPS render loops.</p>
-                  </div>
-                </div>
+              <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 space-y-1.5">
+                <p className="text-purple-400 font-semibold">// DISTRIBUTED AI & AGENTIC INFRASTRUCTURE</p>
+                <p className="text-white/60">DeepSeek-R1 Local Harness · PyTorch · CUDA Accelerators · Distributed Worker Swarms</p>
               </div>
 
-              <div>
-                <h4 className="text-xs font-mono text-blue-400 tracking-wider uppercase mb-2">Production Software Stack</h4>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
-                  <div className="p-2.5 rounded-lg bg-white/[0.02] border border-white/10 font-mono text-white/80">
-                    ✦ Next.js 16 (App Router)
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-white/[0.02] border border-white/10 font-mono text-white/80">
-                    ✦ React 19 & TypeScript
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-white/[0.02] border border-white/10 font-mono text-white/80">
-                    ✦ Three.js & WebGL 2.0
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-white/[0.02] border border-white/10 font-mono text-white/80">
-                    ✦ PyTorch & DeepSeek
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-white/[0.02] border border-white/10 font-mono text-white/80">
-                    ✦ C++ & Rust Systems
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-white/[0.02] border border-white/10 font-mono text-white/80">
-                    ✦ GSAP & Lenis Smooth
-                  </div>
-                </div>
+              <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 space-y-1.5">
+                <p className="text-blue-400 font-semibold">// FRONTEND ARCHITECTURE</p>
+                <p className="text-white/60">Next.js 16 (Turbopack) · Three.js WebGL Shader Quad · Tailwind CSS · Lenis 1.1</p>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 space-y-1.5">
+                <p className="text-emerald-400 font-semibold">// TELEMETRY & HARDWARE THERMALS</p>
+                <p className="text-white/60">GPU Particle Shader (60k Point-Cloud) · Sub-millisecond Physics Tick (0.6ms) · Nominal 28°C</p>
               </div>
             </div>
 
@@ -1151,9 +1472,9 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
               <span className="text-xs text-white/50 font-mono">Press ESC to close</span>
               <button
                 onClick={() => setActiveModal(null)}
-                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-all"
+                className="text-xs font-semibold text-white/70 hover:text-white"
               >
-                Close Specs
+                Dismiss
               </button>
             </div>
           </div>
@@ -1166,7 +1487,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           onClick={() => setActiveModal(null)}
         >
           <div
-            className="relative w-full max-w-2xl bg-[#0D0F16] border border-white/15 rounded-2xl shadow-2xl p-6 overflow-hidden max-h-[85vh] flex flex-col"
+            className="relative w-full max-w-xl bg-[#0D0F16] border border-white/15 rounded-2xl shadow-2xl p-6 overflow-hidden max-h-[85vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
@@ -1175,8 +1496,8 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
                   <Headphones className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">TERRACE RITUALS & HOBBIES</h3>
-                  <p className="text-xs font-mono text-white/60">Music, Sports Operations, Acoustics & Lifestyle</p>
+                  <h3 className="text-lg font-bold text-white">TERRACE AMBIENCE & LIFE OUTSIDE</h3>
+                  <p className="text-xs font-mono text-white/60">Acoustics · Cricket Athletics · Mechanical Modding</p>
                 </div>
               </div>
               <button
@@ -1188,43 +1509,37 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
               </button>
             </div>
 
-            <div className="space-y-3.5 overflow-y-auto pr-1">
-              <div className="p-4 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <Volume2 className="w-4 h-4 text-amber-400" />
-                    <span className="text-sm font-semibold text-white">Organic Terrace Mountain Wind Generator</span>
-                  </div>
-                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
-                    isAudioPlaying ? "bg-emerald-500/20 text-emerald-300" : "bg-white/10 text-white/50"
-                  }`}>
-                    {isAudioPlaying ? "PLAYING" : "MUTED"}
-                  </span>
-                </div>
-                <p className="text-xs text-white/70 mb-3">
-                  Synthesized in real-time using Web Audio API pink/white noise filtered through organic mountain resonance.
+            <div className="space-y-3.5 text-xs text-white/80 overflow-y-auto pr-1">
+              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10">
+                <h4 className="font-semibold text-white mb-1">Cricket Athletics & International Ops</h4>
+                <p className="text-white/60 leading-relaxed">
+                  Active competitive cricketer with deep involvement in the Latvian Cricket Federation ecosystem, merging high-performance sports analytics with international tournament operations.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10">
+                <h4 className="font-semibold text-white mb-1">Mechanical Keyboards & Tactile Craftsmanship</h4>
+                <p className="text-white/60 leading-relaxed">
+                  Building custom aluminum keyboards with hand-lubed switches (Krytox 205g0), custom FR4 plates, and meticulously tuned acoustic damping foams.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10">
+                <h4 className="font-semibold text-white mb-1">Web Audio Generative Terrace Breeze</h4>
+                <p className="text-white/60 leading-relaxed mb-3">
+                  A pure mathematical pink-noise biquad audio filter that models the relaxing organic mountain wind whistling through terrace leaves at dusk.
                 </p>
                 <button
                   onClick={toggleAmbientSound}
-                  className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#F5E6D3] hover:bg-[#FFF8F0] text-black text-xs font-semibold transition-all"
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
+                    isAudioPlaying
+                      ? "bg-[#FF7A00]/20 text-[#FF7A00] border-[#FF7A00]/40"
+                      : "bg-white/5 hover:bg-white/10 text-white/80 border-white/10"
+                  }`}
                 >
-                  {isAudioPlaying ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
-                  <span>{isAudioPlaying ? "Stop Soundscape" : "Start Terrace Breeze"}</span>
+                  {isAudioPlaying ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+                  <span>{isAudioPlaying ? "Mute Terrace Ambience" : "Listen to Terrace Ambience"}</span>
                 </button>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10">
-                <h4 className="text-sm font-semibold text-white mb-0.5">European Cricket Federation Operations & Athletics</h4>
-                <p className="text-xs text-white/70">
-                  Active operations contributor for the Latvian Cricket Federation, coordinating international match fixtures, live broadcast graphics, and competitive team management.
-                </p>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10">
-                <h4 className="text-sm font-semibold text-white mb-0.5">Mechanical Switch Modding & Acoustic Tuning</h4>
-                <p className="text-xs text-white/70">
-                  Obsessed with tactile keystroke feedback, lubing switches with Krytox 205g0, custom brass plates, and acoustic dampening.
-                </p>
               </div>
             </div>
 
@@ -1232,9 +1547,9 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
               <span className="text-xs text-white/50 font-mono">Press ESC to close</span>
               <button
                 onClick={() => setActiveModal(null)}
-                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-all"
+                className="text-xs font-semibold text-white/70 hover:text-white"
               >
-                Close Hobbies
+                Dismiss
               </button>
             </div>
           </div>
@@ -1247,33 +1562,34 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           onClick={() => setActiveModal(null)}
         >
           <div
-            className="relative w-full max-w-2xl bg-[#090B10] border border-emerald-500/30 rounded-2xl shadow-2xl p-6 overflow-hidden max-h-[85vh] flex flex-col font-mono"
+            className="relative w-full max-w-2xl bg-[#080A10] border border-emerald-500/30 rounded-2xl shadow-2xl p-5 overflow-hidden max-h-[85vh] flex flex-col font-mono"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-3">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
-                <span className="text-xs text-white/60 ml-2">soham@particle-kernel: ~ (bash)</span>
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
+                <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
+                <span className="text-xs text-emerald-400 font-semibold ml-2">soham@particle-kernel: ~ (bash)</span>
               </div>
               <button
                 onClick={() => setActiveModal(null)}
                 aria-label="Close terminal"
-                className="p-1 rounded bg-white/5 hover:bg-white/15 text-white/60 hover:text-white transition-colors"
+                className="p-1 rounded bg-white/5 hover:bg-white/10 text-white/50 hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto space-y-2 text-xs pr-1">
+            <div className="flex-1 overflow-y-auto space-y-2 text-xs pr-1 scrollbar-thin">
               {terminalHistory.map((item, idx) => (
-                <div key={idx} className="space-y-0.5">
-                  <div className="flex items-center gap-2 text-emerald-400">
-                    <span className="text-white/40">guest@soham:~$</span>
-                    <span>{item.cmd}</span>
+                <div key={idx} className="space-y-1">
+                  <div className="flex items-center gap-1.5 text-white/50">
+                    <span className="text-emerald-400">➜</span>
+                    <span className="text-purple-400">~</span>
+                    <span className="text-white/90">{item.cmd}</span>
                   </div>
-                  <div className="text-white/80 whitespace-pre-wrap pl-4 border-l border-white/10">
+                  <div className="text-emerald-300/90 whitespace-pre-wrap pl-3.5 border-l border-emerald-500/20">
                     {item.out}
                   </div>
                 </div>
@@ -1281,23 +1597,17 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
               <div ref={terminalBottomRef} />
             </div>
 
-            <form onSubmit={handleTerminalSubmit} className="mt-4 pt-3 border-t border-white/10 flex items-center gap-2">
-              <span className="text-emerald-400 text-xs shrink-0">guest@soham:~$</span>
+            <form onSubmit={handleTerminalSubmit} className="mt-3 pt-3 border-t border-white/10 flex items-center gap-2">
+              <span className="text-emerald-400 text-xs">➜</span>
+              <span className="text-purple-400 text-xs">~</span>
               <input
-                ref={terminalInputRef}
                 type="text"
                 value={terminalInput}
                 onChange={(e) => setTerminalInput(e.target.value)}
+                placeholder="type 'help', 'whoami', 'projects', 'specs', 'sound on', 'enter'..."
+                className="flex-1 bg-transparent text-xs text-white placeholder-white/30 outline-none font-mono"
                 autoFocus
-                placeholder="Type 'help', 'whoami', 'projects', 'specs', or 'enter'..."
-                className="flex-1 bg-transparent text-white text-xs outline-none border-none placeholder:text-white/30"
               />
-              <button
-                type="submit"
-                className="px-2.5 py-1 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-[10px]"
-              >
-                RUN
-              </button>
             </form>
           </div>
         </div>

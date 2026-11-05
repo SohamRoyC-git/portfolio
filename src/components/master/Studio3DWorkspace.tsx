@@ -356,17 +356,17 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       });
     }
 
-    // 3. Sequential Architectural Technical Pen Draw + Ink Fill Bloom (Option A - Deliberate, Unhurried 4.2s Pace)
+    // 3. Strictly Sequential Architectural Technical Pen Draw (WELCOME -> TO -> MY -> PORTFOLIO)
     entranceAnimRef.current = 0.0;
     if (renderTypographyRef.current) {
       renderTypographyRef.current(0.0);
     }
     gsap.killTweensOf(entranceAnimRef);
     gsap.to(entranceAnimRef, {
-      current: 4.0,
-      duration: 4.2,
-      delay: 0.65, // Let preloader curtain fully dissolve so the user catches every single stroke!
-      ease: "power1.inOut",
+      current: 6.2,
+      duration: 6.2,
+      delay: 0.90, // Let preloader curtain fully dissolve so the user catches every single stroke in the clear void!
+      ease: "none",
       onUpdate: () => {
         if (renderTypographyRef.current) {
           renderTypographyRef.current(entranceAnimRef.current);
@@ -579,7 +579,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     textCanvas.height = 1440;
     const tCtx = textCanvas.getContext("2d");
 
-    // Option A: Architectural Technical Pen Draw + Ink Fill Bloom
+    // Option A: Architectural Technical Pen Draw + Ink Fill Bloom (Strict Sequence)
     const drawLetterString = (
       ctx: CanvasRenderingContext2D,
       text: string,
@@ -591,7 +591,9 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       baseline: "top" | "bottom",
       isWireframeOnly: boolean,
       wordStartTime: number,
-      animTime: number
+      animTime: number,
+      charStagger: number = 0.18,
+      charDuration: number = 0.65
     ) => {
       ctx.save();
       ctx.font = `900 ${fontSize}px ${fontFamily}`;
@@ -613,8 +615,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       for (let i = 0; i < chars.length; i++) {
         const char = chars[i];
         const charW = charWidths[i];
-        const charStartTime = wordStartTime + i * 0.20;
-        const charDuration = 0.75;
+        const charStartTime = wordStartTime + i * charStagger;
         // Progress for this letter (0.0 to 1.0)
         const p = Math.max(0, Math.min(1.0, (animTime - charStartTime) / charDuration));
 
@@ -661,32 +662,42 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
       const fontFamily = "'Druk Trial', 'Druk', 'Helvetica Compressed', 'Anton', -apple-system, sans-serif";
 
+      // STRICT MONUMENTAL SEQUENCE: WELCOME -> TO -> MY -> PORTFOLIO
+      // No two words ever appear or animate simultaneously!
+      // 1. WELCOME:   0.00s -> 1.56s (7 letters, solid ivory bloom)
+      //    [pause 1.56s -> 1.90s]
+      // 2. TO:        1.90s -> 2.62s (2 letters wireframe outline only)
+      //    [pause 2.62s -> 3.00s]
+      // 3. MY:        3.00s -> 3.72s (2 letters wireframe outline only)
+      //    [pause 3.72s -> 4.10s]
+      // 4. PORTFOLIO: 4.10s -> 5.98s (9 letters, solid ivory bloom)
+
       if (isMobile) {
         // MOBILE PORTRAIT (Tucked deep into corners)
         const mobFontSize = 190;
-        // Top-Left: WELCOME (solid bloom) + TO (wireframe outline only)
-        drawLetterString(tCtx, "WELCOME", 80, 80, mobFontSize, fontFamily, "left", "top", false, 0.0, animTime);
-        drawLetterString(tCtx, "TO", 80, 280, mobFontSize, fontFamily, "left", "top", true, 0.55, animTime);
+        // 1. Top-Left: WELCOME (solid warm ivory bloom)
+        drawLetterString(tCtx, "WELCOME", 80, 80, mobFontSize, fontFamily, "left", "top", false, 0.0, animTime, 0.16, 0.60);
+        // 2. Top-Left: TO (wireframe outline only, begins only after WELCOME finishes)
+        drawLetterString(tCtx, "TO", 80, 280, mobFontSize, fontFamily, "left", "top", true, 1.90, animTime, 0.22, 0.50);
 
-        // Bottom-Right: MY (wireframe outline only) + PORTFOLIO (solid bloom)
-        drawLetterString(tCtx, "MY", 2480, 1220, mobFontSize, fontFamily, "right", "bottom", true, 0.35, animTime);
-        drawLetterString(tCtx, "PORTFOLIO", 2480, 1400, mobFontSize, fontFamily, "right", "bottom", false, 0.55, animTime);
+        // 3. Bottom-Right: MY (wireframe outline only, begins only after TO finishes)
+        drawLetterString(tCtx, "MY", 2480, 1220, mobFontSize, fontFamily, "right", "bottom", true, 3.00, animTime, 0.22, 0.50);
+        // 4. Bottom-Right: PORTFOLIO (solid warm ivory bloom, begins only after MY finishes)
+        drawLetterString(tCtx, "PORTFOLIO", 2480, 1400, mobFontSize, fontFamily, "right", "bottom", false, 4.10, animTime, 0.16, 0.60);
       } else {
         // DESKTOP: Monumental Druk Diagonal (Solid Ivory vs. 1px Razor-Sharp Wireframe)
         const welcomeFontSize = 295;
         const portfolioFontSize = 310;
 
-        // Top-Left Corner Block
-        // WELCOME: Starts at 0.0s (7 letters, finishes ~1.95s)
-        drawLetterString(tCtx, "WELCOME", 80, 80, welcomeFontSize, fontFamily, "left", "top", false, 0.0, animTime);
-        // TO: Wireframe outline only, starts at 1.45s (finishes ~2.40s)
-        drawLetterString(tCtx, "TO", 80, 390, welcomeFontSize, fontFamily, "left", "top", true, 1.45, animTime);
+        // 1. Top-Left: WELCOME (solid warm ivory bloom)
+        drawLetterString(tCtx, "WELCOME", 80, 80, welcomeFontSize, fontFamily, "left", "top", false, 0.0, animTime, 0.16, 0.60);
+        // 2. Top-Left: TO (wireframe outline only, begins only after WELCOME finishes)
+        drawLetterString(tCtx, "TO", 80, 390, welcomeFontSize, fontFamily, "left", "top", true, 1.90, animTime, 0.22, 0.50);
 
-        // Bottom-Right Corner Block
-        // MY: Wireframe outline only, starts at 0.70s (finishes ~1.65s)
-        drawLetterString(tCtx, "MY", 2480, 1070, welcomeFontSize, fontFamily, "right", "bottom", true, 0.70, animTime);
-        // PORTFOLIO: Starts at 1.35s (9 letters, finishes ~3.70s)
-        drawLetterString(tCtx, "PORTFOLIO", 2480, 1370, portfolioFontSize, fontFamily, "right", "bottom", false, 1.35, animTime);
+        // 3. Bottom-Right: MY (wireframe outline only, begins only after TO finishes)
+        drawLetterString(tCtx, "MY", 2480, 1070, welcomeFontSize, fontFamily, "right", "bottom", true, 3.00, animTime, 0.22, 0.50);
+        // 4. Bottom-Right: PORTFOLIO (solid warm ivory bloom, begins only after MY finishes)
+        drawLetterString(tCtx, "PORTFOLIO", 2480, 1370, portfolioFontSize, fontFamily, "right", "bottom", false, 4.10, animTime, 0.16, 0.60);
       }
     };
 

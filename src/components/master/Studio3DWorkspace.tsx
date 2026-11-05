@@ -293,7 +293,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
       if (textMeshRef.current) {
         const isMobile = window.innerWidth / window.innerHeight < 1.0;
-        const camDist = isMobile ? 3.8 : 3.3;
+        const camDist = isMobile ? 4.5 : 4.0;
         textMeshRef.current.visible = true;
         textMeshRef.current.scale.set(1.0, 1.0, 1.0);
         textMeshRef.current.position.set(0, 0, -camDist);
@@ -540,8 +540,10 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     const smokeQuad = new THREE.Mesh(smokeQuadGeo, smokeMat);
     scene.add(smokeQuad);
 
-    // 4. 3D ATTRACTOR ROOT GROUP (For dynamic 3D tilt & perspective parallax)
+    // 4. 3D ATTRACTOR ROOT GROUP (Calibrated for dedicated central stage with negative-space buffer)
     const attractorGroup = new THREE.Group();
+    attractorGroup.scale.set(isMobile ? 0.78 : 0.84, isMobile ? 0.78 : 0.84, isMobile ? 0.78 : 0.84);
+    attractorGroup.position.set(0, isMobile ? 0.04 : 0.08, 0);
     scene.add(attractorGroup);
     attractorGroupRef.current = attractorGroup;
 
@@ -560,57 +562,56 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
       // Solid Warm Ivory Fill (#F5EEDA)
       tCtx.fillStyle = "#F5EEDA";
-      tCtx.strokeStyle = "rgba(245, 238, 218, 0.45)";
-      tCtx.lineWidth = 1.6;
+      tCtx.strokeStyle = "rgba(245, 238, 218, 0.40)";
+      tCtx.lineWidth = 1.4;
 
       if (isMobile) {
-        // MOBILE PORTRAIT (Large commanding architectural scale)
+        // MOBILE PORTRAIT (Tucked neatly into corners)
         tCtx.textAlign = "left";
         tCtx.textBaseline = "top";
         tCtx.letterSpacing = "0.02em";
-        tCtx.font = `900 220px ${fontFamily}`;
+        tCtx.font = `900 190px ${fontFamily}`;
         tCtx.fillText("WELCOME", 80, 80);
         tCtx.strokeText("WELCOME", 80, 80);
-        tCtx.fillText("TO", 80, 310);
-        tCtx.strokeText("TO", 80, 310);
+        tCtx.fillText("TO", 80, 280);
+        tCtx.strokeText("TO", 80, 280);
 
         tCtx.textAlign = "right";
         tCtx.textBaseline = "bottom";
-        tCtx.font = `900 220px ${fontFamily}`;
-        tCtx.fillText("MY", 2480, 1180);
-        tCtx.strokeText("MY", 2480, 1180);
+        tCtx.font = `900 190px ${fontFamily}`;
+        tCtx.fillText("MY", 2480, 1220);
+        tCtx.strokeText("MY", 2480, 1220);
         tCtx.fillText("PORTFOLIO", 2480, 1400);
         tCtx.strokeText("PORTFOLIO", 2480, 1400);
       } else {
-        // DESKTOP: Giant Monumental Druk Diagonal (Overlapping Lorenz Manifold)
-        // Top-Left Anchor: "WELCOME" on line 1, "TO" on line 2
+        // DESKTOP: Monumental Druk Diagonal (Tucked deep in corners, center 100% open)
+        // Top-Left Corner Block
         tCtx.textAlign = "left";
         tCtx.textBaseline = "top";
         tCtx.letterSpacing = "0.02em";
-        const welcomeFontSize = 390;
+        const welcomeFontSize = 295;
         tCtx.font = `900 ${welcomeFontSize}px ${fontFamily}`;
-        tCtx.fillText("WELCOME", 80, 70);
-        tCtx.strokeText("WELCOME", 80, 70);
+        tCtx.fillText("WELCOME", 80, 80);
+        tCtx.strokeText("WELCOME", 80, 80);
 
-        const toFontSize = 390;
+        const toFontSize = 295;
         tCtx.font = `900 ${toFontSize}px ${fontFamily}`;
-        tCtx.fillText("TO", 80, 470);
-        tCtx.strokeText("TO", 80, 470);
+        tCtx.fillText("TO", 80, 390);
+        tCtx.strokeText("TO", 80, 390);
 
-        // Bottom-Right Counterbalance: "MY" on line 1, "PORTFOLIO" on line 2
-        // Lorenz lower lobe physically overlaps the top of PORTFOLIO!
+        // Bottom-Right Corner Block: Tucked into bottom corner, leaving wide open space for Lorenz wings
         tCtx.textAlign = "right";
-        tCtx.textBaseline = "top";
+        tCtx.textBaseline = "bottom";
         tCtx.letterSpacing = "0.02em";
-        const myFontSize = 390;
+        const myFontSize = 295;
         tCtx.font = `900 ${myFontSize}px ${fontFamily}`;
-        tCtx.fillText("MY", 2480, 470);
-        tCtx.strokeText("MY", 2480, 470);
+        tCtx.fillText("MY", 2480, 1070);
+        tCtx.strokeText("MY", 2480, 1070);
 
-        const portfolioFontSize = 425;
+        const portfolioFontSize = 310;
         tCtx.font = `900 ${portfolioFontSize}px ${fontFamily}`;
-        tCtx.fillText("PORTFOLIO", 2480, 900);
-        tCtx.strokeText("PORTFOLIO", 2480, 900);
+        tCtx.fillText("PORTFOLIO", 2480, 1370);
+        tCtx.strokeText("PORTFOLIO", 2480, 1370);
       }
     };
 
@@ -644,27 +645,15 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     planeWRef.current = planeW;
     planeHRef.current = planeH;
 
-    const trailPosVecs: THREE.Vector2[] = Array.from(
-      { length: 12 },
-      () => new THREE.Vector2(0.5, 0.5)
-    );
-    const trailRadiiArray = new Float32Array(12);
-    const trailAgesArray = new Float32Array(12).fill(100.0);
-
     const textGeo = new THREE.PlaneGeometry(planeW, planeH, 64, 36);
     const textMat = new THREE.ShaderMaterial({
       transparent: true,
       depthWrite: false,
+      depthTest: false,
       blending: THREE.NormalBlending,
       uniforms: {
         uTexture: { value: textTexture },
-        uTrailPos: { value: trailPosVecs },
-        uTrailRadii: { value: trailRadiiArray },
-        uTrailAges: { value: trailAgesArray },
-        uTime: { value: 0 },
-        uAspect: { value: width / height },
         uBlackHole: { value: new THREE.Vector2(0, 0) },
-        uBlackHoleUv: { value: new THREE.Vector2(0.5, 0.5) },
         uLensing: { value: 0.0 },
         uTextAlpha: { value: 1.0 },
         uFlare: { value: 0.0 },
@@ -694,113 +683,42 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       `,
       fragmentShader: `
         uniform sampler2D uTexture;
-        uniform vec2 uTrailPos[12];
-        uniform float uTrailRadii[12];
-        uniform float uTrailAges[12];
-        uniform float uTime;
-        uniform float uAspect;
-        uniform vec2 uBlackHoleUv;
         uniform float uLensing;
         uniform float uTextAlpha;
         uniform float uFlare;
         uniform float uWarpProgress;
         varying vec2 vUv;
 
-        float hash21(vec2 p) {
-          p = fract(p * vec2(234.34, 435.345));
-          p += dot(p, p + 34.23);
-          return fract(p.x * p.y);
-        }
-
         void main() {
           vec2 uv = vUv;
-
-          // VISCOUS GRAVITATIONAL TENDRILS (During Black Hole Singularity hold)
-          if (uLensing > 0.02) {
-            float tendrilPhase = smoothstep(0.15, 1.0, uLensing);
-            if (tendrilPhase > 0.0) {
-              vec2 toBh = uBlackHoleUv - uv;
-              toBh.x *= uAspect;
-              float distToBh = length(toBh);
-              vec2 dir = normalize(toBh);
-              dir.x /= uAspect;
-
-              // Viscous stretching tendrils modulated by angular noise
-              float angle = atan(toBh.y, toBh.x);
-              float tendrilNoise = sin(angle * 12.0 + uTime * 3.5) * 0.5 + 0.5;
-              float stretch = pow(tendrilPhase, 2.0) * (0.35 + 0.65 * tendrilNoise) / (distToBh + 0.12);
-              uv += dir * min(0.65, stretch * 0.42);
-            }
-          }
-
           vec4 texCol = texture2D(uTexture, uv);
           if (texCol.a < 0.01) discard;
 
-          // 1. VISCOUS METABALL FLUID MASK (High Surface Tension Droplets - Lando Norris Effect)
-          vec2 aspectUv = uv;
-          aspectUv.x *= uAspect;
+          // Pure Warm Ivory (#F5EEDA) - Clean, Museum-Grade Solid Druk Silhouette
+          vec3 solidColor = vec3(0.961, 0.933, 0.855);
+          float alpha = texCol.a * uTextAlpha;
 
-          float fluidField = 0.0;
-          for (int i = 0; i < 12; i++) {
-            vec2 pos = uTrailPos[i];
-            pos.x *= uAspect;
-            float r = max(0.001, uTrailRadii[i]);
-            float age = uTrailAges[i];
-            float w = exp(-age * 1.8);
-            float d = length(aspectUv - pos);
-            fluidField += (w * r * r) / (d * d + 0.0006);
-          }
-
-          // High surface tension threshold with smoothstep creates organic, viscous droplets
-          float fluidMask = smoothstep(0.82, 1.18, fluidField);
-
-          // 2. SWIRLING STARDUST EMBERS LAYER (Revealed inside the fluid droplet)
-          vec2 dustGrid = uv * vec2(380.0 * uAspect, 380.0);
-          vec2 dustCell = floor(dustGrid);
-          vec2 dustUv = fract(dustGrid) - 0.5;
-          float dustSeed = hash21(dustCell);
-          float dustSparkle = sin(uTime * 7.0 + dustSeed * 6.28) * 0.5 + 0.5;
-          float emberDist = length(dustUv);
-          float emberCore = smoothstep(0.38, 0.06, emberDist) * step(0.30, dustSeed);
-
-          vec3 stardustColor = mix(vec3(0.96, 0.92, 0.82), vec3(1.0, 0.98, 0.94), dustSparkle);
-          float stardustAlpha = texCol.a * (0.35 + 0.65 * emberCore);
-
-          // 3. RESTING STATE: LUMINOUS CELESTIAL SAND
-          // Crisp, solid ivory fill (#F5EEDA) with living micro-shimmer along letter contours
-          float edgeShimmer = sin(uv.x * 280.0 + uv.y * 280.0 + uTime * 3.0) * 0.5 + 0.5;
-          float isEdge = smoothstep(0.12, 0.90, texCol.a) * (1.0 - smoothstep(0.90, 0.99, texCol.a));
-          vec3 solidColor = vec3(0.961, 0.933, 0.855); // #F5EEDA
-          solidColor += vec3(0.10, 0.08, 0.04) * isEdge * edgeShimmer;
-
-          // 4. VISCOUS LIQUID MENISCUS (Glowing Mercury/Champagne Rim)
-          float rim = smoothstep(0.15, 0.55, fluidMask) * (1.0 - smoothstep(0.55, 0.98, fluidMask));
-          vec3 meniscusGlow = vec3(1.0, 0.96, 0.88) * rim * 1.5;
-
-          // Blend resting solid text into swirling stardust embers through the fluid mask
-          vec3 finalRgb = mix(solidColor, stardustColor, fluidMask) + meniscusGlow;
-          float finalAlpha = mix(texCol.a, stardustAlpha, fluidMask * 0.70);
-
-          // Gravitational spaghettification collapse: dissolve into event horizon
-          if (uLensing > 0.45) {
-            float collapseProg = (uLensing - 0.45) / 0.55;
-            finalAlpha *= clamp(1.0 - pow(collapseProg, 1.4) * 1.5, 0.0, 1.0);
+          // Smooth gravitational collapse into singularity on black hole hold
+          if (uLensing > 0.40) {
+            float collapseProg = (uLensing - 0.40) / 0.60;
+            alpha *= clamp(1.0 - pow(collapseProg, 1.4) * 1.5, 0.0, 1.0);
           }
 
           // In hyperspace warp: dissolve text as it rushes past camera frustum
           if (uWarpProgress > 0.01) {
-            finalAlpha *= clamp(1.0 - pow(uWarpProgress, 1.2) * 1.65, 0.0, 1.0);
+            alpha *= clamp(1.0 - pow(uWarpProgress, 1.2) * 1.65, 0.0, 1.0);
           }
 
           // Supernova flash luminosity flare on return
-          finalRgb = mix(finalRgb, vec3(1.0, 0.98, 0.92), uFlare * 0.85);
+          solidColor = mix(solidColor, vec3(1.0, 0.98, 0.92), uFlare * 0.85);
 
-          gl_FragColor = vec4(finalRgb, finalAlpha * uTextAlpha);
+          gl_FragColor = vec4(solidColor, alpha);
         }
       `,
     });
 
     const textMesh = new THREE.Mesh(textGeo, textMat);
+    textMesh.renderOrder = 0; // Strictly behind 3D Lorenz structure
     textMesh.position.set(0, 0, -camDist);
     textMesh.renderOrder = 2; // drawn behind 3D foreground particles
     camera.add(textMesh);
@@ -997,7 +915,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       const sIndex = (i / PARTICLE_COUNT) * LORENZ_STEPS + Math.random() * 12.0;
       particleIndices[i] = sIndex % LORENZ_STEPS;
       // Calibrated speed: 12 to 22 steps per second (slow, meditative, serene majestic flow)
-      particleSpeeds[i] = Math.random() * 10.0 + 12.0;
+      particleSpeeds[i] = Math.random() * 4.0 + 4.5;
 
       // Delicate cross-sectional ribbon width around the curve (ample breathing room)
       particleRadii[i] = Math.random() * 0.016 + 0.003;
@@ -1783,32 +1701,15 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         }
       }
 
-      // Update Viscous Metaball Fluid Droplets Trail
-      const mVelMag = Math.sqrt(mVel.x * mVel.x + mVel.y * mVel.y);
-      const curUv = mouseUvRef.current;
-
-      for (let k = 11; k > 0; k--) {
-        trailPosVecs[k].copy(trailPosVecs[k - 1]);
-        trailRadiiArray[k] = trailRadiiArray[k - 1] * 0.94;
-        trailAgesArray[k] = trailAgesArray[k - 1] + delta * 2.6;
-      }
-      trailPosVecs[0].copy(curUv);
-      trailRadiiArray[0] = Math.min(0.24, 0.09 + mVelMag * 0.10);
-      trailAgesArray[0] = 0.0;
-
       // Update Typography Shader Uniforms
       if (textMat) {
         const textBhX = (mouseNormRef.current.x * planeWRef.current) * 0.5;
         const textBhY = (mouseNormRef.current.y * planeHRef.current) * 0.5;
         textMat.uniforms.uBlackHole.value.set(textBhX, textBhY);
-        const bhScreenX = (mouseNormRef.current.x + 1.0) * 0.5;
-        const bhScreenY = (mouseNormRef.current.y + 1.0) * 0.5;
-        textMat.uniforms.uBlackHoleUv.value.set(bhScreenX, bhScreenY);
         textMat.uniforms.uLensing.value = textLensingRef.current;
         textMat.uniforms.uTextAlpha.value = textAlphaRef.current;
         textMat.uniforms.uFlare.value = textFlareRef.current;
         textMat.uniforms.uWarpProgress.value = warpProgressRef.current;
-        textMat.uniforms.uTime.value = elapsed;
       }
 
       particleGeo.attributes.position.needsUpdate = true;
@@ -1833,7 +1734,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       cameraRef.current.updateProjectionMatrix();
 
       const vFovRad = (cameraRef.current.fov * Math.PI) / 180;
-      const camDist = mobile ? 3.8 : 3.3;
+      const camDist = mobile ? 4.5 : 4.0;
       const newH = 2 * Math.tan(vFovRad / 2) * camDist;
       const newW = newH * (w / h);
       planeWRef.current = newW;
@@ -1846,6 +1747,12 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
       smokeMat.uniforms.uResolution.value.set(w, h);
       rendererRef.current.setSize(w, h);
+
+      if (attractorGroupRef.current) {
+        const s = mobile ? 0.78 : 0.84;
+        attractorGroupRef.current.scale.set(s, s, s);
+        attractorGroupRef.current.position.set(0, mobile ? 0.04 : 0.08, 0);
+      }
     };
 
     // Mobile Gyroscope 3D Tilt Parallax

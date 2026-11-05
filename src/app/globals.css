@@ -64,6 +64,22 @@ body {
 }
 
 @font-face {
+  font-family: "Druk Trial";
+  src: local("Druk Trial"), local("DrukTrial"), local("Druk-HeavyCondensed"), local("Druk"), url("/fonts/helvetica-compressed-5871d14b6903a.otf") format("opentype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Druk";
+  src: local("Druk"), local("Druk-HeavyCondensed"), local("Druk Trial"), url("/fonts/helvetica-compressed-5871d14b6903a.otf") format("opentype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: "BN Riley";
   src: url("/fonts/BNRiley.otf") format("opentype");
   font-weight: 100 900;

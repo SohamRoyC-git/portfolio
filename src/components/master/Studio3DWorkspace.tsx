@@ -52,6 +52,8 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   const mouseVelocityRef = useRef(new THREE.Vector2(0, 0));
   const mouseNormRef = useRef({ x: 0, y: 0 });
   const mouseUvRef = useRef(new THREE.Vector2(0.5, 0.5));
+  const entranceAnimRef = useRef(999.0);
+  const renderTypographyRef = useRef<((time: number) => void) | null>(null);
   const gyroTiltRef = useRef({ x: 0, y: 0 });
 
   // Black hole phases: absorption (0-2.5s), singularity void (>2.5s), reverse unspooling
@@ -354,7 +356,29 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       });
     }
 
-    // 3. Champagne flare on the grand typography as it arrives
+    // 3. Sequential Architectural Technical Pen Draw + Ink Fill Bloom (Option A)
+    entranceAnimRef.current = 0.0;
+    if (renderTypographyRef.current) {
+      renderTypographyRef.current(0.0);
+    }
+    gsap.killTweensOf(entranceAnimRef);
+    gsap.to(entranceAnimRef, {
+      current: 2.2,
+      duration: 1.85,
+      ease: "power1.inOut",
+      onUpdate: () => {
+        if (renderTypographyRef.current) {
+          renderTypographyRef.current(entranceAnimRef.current);
+        }
+      },
+      onComplete: () => {
+        if (renderTypographyRef.current) {
+          renderTypographyRef.current(999.0);
+        }
+      },
+    });
+
+    // 4. Champagne flare on the grand typography as it arrives
     textAlphaRef.current = 0.0;
     textFlareRef.current = 0.85;
     gsap.killTweensOf(textAlphaRef);
@@ -554,68 +578,123 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     textCanvas.height = 1440;
     const tCtx = textCanvas.getContext("2d");
 
-    const renderTypographyCanvas = () => {
+    // Option A: Architectural Technical Pen Draw + Ink Fill Bloom
+    const drawLetterString = (
+      ctx: CanvasRenderingContext2D,
+      text: string,
+      startX: number,
+      y: number,
+      fontSize: number,
+      fontFamily: string,
+      align: "left" | "right",
+      baseline: "top" | "bottom",
+      isWireframeOnly: boolean,
+      wordStartTime: number,
+      animTime: number
+    ) => {
+      ctx.save();
+      ctx.font = `900 ${fontSize}px ${fontFamily}`;
+      ctx.textBaseline = baseline;
+      ctx.letterSpacing = "0.02em";
+
+      const chars = Array.from(text);
+      const charWidths: number[] = [];
+      let totalWidth = 0;
+      for (let i = 0; i < chars.length; i++) {
+        const wNext = ctx.measureText(text.slice(0, i + 1)).width;
+        const wCur = ctx.measureText(text.slice(0, i)).width;
+        charWidths.push(wNext - wCur);
+        totalWidth = wNext;
+      }
+
+      let curX = align === "left" ? startX : startX - totalWidth;
+
+      for (let i = 0; i < chars.length; i++) {
+        const char = chars[i];
+        const charW = charWidths[i];
+        const charStartTime = wordStartTime + i * 0.085;
+        const charDuration = 0.38;
+        // Progress for this letter (0.0 to 1.0)
+        const p = Math.max(0, Math.min(1.0, (animTime - charStartTime) / charDuration));
+
+        if (p > 0.001) {
+          ctx.save();
+
+          // 1. Technical Pen Outline Draw (1px razor-sharp architectural wireframe)
+          const strokeAlpha = Math.min(1.0, p * 2.2);
+          ctx.strokeStyle = `rgba(245, 238, 218, ${0.85 * strokeAlpha})`;
+          ctx.lineWidth = 1.3;
+
+          // Vertical chisel / drafting pen stroke reveal
+          if (p < 0.99) {
+            const letterH = fontSize * 1.15;
+            const topY = baseline === "top" ? y : y - fontSize;
+            ctx.beginPath();
+            ctx.rect(curX - 4, topY - 6, charW + 8, letterH * Math.min(1.0, p * 1.5) + 10);
+            ctx.clip();
+          }
+
+          ctx.strokeText(char, curX, y);
+
+          // 2. Solid Ivory Ink Fill Bloom (ONLY for WELCOME & PORTFOLIO)
+          if (!isWireframeOnly && p > 0.40) {
+            const fillProgress = (p - 0.40) / 0.60;
+            // Smooth, luxurious ink absorption bloom
+            const fillAlpha = fillProgress * fillProgress;
+            ctx.fillStyle = `rgba(245, 238, 218, ${fillAlpha})`;
+            ctx.fillText(char, curX, y);
+          }
+
+          ctx.restore();
+        }
+
+        curX += charW;
+      }
+
+      ctx.restore();
+    };
+
+    const renderTypographyCanvas = (animTime: number = 999.0) => {
       if (!tCtx) return;
       tCtx.clearRect(0, 0, 2560, 1440);
 
       const fontFamily = "'Druk Trial', 'Druk', 'Helvetica Compressed', 'Anton', -apple-system, sans-serif";
 
-      // Solid Warm Ivory Fill (#F5EEDA)
-      tCtx.fillStyle = "#F5EEDA";
-      tCtx.strokeStyle = "rgba(245, 238, 218, 0.40)";
-      tCtx.lineWidth = 1.4;
-
       if (isMobile) {
-        // MOBILE PORTRAIT (Tucked neatly into corners)
-        tCtx.textAlign = "left";
-        tCtx.textBaseline = "top";
-        tCtx.letterSpacing = "0.02em";
-        tCtx.font = `900 190px ${fontFamily}`;
-        tCtx.fillText("WELCOME", 80, 80);
-        tCtx.strokeText("WELCOME", 80, 80);
-        tCtx.fillText("TO", 80, 280);
-        tCtx.strokeText("TO", 80, 280);
+        // MOBILE PORTRAIT (Tucked deep into corners)
+        const mobFontSize = 190;
+        // Top-Left: WELCOME (solid bloom) + TO (wireframe outline only)
+        drawLetterString(tCtx, "WELCOME", 80, 80, mobFontSize, fontFamily, "left", "top", false, 0.0, animTime);
+        drawLetterString(tCtx, "TO", 80, 280, mobFontSize, fontFamily, "left", "top", true, 0.55, animTime);
 
-        tCtx.textAlign = "right";
-        tCtx.textBaseline = "bottom";
-        tCtx.font = `900 190px ${fontFamily}`;
-        tCtx.fillText("MY", 2480, 1220);
-        tCtx.strokeText("MY", 2480, 1220);
-        tCtx.fillText("PORTFOLIO", 2480, 1400);
-        tCtx.strokeText("PORTFOLIO", 2480, 1400);
+        // Bottom-Right: MY (wireframe outline only) + PORTFOLIO (solid bloom)
+        drawLetterString(tCtx, "MY", 2480, 1220, mobFontSize, fontFamily, "right", "bottom", true, 0.35, animTime);
+        drawLetterString(tCtx, "PORTFOLIO", 2480, 1400, mobFontSize, fontFamily, "right", "bottom", false, 0.55, animTime);
       } else {
-        // DESKTOP: Monumental Druk Diagonal (Tucked deep in corners, center 100% open)
-        // Top-Left Corner Block
-        tCtx.textAlign = "left";
-        tCtx.textBaseline = "top";
-        tCtx.letterSpacing = "0.02em";
+        // DESKTOP: Monumental Druk Diagonal (Solid Ivory vs. 1px Razor-Sharp Wireframe)
         const welcomeFontSize = 295;
-        tCtx.font = `900 ${welcomeFontSize}px ${fontFamily}`;
-        tCtx.fillText("WELCOME", 80, 80);
-        tCtx.strokeText("WELCOME", 80, 80);
-
-        const toFontSize = 295;
-        tCtx.font = `900 ${toFontSize}px ${fontFamily}`;
-        tCtx.fillText("TO", 80, 390);
-        tCtx.strokeText("TO", 80, 390);
-
-        // Bottom-Right Corner Block: Tucked into bottom corner, leaving wide open space for Lorenz wings
-        tCtx.textAlign = "right";
-        tCtx.textBaseline = "bottom";
-        tCtx.letterSpacing = "0.02em";
-        const myFontSize = 295;
-        tCtx.font = `900 ${myFontSize}px ${fontFamily}`;
-        tCtx.fillText("MY", 2480, 1070);
-        tCtx.strokeText("MY", 2480, 1070);
-
         const portfolioFontSize = 310;
-        tCtx.font = `900 ${portfolioFontSize}px ${fontFamily}`;
-        tCtx.fillText("PORTFOLIO", 2480, 1370);
-        tCtx.strokeText("PORTFOLIO", 2480, 1370);
+
+        // Top-Left Corner Block
+        // WELCOME in solid warm ivory (#F5EEDA)
+        drawLetterString(tCtx, "WELCOME", 80, 80, welcomeFontSize, fontFamily, "left", "top", false, 0.0, animTime);
+        // TO in ultra-fine, razor-sharp 1px wireframe outline
+        drawLetterString(tCtx, "TO", 80, 390, welcomeFontSize, fontFamily, "left", "top", true, 0.62, animTime);
+
+        // Bottom-Right Corner Block
+        // MY in ultra-fine, razor-sharp 1px wireframe outline
+        drawLetterString(tCtx, "MY", 2480, 1070, welcomeFontSize, fontFamily, "right", "bottom", true, 0.38, animTime);
+        // PORTFOLIO in solid warm ivory (#F5EEDA)
+        drawLetterString(tCtx, "PORTFOLIO", 2480, 1370, portfolioFontSize, fontFamily, "right", "bottom", false, 0.60, animTime);
       }
     };
 
-    renderTypographyCanvas();
+    renderTypographyRef.current = (t: number) => {
+      renderTypographyCanvas(t);
+      textTexture.needsUpdate = true;
+    };
+
+    renderTypographyCanvas(999.0);
 
     const textTexture = new THREE.CanvasTexture(textCanvas);
     textTexture.minFilter = THREE.LinearFilter;

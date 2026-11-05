@@ -356,15 +356,16 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       });
     }
 
-    // 3. Sequential Architectural Technical Pen Draw + Ink Fill Bloom (Option A)
+    // 3. Sequential Architectural Technical Pen Draw + Ink Fill Bloom (Option A - Deliberate, Unhurried 4.2s Pace)
     entranceAnimRef.current = 0.0;
     if (renderTypographyRef.current) {
       renderTypographyRef.current(0.0);
     }
     gsap.killTweensOf(entranceAnimRef);
     gsap.to(entranceAnimRef, {
-      current: 2.2,
-      duration: 1.85,
+      current: 4.0,
+      duration: 4.2,
+      delay: 0.65, // Let preloader curtain fully dissolve so the user catches every single stroke!
       ease: "power1.inOut",
       onUpdate: () => {
         if (renderTypographyRef.current) {
@@ -612,8 +613,8 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       for (let i = 0; i < chars.length; i++) {
         const char = chars[i];
         const charW = charWidths[i];
-        const charStartTime = wordStartTime + i * 0.085;
-        const charDuration = 0.38;
+        const charStartTime = wordStartTime + i * 0.20;
+        const charDuration = 0.75;
         // Progress for this letter (0.0 to 1.0)
         const p = Math.max(0, Math.min(1.0, (animTime - charStartTime) / charDuration));
 
@@ -676,16 +677,16 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         const portfolioFontSize = 310;
 
         // Top-Left Corner Block
-        // WELCOME in solid warm ivory (#F5EEDA)
+        // WELCOME: Starts at 0.0s (7 letters, finishes ~1.95s)
         drawLetterString(tCtx, "WELCOME", 80, 80, welcomeFontSize, fontFamily, "left", "top", false, 0.0, animTime);
-        // TO in ultra-fine, razor-sharp 1px wireframe outline
-        drawLetterString(tCtx, "TO", 80, 390, welcomeFontSize, fontFamily, "left", "top", true, 0.62, animTime);
+        // TO: Wireframe outline only, starts at 1.45s (finishes ~2.40s)
+        drawLetterString(tCtx, "TO", 80, 390, welcomeFontSize, fontFamily, "left", "top", true, 1.45, animTime);
 
         // Bottom-Right Corner Block
-        // MY in ultra-fine, razor-sharp 1px wireframe outline
-        drawLetterString(tCtx, "MY", 2480, 1070, welcomeFontSize, fontFamily, "right", "bottom", true, 0.38, animTime);
-        // PORTFOLIO in solid warm ivory (#F5EEDA)
-        drawLetterString(tCtx, "PORTFOLIO", 2480, 1370, portfolioFontSize, fontFamily, "right", "bottom", false, 0.60, animTime);
+        // MY: Wireframe outline only, starts at 0.70s (finishes ~1.65s)
+        drawLetterString(tCtx, "MY", 2480, 1070, welcomeFontSize, fontFamily, "right", "bottom", true, 0.70, animTime);
+        // PORTFOLIO: Starts at 1.35s (9 letters, finishes ~3.70s)
+        drawLetterString(tCtx, "PORTFOLIO", 2480, 1370, portfolioFontSize, fontFamily, "right", "bottom", false, 1.35, animTime);
       }
     };
 

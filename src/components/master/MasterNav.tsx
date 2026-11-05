@@ -89,8 +89,12 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
           ref={navRef}
           className="w-full flex items-center justify-between gap-4 pointer-events-auto py-5 sm:py-7 px-5 sm:px-10 md:px-14 bg-transparent border-none"
         >
-          {/* TOP LEFT: Pure Transparent White Icons (LinkedIn + CV PDF) */}
-          <div className="flex items-center gap-2.5 sm:gap-3">
+          {/* TOP LEFT: Pure Transparent White Icons (Hidden in 3D Studio for pure CASA MOMO corners) */}
+          <div
+            className={`flex items-center gap-2.5 sm:gap-3 transition-opacity duration-500 ${
+              activeId === "monument-studio-3d" ? "opacity-0 pointer-events-none" : "opacity-100 pointer-events-auto"
+            }`}
+          >
             {/* LinkedIn Profile */}
             <a
               href="https://www.linkedin.com/in/soham-roychoudhury-a3537a364/"

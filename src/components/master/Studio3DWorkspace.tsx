@@ -20,6 +20,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 }: Studio3DWorkspaceProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const warpFlashRef = useRef<HTMLDivElement>(null);
+  const telemetryHintRef = useRef<HTMLDivElement>(null);
 
   // Interaction HUD & Status
   const [interactionHint, setInteractionHint] = useState<string>(
@@ -259,6 +260,9 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       isHoldingRef.current = false;
       isAbsorbedRef.current = false;
       isUnspoolingRef.current = false;
+      if (telemetryHintRef.current) {
+        telemetryHintRef.current.style.opacity = "1";
+      }
 
       // Reset particles to target coordinates with zero velocity and full scale
       if (
@@ -385,6 +389,9 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     isTransitioningRef.current = true;
     warpStartTimeRef.current = performance.now();
     playHyperspaceSound();
+    if (telemetryHintRef.current) {
+      telemetryHintRef.current.style.opacity = "0";
+    }
     setInteractionHint("LIGHTSPEED WARP · CROSSING EVENT HORIZON INTO ARCHIVE");
 
     const camera = cameraRef.current;
@@ -559,6 +566,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         // MOBILE PORTRAIT (Large commanding architectural scale)
         tCtx.textAlign = "left";
         tCtx.textBaseline = "top";
+        tCtx.letterSpacing = "0.04em";
         tCtx.font = `normal 155px ${fontFamily}`;
         tCtx.fillText("WELCOME", 120, 120);
         tCtx.strokeText("WELCOME", 120, 120);
@@ -573,10 +581,11 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         tCtx.fillText("PORTFOLIO", 2440, 1310);
         tCtx.strokeText("PORTFOLIO", 2440, 1310);
       } else {
-        // DESKTOP: Giant Two-Corner Diagonal (Grand CASA MOMO Presence)
-        // Top-Left Anchor: "WELCOME" on line 1, "TO" on line 2 (Occupying top-left corner block)
+        // DESKTOP: Giant Two-Corner Diagonal (Pure CASA MOMO Boutique Layout)
+        // Top-Left Anchor: "WELCOME" on line 1, "TO" on line 2 with elegant letter spacing
         tCtx.textAlign = "left";
         tCtx.textBaseline = "top";
+        tCtx.letterSpacing = "0.045em";
         const welcomeFontSize = 265;
         tCtx.font = `normal ${welcomeFontSize}px ${fontFamily}`;
         tCtx.fillText("WELCOME", 140, 120);
@@ -587,9 +596,10 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         tCtx.fillText("TO", 140, 395);
         tCtx.strokeText("TO", 140, 395);
 
-        // Bottom-Right Counterbalance: "MY" on line 1, "PORTFOLIO" on line 2 (Occupying bottom-right corner block)
+        // Bottom-Right Counterbalance: "MY" on line 1, "PORTFOLIO" on line 2
         tCtx.textAlign = "right";
         tCtx.textBaseline = "bottom";
+        tCtx.letterSpacing = "0.045em";
         const myFontSize = 250;
         tCtx.font = `normal ${myFontSize}px ${fontFamily}`;
         tCtx.fillText("MY", 2420, 1030);
@@ -687,7 +697,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
           // In hyperspace warp: dissolve text as it rushes past the camera frustum
           if (uWarpProgress > 0.01) {
-            alpha *= clamp(1.0 - pow(uWarpProgress, 1.2) * 1.4, 0.0, 1.0);
+            alpha *= clamp(1.0 - pow(uWarpProgress, 1.2) * 1.65, 0.0, 1.0);
           }
 
           gl_FragColor = vec4(col.rgb, alpha);
@@ -926,8 +936,8 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       particleColors[i3 + 1] = shade[1] + (Math.random() - 0.5) * 0.02;
       particleColors[i3 + 2] = shade[2] + (Math.random() - 0.5) * 0.02;
 
-      // Luminous individual stardust embers
-      particleSizes[i] = Math.random() * 2.0 + 1.8;
+      // Crisp, fine diamond stardust embers (calibrated for high-DPI displays)
+      particleSizes[i] = Math.random() * 1.4 + 1.2;
       particleScales[i] = 1.0;
     }
 
@@ -945,66 +955,54 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       uniforms: {
         uTime: { value: 0 },
         uWarpProgress: { value: 0 },
+        uPixelRatio: { value: Math.min(window.devicePixelRatio || 1, 2) },
       },
       vertexShader: `
         uniform float uTime;
         uniform float uWarpProgress;
+        uniform float uPixelRatio;
         attribute float size;
         attribute float scale;
         attribute vec3 color;
         varying vec3 vColor;
-        varying vec2 vStreakDir;
-        varying float vWarp;
         varying float vScale;
 
         void main() {
           vColor = color;
-          vWarp = uWarpProgress;
           vScale = scale;
 
           vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
           vec4 clipPos = projectionMatrix * mvPos;
 
-          // Normalized 2D radial direction from screen vanishing center
-          vec2 screenPos = clipPos.xy / (clipPos.w + 0.0001);
-          float len = length(screenPos);
-          vStreakDir = len > 0.001 ? screenPos / len : vec2(1.0, 0.0);
-
-          // Star Wars Warp streak expansion: bold, brilliant lightspeed streaks
-          float warpScale = 1.0 + uWarpProgress * 12.0;
-          float ptSize = size * scale * warpScale * (18.0 / max(0.1, -mvPos.z));
-          gl_PointSize = clamp(ptSize, 3.0, 120.0);
+          // Crisp, pinpoint calibrated ember sizing (sharp diamond core)
+          float ptSize = size * scale * (10.0 / max(0.2, -mvPos.z)) * (uPixelRatio / 1.5);
+          gl_PointSize = clamp(ptSize, 2.0, 22.0);
           gl_Position = clipPos;
         }
       `,
       fragmentShader: `
         uniform float uWarpProgress;
         varying vec3 vColor;
-        varying vec2 vStreakDir;
-        varying float vWarp;
         varying float vScale;
 
         void main() {
           if (vScale < 0.01) discard;
 
           vec2 coord = gl_PointCoord - vec2(0.5);
-
-          // Star Wars Hyperspace needle-streak alignment along radial vector
-          if (vWarp > 0.02) {
-            float c = vStreakDir.x;
-            float s = vStreakDir.y;
-            mat2 rot = mat2(c, -s, s, c);
-            coord = rot * coord;
-            coord.y *= 2.2;
-            coord.x *= 0.65;
-          }
-
           float d = length(coord);
           if (d > 0.5) discard;
 
-          float alpha = smoothstep(0.5, 0.02, d) * (0.88 + vWarp * 0.12) * vScale;
-          vec3 finalColor = mix(vColor, vec3(1.0, 0.98, 0.94), clamp(vWarp * 1.2, 0.0, 1.0));
-          gl_FragColor = vec4(finalColor, alpha);
+          // Razor-sharp anti-aliased diamond core with delicate celestial perimeter
+          float core = smoothstep(0.48, 0.36, d);
+          float halo = exp(-d * 4.8) * 0.45;
+          float alpha = (core * 0.90 + halo * 0.40) * vScale;
+
+          // In hyperspace warp: points crossfade smoothly into the 3D hyperdrive line beams
+          if (uWarpProgress > 0.01) {
+            alpha *= clamp(1.0 - uWarpProgress * 2.5, 0.0, 1.0);
+          }
+
+          gl_FragColor = vec4(vColor, alpha);
         }
       `,
     });
@@ -1013,6 +1011,60 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     particles.renderOrder = 10; // Foreground particles render in front of textMesh (renderOrder: 2)
     attractorGroup.add(particles);
     particlesRef.current = particles;
+
+    // 9B. TRUE 3D STAR WARS HYPERDRIVE LINE BEAMS (Razor-Sharp LineSegments)
+    const WARP_BEAMS_COUNT = 3200;
+    const warpLinePos = new Float32Array(WARP_BEAMS_COUNT * 2 * 3);
+    const warpLineCol = new Float32Array(WARP_BEAMS_COUNT * 2 * 3);
+    const warpBeamsData: Array<{ x: number; y: number; z: number; speed: number; length: number }> = [];
+
+    for (let i = 0; i < WARP_BEAMS_COUNT; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const r = Math.pow(Math.random(), 0.65) * 3.6 + 0.15;
+      const x = Math.cos(theta) * r;
+      const y = Math.sin(theta) * r;
+      const z = 1.0 - Math.random() * 14.0;
+      const speed = 26.0 + Math.random() * 18.0;
+      const length = 1.4 + Math.random() * 2.2;
+
+      warpBeamsData.push({ x, y, z, speed, length });
+
+      const i6 = i * 6;
+      // Head vertex
+      warpLinePos[i6] = x;
+      warpLinePos[i6 + 1] = y;
+      warpLinePos[i6 + 2] = z;
+      // Tail vertex
+      warpLinePos[i6 + 3] = x;
+      warpLinePos[i6 + 4] = y;
+      warpLinePos[i6 + 5] = z - length;
+
+      // Head: pure brilliant white/champagne laser core
+      warpLineCol[i6] = 1.0;
+      warpLineCol[i6 + 1] = 0.99;
+      warpLineCol[i6 + 2] = 0.95;
+      // Tail: luminous champagne trailing falloff
+      warpLineCol[i6 + 3] = 0.95;
+      warpLineCol[i6 + 4] = 0.85;
+      warpLineCol[i6 + 5] = 0.68;
+    }
+
+    const warpLinesGeo = new THREE.BufferGeometry();
+    warpLinesGeo.setAttribute("position", new THREE.BufferAttribute(warpLinePos, 3));
+    warpLinesGeo.setAttribute("color", new THREE.BufferAttribute(warpLineCol, 3));
+
+    const warpLinesMat = new THREE.LineBasicMaterial({
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.0,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+
+    const warpLinesMesh = new THREE.LineSegments(warpLinesGeo, warpLinesMat);
+    warpLinesMesh.renderOrder = 12; // Drawn on top of letters
+    warpLinesMesh.visible = false;
+    scene.add(warpLinesMesh);
 
     // 10. INTERACTION RAYCASTING & FLUID CURSOR BRUSH
     const rayPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
@@ -1062,15 +1114,21 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         navigator.vibrate(18);
       }
 
-      // Trigger Black Hole after 120ms
+      // Trigger Black Hole only after deliberate hold (>260ms)
       holdTimerRef.id = setTimeout(() => {
         isHoldingRef.current = true;
         isAbsorbedRef.current = false;
         isUnspoolingRef.current = false;
         blackHolePosRef.current.copy(mouseLocalPosRef.current);
         startBlackHoleSound();
+        if (telemetryHintRef.current) {
+          telemetryHintRef.current.style.opacity = "0";
+        }
+        if (typeof navigator !== "undefined" && navigator.vibrate) {
+          navigator.vibrate(22);
+        }
         setInteractionHint("GRAVITATIONAL DECONSTRUCTION · COLLAPSING INTO SINGULARITY");
-      }, 120);
+      }, 260);
     };
 
     // POINTER UP: Reverse Accretion River Supernova & Spacetime Typography Restoration
@@ -1126,8 +1184,14 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         // Slower 4.6s timeline gives plenty of time for river unspooling followed by typography restoration
         setTimeout(() => {
           isUnspoolingRef.current = false;
-          setInteractionHint("MOVE TO DISTURB · HOLD TO CONDENSE MANIFOLD · WARP TO ARCHIVE");
+          if (telemetryHintRef.current) {
+            telemetryHintRef.current.style.opacity = "1";
+          }
+          setInteractionHint("MOVE TO DISTURB · HOLD TO CONDENSE MANIFOLD · TAP TO WARP");
         }, 4600);
+      } else if (pressDuration < 260 && dx < 20 && dy < 20 && !isTransitioningRef.current) {
+        // Quick tap or click anywhere on screen -> engage Star Wars Hyperspace Jump!
+        triggerWarpTransition();
       }
     };
 
@@ -1218,7 +1282,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         }
       }
 
-      // C. CONSTANT VISIBLE LORENZ ATTRACTOR FLOW & PHYSICS INTEGRATION
+      // C. CONSTANT VISIBLE LORENZ ATTRACTOR FLOW & 3D MANIFOLD RAYCASTING
       const mw = mouseLocalPosRef.current;
       const mVel = mouseVelocityRef.current;
       const posArr = currentPositions;
@@ -1226,7 +1290,17 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       const velArr = velocities;
       const scaleArr = particleScales;
       const isWarping = isTransitioningRef.current;
-      const brushRadius = isMobile ? 0.24 : 0.18;
+      // Generous brush radius (0.42 desktop / 0.48 mobile) to reach the outer edge loops and wings!
+      const brushRadius = isMobile ? 0.48 : 0.42;
+
+      // Transform camera cursor ray into attractorGroup local coordinates
+      const localCursorRay = raycaster.ray.clone();
+      if (attractorGroupRef.current) {
+        const invMat = new THREE.Matrix4().copy(attractorGroupRef.current.matrixWorld).invert();
+        localCursorRay.applyMatrix4(invMat);
+      }
+      const particlePosVec = new THREE.Vector3();
+      const closestRayPoint = new THREE.Vector3();
 
       let swallowedCount = 0;
 
@@ -1442,19 +1516,24 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             scl = Math.min(1.0, scl + delta * 2.0);
           }
 
-          // FLUID INERTIA BRUSH (IMURUN Reference Video Style - NO WATER RIPPLE)
-          const mdx = px - mw.x;
-          const mdy = py - mw.y;
-          const dist = Math.sqrt(mdx * mdx + mdy * mdy);
+          // 3D MANIFOLD SURFACE RAYCASTING & FLUID INERTIA BRUSH (Edge-Mapped Reach)
+          particlePosVec.set(px, py, pz);
+          const distToCursorRay = localCursorRay.distanceToPoint(particlePosVec);
 
-          if (dist < brushRadius) {
-            const w = Math.cos((dist / brushRadius) * (Math.PI * 0.5));
+          if (distToCursorRay < brushRadius) {
+            const w = Math.cos((distToCursorRay / brushRadius) * (Math.PI * 0.5));
             // Impart directional mouse drag momentum to the flying stream
-            vx += mVel.x * 0.36 * w;
-            vy += mVel.y * 0.36 * w;
-            // Soft micro-deflection
-            vx += (mdx / (dist + 0.001)) * 0.35 * w * delta;
-            vy += (mdy / (dist + 0.001)) * 0.35 * w * delta;
+            vx += mVel.x * 0.42 * w;
+            vy += mVel.y * 0.42 * w;
+            // Micro-deflection away from 3D line of sight
+            localCursorRay.closestPointToPoint(particlePosVec, closestRayPoint);
+            const mdx = px - closestRayPoint.x;
+            const mdy = py - closestRayPoint.y;
+            const mdz = pz - closestRayPoint.z;
+            const pushDist = Math.sqrt(mdx * mdx + mdy * mdy + mdz * mdz) + 0.001;
+            vx += (mdx / pushDist) * 0.38 * w * delta;
+            vy += (mdy / pushDist) * 0.38 * w * delta;
+            vz += (mdz / pushDist) * 0.18 * w * delta;
           }
 
           // Damping for smooth fluid relaxation
@@ -1538,18 +1617,63 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         });
       }
 
-      // HYPERSPACE TEXT ZOOM FLY-PAST (Rushing outward and past camera into the stars)
+      // UPDATE TRUE 3D STAR WARS HYPERDRIVE LINE BEAMS
+      if (isWarping) {
+        const warpProg = warpProgressRef.current;
+        warpLinesMesh.visible = true;
+        // Fade in rapidly as hyperdrive engages, then smooth hold until final flash
+        warpLinesMat.opacity = Math.min(1.0, warpProg * 3.5) * (1.0 - Math.max(0, (warpProg - 0.88) / 0.12));
+
+        const linePos = warpLinesGeo.attributes.position.array as Float32Array;
+        const camZ = camera.position.z;
+
+        for (let i = 0; i < WARP_BEAMS_COUNT; i++) {
+          const b = warpBeamsData[i];
+          // Accelerate forward along Z towards camera
+          b.z += b.speed * warpProg * delta;
+
+          // Elongate laser beams dynamically with hyperdrive speed
+          const currentStreakLen = b.length * (0.8 + warpProg * 2.2);
+
+          // Recycle beam to deep space once it rushes past camera frustum
+          if (b.z - currentStreakLen > camZ + 0.6) {
+            b.z = -14.0 - Math.random() * 4.0;
+            const theta = Math.random() * Math.PI * 2;
+            const r = Math.pow(Math.random(), 0.65) * 3.6 + 0.15;
+            b.x = Math.cos(theta) * r;
+            b.y = Math.sin(theta) * r;
+          }
+
+          const i6 = i * 6;
+          // Head (forward laser tip)
+          linePos[i6] = b.x;
+          linePos[i6 + 1] = b.y;
+          linePos[i6 + 2] = b.z;
+
+          // Tail (trailing beam)
+          linePos[i6 + 3] = b.x;
+          linePos[i6 + 4] = b.y;
+          linePos[i6 + 5] = b.z - currentStreakLen;
+        }
+
+        warpLinesGeo.attributes.position.needsUpdate = true;
+      } else {
+        warpLinesMesh.visible = false;
+        warpLinesMat.opacity = 0.0;
+      }
+
+      // HYPERSPACE TEXT ZOOM FLY-PAST (Words rush outward past screen corners into deep space)
       if (textMeshRef.current) {
         const warpProg = warpProgressRef.current;
         if (warpProg > 0.001) {
-          if (warpProg > 0.70) {
+          if (warpProg > 0.62) {
             textMeshRef.current.visible = false;
           } else {
             textMeshRef.current.visible = true;
-            // Exponential zoom expansion rushing outward past screen edges
-            const zoomScale = 1.0 + Math.pow(warpProg, 1.35) * 5.2;
+            // Zoom words outward towards screen corners, leaving center hyperdrive tunnel clear
+            const zoomScale = 1.0 + Math.pow(warpProg, 1.2) * 4.6;
             textMeshRef.current.scale.set(zoomScale, zoomScale, 1.0);
-            textMeshRef.current.position.z = -camDist + Math.pow(warpProg, 1.4) * (camDist * 0.65);
+            textMeshRef.current.position.set(0, 0, -camDist);
           }
         } else {
           textMeshRef.current.visible = true;
@@ -1650,24 +1774,18 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       {/* Star Wars Hyperspace Lightspeed Flash Overlay */}
       <div
         ref={warpFlashRef}
-        className="absolute inset-0 bg-[#FFFDF5] pointer-events-none opacity-0 z-50 transition-opacity"
+        className="absolute inset-0 bg-[#FFFDF5] pointer-events-none opacity-0 z-50"
       />
 
-      {/* Editorial Boutique Corner: Supporting Telemetry & Hyperspace Jump (CASA MOMO Style) */}
-      <footer className="absolute bottom-8 left-8 sm:left-12 z-40 pointer-events-auto flex flex-col items-start gap-2.5">
-        <div className="hidden sm:flex flex-col text-[11px] font-mono tracking-widest text-[#F5EEDA]/45 uppercase select-none">
-          <span>Non-Linear Dynamical Phase Space</span>
-          <span>Deterministic Chaos · Atelier Edition</span>
-        </div>
-        <button
-          onClick={triggerWarpTransition}
-          className="group flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#F5EEDA]/5 hover:bg-[#F5EEDA]/10 border border-[#F5EEDA]/15 hover:border-[#F5EEDA]/30 text-[#F5EEDA]/80 hover:text-[#F5EEDA] text-xs font-mono tracking-wider transition-all backdrop-blur-md shadow-lg active:scale-95"
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400/90 animate-pulse" />
-          <span>Hyperspace Jump</span>
-          <ArrowRight className="w-3.5 h-3.5 text-[#F5EEDA]/50 group-hover:text-[#F5EEDA] group-hover:translate-x-0.5 transition-transform" />
-        </button>
-      </footer>
+      {/* Whisper-Quiet Subtle Center Telemetry Hint (Pure CASA MOMO Layout) */}
+      <div
+        ref={telemetryHintRef}
+        className="absolute bottom-6 left-0 right-0 z-30 flex justify-center pointer-events-none select-none transition-opacity duration-500"
+      >
+        <span className="text-[9.5px] font-mono tracking-[0.28em] text-[#F5EEDA]/35 uppercase">
+          TAP TO WARP · HOLD TO CONDENSE
+        </span>
+      </div>
     </div>
   );
 });

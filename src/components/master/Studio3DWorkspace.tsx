@@ -286,6 +286,14 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       }
 
 
+      if (textMeshRef.current) {
+        const isMobile = window.innerWidth / window.innerHeight < 1.0;
+        const camDist = isMobile ? 3.8 : 3.3;
+        textMeshRef.current.visible = true;
+        textMeshRef.current.scale.set(1.0, 1.0, 1.0);
+        textMeshRef.current.position.set(0, 0, -camDist);
+      }
+
       if (blackHoleGroupRef.current) {
         blackHoleGroupRef.current.scale.set(0, 0, 0);
         blackHoleGroupRef.current.visible = false;
@@ -293,6 +301,83 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       setInteractionHint("MOVE TO DISTURB · HOLD TO CONDENSE MANIFOLD · WARP TO ARCHIVE");
     }
   }, [isActive]);
+
+  // High-production cinematic entrance sequence from preloader into 3D structure screen
+  const triggerCinematicEntrance = useCallback(() => {
+    if (!cameraRef.current) return;
+    const isMobile = window.innerWidth / window.innerHeight < 1.0;
+    const targetZ = isMobile ? 3.5 : 3.0;
+
+    // 1. Camera starts pushed back and glides into prime viewing focal length
+    cameraRef.current.position.set(0, 0, targetZ + 1.4);
+    gsap.killTweensOf(cameraRef.current.position);
+    gsap.to(cameraRef.current.position, {
+      z: targetZ,
+      duration: 1.9,
+      ease: "power3.out",
+    });
+
+    // 2. Stardust ignition & bloom: particle scales bloom from 0 to 1
+    if (particleScalesRef.current && particlesRef.current) {
+      const scl = particleScalesRef.current;
+      for (let i = 0; i < scl.length; i++) {
+        scl[i] = 0.0;
+      }
+      if (particlesRef.current.geometry.attributes.scale) {
+        particlesRef.current.geometry.attributes.scale.needsUpdate = true;
+      }
+
+      const ignition = { progress: 0 };
+      gsap.to(ignition, {
+        progress: 1,
+        duration: 1.8,
+        ease: "power2.out",
+        onUpdate: () => {
+          if (!particleScalesRef.current || !particlesRef.current) return;
+          const s = particleScalesRef.current;
+          const total = s.length;
+          const activeBoundary = Math.floor(ignition.progress * total);
+          for (let i = 0; i < total; i++) {
+            if (i < activeBoundary) {
+              s[i] = Math.min(1.0, s[i] + 0.08);
+            }
+          }
+          if (particlesRef.current.geometry.attributes.scale) {
+            particlesRef.current.geometry.attributes.scale.needsUpdate = true;
+          }
+        },
+      });
+    }
+
+    // 3. Champagne flare on the grand typography as it arrives
+    textAlphaRef.current = 0.0;
+    textFlareRef.current = 0.85;
+    gsap.killTweensOf(textAlphaRef);
+    gsap.killTweensOf(textFlareRef);
+    gsap.to(textAlphaRef, {
+      current: 1.0,
+      duration: 1.4,
+      delay: 0.15,
+      ease: "power2.out",
+    });
+    gsap.to(textFlareRef, {
+      current: 0.0,
+      duration: 1.8,
+      delay: 0.25,
+      ease: "power2.inOut",
+    });
+  }, []);
+
+  // Wire up preloader enter event listener
+  useEffect(() => {
+    const handleEnterEvent = () => {
+      triggerCinematicEntrance();
+    };
+    window.addEventListener("atelier-enter-studio", handleEnterEvent);
+    return () => {
+      window.removeEventListener("atelier-enter-studio", handleEnterEvent);
+    };
+  }, [triggerCinematicEntrance]);
 
   // Star Wars Galactic Lightspeed Hyperspace Jump (Sustained 3.8 Seconds with Needle Streaks)
   const triggerWarpTransition = useCallback(() => {
@@ -474,36 +559,46 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         // MOBILE PORTRAIT (Large commanding architectural scale)
         tCtx.textAlign = "left";
         tCtx.textBaseline = "top";
-        tCtx.font = `normal 140px ${fontFamily}`;
-        tCtx.fillText("WELCOME", 120, 130);
-        tCtx.strokeText("WELCOME", 120, 130);
-        tCtx.fillText("TO", 120, 290);
-        tCtx.strokeText("TO", 120, 290);
+        tCtx.font = `normal 155px ${fontFamily}`;
+        tCtx.fillText("WELCOME", 120, 120);
+        tCtx.strokeText("WELCOME", 120, 120);
+        tCtx.fillText("TO", 120, 295);
+        tCtx.strokeText("TO", 120, 295);
 
         tCtx.textAlign = "right";
         tCtx.textBaseline = "bottom";
-        tCtx.font = `normal 130px ${fontFamily}`;
-        tCtx.fillText("MY", 2440, 1150);
-        tCtx.strokeText("MY", 2440, 1150);
+        tCtx.font = `normal 145px ${fontFamily}`;
+        tCtx.fillText("MY", 2440, 1140);
+        tCtx.strokeText("MY", 2440, 1140);
         tCtx.fillText("PORTFOLIO", 2440, 1310);
         tCtx.strokeText("PORTFOLIO", 2440, 1310);
       } else {
         // DESKTOP: Giant Two-Corner Diagonal (Grand CASA MOMO Presence)
-        // Top-Left Anchor: "WELCOME TO"
+        // Top-Left Anchor: "WELCOME" on line 1, "TO" on line 2 (Occupying top-left corner block)
         tCtx.textAlign = "left";
         tCtx.textBaseline = "top";
-        const welcomeFontSize = 205;
+        const welcomeFontSize = 265;
         tCtx.font = `normal ${welcomeFontSize}px ${fontFamily}`;
-        tCtx.fillText("WELCOME TO", 140, 130);
-        tCtx.strokeText("WELCOME TO", 140, 130);
+        tCtx.fillText("WELCOME", 140, 120);
+        tCtx.strokeText("WELCOME", 140, 120);
 
-        // Bottom-Right Counterbalance: "MY PORTFOLIO"
+        const toFontSize = 250;
+        tCtx.font = `normal ${toFontSize}px ${fontFamily}`;
+        tCtx.fillText("TO", 140, 395);
+        tCtx.strokeText("TO", 140, 395);
+
+        // Bottom-Right Counterbalance: "MY" on line 1, "PORTFOLIO" on line 2 (Occupying bottom-right corner block)
         tCtx.textAlign = "right";
         tCtx.textBaseline = "bottom";
-        const portfolioFontSize = 200;
+        const myFontSize = 250;
+        tCtx.font = `normal ${myFontSize}px ${fontFamily}`;
+        tCtx.fillText("MY", 2420, 1030);
+        tCtx.strokeText("MY", 2420, 1030);
+
+        const portfolioFontSize = 245;
         tCtx.font = `normal ${portfolioFontSize}px ${fontFamily}`;
-        tCtx.fillText("MY PORTFOLIO", 2420, 1310);
-        tCtx.strokeText("MY PORTFOLIO", 2420, 1310);
+        tCtx.fillText("PORTFOLIO", 2420, 1310);
+        tCtx.strokeText("PORTFOLIO", 2420, 1310);
       }
     };
 
@@ -515,7 +610,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
     // Font readiness hook to redraw once BN Riley is loaded into document.fonts
     if (typeof document !== "undefined" && document.fonts) {
-      document.fonts.load("230px 'BN Riley'").then(() => {
+      document.fonts.load("265px 'BN Riley'").then(() => {
         renderTypographyCanvas();
         textTexture.needsUpdate = true;
       });
@@ -590,9 +685,9 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             alpha *= max(0.0, (1.0 - uLensing) / 0.2);
           }
 
-          // In hyperspace warp: dissolve text into the lightspeed stars
+          // In hyperspace warp: dissolve text as it rushes past the camera frustum
           if (uWarpProgress > 0.01) {
-            alpha *= clamp(1.0 - uWarpProgress * 1.5, 0.0, 1.0);
+            alpha *= clamp(1.0 - pow(uWarpProgress, 1.2) * 1.4, 0.0, 1.0);
           }
 
           gl_FragColor = vec4(col.rgb, alpha);
@@ -875,10 +970,10 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           float len = length(screenPos);
           vStreakDir = len > 0.001 ? screenPos / len : vec2(1.0, 0.0);
 
-          // Star Wars Warp streak expansion
-          float warpScale = 1.0 + uWarpProgress * 4.0;
-          float ptSize = size * scale * warpScale * (12.0 / -mvPos.z);
-          gl_PointSize = clamp(ptSize, 2.0, 64.0);
+          // Star Wars Warp streak expansion: bold, brilliant lightspeed streaks
+          float warpScale = 1.0 + uWarpProgress * 12.0;
+          float ptSize = size * scale * warpScale * (18.0 / max(0.1, -mvPos.z));
+          gl_PointSize = clamp(ptSize, 3.0, 120.0);
           gl_Position = clipPos;
         }
       `,
@@ -898,25 +993,24 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           if (vWarp > 0.02) {
             float c = vStreakDir.x;
             float s = vStreakDir.y;
-            // Rotate coordinate space to align with radial velocity streak direction
-            mat2 rot = mat2(c, s, -s, c);
+            mat2 rot = mat2(c, -s, s, c);
             coord = rot * coord;
-            // Squeeze Y into an aerodynamic needle streak so it never touches square sprite bounds
-            coord.y *= (1.8 + vWarp * 3.2);
+            coord.y *= 2.2;
+            coord.x *= 0.65;
           }
 
           float d = length(coord);
           if (d > 0.5) discard;
 
-          float alpha = smoothstep(0.5, 0.02, d) * (0.86 + vWarp * 0.14) * vScale;
-          // Warp stars turn into brilliant white/champagne lightspeed needles
-          vec3 finalColor = mix(vColor, vec3(1.0, 1.0, 1.0), vWarp * 0.94);
+          float alpha = smoothstep(0.5, 0.02, d) * (0.88 + vWarp * 0.12) * vScale;
+          vec3 finalColor = mix(vColor, vec3(1.0, 0.98, 0.94), clamp(vWarp * 1.2, 0.0, 1.0));
           gl_FragColor = vec4(finalColor, alpha);
         }
       `,
     });
 
     const particles = new THREE.Points(particleGeo, particleMat);
+    particles.renderOrder = 10; // Foreground particles render in front of textMesh (renderOrder: 2)
     attractorGroup.add(particles);
     particlesRef.current = particles;
 
@@ -1034,9 +1128,6 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           isUnspoolingRef.current = false;
           setInteractionHint("MOVE TO DISTURB · HOLD TO CONDENSE MANIFOLD · WARP TO ARCHIVE");
         }, 4600);
-      } else if (pressDuration < 220 && dx < 15 && dy < 15) {
-        // Quick single click/tap: Star Wars Lightspeed Hyperspace Jump!
-        triggerWarpTransition();
       }
     };
 
@@ -1445,6 +1536,26 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             });
           },
         });
+      }
+
+      // HYPERSPACE TEXT ZOOM FLY-PAST (Rushing outward and past camera into the stars)
+      if (textMeshRef.current) {
+        const warpProg = warpProgressRef.current;
+        if (warpProg > 0.001) {
+          if (warpProg > 0.70) {
+            textMeshRef.current.visible = false;
+          } else {
+            textMeshRef.current.visible = true;
+            // Exponential zoom expansion rushing outward past screen edges
+            const zoomScale = 1.0 + Math.pow(warpProg, 1.35) * 5.2;
+            textMeshRef.current.scale.set(zoomScale, zoomScale, 1.0);
+            textMeshRef.current.position.z = -camDist + Math.pow(warpProg, 1.4) * (camDist * 0.65);
+          }
+        } else {
+          textMeshRef.current.visible = true;
+          textMeshRef.current.scale.set(1.0, 1.0, 1.0);
+          textMeshRef.current.position.set(0, 0, -camDist);
+        }
       }
 
       // Update Typography Shader Uniforms

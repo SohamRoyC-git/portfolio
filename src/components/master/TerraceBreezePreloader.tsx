@@ -252,11 +252,18 @@ export const TerraceBreezePreloader = memo(function TerraceBreezePreloader({
     setIsEntering(true);
     playEnterSound();
 
+    // Signal the 3D Studio to ignite its cinematic camera glide-in & stardust bloom
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("atelier-enter-studio"));
+    }
+
     if (containerRef.current) {
+      // High-production gallery iris/depth plunge & optical blur dissipation
       gsap.to(containerRef.current, {
         opacity: 0,
-        scale: 1.02,
-        duration: 0.85,
+        scale: 1.07,
+        filter: "blur(18px)",
+        duration: 1.15,
         ease: "power2.inOut",
         onComplete: () => {
           setVisible(false);
@@ -270,6 +277,9 @@ export const TerraceBreezePreloader = memo(function TerraceBreezePreloader({
           }
         },
       });
+    } else {
+      setVisible(false);
+      if (onComplete) onComplete();
     }
   }, [isEntering, playEnterSound, onComplete]);
 

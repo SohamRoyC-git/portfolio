@@ -567,16 +567,27 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
     // 4. 3D ATTRACTOR ROOT GROUP (Calibrated for dedicated central stage with negative-space buffer)
     const attractorGroup = new THREE.Group();
-    attractorGroup.scale.set(isMobile ? 0.78 : 0.84, isMobile ? 0.78 : 0.84, isMobile ? 0.78 : 0.84);
-    attractorGroup.position.set(0, isMobile ? 0.04 : 0.08, 0);
+    attractorGroup.scale.set(isMobile ? 0.80 : 0.84, isMobile ? 0.80 : 0.84, isMobile ? 0.80 : 0.84);
+    attractorGroup.position.set(0, isMobile ? 0.02 : 0.08, 0);
     scene.add(attractorGroup);
     attractorGroupRef.current = attractorGroup;
 
     // 4B. CASA MOMO INSPIRED TWO-CORNER DIAGONAL EDITORIAL TYPOGRAPHY (FIXED ON SCREEN)
-    // Top-Left: "WELCOME TO", Bottom-Right: "MY PORTFOLIO", Center completely open for Lorenz Attractor
+    // Dynamic canvas dimensions matching the exact viewport aspect ratio for zero distortion on mobile and desktop
+    const aspect = width / height;
+    let canvasW: number;
+    let canvasH: number;
+    if (isMobile) {
+      canvasW = 1080;
+      canvasH = Math.round(1080 / aspect);
+    } else {
+      canvasW = 2560;
+      canvasH = Math.round(2560 / aspect);
+    }
+
     const textCanvas = document.createElement("canvas");
-    textCanvas.width = 2560;
-    textCanvas.height = 1440;
+    textCanvas.width = canvasW;
+    textCanvas.height = canvasH;
     const tCtx = textCanvas.getContext("2d");
 
     // Option A: Architectural Technical Pen Draw + Ink Fill Bloom (Strict Sequence)
@@ -658,7 +669,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
     const renderTypographyCanvas = (animTime: number = 999.0) => {
       if (!tCtx) return;
-      tCtx.clearRect(0, 0, 2560, 1440);
+      tCtx.clearRect(0, 0, textCanvas.width, textCanvas.height);
 
       const fontFamily = "'Druk Trial', 'Druk', 'Helvetica Compressed', 'Anton', -apple-system, sans-serif";
 
@@ -672,18 +683,26 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       //    [pause 3.72s -> 4.10s]
       // 4. PORTFOLIO: 4.10s -> 5.98s (9 letters, solid ivory bloom)
 
-      if (isMobile) {
-        // MOBILE PORTRAIT (Tucked deep into corners)
-        const mobFontSize = 190;
-        // 1. Top-Left: WELCOME (solid warm ivory bloom)
-        drawLetterString(tCtx, "WELCOME", 80, 80, mobFontSize, fontFamily, "left", "top", false, 0.0, animTime, 0.16, 0.60);
-        // 2. Top-Left: TO (wireframe outline only, begins only after WELCOME finishes)
-        drawLetterString(tCtx, "TO", 80, 280, mobFontSize, fontFamily, "left", "top", true, 1.90, animTime, 0.22, 0.50);
+      const cW = textCanvas.width;
+      const cH = textCanvas.height;
 
-        // 3. Bottom-Right: MY (wireframe outline only, begins only after TO finishes)
-        drawLetterString(tCtx, "MY", 2480, 1220, mobFontSize, fontFamily, "right", "bottom", true, 3.00, animTime, 0.22, 0.50);
-        // 4. Bottom-Right: PORTFOLIO (solid warm ivory bloom, begins only after MY finishes)
-        drawLetterString(tCtx, "PORTFOLIO", 2480, 1400, mobFontSize, fontFamily, "right", "bottom", false, 4.10, animTime, 0.16, 0.60);
+      if (isMobile) {
+        // MOBILE PORTRAIT (Proportional to tall vertical screen)
+        // High-fashion condensed typography positioned cleanly within safe margins
+        const welcomeFontSize = 165;
+        const portfolioFontSize = 155;
+        const leftMargin = 60;
+        const rightMargin = cW - 60;
+
+        // Top-Left: WELCOME (solid warm ivory) + TO (1px wireframe outline)
+        // Safely below top bar / dynamic island
+        drawLetterString(tCtx, "WELCOME", leftMargin, 210, welcomeFontSize, fontFamily, "left", "top", false, 0.0, animTime, 0.16, 0.60);
+        drawLetterString(tCtx, "TO", leftMargin, 385, welcomeFontSize, fontFamily, "left", "top", true, 1.90, animTime, 0.22, 0.50);
+
+        // Bottom-Right: MY (1px wireframe outline) + PORTFOLIO (solid warm ivory)
+        // Safely above bottom HUD hint and iOS home indicator
+        drawLetterString(tCtx, "MY", rightMargin, cH - 365, welcomeFontSize, fontFamily, "right", "bottom", true, 3.00, animTime, 0.22, 0.50);
+        drawLetterString(tCtx, "PORTFOLIO", rightMargin, cH - 200, portfolioFontSize, fontFamily, "right", "bottom", false, 4.10, animTime, 0.16, 0.60);
       } else {
         // DESKTOP: Monumental Druk Diagonal (Solid Ivory vs. 1px Razor-Sharp Wireframe)
         const welcomeFontSize = 295;
@@ -715,22 +734,22 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     // Font readiness hook to redraw once Druk / Helvetica Compressed is ready
     if (typeof document !== "undefined" && document.fonts) {
       document.fonts.load("390px 'Druk Trial'").then(() => {
-        renderTypographyCanvas();
+        renderTypographyCanvas(entranceAnimRef.current);
         textTexture.needsUpdate = true;
       });
       document.fonts.load("390px 'Helvetica Compressed'").then(() => {
-        renderTypographyCanvas();
+        renderTypographyCanvas(entranceAnimRef.current);
         textTexture.needsUpdate = true;
       });
       document.fonts.ready.then(() => {
-        renderTypographyCanvas();
+        renderTypographyCanvas(entranceAnimRef.current);
         textTexture.needsUpdate = true;
       });
     }
 
     // Viewport-Locked Screen Geometry: Attached directly to camera so letters stay 100% rock-solid fixed on screen
     const vFovRad = (camera.fov * Math.PI) / 180;
-    const camDist = isMobile ? 3.8 : 3.3;
+    const camDist = 4.0;
     const planeH = 2 * Math.tan(vFovRad / 2) * camDist;
     const planeW = planeH * (width / height);
     planeWRef.current = planeW;
@@ -1818,16 +1837,17 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       const w = container.clientWidth || window.innerWidth;
       const h = container.clientHeight || window.innerHeight;
       const mobile = w / h < 1.0;
+      const asp = w / h;
 
-      cameraRef.current.aspect = w / h;
+      cameraRef.current.aspect = asp;
       cameraRef.current.fov = mobile ? 56 : 45;
       cameraRef.current.position.z = mobile ? 3.5 : 3.0;
       cameraRef.current.updateProjectionMatrix();
 
       const vFovRad = (cameraRef.current.fov * Math.PI) / 180;
-      const camDist = mobile ? 4.5 : 4.0;
+      const camDist = 4.0;
       const newH = 2 * Math.tan(vFovRad / 2) * camDist;
-      const newW = newH * (w / h);
+      const newW = newH * asp;
       planeWRef.current = newW;
       planeHRef.current = newH;
       if (textMeshRef.current) {
@@ -1836,13 +1856,24 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         textMeshRef.current.position.set(0, 0, -camDist);
       }
 
+      // Recompute canvas dimensions on viewport resize so texture aspect ratio remains 100% 1:1 true
+      if (mobile) {
+        textCanvas.width = 1080;
+        textCanvas.height = Math.round(1080 / asp);
+      } else {
+        textCanvas.width = 2560;
+        textCanvas.height = Math.round(2560 / asp);
+      }
+      renderTypographyCanvas(entranceAnimRef.current);
+      textTexture.needsUpdate = true;
+
       smokeMat.uniforms.uResolution.value.set(w, h);
       rendererRef.current.setSize(w, h);
 
       if (attractorGroupRef.current) {
-        const s = mobile ? 0.78 : 0.84;
+        const s = mobile ? 0.80 : 0.84;
         attractorGroupRef.current.scale.set(s, s, s);
-        attractorGroupRef.current.position.set(0, mobile ? 0.04 : 0.08, 0);
+        attractorGroupRef.current.position.set(0, mobile ? 0.02 : 0.08, 0);
       }
     };
 
@@ -1885,7 +1916,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   return (
     <div className="relative w-full h-[100svh] bg-[#06070B] text-[#F8F5EE] overflow-hidden select-none">
       {/* Three.js Canvas Container */}
-      <div ref={mountRef} className="absolute inset-0 w-full h-full z-10 cursor-crosshair" />
+      <div ref={mountRef} className="absolute inset-0 w-full h-full z-10 cursor-crosshair touch-none" />
 
       {/* Star Wars Hyperspace Lightspeed Flash Overlay */}
       <div
@@ -1896,9 +1927,9 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       {/* Whisper-Quiet Subtle Center Telemetry Hint (Pure CASA MOMO Layout) */}
       <div
         ref={telemetryHintRef}
-        className="absolute bottom-6 left-0 right-0 z-30 flex justify-center pointer-events-none select-none transition-opacity duration-500"
+        className="absolute bottom-6 left-0 right-0 z-30 flex justify-center pointer-events-none select-none transition-opacity duration-500 pb-[env(safe-area-inset-bottom,0px)]"
       >
-        <span className="text-[9.5px] font-mono tracking-[0.28em] text-[#F5EEDA]/35 uppercase">
+        <span className="text-[9px] sm:text-[9.5px] font-mono tracking-[0.24em] sm:tracking-[0.28em] text-[#F5EEDA]/40 uppercase px-4 text-center">
           TAP TO WARP · HOLD TO CONDENSE
         </span>
       </div>

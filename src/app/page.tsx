@@ -217,6 +217,23 @@ export default function Home() {
       lenisRef.current.start();
     }
 
+    // On mobile (< 768px), "monument-statement" is embedded within MonumentalHero at progress ~0.82
+    if (typeof window !== "undefined" && window.innerWidth < 768 && id === "monument-statement") {
+      const heroEl = document.getElementById("hero-wrapper");
+      if (heroEl) {
+        const target = heroEl.offsetTop + (heroEl.offsetHeight - window.innerHeight) * 0.82;
+        if (lenisRef.current) {
+          lenisRef.current.scrollTo(target, { duration: 1.0 });
+        } else if (scrollerRef.current) {
+          scrollerRef.current.scrollTo({ top: target, behavior: "smooth" });
+        }
+        setTimeout(() => {
+          ScrollTrigger.refresh();
+        }, 150);
+        return;
+      }
+    }
+
     const el = document.getElementById(id);
     if (!el) return;
 

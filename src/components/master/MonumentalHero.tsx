@@ -42,6 +42,32 @@ const STATEMENT_LINES = [
   },
 ];
 
+// Concept 1 + 3 Hybrid: Quantum Stardust & Anamorphic Speed Particles
+const WARP_PARTICLES = [
+  { left: "10%", top: "12%", width: 2, height: 32, color: "#FF8C38", opacity: 0.8 },
+  { left: "22%", top: "6%", width: 1.5, height: 44, color: "#F5EEDA", opacity: 0.9 },
+  { left: "38%", top: "18%", width: 2, height: 55, color: "#FFFDF8", opacity: 0.85 },
+  { left: "55%", top: "10%", width: 1.5, height: 38, color: "#FF8C38", opacity: 0.8 },
+  { left: "70%", top: "22%", width: 2, height: 48, color: "#F5EEDA", opacity: 0.9 },
+  { left: "86%", top: "8%", width: 1.5, height: 34, color: "#EAD7C0", opacity: 0.75 },
+  { left: "16%", top: "42%", width: 2, height: 50, color: "#FFFDF8", opacity: 0.85 },
+  { left: "32%", top: "48%", width: 1.5, height: 40, color: "#FF8C38", opacity: 0.75 },
+  { left: "48%", top: "44%", width: 2.5, height: 64, color: "#F5EEDA", opacity: 0.95 },
+  { left: "64%", top: "54%", width: 1.5, height: 42, color: "#FFFDF8", opacity: 0.8 },
+  { left: "82%", top: "46%", width: 2, height: 46, color: "#FF8C38", opacity: 0.75 },
+  { left: "8%", top: "66%", width: 1.5, height: 32, color: "#EAD7C0", opacity: 0.7 },
+  { left: "26%", top: "72%", width: 2, height: 44, color: "#F5EEDA", opacity: 0.85 },
+  { left: "44%", top: "80%", width: 1.5, height: 38, color: "#FF8C38", opacity: 0.8 },
+  { left: "60%", top: "70%", width: 2, height: 54, color: "#FFFDF8", opacity: 0.9 },
+  { left: "76%", top: "76%", width: 1.5, height: 36, color: "#F5EEDA", opacity: 0.75 },
+  { left: "90%", top: "82%", width: 2, height: 45, color: "#FF8C38", opacity: 0.8 },
+  { left: "14%", top: "28%", width: 3, height: 3, color: "#FFFDF8", opacity: 0.9 },
+  { left: "52%", top: "32%", width: 4, height: 4, color: "#FF8C38", opacity: 0.95 },
+  { left: "80%", top: "36%", width: 3, height: 3, color: "#F5EEDA", opacity: 0.85 },
+  { left: "30%", top: "62%", width: 3, height: 3, color: "#FF8C38", opacity: 0.8 },
+  { left: "68%", top: "86%", width: 4, height: 4, color: "#FFFDF8", opacity: 0.9 },
+];
+
 interface MonumentalHeroProps {
   onExplore: () => void;
   onConnect?: () => void;
@@ -77,12 +103,11 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
   const statementDividerBottomRef = useRef<HTMLDivElement | null>(null);
   const statementAttributionRef = useRef<HTMLDivElement | null>(null);
 
-  // Solution 1: Organic Alpine Horizon Dawn & Volumetric Sunbeams
-  const dawnSkyGlowRef = useRef<HTMLDivElement | null>(null);
-  const dawnSunOrbRef = useRef<HTMLDivElement | null>(null);
-  const dawnGodRaysRef = useRef<SVGSVGElement | null>(null);
-  const dawnMountainsRef = useRef<SVGSVGElement | null>(null);
-  const dawnLensFlareRef = useRef<HTMLDivElement | null>(null);
+  // Concept 1 + 3 Hybrid: Cosmic Anamorphic Warp & Particle Matrix Deconstruction Refs
+  const singularityCoreRef = useRef<HTMLDivElement | null>(null);
+  const anamorphicStreaksRef = useRef<HTMLDivElement | null>(null);
+  const particleMatrixRef = useRef<HTMLDivElement | null>(null);
+  const holoGridHorizonRef = useRef<HTMLDivElement | null>(null);
 
   // Desktop Refs
   const desktopSectionRef = useRef<HTMLElement | null>(null);
@@ -108,8 +133,14 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
     if (typeof window !== "undefined" && window.innerWidth < 768 && mobileContainerRef.current) {
       const targetScroll =
         mobileContainerRef.current.offsetTop +
-        (mobileContainerRef.current.offsetHeight - window.innerHeight) * 0.60;
-      window.scrollTo({ top: targetScroll, behavior: "smooth" });
+        (mobileContainerRef.current.offsetHeight - window.innerHeight) * 0.82;
+      const lenis = (window as any).lenis;
+      if (lenis) {
+        lenis.scrollTo(targetScroll, { duration: 1.0 });
+      } else {
+        const scroller = document.getElementById("app-scroller");
+        if (scroller) scroller.scrollTo({ top: targetScroll, behavior: "smooth" });
+      }
     } else {
       onExplore();
     }
@@ -200,12 +231,11 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
       if (statementMetaRef.current) gsap.set(statementMetaRef.current, { opacity: 0, y: -8 });
       if (statementAttributionRef.current) gsap.set(statementAttributionRef.current, { opacity: 0, y: 8 });
 
-      // Solution 1: Horizon Dawn & Volumetric Sunbeams initial state
-      if (dawnSkyGlowRef.current) gsap.set(dawnSkyGlowRef.current, { opacity: 0 });
-      if (dawnSunOrbRef.current) gsap.set(dawnSunOrbRef.current, { y: 130, scale: 0.8, opacity: 0 });
-      if (dawnGodRaysRef.current) gsap.set(dawnGodRaysRef.current, { opacity: 0, rotate: -4 });
-      if (dawnMountainsRef.current) gsap.set(dawnMountainsRef.current, { y: 35, opacity: 0 });
-      if (dawnLensFlareRef.current) gsap.set(dawnLensFlareRef.current, { opacity: 0, scaleX: 0 });
+      // Concept 1 + 3 Hybrid: Cosmic Anamorphic Warp initial states
+      if (singularityCoreRef.current) gsap.set(singularityCoreRef.current, { scale: 0.1, opacity: 0 });
+      if (anamorphicStreaksRef.current) gsap.set(anamorphicStreaksRef.current, { scaleX: 0.05, opacity: 0 });
+      if (particleMatrixRef.current) gsap.set(particleMatrixRef.current, { opacity: 0, y: -20, scale: 0.85 });
+      if (holoGridHorizonRef.current) gsap.set(holoGridHorizonRef.current, { opacity: 0, scaleY: 0.2 });
 
       const statementWords = statementHeadlineRef.current?.querySelectorAll(".statement-word");
       if (statementWords && statementWords.length > 0) {
@@ -372,56 +402,112 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         masterTl.to(statementAttributionRef.current, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 8.8);
       }
 
-      // Phase 8 (9.00 -> 9.30): Luxury Hold for illuminated statement in Twilight Realm
-      masterTl.to({}, { duration: 0.30 }, 9.0);
+      // Phase 8 (8.80 -> 9.15): Luxury Hold for illuminated statement in Twilight Realm
+      masterTl.to({}, { duration: 0.35 }, 8.80);
 
-      // Phase 9 (9.30 -> 10.00): Solution 1 - The Horizon Dawn & Volumetric God-Rays Awaken
-      // Mountain ridges rise organically across the lower horizon
-      if (dawnMountainsRef.current) {
+      // Phase 9A (9.15 -> 9.48): Concept 3 - Wireframe Skeleton Deconstruction & Quantum Particles Awaken
+      if (statementWords && statementWords.length > 0) {
         masterTl.to(
-          dawnMountainsRef.current,
-          { y: 0, opacity: 1, duration: 0.65, ease: "power2.out" },
-          9.30
+          statementWords,
+          {
+            color: "transparent",
+            webkitTextStroke: "1px rgba(245, 238, 218, 0.9)",
+            textShadow: "0 0 16px rgba(255, 140, 56, 0.65)",
+            stagger: 0.012,
+            duration: 0.32,
+            ease: "power2.out",
+          },
+          9.15
         );
       }
-      // Celestial Sun rises gracefully from behind the mountain peaks
-      if (dawnSunOrbRef.current) {
+      if (statementDividerTopRef.current && statementDividerBottomRef.current) {
         masterTl.to(
-          dawnSunOrbRef.current,
-          { y: 0, scale: 1.0, opacity: 1, duration: 0.70, ease: "power2.out" },
-          9.30
+          [statementDividerTopRef.current, statementDividerBottomRef.current],
+          {
+            backgroundColor: "transparent",
+            boxShadow: "0 0 18px rgba(255, 140, 56, 0.85)",
+            duration: 0.30,
+          },
+          9.15
         );
       }
-      // Volumetric God-Rays fan out across the twilight sky
-      if (dawnGodRaysRef.current) {
+      // Quantum stardust particles materialize as typography deconstructs
+      if (particleMatrixRef.current) {
         masterTl.to(
-          dawnGodRaysRef.current,
-          { opacity: 0.85, rotate: 2, duration: 0.70, ease: "power1.out" },
-          9.30
+          particleMatrixRef.current,
+          { opacity: 1, scale: 1.0, y: 0, duration: 0.32, ease: "power2.out" },
+          9.18
         );
       }
-      // Horizon dawn glow warms the sky
-      if (dawnSkyGlowRef.current) {
+      if (holoGridHorizonRef.current) {
         masterTl.to(
-          dawnSkyGlowRef.current,
-          { opacity: 1, duration: 0.65, ease: "power2.out" },
-          9.35
+          holoGridHorizonRef.current,
+          { opacity: 0.45, scaleY: 1.0, duration: 0.35, ease: "power2.out" },
+          9.20
         );
       }
-      // Anamorphic horizontal lens flare flashes across the sun rim
-      if (dawnLensFlareRef.current) {
+
+      // Phase 9B (9.48 -> 10.00): Concept 1 - Anamorphic Streak Warp & Event Horizon Acceleration
+      // Central singularity flare expands into deep cosmic void
+      if (singularityCoreRef.current) {
         masterTl.to(
-          dawnLensFlareRef.current,
-          { opacity: 0.9, scaleX: 1, duration: 0.45, ease: "power2.out" },
-          9.55
+          singularityCoreRef.current,
+          { scale: 3.6, opacity: 1, duration: 0.50, ease: "power2.in" },
+          9.48
+        );
+        masterTl.to(
+          singularityCoreRef.current,
+          { opacity: 0, duration: 0.15, ease: "power1.out" },
+          9.85
         );
       }
-      // Statement text floats up gently and dissolves into the dawn glow
+      // Horizontal anamorphic laser streaks flash across the lens
+      if (anamorphicStreaksRef.current) {
+        masterTl.to(
+          anamorphicStreaksRef.current,
+          { scaleX: 18.0, opacity: 1, duration: 0.40, ease: "power2.inOut" },
+          9.50
+        );
+        masterTl.to(
+          anamorphicStreaksRef.current,
+          { opacity: 0, duration: 0.15, ease: "power2.out" },
+          9.85
+        );
+      }
+      // Camera rockets THROUGH the wireframe typography into deep space
       if (statementContainerRef.current) {
         masterTl.to(
           statementContainerRef.current,
-          { y: -30, opacity: 0, scale: 1.02, duration: 0.50, ease: "power2.in" },
-          9.45
+          {
+            scale: 2.8,
+            y: -50,
+            opacity: 0,
+            filter: "blur(6px)",
+            duration: 0.48,
+            ease: "power3.in",
+          },
+          9.50
+        );
+      }
+      // Quantum stardust particles stream past the camera at hyper-speed
+      if (particleMatrixRef.current) {
+        masterTl.to(
+          particleMatrixRef.current,
+          {
+            y: 420,
+            scaleY: 3.8,
+            opacity: 0,
+            duration: 0.48,
+            ease: "power3.in",
+          },
+          9.50
+        );
+      }
+      if (holoGridHorizonRef.current) {
+        masterTl.to(
+          holoGridHorizonRef.current,
+          { y: 150, opacity: 0, duration: 0.45, ease: "power2.in" },
+          9.52
         );
       }
 
@@ -610,11 +696,11 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               clipPath: "circle(0% at 50% 50%)",
             }}
           >
-            {/* Atmospheric Dusk Horizon Gradient */}
-            <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-[#1C0814] via-[#0E030A] to-[#060103]" />
+            {/* Deep Obsidian Cosmic Vacuum Background (Pure high-art space) */}
+            <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-[#090B10] via-[#060709] to-[#030406]" />
 
-            {/* Twilight Horizon Glow (Echoing distant mountains) */}
-            <div className="absolute inset-x-0 bottom-0 h-2/3 pointer-events-none bg-[radial-gradient(ellipse_120%_60%_at_50%_90%,rgba(255,140,56,0.20)_0%,transparent_80%)]" />
+            {/* Deep Ambient Cosmic Glow */}
+            <div className="absolute inset-x-0 bottom-0 h-2/3 pointer-events-none bg-[radial-gradient(ellipse_120%_60%_at_50%_90%,rgba(255,140,56,0.12)_0%,transparent_80%)]" />
 
             {/* Starlit Celestial Dust Texture */}
             <div className="absolute inset-0 pointer-events-none opacity-40 bg-[radial-gradient(circle_at_25%_25%,rgba(255,255,255,0.12)_1px,transparent_1px),radial-gradient(circle_at_75%_35%,rgba(255,140,56,0.15)_1.5px,transparent_1.5px),radial-gradient(circle_at_45%_70%,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[length:80px_80px]" />
@@ -634,110 +720,94 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               }}
             />
 
-            {/* 6B. Solution 1: Organic Alpine Horizon Dawn & Volumetric Sunbeams */}
-            {/* Horizon Dawn Sky Atmosphere Glow */}
+            {/* Concept 1 + 3 Hybrid: Event Horizon Singularity & Anamorphic Warp System */}
+            {/* 1. Central Event Horizon Singularity Core */}
             <div
-              ref={dawnSkyGlowRef}
-              className="absolute inset-x-0 bottom-0 h-4/5 pointer-events-none bg-[radial-gradient(ellipse_140%_80%_at_50%_90%,rgba(255,140,56,0.5)_0%,rgba(245,158,11,0.22)_40%,transparent_80%)] will-change-[opacity]"
-            />
-
-            {/* Volumetric SVG God Rays */}
-            <svg
-              ref={dawnGodRaysRef}
-              className="absolute -inset-x-6 bottom-16 h-[520px] w-[calc(100%+48px)] mix-blend-screen pointer-events-none filter blur-[3px] will-change-[opacity,transform]"
-              viewBox="0 0 500 500"
-              preserveAspectRatio="none"
-            >
-              <defs>
-                <linearGradient id="heroSoftRay" x1="0.5" y1="1" x2="0.5" y2="0">
-                  <stop offset="0%" stopColor="#FFE0B2" stopOpacity="0.6" />
-                  <stop offset="40%" stopColor="#FFB74D" stopOpacity="0.32" />
-                  <stop offset="75%" stopColor="#FF7043" stopOpacity="0.12" />
-                  <stop offset="100%" stopColor="#FF5722" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-              <polygon points="250,420 50,0 110,0" fill="url(#heroSoftRay)" opacity="0.65" />
-              <polygon points="250,420 140,0 195,0" fill="url(#heroSoftRay)" opacity="0.85" />
-              <polygon points="250,420 220,0 270,0" fill="url(#heroSoftRay)" opacity="0.95" />
-              <polygon points="250,420 295,0 350,0" fill="url(#heroSoftRay)" opacity="0.85" />
-              <polygon points="250,420 380,0 440,0" fill="url(#heroSoftRay)" opacity="0.65" />
-              <polygon points="250,420 0,60 40,20" fill="url(#heroSoftRay)" opacity="0.45" />
-              <polygon points="250,420 460,20 500,60" fill="url(#heroSoftRay)" opacity="0.45" />
-            </svg>
-
-            {/* Rising Celestial Sun Orb */}
-            <div
-              ref={dawnSunOrbRef}
-              className="absolute left-1/2 -translate-x-1/2 bottom-[145px] w-36 h-36 rounded-full pointer-events-none will-change-[transform,opacity]"
+              ref={singularityCoreRef}
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full pointer-events-none will-change-[transform,opacity]"
               style={{
-                background: "radial-gradient(circle, #FFFDF8 0%, #FEF3C7 22%, #FBBF24 50%, #EA580C 75%, transparent 95%)",
-                boxShadow: "0 0 35px rgba(255, 235, 180, 0.9), 0 0 80px rgba(255, 140, 56, 0.7), 0 0 150px rgba(245, 158, 11, 0.45)",
+                background: "radial-gradient(circle, rgba(255, 248, 235, 0.95) 0%, rgba(255, 140, 56, 0.55) 24%, rgba(180, 70, 20, 0.15) 55%, transparent 75%)",
+                boxShadow: "0 0 50px rgba(255, 140, 56, 0.6), 0 0 100px rgba(255, 110, 30, 0.3)",
               }}
             />
 
-            {/* Anamorphic Horizontal Sun Lens Flare */}
+            {/* 2. Anamorphic Horizontal Laser Flares (Needle-sharp speed streaks) */}
             <div
-              ref={dawnLensFlareRef}
-              className="absolute inset-x-0 bottom-[218px] h-[2px] pointer-events-none will-change-[transform,opacity] origin-center"
+              ref={anamorphicStreaksRef}
+              className="absolute inset-x-0 top-1/2 -translate-y-1/2 pointer-events-none will-change-[transform,opacity] flex flex-col items-center justify-center gap-5"
+            >
+              {/* Center Primary Flare */}
+              <div
+                className="w-full h-[2px]"
+                style={{
+                  background: "linear-gradient(90deg, transparent 0%, rgba(255, 140, 56, 0.3) 15%, rgba(255, 248, 235, 1) 50%, rgba(255, 140, 56, 0.3) 85%, transparent 100%)",
+                  boxShadow: "0 0 16px rgba(255, 200, 120, 0.9), 0 0 35px rgba(255, 140, 56, 0.7)",
+                }}
+              />
+              {/* Satellite Upper Flare */}
+              <div
+                className="w-3/4 h-[1px] opacity-75"
+                style={{
+                  background: "linear-gradient(90deg, transparent 0%, rgba(255, 140, 56, 0.2) 20%, rgba(255, 245, 220, 0.9) 50%, rgba(255, 140, 56, 0.2) 80%, transparent 100%)",
+                  boxShadow: "0 0 10px rgba(255, 160, 60, 0.6)",
+                }}
+              />
+              {/* Satellite Lower Flare */}
+              <div
+                className="w-3/4 h-[1px] opacity-75"
+                style={{
+                  background: "linear-gradient(90deg, transparent 0%, rgba(255, 140, 56, 0.2) 20%, rgba(255, 245, 220, 0.9) 50%, rgba(255, 140, 56, 0.2) 80%, transparent 100%)",
+                  boxShadow: "0 0 10px rgba(255, 160, 60, 0.6)",
+                }}
+              />
+            </div>
+
+            {/* 3. Quantum Stardust Particle Matrix (Continuity with 3D Lorenz Attractor) */}
+            <div
+              ref={particleMatrixRef}
+              className="absolute inset-0 pointer-events-none will-change-[transform,opacity] overflow-hidden"
+            >
+              {WARP_PARTICLES.map((p, idx) => (
+                <div
+                  key={idx}
+                  className="absolute rounded-full"
+                  style={{
+                    left: p.left,
+                    top: p.top,
+                    width: `${p.width}px`,
+                    height: `${p.height}px`,
+                    opacity: p.opacity,
+                    background:
+                      p.height > 6
+                        ? `linear-gradient(to bottom, transparent, ${p.color}, #FFFDF8)`
+                        : p.color,
+                    boxShadow: `0 0 8px ${p.color}`,
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* 4. Architectural Perspective Holographic Grid Horizon */}
+            <div
+              ref={holoGridHorizonRef}
+              className="absolute inset-x-0 bottom-0 h-48 pointer-events-none will-change-[transform,opacity] opacity-0"
               style={{
-                background: "linear-gradient(90deg, transparent 0%, rgba(255, 140, 56, 0.3) 25%, rgba(255, 245, 220, 0.95) 50%, rgba(255, 140, 56, 0.3) 75%, transparent 100%)",
-                boxShadow: "0 0 16px rgba(255, 180, 80, 0.85)",
+                perspective: "500px",
+                transformOrigin: "bottom center",
               }}
-            />
-
-            {/* Multi-Layer Organic Alpine Silhouettes (SVG) */}
-            <svg
-              ref={dawnMountainsRef}
-              className="absolute inset-x-0 bottom-0 h-[360px] w-full pointer-events-none will-change-[transform,opacity]"
-              viewBox="0 0 1000 600"
-              preserveAspectRatio="none"
             >
-              <defs>
-                <linearGradient id="heroDistantMtnGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#2D1426" stopOpacity="0.75" />
-                  <stop offset="100%" stopColor="#140713" stopOpacity="0.95" />
-                </linearGradient>
-                <linearGradient id="heroMidMtnGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#190A15" />
-                  <stop offset="100%" stopColor="#090308" />
-                </linearGradient>
-                <linearGradient id="heroForeMtnGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#0A0407" />
-                  <stop offset="100%" stopColor="#030103" />
-                </linearGradient>
-              </defs>
-
-              <path
-                d="M0,320 C80,300 140,250 200,240 C260,230 310,270 370,230 C430,190 480,210 540,190 C600,170 660,230 730,190 C800,150 860,220 920,200 C960,190 980,210 1000,200 L1000,600 L0,600 Z"
-                fill="url(#heroDistantMtnGrad)"
+              <div
+                className="w-full h-full"
+                style={{
+                  transform: "rotateX(72deg)",
+                  backgroundImage:
+                    "linear-gradient(to right, rgba(255, 140, 56, 0.15) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 140, 56, 0.15) 1px, transparent 1px)",
+                  backgroundSize: "32px 32px",
+                  maskImage: "linear-gradient(to bottom, transparent 0%, black 60%)",
+                  WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 60%)",
+                }}
               />
-              <path
-                d="M0,360 C40,350 70,330 110,335 C150,340 180,300 230,290 C280,280 320,310 360,285 C400,260 440,275 480,250 C520,225 560,240 600,220 C650,240 690,210 740,225 C790,240 840,270 890,260 C940,250 970,270 1000,265 L1000,600 L0,600 Z"
-                fill="url(#heroMidMtnGrad)"
-              />
-              <path
-                d="M0,430 C50,420 90,400 140,410 C190,420 230,380 290,375 C350,370 410,395 470,360 C530,330 580,360 640,340 C700,320 760,350 820,330 C880,310 940,340 1000,320 L1000,600 L0,600 Z"
-                fill="url(#heroForeMtnGrad)"
-              />
-            </svg>
-
-            {/* Cyber-Pastoral Terrace Deck & Railing Silhouette */}
-            <svg
-              className="absolute inset-x-0 bottom-0 h-[110px] w-full pointer-events-none"
-              viewBox="0 0 1000 200"
-              preserveAspectRatio="none"
-            >
-              <rect x="0" y="80" width="1000" height="14" fill="#080306" rx="2" />
-              <line x1="0" y1="80" x2="1000" y2="80" stroke="#FF8C38" strokeWidth="1.5" strokeOpacity="0.4" />
-              <g fill="#070205">
-                {[40, 90, 140, 190, 240, 290, 340, 390, 440, 490, 540, 590, 640, 690, 740, 790, 840, 890, 940].map((x) => (
-                  <rect key={x} x={x} y="94" width="6" height="106" />
-                ))}
-              </g>
-              <rect x="0" y="170" width="1000" height="30" fill="#030102" />
-              <path d="M0,90 C25,75 40,65 55,75 C70,85 85,60 100,75 C115,90 120,70 135,85 L135,120 L0,120 Z" fill="#060205" opacity="0.95" />
-              <path d="M865,85 C880,70 895,90 910,75 C925,60 940,85 955,75 C970,65 985,75 1000,90 L1000,120 L865,120 Z" fill="#060205" opacity="0.95" />
-            </svg>
+            </div>
 
             <div
               ref={statementContainerRef}

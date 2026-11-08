@@ -3,7 +3,7 @@
 import React, { memo, useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
-import { ArrowDown, ArrowUpRight, Sparkles } from "lucide-react";
+import { ArrowDown, ArrowUpRight, Sparkles, GraduationCap, Trophy, Cpu, Award } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -68,6 +68,60 @@ const WARP_PARTICLES = [
   { left: "68%", top: "86%", width: 4, height: 4, color: "#FFFDF8", opacity: 0.9 },
 ];
 
+interface FoundationPillar {
+  num: string;
+  tag: string;
+  title: string;
+  role: string;
+  desc: string;
+  status: string;
+  icon: React.ElementType;
+  chips: string[];
+}
+
+const FOUNDATION_PILLARS: FoundationPillar[] = [
+  {
+    num: "01",
+    tag: "ACADEMIC CORE",
+    title: "Netaji Subhash Engineering College",
+    role: "B.Tech in Artificial Intelligence & Machine Learning (2024–2028)",
+    desc: "Specialized in predictive neural architectures, high-throughput systems, computational algebra, and algorithmic optimization.",
+    status: "CURRENT CANDIDATE",
+    icon: GraduationCap,
+    chips: ["NEURAL ARCHITECTURES", "COMPUTATIONAL ALGEBRA", "HIGH-THROUGHPUT"],
+  },
+  {
+    num: "02",
+    tag: "EUROPEAN OPS",
+    title: "Latvian Cricket Federation",
+    role: "National Sports Governing Body Digital Ecosystem",
+    desc: "Modernized national sports governing digital infrastructure, automated live tournament telemetry, and EU regulatory compliance systems across Riga & European circuits.",
+    status: "PRODUCTION SYSTEM",
+    icon: Trophy,
+    chips: ["EU COMPLIANCE", "LIVE TELEMETRY", "RIGA CIRCUIT"],
+  },
+  {
+    num: "03",
+    tag: "< 5MS ENGINE",
+    title: "278-Key In-Memory Localization Engine",
+    role: "Zero-API Sub-Millisecond Bilingual Translation",
+    desc: "Zero-API in-memory localization dictionary eliminating roundtrip latency for international B2B agricultural commodity trade channels between EU and CIS.",
+    status: "PROPRIETARY CORE",
+    icon: Cpu,
+    chips: ["ZERO-API", "SUB-MILLISECOND", "EU-CIS TRADE"],
+  },
+  {
+    num: "04",
+    tag: "DISTINCTION",
+    title: "The Heritage School",
+    role: "ISC Class XII (82.75%) · ICSE (89.4%)",
+    desc: "Distinction in Computer Science & Mathematics. Rigorous foundations in pure algorithmic logic, object-oriented design, and discrete mathematics.",
+    status: "ALUMNI DISTINCTION",
+    icon: Award,
+    chips: ["ALGORITHMIC LOGIC", "DISCRETE MATH", "OOP ARCHITECTURE"],
+  },
+];
+
 interface MonumentalHeroProps {
   onExplore: () => void;
   onConnect?: () => void;
@@ -108,6 +162,21 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
   const anamorphicStreaksRef = useRef<HTMLDivElement | null>(null);
   const particleMatrixRef = useRef<HTMLDivElement | null>(null);
   const holoGridHorizonRef = useRef<HTMLDivElement | null>(null);
+
+  // Mobile Movement 02: Foundation Architecture (Z-Axis Depth Stage)
+  const mobileCreedStageRef = useRef<HTMLDivElement | null>(null);
+  const creedHudRef = useRef<HTMLDivElement | null>(null);
+  const creedOdometerRef = useRef<HTMLDivElement | null>(null);
+  const creedRailSeg1Ref = useRef<HTMLDivElement | null>(null);
+  const creedRailSeg2Ref = useRef<HTMLDivElement | null>(null);
+  const creedRailSeg3Ref = useRef<HTMLDivElement | null>(null);
+  const creedRailSeg4Ref = useRef<HTMLDivElement | null>(null);
+  const creedCard1Ref = useRef<HTMLDivElement | null>(null);
+  const creedCard2Ref = useRef<HTMLDivElement | null>(null);
+  const creedCard3Ref = useRef<HTMLDivElement | null>(null);
+  const creedCard4Ref = useRef<HTMLDivElement | null>(null);
+  const creedFooterRef = useRef<HTMLDivElement | null>(null);
+  const creedCardRefs = [creedCard1Ref, creedCard2Ref, creedCard3Ref, creedCard4Ref];
 
   // Desktop Refs
   const desktopSectionRef = useRef<HTMLElement | null>(null);
@@ -236,6 +305,18 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
       if (anamorphicStreaksRef.current) gsap.set(anamorphicStreaksRef.current, { scaleX: 0.05, opacity: 0 });
       if (particleMatrixRef.current) gsap.set(particleMatrixRef.current, { opacity: 0, y: -20, scale: 0.85 });
       if (holoGridHorizonRef.current) gsap.set(holoGridHorizonRef.current, { opacity: 0, scaleY: 0.2 });
+
+      // Mobile Movement 02: Foundation Architecture (Z-Axis Depth Stage Initial States)
+      if (mobileCreedStageRef.current) gsap.set(mobileCreedStageRef.current, { opacity: 0, pointerEvents: "none" });
+      if (creedHudRef.current) gsap.set(creedHudRef.current, { opacity: 0, y: -16 });
+      if (creedFooterRef.current) gsap.set(creedFooterRef.current, { opacity: 0, y: 16 });
+      if (creedOdometerRef.current) gsap.set(creedOdometerRef.current, { yPercent: 0 });
+
+      // Every card is positioned in the exact same center 3D plane, but deep in Z-space (-600px, scale 0.18, blurred)
+      if (creedCard1Ref.current) gsap.set(creedCard1Ref.current, { scale: 0.18, z: -600, opacity: 0, filter: "blur(8px)", transformOrigin: "center center" });
+      if (creedCard2Ref.current) gsap.set(creedCard2Ref.current, { scale: 0.18, z: -600, opacity: 0, filter: "blur(8px)", transformOrigin: "center center" });
+      if (creedCard3Ref.current) gsap.set(creedCard3Ref.current, { scale: 0.18, z: -600, opacity: 0, filter: "blur(8px)", transformOrigin: "center center" });
+      if (creedCard4Ref.current) gsap.set(creedCard4Ref.current, { scale: 0.18, z: -600, opacity: 0, filter: "blur(8px)", transformOrigin: "center center" });
 
       const statementWords = statementHeadlineRef.current?.querySelectorAll(".statement-word");
       if (statementWords && statementWords.length > 0) {
@@ -511,6 +592,127 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         );
       }
 
+      // =======================================================================
+      // MOVEMENT 02: FOUNDATION ARCHITECTURE (SCROLLED IN ON THE SAME Z-AXIS)
+      // Zero Y-axis drop. Camera continues forward flight through 4 Spatial Plinths.
+      // =======================================================================
+      // Switch active stage from Statement to Creed as camera breaches the warp
+      if (mobileCreedStageRef.current) {
+        masterTl.to(
+          mobileCreedStageRef.current,
+          { opacity: 1, pointerEvents: "auto", duration: 0.35, ease: "power1.out" },
+          9.75
+        );
+      }
+
+      // Telemetry HUD and Footer illuminate cleanly from depth
+      if (creedHudRef.current) {
+        masterTl.to(creedHudRef.current, { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }, 9.90);
+      }
+      if (creedFooterRef.current) {
+        masterTl.to(creedFooterRef.current, { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }, 9.90);
+      }
+
+      // Phase 10 (9.80 -> 11.20): PILLAR 01 SCROLLED IN FROM SINGULARITY (NSEC AIML)
+      if (creedCard1Ref.current) {
+        masterTl.fromTo(
+          creedCard1Ref.current,
+          { scale: 0.18, z: -600, opacity: 0, filter: "blur(8px)" },
+          { scale: 1.0, z: 0, opacity: 1, filter: "blur(0px)", duration: 1.4, ease: "power2.out" },
+          9.80
+        );
+      }
+
+      // Phase 11 (11.20 -> 12.20): PILLAR 01 READING HOLD
+      masterTl.to({}, { duration: 1.0 }, 11.20);
+
+      // Phase 12 (12.20 -> 13.60): PUNCH THROUGH PILLAR 01 & PILLAR 02 SCROLLED IN (Latvian Cricket Federation)
+      if (creedCard1Ref.current) {
+        masterTl.to(
+          creedCard1Ref.current,
+          { scale: 2.4, z: 350, opacity: 0, filter: "blur(8px)", duration: 1.2, ease: "power2.in" },
+          12.20
+        );
+      }
+      if (creedCard2Ref.current) {
+        masterTl.fromTo(
+          creedCard2Ref.current,
+          { scale: 0.18, z: -600, opacity: 0, filter: "blur(8px)" },
+          { scale: 1.0, z: 0, opacity: 1, filter: "blur(0px)", duration: 1.4, ease: "power2.out" },
+          12.20
+        );
+      }
+      if (creedOdometerRef.current) {
+        masterTl.to(creedOdometerRef.current, { yPercent: -25, duration: 0.6, ease: "power2.out" }, 12.40);
+      }
+      if (creedRailSeg2Ref.current) {
+        masterTl.to(creedRailSeg2Ref.current, { backgroundColor: "#FF8C38", duration: 0.4 }, 12.40);
+      }
+
+      // Phase 13 (13.60 -> 14.60): PILLAR 02 READING HOLD
+      masterTl.to({}, { duration: 1.0 }, 13.60);
+
+      // Phase 14 (14.60 -> 16.00): PUNCH THROUGH PILLAR 02 & PILLAR 03 SCROLLED IN (278-Key Localization Engine)
+      if (creedCard2Ref.current) {
+        masterTl.to(
+          creedCard2Ref.current,
+          { scale: 2.4, z: 350, opacity: 0, filter: "blur(8px)", duration: 1.2, ease: "power2.in" },
+          14.60
+        );
+      }
+      if (creedCard3Ref.current) {
+        masterTl.fromTo(
+          creedCard3Ref.current,
+          { scale: 0.18, z: -600, opacity: 0, filter: "blur(8px)" },
+          { scale: 1.0, z: 0, opacity: 1, filter: "blur(0px)", duration: 1.4, ease: "power2.out" },
+          14.60
+        );
+      }
+      if (creedOdometerRef.current) {
+        masterTl.to(creedOdometerRef.current, { yPercent: -50, duration: 0.6, ease: "power2.out" }, 14.80);
+      }
+      if (creedRailSeg3Ref.current) {
+        masterTl.to(creedRailSeg3Ref.current, { backgroundColor: "#FF8C38", duration: 0.4 }, 14.80);
+      }
+
+      // Phase 15 (16.00 -> 17.00): PILLAR 03 READING HOLD
+      masterTl.to({}, { duration: 1.0 }, 16.00);
+
+      // Phase 16 (17.00 -> 18.40): PUNCH THROUGH PILLAR 03 & PILLAR 04 SCROLLED IN (The Heritage School Distinction)
+      if (creedCard3Ref.current) {
+        masterTl.to(
+          creedCard3Ref.current,
+          { scale: 2.4, z: 350, opacity: 0, filter: "blur(8px)", duration: 1.2, ease: "power2.in" },
+          17.00
+        );
+      }
+      if (creedCard4Ref.current) {
+        masterTl.fromTo(
+          creedCard4Ref.current,
+          { scale: 0.18, z: -600, opacity: 0, filter: "blur(8px)" },
+          { scale: 1.0, z: 0, opacity: 1, filter: "blur(0px)", duration: 1.4, ease: "power2.out" },
+          17.00
+        );
+      }
+      if (creedOdometerRef.current) {
+        masterTl.to(creedOdometerRef.current, { yPercent: -75, duration: 0.6, ease: "power2.out" }, 17.20);
+      }
+      if (creedRailSeg4Ref.current) {
+        masterTl.to(creedRailSeg4Ref.current, { backgroundColor: "#FF8C38", duration: 0.4 }, 17.20);
+      }
+
+      // Phase 17 (18.40 -> 19.30): PILLAR 04 READING HOLD
+      masterTl.to({}, { duration: 0.90 }, 18.40);
+
+      // Phase 18 (19.30 -> 20.00): SMOOTH MONOLITHIC UNPIN INTO MOVEMENT 03
+      if (creedCard4Ref.current) {
+        masterTl.to(
+          [creedCard4Ref.current, creedHudRef.current, creedFooterRef.current],
+          { scale: 0.90, opacity: 0, y: -25, duration: 0.70, ease: "power2.inOut" },
+          19.30
+        );
+      }
+
       return () => {
         if (cueTween) cueTween.kill();
       };
@@ -547,12 +749,16 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
       {/* ========================================================================= */}
       <div
         ref={mobileContainerRef}
-        className="md:hidden relative w-full h-[280vh] bg-[#060709] overflow-clip"
+        className="md:hidden relative w-full h-[600vh] bg-[#060709] overflow-clip"
       >
-        {/* Navigation & Explore Anchor for Statement phase */}
+        {/* Navigation & Explore Anchors for Statement & Creed phases */}
         <div
           id="monument-statement-mobile"
-          className="absolute top-[55%] inset-x-0 h-[1px] pointer-events-none"
+          className="absolute top-[38%] inset-x-0 h-[1px] pointer-events-none"
+        />
+        <div
+          id="monument-creed-mobile"
+          className="absolute top-[52%] inset-x-0 h-[1px] pointer-events-none"
         />
 
         {/* 100svh Sticky 3D Camera Viewport (Zero Y-axis translation throughout!) */}
@@ -896,6 +1102,138 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               <div className="absolute -top-7 inset-x-0 text-center font-mono text-[8px] tracking-[0.28em] text-[#FF8C38] uppercase">
                 PORTAL // TRANSIT ACTIVE
               </div>
+            </div>
+          </div>
+
+          {/* 8. MOVEMENT 02: FOUNDATION ARCHITECTURE (SCROLLED IN ON THE SAME Z-AXIS) */}
+          <div
+            ref={mobileCreedStageRef}
+            className="absolute inset-0 z-30 flex flex-col justify-between pt-16 pb-8 px-6 pointer-events-none opacity-0 select-none will-change-[transform,opacity]"
+            style={{ perspective: "1000px" }}
+          >
+            {/* Top Telemetry HUD Bar */}
+            <div
+              ref={creedHudRef}
+              className="relative z-30 w-full max-w-sm mx-auto flex flex-col gap-2.5 pt-1 will-change-[transform,opacity]"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#FF8C38] animate-pulse" />
+                  <span className="font-sans font-bold text-[9px] uppercase tracking-[0.22em] text-[#CBB59D]">
+                    FOUNDATION ARCHITECTURE
+                  </span>
+                </div>
+
+                {/* Swiss Rolling Odometer Counter [ 01 / 04 ] */}
+                <div className="font-mono text-xs tracking-wider flex items-center gap-1 text-white/50">
+                  <span>[</span>
+                  <div className="relative h-4 w-5 overflow-hidden inline-flex flex-col items-center">
+                    <div
+                      ref={creedOdometerRef}
+                      className="flex flex-col items-center font-bold text-[#FF8C38] will-change-transform leading-none"
+                    >
+                      <span className="h-4 flex items-center justify-center">01</span>
+                      <span className="h-4 flex items-center justify-center">02</span>
+                      <span className="h-4 flex items-center justify-center">03</span>
+                      <span className="h-4 flex items-center justify-center">04</span>
+                    </div>
+                  </div>
+                  <span>/ 04 ]</span>
+                </div>
+              </div>
+
+              {/* 4-Segment Monograph Progress Rail */}
+              <div className="flex items-center gap-1.5 w-full">
+                <div ref={creedRailSeg1Ref} className="h-[2px] flex-1 rounded-full bg-[#FF8C38] transition-colors" />
+                <div ref={creedRailSeg2Ref} className="h-[2px] flex-1 rounded-full bg-white/10 transition-colors" />
+                <div ref={creedRailSeg3Ref} className="h-[2px] flex-1 rounded-full bg-white/10 transition-colors" />
+                <div ref={creedRailSeg4Ref} className="h-[2px] flex-1 rounded-full bg-white/10 transition-colors" />
+              </div>
+            </div>
+
+            {/* THE 4 TITANIUM MONOGRAPH SHEETS: SCROLLED IN ON THE Z-AXIS */}
+            <div
+              className="relative z-20 w-full max-w-sm mx-auto my-auto h-[400px] flex items-center justify-center [perspective:1000px] [transform-style:preserve-3d]"
+            >
+              {FOUNDATION_PILLARS.map((item, idx) => {
+                const Icon = item.icon;
+                return (
+                  <div
+                    key={idx}
+                    ref={creedCardRefs[idx]}
+                    className="absolute inset-0 rounded-2xl p-6 sm:p-7 flex flex-col justify-between bg-[#0A0D14] border border-white/15 shadow-[0_22px_55px_rgba(0,0,0,0.95),0_0_30px_rgba(255,140,56,0.10)] overflow-hidden will-change-[transform,opacity,filter]"
+                    style={{
+                      zIndex: (idx + 1) * 10,
+                      transformOrigin: "center center",
+                    }}
+                  >
+                    {/* Solid Titanium Gradient Sheen */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-[#121622] via-[#0D1018] to-[#0A0D14] pointer-events-none" />
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,140,56,0.10)_0%,transparent_70%)] pointer-events-none" />
+
+                    {/* Corner Accent Marks */}
+                    <span className="absolute top-3 left-3 text-[9px] font-mono text-[#FF8C38]/40 select-none pointer-events-none">+</span>
+                    <span className="absolute top-3 right-3 text-[9px] font-mono text-[#FF8C38]/40 select-none pointer-events-none">+</span>
+
+                    {/* Card Top Meta */}
+                    <div className="relative z-10">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="font-helvetica font-normal text-3xl sm:text-4xl text-white/30 leading-none">
+                          {item.num}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <Icon size={14} className="text-[#FF8C38]" />
+                          <span className="text-[10px] font-sans font-extrabold uppercase tracking-[0.16em] text-[#FF8C38]">
+                            {item.tag}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Institution / Project Title */}
+                      <h4 className="font-sans font-bold text-lg text-white mb-1.5 leading-snug">
+                        {item.title}
+                      </h4>
+
+                      {/* Role / Degree */}
+                      <div className="text-xs font-mono text-[#FF8C38]/90 mb-3 leading-snug">
+                        {item.role}
+                      </div>
+
+                      {/* Detailed Narrative */}
+                      <p className="font-sans font-normal text-xs text-slate-300 leading-relaxed mb-4">
+                        {item.desc}
+                      </p>
+
+                      {/* Spec Chips */}
+                      <div className="flex flex-wrap gap-1.5">
+                        {item.chips.map((chip, cIdx) => (
+                          <span
+                            key={cIdx}
+                            className="px-2 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider bg-white/5 border border-white/10 text-slate-300"
+                          >
+                            {chip}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Status Pill Footer */}
+                    <div className="relative z-10 pt-3 border-t border-white/10 flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-slate-400">
+                      <span>VERIFICATION</span>
+                      <span className="text-amber-200 font-semibold">{item.status}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Bottom Telemetry Bar */}
+            <div
+              ref={creedFooterRef}
+              className="relative z-30 w-full max-w-sm mx-auto flex items-center justify-between text-[9px] font-mono text-[#CBB59D]/70 uppercase tracking-widest pt-2.5 border-t border-white/5 will-change-[transform,opacity]"
+            >
+              <span>KOLKATA · LATVIA · GLOBAL EDGE</span>
+              <span className="text-[#FF8C38] font-bold">VERIFIED PLINTH</span>
             </div>
           </div>
 

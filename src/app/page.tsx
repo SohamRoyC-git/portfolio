@@ -148,6 +148,8 @@ export default function Home() {
       "monument-hero",
       "monument-statement",
       "monument-creed",
+      "monument-statement-mobile",
+      "monument-creed-mobile",
       "monument-exhibition",
       "monument-matrix",
       "monument-terminal",
@@ -157,7 +159,13 @@ export default function Home() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting && !isStudioActive) {
-            setActiveId(entry.target.id);
+            if (entry.target.id === "monument-statement-mobile") {
+              setActiveId("monument-statement");
+            } else if (entry.target.id === "monument-creed-mobile") {
+              setActiveId("monument-creed");
+            } else {
+              setActiveId(entry.target.id);
+            }
           }
         });
       },
@@ -217,20 +225,34 @@ export default function Home() {
       lenisRef.current.start();
     }
 
-    // On mobile (< 768px), "monument-statement" is embedded within MonumentalHero at progress ~0.82
-    if (typeof window !== "undefined" && window.innerWidth < 768 && id === "monument-statement") {
+    // On mobile (< 768px), "monument-statement" and "monument-creed" live in the unified 3D camera depth tunnel in #hero-wrapper
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
       const heroEl = document.getElementById("hero-wrapper");
       if (heroEl) {
-        const target = heroEl.offsetTop + (heroEl.offsetHeight - window.innerHeight) * 0.82;
-        if (lenisRef.current) {
-          lenisRef.current.scrollTo(target, { duration: 1.0 });
-        } else if (scrollerRef.current) {
-          scrollerRef.current.scrollTo({ top: target, behavior: "smooth" });
+        if (id === "monument-statement") {
+          const target = heroEl.offsetTop + (heroEl.offsetHeight - window.innerHeight) * 0.40;
+          if (lenisRef.current) {
+            lenisRef.current.scrollTo(target, { duration: 1.0 });
+          } else if (scrollerRef.current) {
+            scrollerRef.current.scrollTo({ top: target, behavior: "smooth" });
+          }
+          setTimeout(() => {
+            ScrollTrigger.refresh();
+          }, 150);
+          return;
         }
-        setTimeout(() => {
-          ScrollTrigger.refresh();
-        }, 150);
-        return;
+        if (id === "monument-creed") {
+          const target = heroEl.offsetTop + (heroEl.offsetHeight - window.innerHeight) * 0.55;
+          if (lenisRef.current) {
+            lenisRef.current.scrollTo(target, { duration: 1.0 });
+          } else if (scrollerRef.current) {
+            scrollerRef.current.scrollTo({ top: target, behavior: "smooth" });
+          }
+          setTimeout(() => {
+            ScrollTrigger.refresh();
+          }, 150);
+          return;
+        }
       }
     }
 

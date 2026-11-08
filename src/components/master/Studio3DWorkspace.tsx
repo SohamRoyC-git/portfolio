@@ -705,18 +705,24 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         drawLetterString(tCtx, "PORTFOLIO", rightMargin, cH - 200, portfolioFontSize, fontFamily, "right", "bottom", false, 4.10, animTime, 0.16, 0.60);
       } else {
         // DESKTOP: Monumental Druk Diagonal (Solid Ivory vs. 1px Razor-Sharp Wireframe)
-        const welcomeFontSize = 295;
-        const portfolioFontSize = 310;
+        // Dynamically scaled relative to canvas dimensions so it NEVER goes off screen on any monitor
+        const welcomeFontSize = Math.min(270, Math.round(cH * 0.18));
+        const portfolioFontSize = Math.min(280, Math.round(cH * 0.19));
+
+        const leftMargin = 80;
+        const topMargin = 70;
+        const rightMargin = cW - 80;
+        const bottomMargin = cH - 70;
 
         // 1. Top-Left: WELCOME (solid warm ivory bloom)
-        drawLetterString(tCtx, "WELCOME", 80, 80, welcomeFontSize, fontFamily, "left", "top", false, 0.0, animTime, 0.16, 0.60);
+        drawLetterString(tCtx, "WELCOME", leftMargin, topMargin, welcomeFontSize, fontFamily, "left", "top", false, 0.0, animTime, 0.16, 0.60);
         // 2. Top-Left: TO (wireframe outline only, begins only after WELCOME finishes)
-        drawLetterString(tCtx, "TO", 80, 390, welcomeFontSize, fontFamily, "left", "top", true, 1.90, animTime, 0.22, 0.50);
+        drawLetterString(tCtx, "TO", leftMargin, topMargin + welcomeFontSize + 12, welcomeFontSize, fontFamily, "left", "top", true, 1.90, animTime, 0.22, 0.50);
 
         // 3. Bottom-Right: MY (wireframe outline only, begins only after TO finishes)
-        drawLetterString(tCtx, "MY", 2480, 1070, welcomeFontSize, fontFamily, "right", "bottom", true, 3.00, animTime, 0.22, 0.50);
+        drawLetterString(tCtx, "MY", rightMargin, bottomMargin - portfolioFontSize - 10, welcomeFontSize, fontFamily, "right", "bottom", true, 3.00, animTime, 0.22, 0.50);
         // 4. Bottom-Right: PORTFOLIO (solid warm ivory bloom, begins only after MY finishes)
-        drawLetterString(tCtx, "PORTFOLIO", 2480, 1370, portfolioFontSize, fontFamily, "right", "bottom", false, 4.10, animTime, 0.16, 0.60);
+        drawLetterString(tCtx, "PORTFOLIO", rightMargin, bottomMargin, portfolioFontSize, fontFamily, "right", "bottom", false, 4.10, animTime, 0.16, 0.60);
       }
     };
 

@@ -163,27 +163,36 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
   const particleMatrixRef = useRef<HTMLDivElement | null>(null);
   const holoGridHorizonRef = useRef<HTMLDivElement | null>(null);
 
-  // Mobile Movement 02: Foundation Architecture (Z-Axis Depth Stage)
+  // First-Person 3D Spatial Corridor Dolly (Sector 02 Archives)
   const mobileCreedStageRef = useRef<HTMLDivElement | null>(null);
+  const corridorRigRef = useRef<HTMLDivElement | null>(null);
+  const corridorWorldRef = useRef<HTMLDivElement | null>(null);
+  const depthMeterRef = useRef<HTMLSpanElement | null>(null);
+  const blastDoorLeftRef = useRef<HTMLDivElement | null>(null);
+  const blastDoorRightRef = useRef<HTMLDivElement | null>(null);
+  const blastHangarGlowRef = useRef<HTMLDivElement | null>(null);
+
   const creedHudRef = useRef<HTMLDivElement | null>(null);
   const creedOdometerRef = useRef<HTMLDivElement | null>(null);
   const creedRailSeg1Ref = useRef<HTMLDivElement | null>(null);
   const creedRailSeg2Ref = useRef<HTMLDivElement | null>(null);
   const creedRailSeg3Ref = useRef<HTMLDivElement | null>(null);
   const creedRailSeg4Ref = useRef<HTMLDivElement | null>(null);
-  const creedCard1Ref = useRef<HTMLDivElement | null>(null);
-  const creedCard2Ref = useRef<HTMLDivElement | null>(null);
-  const creedCard3Ref = useRef<HTMLDivElement | null>(null);
-  const creedCard4Ref = useRef<HTMLDivElement | null>(null);
   const creedFooterRef = useRef<HTMLDivElement | null>(null);
-  const creedCardRefs = [creedCard1Ref, creedCard2Ref, creedCard3Ref, creedCard4Ref];
 
-  // Option B: Relativistic Warp & Gravitational Lens State & Refs
-  const [gravLensActive, setGravLensActive] = useState(false);
-  const deckContainerRef = useRef<HTMLDivElement | null>(null);
+  const station1Ref = useRef<HTMLDivElement | null>(null);
+  const station2Ref = useRef<HTMLDivElement | null>(null);
+  const station3Ref = useRef<HTMLDivElement | null>(null);
+  const station4Ref = useRef<HTMLDivElement | null>(null);
+  const stationRefs = [station1Ref, station2Ref, station3Ref, station4Ref];
+
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const [cameraYaw, setCameraYaw] = useState(0);
+  const [reticleTarget, setReticleTarget] = useState<string | null>(null);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const isDraggingRef = useRef(false);
 
-  const playGravSound = (type: "lock" | "punch" | "lens") => {
+  const playSpatialSound = (type: "step" | "station" | "doors") => {
     try {
       if (typeof window === "undefined") return;
       if (!audioCtxRef.current) {
@@ -199,81 +208,87 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
 
-        if (type === "lock") {
+        if (type === "station") {
           osc.type = "sine";
-          osc.frequency.setValueAtTime(120, now);
-          osc.frequency.exponentialRampToValueAtTime(65, now + 0.3);
-          gain.gain.setValueAtTime(0.035, now);
-          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
-        } else if (type === "punch") {
+          osc.frequency.setValueAtTime(160, now);
+          osc.frequency.exponentialRampToValueAtTime(75, now + 0.35);
+          gain.gain.setValueAtTime(0.04, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+        } else if (type === "doors") {
+          // Heavy pneumatic release
           osc.type = "triangle";
-          osc.frequency.setValueAtTime(90, now);
-          osc.frequency.exponentialRampToValueAtTime(210, now + 0.18);
-          osc.frequency.exponentialRampToValueAtTime(45, now + 0.42);
-          gain.gain.setValueAtTime(0.045, now);
-          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.42);
+          osc.frequency.setValueAtTime(70, now);
+          osc.frequency.exponentialRampToValueAtTime(180, now + 0.25);
+          osc.frequency.exponentialRampToValueAtTime(40, now + 0.55);
+          gain.gain.setValueAtTime(0.06, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
         } else {
-          // Lens touch resonance
+          // Subtle spatial turn resonance
           osc.type = "sine";
-          osc.frequency.setValueAtTime(140, now);
-          osc.frequency.exponentialRampToValueAtTime(95, now + 0.2);
-          gain.gain.setValueAtTime(0.025, now);
-          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.exponentialRampToValueAtTime(110, now + 0.15);
+          gain.gain.setValueAtTime(0.02, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
         }
 
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start();
-        osc.stop(now + 0.45);
+        osc.stop(now + 0.6);
       }
     } catch {}
   };
 
-  const handleDeckTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
-    setGravLensActive(true);
-    playGravSound("lens");
-    if (typeof navigator !== "undefined" && navigator.vibrate) {
-      try { navigator.vibrate(12); } catch {}
-    }
+  const handleCorridorTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
     const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
     const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
-    if (deckContainerRef.current) {
-      const rect = deckContainerRef.current.getBoundingClientRect();
-      const dx = (clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
-      const dy = (clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
-      gsap.to(deckContainerRef.current, {
-        rotateX: -dy * 10,
-        rotateY: dx * 12,
-        duration: 0.3,
-        ease: "power2.out",
-      });
+    touchStartRef.current = { x: clientX, y: clientY };
+    isDraggingRef.current = true;
+    playSpatialSound("step");
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      try { navigator.vibrate(8); } catch {}
     }
   };
 
-  const handleDeckTouchMove = (e: React.TouchEvent | React.MouseEvent) => {
-    if (!deckContainerRef.current) return;
+  const handleCorridorTouchMove = (e: React.TouchEvent | React.MouseEvent) => {
+    if (!touchStartRef.current || !corridorRigRef.current) return;
     const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
     const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
-    const rect = deckContainerRef.current.getBoundingClientRect();
-    const dx = Math.max(-1, Math.min(1, (clientX - (rect.left + rect.width / 2)) / (rect.width / 2)));
-    const dy = Math.max(-1, Math.min(1, (clientY - (rect.top + rect.height / 2)) / (rect.height / 2)));
-    gsap.to(deckContainerRef.current, {
-      rotateX: -dy * 12,
-      rotateY: dx * 14,
-      duration: 0.15,
+    const deltaX = clientX - touchStartRef.current.x;
+    const deltaY = clientY - touchStartRef.current.y;
+    // Map horizontal swipe (-140px to +140px) to camera yaw (-34deg to +34deg)
+    const targetYaw = Math.max(-36, Math.min(36, (deltaX / 140) * 32));
+    const targetPitch = Math.max(-8, Math.min(8, -(deltaY / 140) * 8));
+    setCameraYaw(Math.round(targetYaw));
+
+    gsap.to(corridorRigRef.current, {
+      rotateY: targetYaw,
+      rotateX: targetPitch,
+      duration: 0.12,
       ease: "power1.out",
     });
+
+    if (targetYaw < -14) {
+      setReticleTarget("LEFT WALL · ALCOVE");
+    } else if (targetYaw > 14) {
+      setReticleTarget("RIGHT WALL · ALCOVE");
+    } else {
+      setReticleTarget(null);
+    }
   };
 
-  const handleDeckTouchEnd = () => {
-    setGravLensActive(false);
-    if (deckContainerRef.current) {
-      gsap.to(deckContainerRef.current, {
-        rotateX: 0,
+  const handleCorridorTouchEnd = () => {
+    isDraggingRef.current = false;
+    touchStartRef.current = null;
+    setReticleTarget(null);
+    if (corridorRigRef.current) {
+      gsap.to(corridorRigRef.current, {
         rotateY: 0,
-        duration: 0.7,
-        ease: "elastic.out(1, 0.45)",
+        rotateX: 0,
+        duration: 0.75,
+        ease: "power2.out",
       });
+      setCameraYaw(0);
     }
   };
 
@@ -405,17 +420,21 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
       if (particleMatrixRef.current) gsap.set(particleMatrixRef.current, { opacity: 0, y: -20, scale: 0.85 });
       if (holoGridHorizonRef.current) gsap.set(holoGridHorizonRef.current, { opacity: 0, scaleY: 0.2 });
 
-      // Mobile Movement 02: Foundation Architecture (Z-Axis Depth Stage Initial States)
+      // Mobile Movement 02: 3D Spatial Corridor Dolly Initial States
       if (mobileCreedStageRef.current) gsap.set(mobileCreedStageRef.current, { opacity: 0, pointerEvents: "none" });
+      if (corridorRigRef.current) gsap.set(corridorRigRef.current, { rotateY: 0, rotateX: 0, transformOrigin: "50% 50% 0px" });
+      if (corridorWorldRef.current) gsap.set(corridorWorldRef.current, { z: 0, transformOrigin: "50% 50% 0px" });
       if (creedHudRef.current) gsap.set(creedHudRef.current, { opacity: 0, y: -16 });
       if (creedFooterRef.current) gsap.set(creedFooterRef.current, { opacity: 0, y: 16 });
       if (creedOdometerRef.current) gsap.set(creedOdometerRef.current, { yPercent: 0 });
+      if (blastDoorLeftRef.current) gsap.set(blastDoorLeftRef.current, { xPercent: 0 });
+      if (blastDoorRightRef.current) gsap.set(blastDoorRightRef.current, { xPercent: 0 });
+      if (blastHangarGlowRef.current) gsap.set(blastHangarGlowRef.current, { opacity: 0, scale: 0.2 });
 
-      // Every card is positioned in the exact same center 3D plane, but deep in Z-space (-600px, scale 0.18, blurred)
-      if (creedCard1Ref.current) gsap.set(creedCard1Ref.current, { scale: 0.18, z: -600, opacity: 0, filter: "blur(8px)", transformOrigin: "center center" });
-      if (creedCard2Ref.current) gsap.set(creedCard2Ref.current, { scale: 0.18, z: -600, opacity: 0, filter: "blur(8px)", transformOrigin: "center center" });
-      if (creedCard3Ref.current) gsap.set(creedCard3Ref.current, { scale: 0.18, z: -600, opacity: 0, filter: "blur(8px)", transformOrigin: "center center" });
-      if (creedCard4Ref.current) gsap.set(creedCard4Ref.current, { scale: 0.18, z: -600, opacity: 0, filter: "blur(8px)", transformOrigin: "center center" });
+      if (station1Ref.current) gsap.set(station1Ref.current, { opacity: 0.35, filter: "blur(4px)" });
+      if (station2Ref.current) gsap.set(station2Ref.current, { opacity: 0.20, filter: "blur(6px)" });
+      if (station3Ref.current) gsap.set(station3Ref.current, { opacity: 0.12, filter: "blur(8px)" });
+      if (station4Ref.current) gsap.set(station4Ref.current, { opacity: 0.08, filter: "blur(10px)" });
 
       const statementWords = statementHeadlineRef.current?.querySelectorAll(".statement-word");
       if (statementWords && statementWords.length > 0) {
@@ -705,180 +724,257 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
       }
 
       // Telemetry HUD and Footer illuminate cleanly from depth
+      const corridorDepth = { value: 0 };
+      const updateDepth = () => {
+        if (depthMeterRef.current) {
+          depthMeterRef.current.textContent = `${corridorDepth.value.toFixed(1)}m`;
+        }
+      };
+
       if (creedHudRef.current) {
-        masterTl.to(creedHudRef.current, { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }, 9.90);
+        masterTl.to(creedHudRef.current, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 9.85);
       }
       if (creedFooterRef.current) {
-        masterTl.to(creedFooterRef.current, { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }, 9.90);
+        masterTl.to(creedFooterRef.current, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 9.85);
       }
 
-      // Phase 10 (9.80 -> 11.20): PILLAR 01 SCROLLED IN FROM SINGULARITY (NSEC AIML)
-      if (creedCard1Ref.current) {
-        masterTl.fromTo(
-          creedCard1Ref.current,
-          { scale: 0.18, z: -600, rotateX: 12, rotateZ: -2.5, opacity: 0, filter: "blur(10px)" },
-          {
-            scale: 1.0,
-            z: 0,
-            rotateX: 0,
-            rotateZ: 0,
-            opacity: 1,
-            filter: "blur(0px)",
-            duration: 1.4,
-            ease: "power2.out",
-            onStart: () => playGravSound("lock"),
-          },
+      // Phase 10 (9.80 -> 12.00): INGRESS & DOLLY TO STATION 01 (Academic Core: NSEC AIML)
+      if (corridorWorldRef.current) {
+        masterTl.to(
+          corridorWorldRef.current,
+          { z: 600, duration: 2.2, ease: "power1.inOut" },
           9.80
         );
       }
-
-      // Phase 11 (11.20 -> 12.20): PILLAR 01 READING HOLD
-      masterTl.to({}, { duration: 1.0 }, 11.20);
-
-      // Phase 12 (12.20 -> 13.60): PUNCH THROUGH PILLAR 01 & PILLAR 02 SCROLLED IN (Latvian Cricket Federation)
-      if (creedCard1Ref.current) {
+      masterTl.to(
+        corridorDepth,
+        { value: 12.4, duration: 2.2, ease: "power1.inOut", onUpdate: updateDepth },
+        9.80
+      );
+      if (station1Ref.current) {
         masterTl.to(
-          creedCard1Ref.current,
+          station1Ref.current,
           {
-            scale: 2.8,
-            z: 420,
-            rotateX: -14,
-            rotateZ: 2,
-            opacity: 0,
-            filter: "blur(12px)",
-            duration: 1.2,
-            ease: "power2.in",
-            onStart: () => playGravSound("punch"),
-          },
-          12.20
-        );
-      }
-      if (creedCard2Ref.current) {
-        masterTl.fromTo(
-          creedCard2Ref.current,
-          { scale: 0.18, z: -600, rotateX: -10, rotateZ: 2.5, opacity: 0, filter: "blur(10px)" },
-          {
-            scale: 1.0,
-            z: 0,
-            rotateX: 0,
-            rotateZ: 0,
             opacity: 1,
             filter: "blur(0px)",
             duration: 1.4,
             ease: "power2.out",
-            onStart: () => playGravSound("lock"),
+            onStart: () => playSpatialSound("station"),
           },
-          12.20
+          10.20
+        );
+      }
+      if (corridorRigRef.current) {
+        masterTl.to(corridorRigRef.current, { rotateY: -10, duration: 0.9, ease: "sine.inOut" }, 10.40);
+        masterTl.to(corridorRigRef.current, { rotateY: 0, duration: 0.6, ease: "power2.out" }, 11.80);
+      }
+
+      // Reading hold at Station 01
+      masterTl.to({}, { duration: 0.8 }, 11.20);
+
+      // Phase 12 (12.00 -> 14.60): DOLLY FROM STATION 01 TO STATION 02 (Latvian Cricket Federation)
+      if (corridorWorldRef.current) {
+        masterTl.to(
+          corridorWorldRef.current,
+          { z: 1350, duration: 2.6, ease: "power1.inOut" },
+          12.00
+        );
+      }
+      masterTl.to(
+        corridorDepth,
+        { value: 24.8, duration: 2.6, ease: "power1.inOut", onUpdate: updateDepth },
+        12.00
+      );
+      if (station1Ref.current) {
+        masterTl.to(
+          station1Ref.current,
+          { opacity: 0.18, filter: "blur(6px)", duration: 1.1, ease: "power2.in" },
+          12.00
+        );
+      }
+      if (station2Ref.current) {
+        masterTl.to(
+          station2Ref.current,
+          {
+            opacity: 1,
+            filter: "blur(0px)",
+            duration: 1.4,
+            ease: "power2.out",
+            onStart: () => playSpatialSound("station"),
+          },
+          12.40
         );
       }
       if (creedOdometerRef.current) {
-        masterTl.to(creedOdometerRef.current, { yPercent: -25, duration: 0.6, ease: "power2.out" }, 12.40);
+        masterTl.to(creedOdometerRef.current, { yPercent: -25, duration: 0.5, ease: "power2.out" }, 12.40);
       }
       if (creedRailSeg2Ref.current) {
         masterTl.to(creedRailSeg2Ref.current, { backgroundColor: "#FF8C38", duration: 0.4 }, 12.40);
       }
+      if (corridorRigRef.current) {
+        masterTl.to(corridorRigRef.current, { rotateY: 10, duration: 0.9, ease: "sine.inOut" }, 12.50);
+        masterTl.to(corridorRigRef.current, { rotateY: 0, duration: 0.6, ease: "power2.out" }, 14.30);
+      }
 
-      // Phase 13 (13.60 -> 14.60): PILLAR 02 READING HOLD
-      masterTl.to({}, { duration: 1.0 }, 13.60);
+      // Reading hold at Station 02
+      masterTl.to({}, { duration: 0.8 }, 13.80);
 
-      // Phase 14 (14.60 -> 16.00): PUNCH THROUGH PILLAR 02 & PILLAR 03 SCROLLED IN (278-Key Localization Engine)
-      if (creedCard2Ref.current) {
+      // Phase 14 (14.60 -> 17.20): DOLLY FROM STATION 02 TO STATION 03 (278-Key Localization Engine)
+      if (corridorWorldRef.current) {
         masterTl.to(
-          creedCard2Ref.current,
-          {
-            scale: 2.8,
-            z: 420,
-            rotateX: 14,
-            rotateZ: -2,
-            opacity: 0,
-            filter: "blur(12px)",
-            duration: 1.2,
-            ease: "power2.in",
-            onStart: () => playGravSound("punch"),
-          },
+          corridorWorldRef.current,
+          { z: 2100, duration: 2.6, ease: "power1.inOut" },
           14.60
         );
       }
-      if (creedCard3Ref.current) {
-        masterTl.fromTo(
-          creedCard3Ref.current,
-          { scale: 0.18, z: -600, rotateX: 10, rotateZ: -2, opacity: 0, filter: "blur(10px)" },
+      masterTl.to(
+        corridorDepth,
+        { value: 36.2, duration: 2.6, ease: "power1.inOut", onUpdate: updateDepth },
+        14.60
+      );
+      if (station2Ref.current) {
+        masterTl.to(
+          station2Ref.current,
+          { opacity: 0.18, filter: "blur(6px)", duration: 1.1, ease: "power2.in" },
+          14.60
+        );
+      }
+      if (station3Ref.current) {
+        masterTl.to(
+          station3Ref.current,
           {
-            scale: 1.0,
-            z: 0,
-            rotateX: 0,
-            rotateZ: 0,
             opacity: 1,
             filter: "blur(0px)",
             duration: 1.4,
             ease: "power2.out",
-            onStart: () => playGravSound("lock"),
+            onStart: () => playSpatialSound("station"),
           },
-          14.60
+          15.00
         );
       }
       if (creedOdometerRef.current) {
-        masterTl.to(creedOdometerRef.current, { yPercent: -50, duration: 0.6, ease: "power2.out" }, 14.80);
+        masterTl.to(creedOdometerRef.current, { yPercent: -50, duration: 0.5, ease: "power2.out" }, 15.00);
       }
       if (creedRailSeg3Ref.current) {
-        masterTl.to(creedRailSeg3Ref.current, { backgroundColor: "#FF8C38", duration: 0.4 }, 14.80);
+        masterTl.to(creedRailSeg3Ref.current, { backgroundColor: "#FF8C38", duration: 0.4 }, 15.00);
+      }
+      if (corridorRigRef.current) {
+        masterTl.to(corridorRigRef.current, { rotateY: -10, duration: 0.9, ease: "sine.inOut" }, 15.10);
+        masterTl.to(corridorRigRef.current, { rotateY: 0, duration: 0.6, ease: "power2.out" }, 16.90);
       }
 
-      // Phase 15 (16.00 -> 17.00): PILLAR 03 READING HOLD
-      masterTl.to({}, { duration: 1.0 }, 16.00);
+      // Reading hold at Station 03
+      masterTl.to({}, { duration: 0.8 }, 16.40);
 
-      // Phase 16 (17.00 -> 18.40): PUNCH THROUGH PILLAR 03 & PILLAR 04 SCROLLED IN (The Heritage School Distinction)
-      if (creedCard3Ref.current) {
+      // Phase 16 (17.20 -> 18.80): DOLLY FROM STATION 03 TO STATION 04 (The Heritage School Distinction)
+      if (corridorWorldRef.current) {
         masterTl.to(
-          creedCard3Ref.current,
-          {
-            scale: 2.8,
-            z: 420,
-            rotateX: -14,
-            rotateZ: 2,
-            opacity: 0,
-            filter: "blur(12px)",
-            duration: 1.2,
-            ease: "power2.in",
-            onStart: () => playGravSound("punch"),
-          },
-          17.00
+          corridorWorldRef.current,
+          { z: 2750, duration: 1.6, ease: "power1.inOut" },
+          17.20
         );
       }
-      if (creedCard4Ref.current) {
-        masterTl.fromTo(
-          creedCard4Ref.current,
-          { scale: 0.18, z: -600, rotateX: -8, rotateZ: 1.5, opacity: 0, filter: "blur(10px)" },
+      masterTl.to(
+        corridorDepth,
+        { value: 48.0, duration: 1.6, ease: "power1.inOut", onUpdate: updateDepth },
+        17.20
+      );
+      if (station3Ref.current) {
+        masterTl.to(
+          station3Ref.current,
+          { opacity: 0.18, filter: "blur(6px)", duration: 1.0, ease: "power2.in" },
+          17.20
+        );
+      }
+      if (station4Ref.current) {
+        masterTl.to(
+          station4Ref.current,
           {
-            scale: 1.0,
-            z: 0,
-            rotateX: 0,
-            rotateZ: 0,
             opacity: 1,
             filter: "blur(0px)",
-            duration: 1.4,
+            duration: 1.3,
             ease: "power2.out",
-            onStart: () => playGravSound("lock"),
+            onStart: () => playSpatialSound("station"),
           },
-          17.00
+          17.40
         );
       }
       if (creedOdometerRef.current) {
-        masterTl.to(creedOdometerRef.current, { yPercent: -75, duration: 0.6, ease: "power2.out" }, 17.20);
+        masterTl.to(creedOdometerRef.current, { yPercent: -75, duration: 0.5, ease: "power2.out" }, 17.30);
       }
       if (creedRailSeg4Ref.current) {
-        masterTl.to(creedRailSeg4Ref.current, { backgroundColor: "#FF8C38", duration: 0.4 }, 17.20);
+        masterTl.to(creedRailSeg4Ref.current, { backgroundColor: "#FF8C38", duration: 0.4 }, 17.30);
+      }
+      if (corridorRigRef.current) {
+        masterTl.to(corridorRigRef.current, { rotateY: 10, duration: 0.8, ease: "sine.inOut" }, 17.40);
+        masterTl.to(corridorRigRef.current, { rotateY: 0, duration: 0.5, ease: "power2.out" }, 18.60);
       }
 
-      // Phase 17 (18.40 -> 19.30): PILLAR 04 READING HOLD
-      masterTl.to({}, { duration: 0.90 }, 18.40);
+      // Reading hold at Station 04
+      masterTl.to({}, { duration: 0.6 }, 18.20);
 
-      // Phase 18 (19.30 -> 20.00): SMOOTH MONOLITHIC UNPIN INTO MOVEMENT 03
-      if (creedCard4Ref.current) {
+      // Phase 18 (18.80 -> 20.00): APPROACH & HYDRAULIC BLAST DOOR BREACH INTO SECTOR 03
+      if (station4Ref.current) {
         masterTl.to(
-          [creedCard4Ref.current, creedHudRef.current, creedFooterRef.current],
-          { scale: 0.88, opacity: 0, y: -30, duration: 0.70, ease: "power2.inOut" },
-          19.30
+          station4Ref.current,
+          { opacity: 0.15, filter: "blur(6px)", duration: 0.6, ease: "power2.in" },
+          18.80
+        );
+      }
+      if (corridorWorldRef.current) {
+        masterTl.to(
+          corridorWorldRef.current,
+          { z: 3450, duration: 1.10, ease: "power2.in" },
+          18.80
+        );
+      }
+      masterTl.to(
+        corridorDepth,
+        { value: 60.0, duration: 1.10, ease: "power2.in", onUpdate: updateDepth },
+        18.80
+      );
+
+      // Hydraulic Blast Doors slide open horizontally at threshold
+      if (blastDoorLeftRef.current) {
+        masterTl.to(
+          blastDoorLeftRef.current,
+          {
+            xPercent: -100,
+            duration: 0.65,
+            ease: "power3.inOut",
+            onStart: () => playSpatialSound("doors"),
+          },
+          18.90
+        );
+      }
+      if (blastDoorRightRef.current) {
+        masterTl.to(
+          blastDoorRightRef.current,
+          { xPercent: 100, duration: 0.65, ease: "power3.inOut" },
+          18.90
+        );
+      }
+      if (blastHangarGlowRef.current) {
+        masterTl.to(
+          blastHangarGlowRef.current,
+          { opacity: 1, scale: 2.5, duration: 0.75, ease: "power2.in" },
+          18.90
+        );
+      }
+
+      // Dissolve corridor HUD as camera breaches hangar threshold into Movement 03
+      if (creedHudRef.current || creedFooterRef.current) {
+        masterTl.to(
+          [creedHudRef.current, creedFooterRef.current],
+          { opacity: 0, duration: 0.35, ease: "power2.in" },
+          19.55
+        );
+      }
+      if (mobileCreedStageRef.current) {
+        masterTl.to(
+          mobileCreedStageRef.current,
+          { opacity: 0, duration: 0.35, ease: "power2.in" },
+          19.65
         );
       }
 
@@ -1274,81 +1370,29 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             </div>
           </div>
 
-          {/* 8. MOVEMENT 02: FOUNDATION ARCHITECTURE (SCROLLED IN ON THE SAME Z-AXIS) */}
+          {/* 8. MOVEMENT 02: FIRST-PERSON 3D SPATIAL CORRIDOR DOLLY (SECTOR 02 ARCHIVES) */}
           <div
             ref={mobileCreedStageRef}
-            className="absolute inset-0 z-30 flex flex-col justify-between pt-16 pb-8 px-6 pointer-events-none opacity-0 select-none will-change-[transform,opacity] overflow-hidden"
-            style={{ perspective: "1000px" }}
+            className="absolute inset-0 z-30 flex flex-col justify-between pt-14 pb-6 px-4 pointer-events-none opacity-0 select-none will-change-[transform,opacity] overflow-hidden"
           >
-            {/* Relativistic Gravitational Singularity Core (Interstellar Gargantua Lens) */}
-            <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-0 overflow-hidden">
-              {/* Rotating Accretion Disk */}
-              <div
-                className="absolute w-[460px] h-[460px] rounded-full will-change-transform opacity-60 animate-[spin_32s_linear_infinite]"
-                style={{
-                  background:
-                    "radial-gradient(ellipse 65% 30% at 50% 50%, rgba(255,140,56,0.38) 0%, rgba(255,100,0,0.18) 45%, rgba(0,0,0,0) 70%)",
-                  transform: "rotateX(72deg) rotateY(-18deg)",
-                }}
-              />
-              {/* Inner Photon Ring */}
-              <div
-                className="absolute w-56 h-56 rounded-full border border-amber-400/40 shadow-[0_0_60px_rgba(255,140,56,0.45),inset_0_0_30px_rgba(255,200,100,0.3)] animate-pulse"
-                style={{
-                  transform: "rotateX(68deg)",
-                  animationDuration: "4s",
-                }}
-              />
-              {/* Pitch Black Event Horizon */}
-              <div className="absolute w-36 h-36 rounded-full bg-black shadow-[0_0_80px_rgba(0,0,0,1)]" />
-
-              {/* Relativistic Warp Dust & Speed Needles */}
-              <div className="absolute inset-0">
-                {[
-                  { top: "15%", left: "22%", size: "w-1 h-1", delay: "0s", duration: "3s" },
-                  { top: "28%", left: "78%", size: "w-1.5 h-1.5", delay: "1.2s", duration: "4.2s" },
-                  { top: "65%", left: "18%", size: "w-1 h-1", delay: "0.6s", duration: "3.5s" },
-                  { top: "72%", left: "82%", size: "w-1.5 h-1.5", delay: "1.8s", duration: "4.8s" },
-                  { top: "42%", left: "10%", size: "w-2 h-0.5", delay: "0.3s", duration: "2.8s" },
-                  { top: "50%", left: "88%", size: "w-2 h-0.5", delay: "1.5s", duration: "3.2s" },
-                  { top: "85%", left: "45%", size: "w-1 h-1", delay: "2.1s", duration: "4.0s" },
-                  { top: "12%", left: "55%", size: "w-1.5 h-1.5", delay: "0.9s", duration: "3.7s" },
-                ].map((mote, mIdx) => (
-                  <span
-                    key={mIdx}
-                    className={`absolute rounded-full bg-[#FF8C38] opacity-60 shadow-[0_0_8px_#FF8C38] ${mote.size}`}
-                    style={{
-                      top: mote.top,
-                      left: mote.left,
-                      animation: `pulse ${mote.duration} ease-in-out infinite alternate`,
-                      animationDelay: mote.delay,
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-
             {/* Top Telemetry HUD Bar */}
             <div
               ref={creedHudRef}
-              className="relative z-30 w-full max-w-sm mx-auto flex flex-col gap-2.5 pt-1 will-change-[transform,opacity] pointer-events-auto"
+              className="relative z-40 w-full max-w-sm mx-auto flex flex-col gap-2 pt-1 will-change-[transform,opacity] pointer-events-auto"
             >
               <div className="flex items-center justify-between">
-                {gravLensActive ? (
-                  <div className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
-                    <span className="font-mono font-bold text-[9px] uppercase tracking-[0.20em] text-cyan-300">
-                      RELATIVISTIC LENS // 4.82G
-                    </span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#FF8C38] animate-pulse" />
-                    <span className="font-sans font-bold text-[9px] uppercase tracking-[0.22em] text-[#CBB59D]">
-                      FOUNDATION ARCHITECTURE
-                    </span>
-                  </div>
-                )}
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#FF8C38] animate-pulse" />
+                  <span className="font-mono font-bold text-[9px] uppercase tracking-[0.20em] text-[#FF8C38]">
+                    SECTOR 02 // ARCHIVES
+                  </span>
+                </div>
+
+                {/* Live Distance / Depth Meter */}
+                <div className="font-mono text-[10px] tracking-widest text-[#CBB59D]/80 flex items-center gap-1.5">
+                  <span className="text-white/40">DIST</span>
+                  <span ref={depthMeterRef} className="text-[#FF8C38] font-bold">00.0m</span>
+                </div>
 
                 {/* Swiss Rolling Odometer Counter [ 01 / 04 ] */}
                 <div className="font-mono text-xs tracking-wider flex items-center gap-1 text-white/50">
@@ -1377,76 +1421,186 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               </div>
             </div>
 
-            {/* THE 4 TITANIUM MONOGRAPH SHEETS: SCROLLED IN ON THE Z-AXIS + INTERACTIVE TOUCH LENS */}
+            {/* 3D SPATIAL CORRIDOR VIEWPORT (First-Person Perspective Dolly & Touch Yaw Rig) */}
             <div
-              ref={deckContainerRef}
-              onTouchStart={handleDeckTouchStart}
-              onTouchMove={handleDeckTouchMove}
-              onTouchEnd={handleDeckTouchEnd}
-              onMouseDown={handleDeckTouchStart}
-              onMouseMove={handleDeckTouchMove}
-              onMouseUp={handleDeckTouchEnd}
-              className="relative z-20 w-full max-w-sm mx-auto my-auto h-[400px] flex items-center justify-center [perspective:1000px] [transform-style:preserve-3d] pointer-events-auto cursor-grab active:cursor-grabbing"
+              onTouchStart={handleCorridorTouchStart}
+              onTouchMove={handleCorridorTouchMove}
+              onTouchEnd={handleCorridorTouchEnd}
+              onMouseDown={handleCorridorTouchStart}
+              onMouseMove={handleCorridorTouchMove}
+              onMouseUp={handleCorridorTouchEnd}
+              className="relative w-full flex-1 my-2 overflow-hidden [perspective:650px] [perspective-origin:50%_50%] pointer-events-auto cursor-grab active:cursor-grabbing"
             >
-              {FOUNDATION_PILLARS.map((item, idx) => {
-                const Icon = item.icon;
-                return (
+              {/* Central Viewfinder Reticle & Targeting HUD */}
+              <div className="absolute inset-0 pointer-events-none z-30 flex flex-col items-center justify-center">
+                {/* Crosshair Center */}
+                <div className="relative flex items-center justify-center">
+                  <div className="w-8 h-8 border border-white/20 rounded-full flex items-center justify-center">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#FF8C38]" />
+                  </div>
+                  <div className="absolute w-12 h-[1px] bg-white/15" />
+                  <div className="absolute h-12 w-[1px] bg-white/15" />
+                </div>
+
+                {/* Dynamic Alcove Targeting Readout */}
+                <div className="mt-3 px-2 py-0.5 rounded bg-black/60 border border-white/10 backdrop-blur-sm">
+                  <span className="font-mono text-[9px] tracking-[0.18em] text-[#FF8C38]">
+                    {reticleTarget ? (
+                      reticleTarget
+                    ) : (
+                      <>
+                        YAW {cameraYaw > 0 ? `+${cameraYaw}°` : `${cameraYaw}°`} · FORWARD DOLLY
+                      </>
+                    )}
+                  </span>
+                </div>
+
+                {/* Anamorphic Vignette around screen edge */}
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(0,0,0,0.85)_100%)] pointer-events-none" />
+              </div>
+
+              {/* CAMERA RIG (Rotates on Y / X via swipe drag & scroll glance) */}
+              <div
+                ref={corridorRigRef}
+                className="absolute inset-0 w-full h-full [transform-style:preserve-3d] will-change-transform"
+              >
+                {/* WORLD RIG (Translates forward along Z-axis from 0px to 3450px) */}
+                <div
+                  ref={corridorWorldRef}
+                  className="absolute inset-0 w-full h-full [transform-style:preserve-3d] will-change-transform"
+                >
+                  {/* FLOOR PLANE (Brushed Titanium, Track Runners, Distance Markers) */}
                   <div
-                    key={idx}
-                    ref={creedCardRefs[idx]}
-                    className="absolute inset-0 rounded-2xl p-6 sm:p-7 flex flex-col justify-between bg-[#0A0D14] border border-white/15 shadow-[0_22px_55px_rgba(0,0,0,0.95),0_0_30px_rgba(255,140,56,0.10)] overflow-hidden will-change-[transform,opacity,filter]"
+                    className="absolute left-1/2 bottom-0 w-[480px] h-[3800px] -translate-x-1/2 translate-y-[210px] [transform:rotateX(90deg)] origin-bottom pointer-events-none"
                     style={{
-                      zIndex: (idx + 1) * 10,
-                      transformOrigin: "center center",
-                      filter: gravLensActive
-                        ? "drop-shadow(-3px 0 2px rgba(0,240,255,0.75)) drop-shadow(3px 0 2px rgba(255,80,0,0.75))"
-                        : undefined,
-                      transition: "filter 0.25s ease-out",
+                      background:
+                        "linear-gradient(to top, rgba(14,18,27,0.95) 0%, rgba(8,10,16,0.98) 100%)",
+                      boxShadow: "inset 0 0 80px rgba(0,0,0,0.9)",
                     }}
                   >
-                    {/* Solid Titanium Gradient Sheen */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-[#121622] via-[#0D1018] to-[#0A0D14] pointer-events-none" />
-                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,140,56,0.12)_0%,transparent_70%)] pointer-events-none" />
+                    {/* Floor Grid Lines */}
+                    <div
+                      className="absolute inset-0 opacity-20"
+                      style={{
+                        backgroundImage:
+                          "linear-gradient(to top, rgba(255,140,56,0.3) 1px, transparent 1px), linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px)",
+                        backgroundSize: "60px 100px",
+                      }}
+                    />
+                    {/* Central Neon Orange Guidance Rail */}
+                    <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[2px] bg-[#FF8C38] shadow-[0_0_12px_#FF8C38] opacity-75" />
+                    {/* Runway Distance Stamps */}
+                    {[
+                      { z: "100px", text: "00M // INGRESS PORTAL" },
+                      { z: "700px", text: "12M // ACADEMIC CORE" },
+                      { z: "1450px", text: "24M // EUROPEAN OPS" },
+                      { z: "2200px", text: "36M // 5MS ENGINE" },
+                      { z: "2850px", text: "48M // DISTINCTION" },
+                      { z: "3250px", text: "60M // COMMISSIONS HANGAR" },
+                    ].map((mark, mIdx) => (
+                      <div
+                        key={mIdx}
+                        className="absolute left-1/2 -translate-x-1/2 font-mono text-[9px] tracking-[0.25em] text-[#FF8C38]/60 uppercase border-b border-[#FF8C38]/30 pb-0.5"
+                        style={{ bottom: mark.z }}
+                      >
+                        {mark.text}
+                      </div>
+                    ))}
+                  </div>
 
-                    {/* Corner Accent Marks */}
-                    <span className="absolute top-3 left-3 text-[9px] font-mono text-[#FF8C38]/50 select-none pointer-events-none">+</span>
-                    <span className="absolute top-3 right-3 text-[9px] font-mono text-[#FF8C38]/50 select-none pointer-events-none">+</span>
+                  {/* CEILING PLANE (Industrial Truss & Recessed Downlights) */}
+                  <div
+                    className="absolute left-1/2 top-0 w-[480px] h-[3800px] -translate-x-1/2 -translate-y-[210px] [transform:rotateX(-90deg)] origin-top pointer-events-none"
+                    style={{
+                      background:
+                        "linear-gradient(to bottom, rgba(14,18,27,0.95) 0%, rgba(6,8,12,0.98) 100%)",
+                    }}
+                  >
+                    <div
+                      className="absolute inset-0 opacity-25"
+                      style={{
+                        backgroundImage:
+                          "linear-gradient(to bottom, rgba(0,240,255,0.2) 1px, transparent 1px), linear-gradient(to right, rgba(255,255,255,0.08) 1px, transparent 1px)",
+                        backgroundSize: "80px 120px",
+                      }}
+                    />
+                    {/* Recessed Overhead Downlight Strip */}
+                    <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[3px] bg-gradient-to-b from-amber-200 via-orange-400 to-amber-100 shadow-[0_0_18px_rgba(255,180,90,0.6)] opacity-70" />
+                  </div>
 
-                    {/* Card Top Meta */}
-                    <div className="relative z-10">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="font-helvetica font-normal text-3xl sm:text-4xl text-white/30 leading-none">
-                          {item.num}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <Icon size={14} className="text-[#FF8C38]" />
-                          <span className="text-[10px] font-sans font-extrabold uppercase tracking-[0.16em] text-[#FF8C38]">
-                            {item.tag}
+                  {/* ARCHITECTURAL STRUCTURAL PYLONS (Depth Cues) */}
+                  {[-300, -950, -1700, -2450].map((zPos, pIdx) => (
+                    <div
+                      key={pIdx}
+                      className="absolute inset-0 pointer-events-none [transform-style:preserve-3d]"
+                      style={{ transform: `translateZ(${zPos}px)` }}
+                    >
+                      {/* Left Wall Pylon */}
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-[360px] bg-white/5 border-r border-[#FF8C38]/30 shadow-[0_0_15px_rgba(255,140,56,0.15)]" />
+                      {/* Right Wall Pylon */}
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-[360px] bg-white/5 border-l border-[#FF8C38]/30 shadow-[0_0_15px_rgba(255,140,56,0.15)]" />
+                    </div>
+                  ))}
+
+                  {/* ======================================================= */}
+                  {/* 4 ARCHITECTURAL WALL ALCOVES (NOT CARDS - MOUNTED WALL BAYS) */}
+                  {/* ======================================================= */}
+
+                  {/* STATION 01: LEFT WALL ALCOVE (Academic Core: NSEC AIML) */}
+                  <div
+                    ref={station1Ref}
+                    className="absolute left-1/2 top-1/2 w-[280px] h-[390px] rounded-xl bg-[#090C14]/95 border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_30px_rgba(255,140,56,0.12)] p-5 flex flex-col justify-between overflow-hidden will-change-[transform,opacity,filter]"
+                    style={{
+                      transform: "translateX(-25px) translateY(-50%) translateZ(-600px) rotateY(16deg)",
+                    }}
+                  >
+                    {/* Left Architectural Wall Bracket */}
+                    <div className="absolute -left-1 top-0 bottom-0 w-2 bg-[#FF8C38] shadow-[0_0_10px_#FF8C38]" />
+                    {/* Corner Accent Bolts */}
+                    <span className="absolute top-2 right-2 text-[8px] font-mono text-[#FF8C38]/60">+</span>
+                    <span className="absolute bottom-2 right-2 text-[8px] font-mono text-[#FF8C38]/60">+</span>
+
+                    {/* Station Header */}
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-helvetica font-normal text-3xl text-white/30 leading-none">01</span>
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#FF8C38]/10 border border-[#FF8C38]/30">
+                          <GraduationCap size={12} className="text-[#FF8C38]" />
+                          <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-[#FF8C38]">
+                            ACADEMIC CORE
                           </span>
                         </div>
                       </div>
 
-                      {/* Institution / Project Title */}
-                      <h4 className="font-sans font-bold text-lg text-white mb-1.5 leading-snug">
-                        {item.title}
+                      <h4 className="font-sans font-bold text-base text-white leading-snug mb-1">
+                        Netaji Subhash Engineering College
                       </h4>
-
-                      {/* Role / Degree */}
-                      <div className="text-xs font-mono text-[#FF8C38]/90 mb-3 leading-snug">
-                        {item.role}
+                      <div className="text-[11px] font-mono text-[#FF8C38]/90 mb-2 leading-snug">
+                        B.Tech in Artificial Intelligence &amp; Machine Learning (2024–2028)
                       </div>
-
-                      {/* Detailed Narrative */}
-                      <p className="font-sans font-normal text-xs text-slate-300 leading-relaxed mb-4">
-                        {item.desc}
+                      <p className="font-sans text-[11px] text-slate-300 leading-relaxed mb-3">
+                        Specialized in predictive neural architectures, high-throughput systems, computational algebra, and algorithmic optimization.
                       </p>
 
-                      {/* Spec Chips */}
-                      <div className="flex flex-wrap gap-1.5">
-                        {item.chips.map((chip, cIdx) => (
+                      {/* Station Live Telemetry Readout */}
+                      <div className="p-2 rounded bg-white/5 border border-white/10 mb-2.5">
+                        <div className="flex items-center justify-between text-[8px] font-mono text-slate-400 mb-1">
+                          <span>SYSTEM BENCH</span>
+                          <span className="text-emerald-400 font-semibold">99.4% CONVERGENCE</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <div className="h-1 flex-1 bg-emerald-400/80 rounded" />
+                          <div className="h-1 flex-1 bg-emerald-400/80 rounded" />
+                          <div className="h-1 flex-1 bg-emerald-400/80 rounded" />
+                          <div className="h-1 w-6 bg-white/10 rounded" />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-1">
+                        {["NEURAL ARCHITECTURES", "COMPUTATIONAL ALGEBRA", "HIGH-THROUGHPUT"].map((chip, cIdx) => (
                           <span
                             key={cIdx}
-                            className="px-2 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider bg-white/5 border border-white/10 text-slate-300"
+                            className="px-1.5 py-0.5 rounded text-[8px] font-mono uppercase bg-white/5 border border-white/10 text-slate-300"
                           >
                             {chip}
                           </span>
@@ -1454,23 +1608,295 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
                       </div>
                     </div>
 
-                    {/* Status Pill Footer */}
-                    <div className="relative z-10 pt-3 border-t border-white/10 flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-slate-400">
+                    <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[9px] font-mono uppercase tracking-wider text-slate-400">
                       <span>VERIFICATION</span>
-                      <span className="text-amber-200 font-semibold">{item.status}</span>
+                      <span className="text-amber-200 font-semibold">CURRENT CANDIDATE</span>
                     </div>
                   </div>
-                );
-              })}
+
+                  {/* STATION 02: RIGHT WALL ALCOVE (European Ops: Latvian Cricket Federation) */}
+                  <div
+                    ref={station2Ref}
+                    className="absolute left-1/2 top-1/2 w-[280px] h-[390px] rounded-xl bg-[#090C14]/95 border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_30px_rgba(255,140,56,0.12)] p-5 flex flex-col justify-between overflow-hidden will-change-[transform,opacity,filter]"
+                    style={{
+                      transform: "translateX(25px) translateY(-50%) translateZ(-1350px) rotateY(-16deg)",
+                    }}
+                  >
+                    {/* Right Architectural Wall Bracket */}
+                    <div className="absolute -right-1 top-0 bottom-0 w-2 bg-[#FF8C38] shadow-[0_0_10px_#FF8C38]" />
+                    <span className="absolute top-2 left-2 text-[8px] font-mono text-[#FF8C38]/60">+</span>
+                    <span className="absolute bottom-2 left-2 text-[8px] font-mono text-[#FF8C38]/60">+</span>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-helvetica font-normal text-3xl text-white/30 leading-none">02</span>
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#FF8C38]/10 border border-[#FF8C38]/30">
+                          <Trophy size={12} className="text-[#FF8C38]" />
+                          <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-[#FF8C38]">
+                            EUROPEAN OPS
+                          </span>
+                        </div>
+                      </div>
+
+                      <h4 className="font-sans font-bold text-base text-white leading-snug mb-1">
+                        Latvian Cricket Federation
+                      </h4>
+                      <div className="text-[11px] font-mono text-[#FF8C38]/90 mb-2 leading-snug">
+                        National Sports Governing Body Digital Ecosystem
+                      </div>
+                      <p className="font-sans text-[11px] text-slate-300 leading-relaxed mb-3">
+                        Modernized national sports governing digital infrastructure, automated live tournament telemetry, and EU regulatory compliance systems across Riga &amp; European circuits.
+                      </p>
+
+                      <div className="p-2 rounded bg-white/5 border border-white/10 mb-2.5">
+                        <div className="flex items-center justify-between text-[8px] font-mono text-slate-400 mb-1">
+                          <span>EU TELEMETRY CIRCUIT</span>
+                          <span className="text-cyan-400 font-semibold">RIGA · ACTIVE 100%</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <div className="h-1 flex-1 bg-cyan-400/80 rounded" />
+                          <div className="h-1 flex-1 bg-cyan-400/80 rounded" />
+                          <div className="h-1 flex-1 bg-cyan-400/80 rounded" />
+                          <div className="h-1 flex-1 bg-cyan-400/80 rounded" />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-1">
+                        {["EU COMPLIANCE", "LIVE TELEMETRY", "RIGA CIRCUIT"].map((chip, cIdx) => (
+                          <span
+                            key={cIdx}
+                            className="px-1.5 py-0.5 rounded text-[8px] font-mono uppercase bg-white/5 border border-white/10 text-slate-300"
+                          >
+                            {chip}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[9px] font-mono uppercase tracking-wider text-slate-400">
+                      <span>VERIFICATION</span>
+                      <span className="text-amber-200 font-semibold">PRODUCTION SYSTEM</span>
+                    </div>
+                  </div>
+
+                  {/* STATION 03: LEFT WALL ALCOVE (< 5ms Engine: 278-Key Localization) */}
+                  <div
+                    ref={station3Ref}
+                    className="absolute left-1/2 top-1/2 w-[280px] h-[390px] rounded-xl bg-[#090C14]/95 border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_30px_rgba(255,140,56,0.12)] p-5 flex flex-col justify-between overflow-hidden will-change-[transform,opacity,filter]"
+                    style={{
+                      transform: "translateX(-25px) translateY(-50%) translateZ(-2100px) rotateY(16deg)",
+                    }}
+                  >
+                    <div className="absolute -left-1 top-0 bottom-0 w-2 bg-[#FF8C38] shadow-[0_0_10px_#FF8C38]" />
+                    <span className="absolute top-2 right-2 text-[8px] font-mono text-[#FF8C38]/60">+</span>
+                    <span className="absolute bottom-2 right-2 text-[8px] font-mono text-[#FF8C38]/60">+</span>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-helvetica font-normal text-3xl text-white/30 leading-none">03</span>
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#FF8C38]/10 border border-[#FF8C38]/30">
+                          <Cpu size={12} className="text-[#FF8C38]" />
+                          <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-[#FF8C38]">
+                            &lt; 5MS ENGINE
+                          </span>
+                        </div>
+                      </div>
+
+                      <h4 className="font-sans font-bold text-base text-white leading-snug mb-1">
+                        278-Key In-Memory Localization Engine
+                      </h4>
+                      <div className="text-[11px] font-mono text-[#FF8C38]/90 mb-2 leading-snug">
+                        Zero-API Sub-Millisecond Bilingual Translation
+                      </div>
+                      <p className="font-sans text-[11px] text-slate-300 leading-relaxed mb-3">
+                        Zero-API in-memory localization dictionary eliminating roundtrip latency for international B2B agricultural commodity trade channels between EU and CIS.
+                      </p>
+
+                      <div className="p-2 rounded bg-white/5 border border-white/10 mb-2.5">
+                        <div className="flex items-center justify-between text-[8px] font-mono text-slate-400 mb-1">
+                          <span>LATENCY BENCH</span>
+                          <span className="text-orange-400 font-semibold">&lt; 4.8MS ROUNDTRIP</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <div className="h-1 flex-1 bg-orange-400/80 rounded" />
+                          <div className="h-1 flex-1 bg-orange-400/80 rounded" />
+                          <div className="h-1 flex-1 bg-orange-400/80 rounded" />
+                          <div className="h-1 flex-1 bg-orange-400/80 rounded" />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-1">
+                        {["ZERO-API", "SUB-MILLISECOND", "EU-CIS TRADE"].map((chip, cIdx) => (
+                          <span
+                            key={cIdx}
+                            className="px-1.5 py-0.5 rounded text-[8px] font-mono uppercase bg-white/5 border border-white/10 text-slate-300"
+                          >
+                            {chip}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[9px] font-mono uppercase tracking-wider text-slate-400">
+                      <span>VERIFICATION</span>
+                      <span className="text-amber-200 font-semibold">PROPRIETARY CORE</span>
+                    </div>
+                  </div>
+
+                  {/* STATION 04: RIGHT WALL ALCOVE (Alumni Distinction: The Heritage School) */}
+                  <div
+                    ref={station4Ref}
+                    className="absolute left-1/2 top-1/2 w-[280px] h-[390px] rounded-xl bg-[#090C14]/95 border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_30px_rgba(255,140,56,0.12)] p-5 flex flex-col justify-between overflow-hidden will-change-[transform,opacity,filter]"
+                    style={{
+                      transform: "translateX(25px) translateY(-50%) translateZ(-2750px) rotateY(-16deg)",
+                    }}
+                  >
+                    <div className="absolute -right-1 top-0 bottom-0 w-2 bg-[#FF8C38] shadow-[0_0_10px_#FF8C38]" />
+                    <span className="absolute top-2 left-2 text-[8px] font-mono text-[#FF8C38]/60">+</span>
+                    <span className="absolute bottom-2 left-2 text-[8px] font-mono text-[#FF8C38]/60">+</span>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-helvetica font-normal text-3xl text-white/30 leading-none">04</span>
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#FF8C38]/10 border border-[#FF8C38]/30">
+                          <Award size={12} className="text-[#FF8C38]" />
+                          <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-[#FF8C38]">
+                            DISTINCTION
+                          </span>
+                        </div>
+                      </div>
+
+                      <h4 className="font-sans font-bold text-base text-white leading-snug mb-1">
+                        The Heritage School
+                      </h4>
+                      <div className="text-[11px] font-mono text-[#FF8C38]/90 mb-2 leading-snug">
+                        ISC Class XII (82.75%) · ICSE (89.4%)
+                      </div>
+                      <p className="font-sans text-[11px] text-slate-300 leading-relaxed mb-3">
+                        Distinction in Computer Science &amp; Mathematics. Rigorous foundations in pure algorithmic logic, object-oriented design, and discrete mathematics.
+                      </p>
+
+                      <div className="p-2 rounded bg-white/5 border border-white/10 mb-2.5">
+                        <div className="flex items-center justify-between text-[8px] font-mono text-slate-400 mb-1">
+                          <span>ALGORITHMIC LOGIC</span>
+                          <span className="text-amber-400 font-semibold">ISC DISTINCTION</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <div className="h-1 flex-1 bg-amber-400/80 rounded" />
+                          <div className="h-1 flex-1 bg-amber-400/80 rounded" />
+                          <div className="h-1 flex-1 bg-amber-400/80 rounded" />
+                          <div className="h-1 flex-1 bg-amber-400/80 rounded" />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-1">
+                        {["ALGORITHMIC LOGIC", "DISCRETE MATH", "OOP ARCHITECTURE"].map((chip, cIdx) => (
+                          <span
+                            key={cIdx}
+                            className="px-1.5 py-0.5 rounded text-[8px] font-mono uppercase bg-white/5 border border-white/10 text-slate-300"
+                          >
+                            {chip}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[9px] font-mono uppercase tracking-wider text-slate-400">
+                      <span>VERIFICATION</span>
+                      <span className="text-amber-200 font-semibold">ALUMNI DISTINCTION</span>
+                    </div>
+                  </div>
+
+                  {/* ======================================================= */}
+                  {/* HYDRAULIC BLAST DOORS (SECTOR 03 COMMISSIONS HANGAR ENTRY) */}
+                  {/* ======================================================= */}
+                  <div
+                    className="absolute left-1/2 top-1/2 w-[340px] h-[460px] [transform-style:preserve-3d] pointer-events-none"
+                    style={{ transform: "translate3d(-50%, -50%, -3200px)" }}
+                  >
+                    {/* Blinding Showroom Hangar Light Behind Doors */}
+                    <div
+                      ref={blastHangarGlowRef}
+                      className="absolute -inset-10 bg-[radial-gradient(circle,rgba(255,160,70,0.95)_0%,rgba(255,210,120,0.7)_40%,rgba(255,140,56,0.3)_70%,transparent_100%)] blur-3xl will-change-[transform,opacity] z-0"
+                    />
+
+                    {/* Architectural Frame Over Blast Door */}
+                    <div className="absolute -top-10 inset-x-0 h-8 bg-[#090C14] border-t-2 border-x-2 border-[#FF8C38]/40 flex items-center justify-between px-3 text-[8px] font-mono text-[#FF8C38] tracking-[0.25em] z-20">
+                      <span>AIRLOCK // S03</span>
+                      <span className="animate-pulse">COMMISSIONS HANGAR</span>
+                    </div>
+
+                    {/* Left Heavy Blast Door */}
+                    <div
+                      ref={blastDoorLeftRef}
+                      className="absolute left-0 top-0 w-1/2 h-full z-10 bg-gradient-to-r from-[#0C1019] via-[#0E131F] to-[#121826] border-y-2 border-l-2 border-r border-white/20 border-r-[#FF8C38]/60 shadow-[inset_0_0_20px_rgba(0,0,0,0.95)] flex flex-col justify-between p-4 overflow-hidden will-change-transform"
+                    >
+                      {/* Warning Hazard Diagonal Chevrons */}
+                      <div
+                        className="w-full h-3 opacity-30"
+                        style={{
+                          backgroundImage:
+                            "repeating-linear-gradient(45deg, #FF8C38, #FF8C38 6px, transparent 6px, transparent 12px)",
+                        }}
+                      />
+                      <div className="my-auto space-y-2">
+                        <div className="w-12 h-1 bg-[#FF8C38]" />
+                        <div className="font-mono text-[9px] font-bold text-white tracking-widest uppercase">
+                          SECTOR 03
+                        </div>
+                        <div className="font-mono text-[7px] text-slate-400 tracking-wider">
+                          HYDRAULIC SEAL ACTIVE
+                        </div>
+                      </div>
+                      <div className="text-[7px] font-mono text-[#FF8C38]/70 tracking-widest">
+                        DOOR // L-01
+                      </div>
+                    </div>
+
+                    {/* Right Heavy Blast Door */}
+                    <div
+                      ref={blastDoorRightRef}
+                      className="absolute right-0 top-0 w-1/2 h-full z-10 bg-gradient-to-l from-[#0C1019] via-[#0E131F] to-[#121826] border-y-2 border-r-2 border-l border-white/20 border-l-[#FF8C38]/60 shadow-[inset_0_0_20px_rgba(0,0,0,0.95)] flex flex-col justify-between p-4 overflow-hidden will-change-transform"
+                    >
+                      <div
+                        className="w-full h-3 opacity-30"
+                        style={{
+                          backgroundImage:
+                            "repeating-linear-gradient(-45deg, #FF8C38, #FF8C38 6px, transparent 6px, transparent 12px)",
+                        }}
+                      />
+                      <div className="my-auto space-y-2 text-right">
+                        <div className="w-12 h-1 bg-[#FF8C38] ml-auto" />
+                        <div className="font-mono text-[9px] font-bold text-white tracking-widest uppercase">
+                          HANGAR
+                        </div>
+                        <div className="font-mono text-[7px] text-slate-400 tracking-wider">
+                          AUTOMATED RELEASE
+                        </div>
+                      </div>
+                      <div className="text-[7px] font-mono text-[#FF8C38]/70 tracking-widest text-right">
+                        DOOR // R-02
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
             </div>
 
             {/* Bottom Telemetry Bar */}
             <div
               ref={creedFooterRef}
-              className="relative z-30 w-full max-w-sm mx-auto flex items-center justify-between text-[9px] font-mono text-[#CBB59D]/70 uppercase tracking-widest pt-2.5 border-t border-white/5 will-change-[transform,opacity] pointer-events-auto"
+              className="relative z-40 w-full max-w-sm mx-auto flex items-center justify-between text-[9px] font-mono text-[#CBB59D]/70 uppercase tracking-widest pt-2 border-t border-white/10 will-change-[transform,opacity] pointer-events-auto"
             >
-              <span>TOUCH &amp; DRAG TO WARP GRAVITY</span>
-              <span className="text-[#FF8C38] font-bold">SCROLL TO FLY</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[#FF8C38] font-bold animate-pulse">◀</span>
+                <span>SWIPE TO LOOK AROUND</span>
+                <span className="text-[#FF8C38] font-bold animate-pulse">▶</span>
+              </div>
+              <span className="text-[#FF8C38] font-bold flex items-center gap-1">
+                SCROLL TO WALK ↓
+              </span>
             </div>
           </div>
 

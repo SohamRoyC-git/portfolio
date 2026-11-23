@@ -4,7 +4,7 @@ import React, { memo, useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { ArrowDown, ArrowUpRight, Sparkles } from "lucide-react";
-import { IsometricConsoleCreed } from "./IsometricConsoleCreed";
+import { LiquidChromeCreed } from "./LiquidChromeCreed";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -683,12 +683,12 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             </div>
           </div>
 
-          {/* 7. MOVEMENT 02: 3D ISOMETRIC NEURAL DECK CONSOLE CREED */}
+          {/* 7. MOVEMENT 02: LIQUID CHROME / FERROFLUID SCULPTURE CREED */}
           <div
             ref={mobileCreedStageRef}
             className="absolute inset-0 z-30 flex flex-col justify-center items-center pointer-events-none opacity-0 select-none will-change-[transform,opacity,filter] overflow-hidden"
           >
-            <IsometricConsoleCreed progress={creedProgress} />
+            <LiquidChromeCreed progress={creedProgress} />
           </div>
 
 

@@ -178,6 +178,105 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
   const creedFooterRef = useRef<HTMLDivElement | null>(null);
   const creedCardRefs = [creedCard1Ref, creedCard2Ref, creedCard3Ref, creedCard4Ref];
 
+  // Option B: Relativistic Warp & Gravitational Lens State & Refs
+  const [gravLensActive, setGravLensActive] = useState(false);
+  const deckContainerRef = useRef<HTMLDivElement | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+
+  const playGravSound = (type: "lock" | "punch" | "lens") => {
+    try {
+      if (typeof window === "undefined") return;
+      if (!audioCtxRef.current) {
+        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioCtx) audioCtxRef.current = new AudioCtx();
+      }
+      if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
+        audioCtxRef.current.resume();
+      }
+      if (audioCtxRef.current) {
+        const ctx = audioCtxRef.current;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        if (type === "lock") {
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(120, now);
+          osc.frequency.exponentialRampToValueAtTime(65, now + 0.3);
+          gain.gain.setValueAtTime(0.035, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+        } else if (type === "punch") {
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(90, now);
+          osc.frequency.exponentialRampToValueAtTime(210, now + 0.18);
+          osc.frequency.exponentialRampToValueAtTime(45, now + 0.42);
+          gain.gain.setValueAtTime(0.045, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.42);
+        } else {
+          // Lens touch resonance
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(140, now);
+          osc.frequency.exponentialRampToValueAtTime(95, now + 0.2);
+          gain.gain.setValueAtTime(0.025, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+        }
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(now + 0.45);
+      }
+    } catch {}
+  };
+
+  const handleDeckTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
+    setGravLensActive(true);
+    playGravSound("lens");
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      try { navigator.vibrate(12); } catch {}
+    }
+    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+    if (deckContainerRef.current) {
+      const rect = deckContainerRef.current.getBoundingClientRect();
+      const dx = (clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
+      const dy = (clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
+      gsap.to(deckContainerRef.current, {
+        rotateX: -dy * 10,
+        rotateY: dx * 12,
+        duration: 0.3,
+        ease: "power2.out",
+      });
+    }
+  };
+
+  const handleDeckTouchMove = (e: React.TouchEvent | React.MouseEvent) => {
+    if (!deckContainerRef.current) return;
+    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+    const rect = deckContainerRef.current.getBoundingClientRect();
+    const dx = Math.max(-1, Math.min(1, (clientX - (rect.left + rect.width / 2)) / (rect.width / 2)));
+    const dy = Math.max(-1, Math.min(1, (clientY - (rect.top + rect.height / 2)) / (rect.height / 2)));
+    gsap.to(deckContainerRef.current, {
+      rotateX: -dy * 12,
+      rotateY: dx * 14,
+      duration: 0.15,
+      ease: "power1.out",
+    });
+  };
+
+  const handleDeckTouchEnd = () => {
+    setGravLensActive(false);
+    if (deckContainerRef.current) {
+      gsap.to(deckContainerRef.current, {
+        rotateX: 0,
+        rotateY: 0,
+        duration: 0.7,
+        ease: "elastic.out(1, 0.45)",
+      });
+    }
+  };
+
   // Desktop Refs
   const desktopSectionRef = useRef<HTMLElement | null>(null);
   const desktopVideoRef = useRef<HTMLDivElement | null>(null);
@@ -617,8 +716,18 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
       if (creedCard1Ref.current) {
         masterTl.fromTo(
           creedCard1Ref.current,
-          { scale: 0.18, z: -600, opacity: 0, filter: "blur(8px)" },
-          { scale: 1.0, z: 0, opacity: 1, filter: "blur(0px)", duration: 1.4, ease: "power2.out" },
+          { scale: 0.18, z: -600, rotateX: 12, rotateZ: -2.5, opacity: 0, filter: "blur(10px)" },
+          {
+            scale: 1.0,
+            z: 0,
+            rotateX: 0,
+            rotateZ: 0,
+            opacity: 1,
+            filter: "blur(0px)",
+            duration: 1.4,
+            ease: "power2.out",
+            onStart: () => playGravSound("lock"),
+          },
           9.80
         );
       }
@@ -630,15 +739,35 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
       if (creedCard1Ref.current) {
         masterTl.to(
           creedCard1Ref.current,
-          { scale: 2.4, z: 350, opacity: 0, filter: "blur(8px)", duration: 1.2, ease: "power2.in" },
+          {
+            scale: 2.8,
+            z: 420,
+            rotateX: -14,
+            rotateZ: 2,
+            opacity: 0,
+            filter: "blur(12px)",
+            duration: 1.2,
+            ease: "power2.in",
+            onStart: () => playGravSound("punch"),
+          },
           12.20
         );
       }
       if (creedCard2Ref.current) {
         masterTl.fromTo(
           creedCard2Ref.current,
-          { scale: 0.18, z: -600, opacity: 0, filter: "blur(8px)" },
-          { scale: 1.0, z: 0, opacity: 1, filter: "blur(0px)", duration: 1.4, ease: "power2.out" },
+          { scale: 0.18, z: -600, rotateX: -10, rotateZ: 2.5, opacity: 0, filter: "blur(10px)" },
+          {
+            scale: 1.0,
+            z: 0,
+            rotateX: 0,
+            rotateZ: 0,
+            opacity: 1,
+            filter: "blur(0px)",
+            duration: 1.4,
+            ease: "power2.out",
+            onStart: () => playGravSound("lock"),
+          },
           12.20
         );
       }
@@ -656,15 +785,35 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
       if (creedCard2Ref.current) {
         masterTl.to(
           creedCard2Ref.current,
-          { scale: 2.4, z: 350, opacity: 0, filter: "blur(8px)", duration: 1.2, ease: "power2.in" },
+          {
+            scale: 2.8,
+            z: 420,
+            rotateX: 14,
+            rotateZ: -2,
+            opacity: 0,
+            filter: "blur(12px)",
+            duration: 1.2,
+            ease: "power2.in",
+            onStart: () => playGravSound("punch"),
+          },
           14.60
         );
       }
       if (creedCard3Ref.current) {
         masterTl.fromTo(
           creedCard3Ref.current,
-          { scale: 0.18, z: -600, opacity: 0, filter: "blur(8px)" },
-          { scale: 1.0, z: 0, opacity: 1, filter: "blur(0px)", duration: 1.4, ease: "power2.out" },
+          { scale: 0.18, z: -600, rotateX: 10, rotateZ: -2, opacity: 0, filter: "blur(10px)" },
+          {
+            scale: 1.0,
+            z: 0,
+            rotateX: 0,
+            rotateZ: 0,
+            opacity: 1,
+            filter: "blur(0px)",
+            duration: 1.4,
+            ease: "power2.out",
+            onStart: () => playGravSound("lock"),
+          },
           14.60
         );
       }
@@ -682,15 +831,35 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
       if (creedCard3Ref.current) {
         masterTl.to(
           creedCard3Ref.current,
-          { scale: 2.4, z: 350, opacity: 0, filter: "blur(8px)", duration: 1.2, ease: "power2.in" },
+          {
+            scale: 2.8,
+            z: 420,
+            rotateX: -14,
+            rotateZ: 2,
+            opacity: 0,
+            filter: "blur(12px)",
+            duration: 1.2,
+            ease: "power2.in",
+            onStart: () => playGravSound("punch"),
+          },
           17.00
         );
       }
       if (creedCard4Ref.current) {
         masterTl.fromTo(
           creedCard4Ref.current,
-          { scale: 0.18, z: -600, opacity: 0, filter: "blur(8px)" },
-          { scale: 1.0, z: 0, opacity: 1, filter: "blur(0px)", duration: 1.4, ease: "power2.out" },
+          { scale: 0.18, z: -600, rotateX: -8, rotateZ: 1.5, opacity: 0, filter: "blur(10px)" },
+          {
+            scale: 1.0,
+            z: 0,
+            rotateX: 0,
+            rotateZ: 0,
+            opacity: 1,
+            filter: "blur(0px)",
+            duration: 1.4,
+            ease: "power2.out",
+            onStart: () => playGravSound("lock"),
+          },
           17.00
         );
       }
@@ -708,7 +877,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
       if (creedCard4Ref.current) {
         masterTl.to(
           [creedCard4Ref.current, creedHudRef.current, creedFooterRef.current],
-          { scale: 0.90, opacity: 0, y: -25, duration: 0.70, ease: "power2.inOut" },
+          { scale: 0.88, opacity: 0, y: -30, duration: 0.70, ease: "power2.inOut" },
           19.30
         );
       }
@@ -1108,21 +1277,78 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
           {/* 8. MOVEMENT 02: FOUNDATION ARCHITECTURE (SCROLLED IN ON THE SAME Z-AXIS) */}
           <div
             ref={mobileCreedStageRef}
-            className="absolute inset-0 z-30 flex flex-col justify-between pt-16 pb-8 px-6 pointer-events-none opacity-0 select-none will-change-[transform,opacity]"
+            className="absolute inset-0 z-30 flex flex-col justify-between pt-16 pb-8 px-6 pointer-events-none opacity-0 select-none will-change-[transform,opacity] overflow-hidden"
             style={{ perspective: "1000px" }}
           >
+            {/* Relativistic Gravitational Singularity Core (Interstellar Gargantua Lens) */}
+            <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-0 overflow-hidden">
+              {/* Rotating Accretion Disk */}
+              <div
+                className="absolute w-[460px] h-[460px] rounded-full will-change-transform opacity-60 animate-[spin_32s_linear_infinite]"
+                style={{
+                  background:
+                    "radial-gradient(ellipse 65% 30% at 50% 50%, rgba(255,140,56,0.38) 0%, rgba(255,100,0,0.18) 45%, rgba(0,0,0,0) 70%)",
+                  transform: "rotateX(72deg) rotateY(-18deg)",
+                }}
+              />
+              {/* Inner Photon Ring */}
+              <div
+                className="absolute w-56 h-56 rounded-full border border-amber-400/40 shadow-[0_0_60px_rgba(255,140,56,0.45),inset_0_0_30px_rgba(255,200,100,0.3)] animate-pulse"
+                style={{
+                  transform: "rotateX(68deg)",
+                  animationDuration: "4s",
+                }}
+              />
+              {/* Pitch Black Event Horizon */}
+              <div className="absolute w-36 h-36 rounded-full bg-black shadow-[0_0_80px_rgba(0,0,0,1)]" />
+
+              {/* Relativistic Warp Dust & Speed Needles */}
+              <div className="absolute inset-0">
+                {[
+                  { top: "15%", left: "22%", size: "w-1 h-1", delay: "0s", duration: "3s" },
+                  { top: "28%", left: "78%", size: "w-1.5 h-1.5", delay: "1.2s", duration: "4.2s" },
+                  { top: "65%", left: "18%", size: "w-1 h-1", delay: "0.6s", duration: "3.5s" },
+                  { top: "72%", left: "82%", size: "w-1.5 h-1.5", delay: "1.8s", duration: "4.8s" },
+                  { top: "42%", left: "10%", size: "w-2 h-0.5", delay: "0.3s", duration: "2.8s" },
+                  { top: "50%", left: "88%", size: "w-2 h-0.5", delay: "1.5s", duration: "3.2s" },
+                  { top: "85%", left: "45%", size: "w-1 h-1", delay: "2.1s", duration: "4.0s" },
+                  { top: "12%", left: "55%", size: "w-1.5 h-1.5", delay: "0.9s", duration: "3.7s" },
+                ].map((mote, mIdx) => (
+                  <span
+                    key={mIdx}
+                    className={`absolute rounded-full bg-[#FF8C38] opacity-60 shadow-[0_0_8px_#FF8C38] ${mote.size}`}
+                    style={{
+                      top: mote.top,
+                      left: mote.left,
+                      animation: `pulse ${mote.duration} ease-in-out infinite alternate`,
+                      animationDelay: mote.delay,
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+
             {/* Top Telemetry HUD Bar */}
             <div
               ref={creedHudRef}
-              className="relative z-30 w-full max-w-sm mx-auto flex flex-col gap-2.5 pt-1 will-change-[transform,opacity]"
+              className="relative z-30 w-full max-w-sm mx-auto flex flex-col gap-2.5 pt-1 will-change-[transform,opacity] pointer-events-auto"
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#FF8C38] animate-pulse" />
-                  <span className="font-sans font-bold text-[9px] uppercase tracking-[0.22em] text-[#CBB59D]">
-                    FOUNDATION ARCHITECTURE
-                  </span>
-                </div>
+                {gravLensActive ? (
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+                    <span className="font-mono font-bold text-[9px] uppercase tracking-[0.20em] text-cyan-300">
+                      RELATIVISTIC LENS // 4.82G
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#FF8C38] animate-pulse" />
+                    <span className="font-sans font-bold text-[9px] uppercase tracking-[0.22em] text-[#CBB59D]">
+                      FOUNDATION ARCHITECTURE
+                    </span>
+                  </div>
+                )}
 
                 {/* Swiss Rolling Odometer Counter [ 01 / 04 ] */}
                 <div className="font-mono text-xs tracking-wider flex items-center gap-1 text-white/50">
@@ -1151,9 +1377,16 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               </div>
             </div>
 
-            {/* THE 4 TITANIUM MONOGRAPH SHEETS: SCROLLED IN ON THE Z-AXIS */}
+            {/* THE 4 TITANIUM MONOGRAPH SHEETS: SCROLLED IN ON THE Z-AXIS + INTERACTIVE TOUCH LENS */}
             <div
-              className="relative z-20 w-full max-w-sm mx-auto my-auto h-[400px] flex items-center justify-center [perspective:1000px] [transform-style:preserve-3d]"
+              ref={deckContainerRef}
+              onTouchStart={handleDeckTouchStart}
+              onTouchMove={handleDeckTouchMove}
+              onTouchEnd={handleDeckTouchEnd}
+              onMouseDown={handleDeckTouchStart}
+              onMouseMove={handleDeckTouchMove}
+              onMouseUp={handleDeckTouchEnd}
+              className="relative z-20 w-full max-w-sm mx-auto my-auto h-[400px] flex items-center justify-center [perspective:1000px] [transform-style:preserve-3d] pointer-events-auto cursor-grab active:cursor-grabbing"
             >
               {FOUNDATION_PILLARS.map((item, idx) => {
                 const Icon = item.icon;
@@ -1165,15 +1398,19 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
                     style={{
                       zIndex: (idx + 1) * 10,
                       transformOrigin: "center center",
+                      filter: gravLensActive
+                        ? "drop-shadow(-3px 0 2px rgba(0,240,255,0.75)) drop-shadow(3px 0 2px rgba(255,80,0,0.75))"
+                        : undefined,
+                      transition: "filter 0.25s ease-out",
                     }}
                   >
                     {/* Solid Titanium Gradient Sheen */}
                     <div className="absolute inset-0 bg-gradient-to-b from-[#121622] via-[#0D1018] to-[#0A0D14] pointer-events-none" />
-                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,140,56,0.10)_0%,transparent_70%)] pointer-events-none" />
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,140,56,0.12)_0%,transparent_70%)] pointer-events-none" />
 
                     {/* Corner Accent Marks */}
-                    <span className="absolute top-3 left-3 text-[9px] font-mono text-[#FF8C38]/40 select-none pointer-events-none">+</span>
-                    <span className="absolute top-3 right-3 text-[9px] font-mono text-[#FF8C38]/40 select-none pointer-events-none">+</span>
+                    <span className="absolute top-3 left-3 text-[9px] font-mono text-[#FF8C38]/50 select-none pointer-events-none">+</span>
+                    <span className="absolute top-3 right-3 text-[9px] font-mono text-[#FF8C38]/50 select-none pointer-events-none">+</span>
 
                     {/* Card Top Meta */}
                     <div className="relative z-10">
@@ -1230,10 +1467,10 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             {/* Bottom Telemetry Bar */}
             <div
               ref={creedFooterRef}
-              className="relative z-30 w-full max-w-sm mx-auto flex items-center justify-between text-[9px] font-mono text-[#CBB59D]/70 uppercase tracking-widest pt-2.5 border-t border-white/5 will-change-[transform,opacity]"
+              className="relative z-30 w-full max-w-sm mx-auto flex items-center justify-between text-[9px] font-mono text-[#CBB59D]/70 uppercase tracking-widest pt-2.5 border-t border-white/5 will-change-[transform,opacity] pointer-events-auto"
             >
-              <span>KOLKATA · LATVIA · GLOBAL EDGE</span>
-              <span className="text-[#FF8C38] font-bold">VERIFIED PLINTH</span>
+              <span>TOUCH &amp; DRAG TO WARP GRAVITY</span>
+              <span className="text-[#FF8C38] font-bold">SCROLL TO FLY</span>
             </div>
           </div>
 

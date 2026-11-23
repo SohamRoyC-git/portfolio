@@ -4,7 +4,7 @@ import React, { memo, useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { ArrowDown, ArrowUpRight, Sparkles } from "lucide-react";
-import { CelestialCreedGlobe } from "./CelestialCreedGlobe";
+import { TactileRotaryDial } from "./TactileRotaryDial";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -531,11 +531,11 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
           {/* 4. Initial Mobile Bottom Hint HUD */}
           <div
             ref={mobileBottomHudRef}
-            className="absolute bottom-6 inset-x-6 z-20 flex items-center justify-between text-[9px] font-mono text-white/70 uppercase tracking-widest pointer-events-none"
+            className="absolute bottom-6 inset-x-6 z-20 flex items-center justify-between text-[9px] font-sans text-white/70 uppercase tracking-widest pointer-events-none"
           >
-            <span>KOLKATA // STUDIO</span>
-            <span className="flex items-center gap-1.5 text-[#FF8C38] font-bold">
-              <span>SCROLL TO ENTER</span>
+            <span>Kolkata Studio</span>
+            <span className="flex items-center gap-1.5 text-white font-bold">
+              <span>Scroll to Enter</span>
               <ArrowDown size={11} className="animate-bounce" />
             </span>
           </div>
@@ -597,9 +597,9 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               </div>
             </div>
 
-            <div className="relative z-10 w-full flex items-center justify-between text-[9px] font-mono text-orange-200/60 uppercase tracking-widest pt-2">
-              <span>KOLKATA // LAT 22.5726° N</span>
-              <span>ATELIER 2026</span>
+            <div className="relative z-10 w-full flex items-center justify-between text-[9px] font-sans text-white/50 uppercase tracking-widest pt-2">
+              <span>Kolkata, India</span>
+              <span>Atelier 2026</span>
             </div>
           </div>
 
@@ -683,12 +683,12 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             </div>
           </div>
 
-          {/* 7. MOVEMENT 02: 3D SCULPTURAL RIBBON CREED GLOBE (MINIMALIST LUXURY) */}
+          {/* 7. MOVEMENT 02: TACTILE PRECISION ROTARY DIAL & LIQUID GLASS CREED */}
           <div
             ref={mobileCreedStageRef}
             className="absolute inset-0 z-30 flex flex-col justify-center items-center pt-6 pb-2 px-3 pointer-events-none opacity-0 select-none will-change-[transform,opacity,filter] overflow-hidden"
           >
-            <CelestialCreedGlobe progress={creedProgress} />
+            <TactileRotaryDial progress={creedProgress} />
           </div>
 
 

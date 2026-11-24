@@ -274,14 +274,22 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
             },
           });
         } else {
-          // Mobile Entrance: As user enters GrandSpatialDiscs, the first 650px of scroll
-          // shatters the black triangles and reveals Project 01 in-place!
+          // Hide stage initially on mobile until it reaches top: 0 (prevents upward slide during Creed)
+          if (stageRef.current) {
+            stageRef.current.style.visibility = "hidden";
+          }
+
+          // Mobile Entrance: In-place Apekon triangular shatter reveal strictly at top: 0
+          // Zero vertical downward scrolling — occurs directly on that screen itself!
           ScrollTrigger.create({
             trigger: sectionRef.current,
             start: "top top",
             end: "top+=650 top",
             scrub: 0.4,
             onUpdate: (self) => {
+              if (stageRef.current) {
+                stageRef.current.style.visibility = self.progress > 0 ? "visible" : "hidden";
+              }
               if (entranceBlackCoverRef.current) {
                 if (self.progress > 0.01) {
                   entranceBlackCoverRef.current.style.opacity = "0";
@@ -292,6 +300,9 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
               renderApekonReveal(self.progress);
             },
             onLeaveBack: () => {
+              if (stageRef.current) {
+                stageRef.current.style.visibility = "hidden";
+              }
               if (entranceBlackCoverRef.current) {
                 entranceBlackCoverRef.current.style.opacity = "1";
               }
@@ -492,7 +503,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
     <div
       id="monument-exhibition"
       ref={sectionRef}
-      className="relative w-full z-20 mt-0"
+      className="relative w-full z-40 -mt-[100svh] md:mt-0"
       style={{ height: "calc(100svh + 2600px)" }}
     >
       {/* Sticky 100svh Architectural Stage (Rich Wine Red & Warm Italian Light Sand) */}

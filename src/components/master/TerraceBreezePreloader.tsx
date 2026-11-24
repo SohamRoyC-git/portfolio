@@ -68,7 +68,12 @@ export const TerraceBreezePreloader = memo(function TerraceBreezePreloader({
 
   // 1. Living 2D Liquid Background Blobs + 60fps SR Monogram Draw & Fill
   useEffect(() => {
-    // Organic drifting background blobs so the Antique Gold canvas feels alive
+    // Initialize liquid wash completely below viewport cleanly via GSAP (no inline transform conflict)
+    if (liquidWashRef.current) {
+      gsap.set(liquidWashRef.current, { yPercent: 100 });
+    }
+
+    // Organic drifting background blobs so the Oat Milk canvas feels alive
     if (blob1Ref.current) {
       gsap.to(blob1Ref.current, {
         attr: {
@@ -185,44 +190,47 @@ export const TerraceBreezePreloader = memo(function TerraceBreezePreloader({
       if (monogramGroupRef.current) {
         washTl.to(
           monogramGroupRef.current,
-          { y: -24, scale: 1.08, opacity: 0, duration: 0.65, ease: "power2.inOut" },
+          { y: -32, scale: 1.08, opacity: 0, duration: 0.55, ease: "power2.in" },
           0
         );
       }
 
-      // Morph wave crest + sweep liquid obsidian wash from bottom (105%) all the way past top (-18%)
+      // Morph wave crest smoothly while rising so it ripples like real 2D liquid
       washTl.to(
         liquidWavePathRef.current,
         {
           attr: {
-            d: "M 0 120 Q 360 10 720 110 T 1440 40 L 1440 900 L 0 900 Z",
+            d: "M 0 110 C 320 260, 560 0, 920 170 C 1180 280, 1340 20, 1440 120 L 1440 900 L 0 900 Z",
           },
-          duration: 0.55,
+          duration: 0.65,
           ease: "sine.inOut",
         },
         0
       );
 
+      // Sweep liquid obsidian wash from yPercent: 100 (just below screen) to yPercent: -25 (completely covering screen)
       washTl.fromTo(
         liquidWashRef.current,
-        { yPercent: 105 },
+        { yPercent: 100 },
         {
-          yPercent: -15,
-          duration: 1.05,
-          ease: "power3.inOut",
-          onStart: () => {
-            // Trigger 3D Studio entrance right as the wave washes across the viewport
-            setTimeout(() => {
-              if (typeof window !== "undefined") {
-                window.dispatchEvent(new CustomEvent("atelier-enter-studio"));
-              }
-            }, 420);
-          },
+          yPercent: -25,
+          duration: 0.95,
+          ease: "power2.inOut",
         },
-        0.05
+        0
       );
 
-      // Fade out the preloader container once completely washed in #06070B obsidian
+      // Trigger 3D Studio entrance right as obsidian wave completes covering the screen, then fade preloader
+      washTl.call(
+        () => {
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new CustomEvent("atelier-enter-studio"));
+          }
+        },
+        [],
+        0.85
+      );
+
       if (containerRef.current) {
         washTl.to(
           containerRef.current,
@@ -261,12 +269,12 @@ export const TerraceBreezePreloader = memo(function TerraceBreezePreloader({
     <div
       ref={containerRef}
       onClick={isReady ? handleTriggerEnter : undefined}
-      className={`fixed inset-0 z-[99999] bg-[#B08A4F] text-[#102F27] flex flex-col justify-between p-6 sm:p-10 select-none overflow-hidden touch-none ${
+      className={`fixed inset-0 z-[99999] bg-[#EEE5D4] text-[#1D4A35] flex flex-col justify-between p-6 sm:p-10 select-none overflow-hidden touch-none ${
         isReady ? "cursor-pointer" : "cursor-default"
       }`}
       aria-label="Atelier Preloader"
     >
-      {/* Living 2D Liquid Background Waves (Antique Gold highlights & subtle Forest depth) */}
+      {/* Living 2D Liquid Background Waves (Warm Sand & Subtle Forest Green depth) */}
       <svg
         className="absolute inset-0 w-full h-full pointer-events-none z-0"
         viewBox="0 0 1440 900"
@@ -276,24 +284,24 @@ export const TerraceBreezePreloader = memo(function TerraceBreezePreloader({
         <path
           ref={blob1Ref}
           d="M 0 140 Q 320 220 680 130 T 1180 190 T 1440 130 L 1440 0 L 0 0 Z"
-          fill="#C59E61"
-          fillOpacity="0.45"
+          fill="#E1D5BE"
+          fillOpacity="0.65"
         />
         <path
           ref={blob2Ref}
           d="M 0 720 Q 280 790 620 710 T 1120 770 T 1440 700 L 1440 900 L 0 900 Z"
-          fill="#102F27"
-          fillOpacity="0.09"
+          fill="#1D4A35"
+          fillOpacity="0.08"
         />
       </svg>
 
       {/* Top Header: Minimal Atelier Identity */}
-      <div className="relative z-10 w-full flex items-center justify-between text-[8px] sm:text-[10px] font-mono tracking-[0.24em] uppercase text-[#102F27]/70">
+      <div className="relative z-10 w-full flex items-center justify-between text-[8px] sm:text-[10px] font-mono tracking-[0.24em] uppercase text-[#1D4A35]/70">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#102F27] animate-pulse" />
-          <span className="text-[#102F27] font-bold">SR // ATELIER</span>
+          <span className="w-2 h-2 rounded-full bg-[#F2462E] animate-pulse" />
+          <span className="text-[#1D4A35] font-bold">SR // ATELIER</span>
         </div>
-        <div className="tracking-[0.22em] text-[#102F27]/70 font-semibold">
+        <div className="tracking-[0.22em] text-[#1D4A35]/70 font-semibold">
           2026 EDITION
         </div>
       </div>
@@ -311,7 +319,7 @@ export const TerraceBreezePreloader = memo(function TerraceBreezePreloader({
               <path
                 ref={monogramSRef}
                 d="M 106 44 C 94 24, 56 26, 52 54 C 48 78, 102 84, 98 114 C 94 140, 48 142, 38 118"
-                stroke="#102F27"
+                stroke="#1D4A35"
                 strokeWidth="10"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -320,7 +328,7 @@ export const TerraceBreezePreloader = memo(function TerraceBreezePreloader({
               <path
                 ref={monogramRStemRef}
                 d="M 132 134 L 132 34"
-                stroke="#102F27"
+                stroke="#1D4A35"
                 strokeWidth="11"
                 strokeLinecap="round"
               />
@@ -328,17 +336,17 @@ export const TerraceBreezePreloader = memo(function TerraceBreezePreloader({
               <path
                 ref={monogramRBowlRef}
                 d="M 132 34 L 166 34 C 194 34, 196 82, 166 84 L 132 84 M 158 84 L 194 134"
-                stroke="#102F27"
+                stroke="#1D4A35"
                 strokeWidth="11"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
-              {/* Flowing 2D Underline Flourish */}
+              {/* Flowing 2D Underline Flourish in Tomato Red */}
               <path
                 ref={monogramFlourishRef}
                 d="M 38 152 Q 118 168 198 148"
-                stroke="#102F27"
-                strokeWidth="6"
+                stroke="#F2462E"
+                strokeWidth="6.5"
                 strokeLinecap="round"
               />
             </g>
@@ -347,29 +355,29 @@ export const TerraceBreezePreloader = memo(function TerraceBreezePreloader({
 
         {/* Clean Progress Readout */}
         <div className="flex items-center gap-3 mb-4">
-          <span className="font-mono font-black text-lg sm:text-xl tracking-widest text-[#102F27]">
+          <span className="font-mono font-black text-lg sm:text-xl tracking-widest text-[#1D4A35]">
             {pStr}%
           </span>
         </div>
 
         {/* Minimal Forest Progress Bar */}
-        <div className="w-full max-w-[200px] sm:max-w-[240px] h-[3px] bg-[#102F27]/15 rounded-full overflow-hidden mb-4">
+        <div className="w-full max-w-[200px] sm:max-w-[240px] h-[3px] bg-[#1D4A35]/15 rounded-full overflow-hidden mb-4">
           <div
-            className="h-full bg-[#102F27] rounded-full transition-all duration-100 ease-out"
+            className="h-full bg-[#1D4A35] rounded-full transition-all duration-100 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>
 
         {/* Status Telemetry */}
-        <div className="text-[8.5px] sm:text-[9.5px] font-mono font-semibold tracking-[0.2em] uppercase text-[#102F27]/75 text-center truncate max-w-full mb-7">
+        <div className="text-[8.5px] sm:text-[9.5px] font-mono font-semibold tracking-[0.2em] uppercase text-[#1D4A35]/75 text-center truncate max-w-full mb-7">
           {getStatus(progress)}
         </div>
 
         {/* Tactile Entry Pill Button (Appears gracefully at 100%) */}
         {isReady && (
           <div ref={readyBtnRef}>
-            <div className="inline-flex items-center gap-2.5 px-7 sm:px-9 py-3 sm:py-3.5 rounded-full bg-[#102F27] text-[#F5ECD9] font-mono text-[9px] sm:text-[10.5px] font-bold tracking-[0.22em] uppercase shadow-[0_14px_34px_rgba(16,47,39,0.32)] hover:scale-105 active:scale-95 transition-transform duration-200">
-              <span className="w-2 h-2 rounded-full bg-[#B08A4F] animate-ping" />
+            <div className="inline-flex items-center gap-2.5 px-7 sm:px-9 py-3 sm:py-3.5 rounded-full bg-[#1D4A35] text-[#EEE5D4] font-mono text-[9px] sm:text-[10.5px] font-bold tracking-[0.22em] uppercase shadow-[0_14px_34px_rgba(29,74,53,0.3)] hover:scale-105 active:scale-95 transition-transform duration-200">
+              <span className="w-2 h-2 rounded-full bg-[#F2462E] animate-ping" />
               <span className="hidden sm:inline">Click or Press Enter to Step Inside</span>
               <span className="inline sm:hidden">Tap to Step Inside</span>
             </div>
@@ -378,7 +386,7 @@ export const TerraceBreezePreloader = memo(function TerraceBreezePreloader({
       </div>
 
       {/* Footer Details */}
-      <div className="relative z-10 w-full flex items-center justify-between text-[7px] sm:text-[8.5px] font-mono font-semibold tracking-[0.2em] uppercase text-[#102F27]/60 border-t border-[#102F27]/15 pt-3">
+      <div className="relative z-10 w-full flex items-center justify-between text-[7px] sm:text-[8.5px] font-mono font-semibold tracking-[0.2em] uppercase text-[#1D4A35]/60 border-t border-[#1D4A35]/15 pt-3">
         <span>HARDWARE ACCELERATED</span>
         <span>STANDALONE EXPERIENCE</span>
       </div>
@@ -386,8 +394,7 @@ export const TerraceBreezePreloader = memo(function TerraceBreezePreloader({
       {/* 2D Liquid Obsidian Wave Wash Overlay (Washes smoothly over screen into Lorenz Attractor) */}
       <div
         ref={liquidWashRef}
-        className="fixed inset-x-0 -top-[20vh] h-[140vh] w-full pointer-events-none z-50"
-        style={{ transform: "translateY(105%)" }}
+        className="fixed inset-0 h-[135vh] w-full pointer-events-none z-50"
       >
         <svg
           className="w-full h-full"
@@ -397,7 +404,7 @@ export const TerraceBreezePreloader = memo(function TerraceBreezePreloader({
         >
           <path
             ref={liquidWavePathRef}
-            d="M 0 140 Q 360 40 720 130 T 1440 60 L 1440 900 L 0 900 Z"
+            d="M 0 160 C 320 10, 560 270, 920 100 C 1180 -20, 1340 210, 1440 80 L 1440 900 L 0 900 Z"
             fill="#06070B"
           />
         </svg>

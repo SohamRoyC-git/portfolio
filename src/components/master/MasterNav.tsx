@@ -51,7 +51,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
     const interval = setInterval(updateTime, 1000);
     const isLightSection = activeId === "monument-creed" || activeId === "monument-matrix";
   const pillSurfaceClass = isLightSection
-    ? "border-white/30 bg-white/5 md:border-[#102F27]/25 md:bg-[#102F27]/90 hover:bg-white/20 md:hover:bg-[#102F27]"
+    ? "border-white/30 bg-white/5 md:border-[#1D4A35]/25 md:bg-[#1D4A35]/90 hover:bg-white/20 md:hover:bg-[#1D4A35]"
     : "border-white/30 bg-white/5 hover:bg-white/20";
 
   return () => clearInterval(interval);
@@ -67,7 +67,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
     window.addEventListener("keydown", handleKeyDown);
     const isLightSection = activeId === "monument-creed" || activeId === "monument-matrix";
   const pillSurfaceClass = isLightSection
-    ? "border-white/30 bg-white/5 md:border-[#102F27]/25 md:bg-[#102F27]/90 hover:bg-white/20 md:hover:bg-[#102F27]"
+    ? "border-white/30 bg-white/5 md:border-[#1D4A35]/25 md:bg-[#1D4A35]/90 hover:bg-white/20 md:hover:bg-[#1D4A35]"
     : "border-white/30 bg-white/5 hover:bg-white/20";
 
   return () => window.removeEventListener("keydown", handleKeyDown);
@@ -90,7 +90,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
 
   const isLightSection = activeId === "monument-creed" || activeId === "monument-matrix";
   const pillSurfaceClass = isLightSection
-    ? "border-white/30 bg-white/5 md:border-[#102F27]/25 md:bg-[#102F27]/90 hover:bg-white/20 md:hover:bg-[#102F27]"
+    ? "border-white/30 bg-white/5 md:border-[#1D4A35]/25 md:bg-[#1D4A35]/90 hover:bg-white/20 md:hover:bg-[#1D4A35]"
     : "border-white/30 bg-white/5 hover:bg-white/20";
 
   return (
@@ -206,7 +206,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
                 const isActive = activeId === link.id;
                 const isLightSection = activeId === "monument-creed" || activeId === "monument-matrix";
   const pillSurfaceClass = isLightSection
-    ? "border-white/30 bg-white/5 md:border-[#102F27]/25 md:bg-[#102F27]/90 hover:bg-white/20 md:hover:bg-[#102F27]"
+    ? "border-white/30 bg-white/5 md:border-[#1D4A35]/25 md:bg-[#1D4A35]/90 hover:bg-white/20 md:hover:bg-[#1D4A35]"
     : "border-white/30 bg-white/5 hover:bg-white/20";
 
   return (

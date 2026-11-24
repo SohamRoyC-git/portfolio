@@ -623,11 +623,11 @@ export const ArchitecturalCreed: React.FC = memo(() => {
 
       {/* ========================================================================= */}
       {/* DESKTOP EXPERIENCE (>= 768px): FLOWING 2D RIBBON EDITORIAL STREAM          */}
-      {/* Antique Gold Base (#B08A4F) + Bold 2D Forest Ribbon (#102F27)              */}
+      {/* Oat Milk Base (#EEE5D4) + Forest Green Ribbon (#1D4A35) + Tomato (#F2462E) */}
       {/* ========================================================================= */}
       <div
         ref={sectionRef}
-        className="hidden md:block relative w-full bg-[#B08A4F] text-[#102F27] border-t border-[#102F27]/15 overflow-hidden"
+        className="hidden md:block relative w-full bg-[#EEE5D4] text-[#1D4A35] border-t border-[#1D4A35]/15 overflow-hidden"
       >
         {/* Full-Height Sweeping 2D Ribbon (Starts cleanly at top-right edge above header, weaves smoothly through all 4 pillars to bottom) */}
         <svg
@@ -639,7 +639,7 @@ export const ArchitecturalCreed: React.FC = memo(() => {
           <path
             ref={ribbonPathRef}
             d="M 610 -20 C 630 160, 560 330, 320 500 C 120 650, 120 860, 320 1010 C 520 1160, 480 1380, 320 1620"
-            stroke="#102F27"
+            stroke="#1D4A35"
             strokeWidth="28"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -656,24 +656,24 @@ export const ArchitecturalCreed: React.FC = memo(() => {
           >
             {/* Header Block */}
             <div ref={headerRef} className="mb-20 lg:mb-28">
-              <div className="flex items-center justify-between text-[11px] font-sans font-bold uppercase tracking-[0.26em] text-[#102F27]/75 mb-4">
+              <div className="flex items-center justify-between text-[11px] font-sans font-bold uppercase tracking-[0.26em] text-[#1D4A35]/75 mb-4">
                 <span className="flex items-center gap-2.5">
-                  <span className="w-2 h-2 rounded-full bg-[#102F27]" />
+                  <span className="w-2 h-2 rounded-full bg-[#F2462E]" />
                   ACADEMIC &amp; TECHNICAL FOUNDATIONS
                 </span>
-                <span className="text-[#102F27] font-extrabold">04 MONOLITHIC PILLARS</span>
+                <span className="text-[#F2462E] font-extrabold">04 MONOLITHIC PILLARS</span>
               </div>
               <div
                 ref={headerLineRef}
-                className="w-full h-[1.5px] bg-[#102F27]/20 mb-7"
+                className="w-full h-[1.5px] bg-[#1D4A35]/20 mb-7"
               />
               <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
-                <h3 className="font-sans font-black text-3xl md:text-4xl lg:text-5xl uppercase tracking-tight text-[#102F27] leading-[1.05]">
-                  Architectural <span className="text-[#F5ECD9]">Credentials</span>
+                <h3 className="font-sans font-black text-3xl md:text-4xl lg:text-5xl uppercase tracking-tight text-[#1D4A35] leading-[1.05]">
+                  Architectural <span className="text-[#F2462E]">Credentials</span>
                   <br />
                   &amp; Specializations
                 </h3>
-                <span className="text-xs font-mono font-semibold text-[#102F27]/70 uppercase tracking-widest">
+                <span className="text-xs font-mono font-semibold text-[#1D4A35]/70 uppercase tracking-widest">
                   VERIFIED ENGINEERING TRACK · 2026
                 </span>
               </div>
@@ -701,19 +701,16 @@ export const ArchitecturalCreed: React.FC = memo(() => {
                           isLeft ? "lg:pr-8 text-left" : "lg:pl-8 text-left"
                         }`}
                       >
-                        {/* Top Tag + Oversized Hollow-to-Illuminated Numeral */}
+                        {/* Top Tag + Oversized Tomato Red Numeral */}
                         <div className="flex items-baseline justify-between gap-4 mb-4">
                           <span
-                            className="font-helvetica font-normal text-6xl lg:text-7xl leading-none text-transparent transition-all duration-500 select-none group-hover:text-[#102F27]"
-                            style={{
-                              WebkitTextStroke: "1.5px rgba(16, 47, 39, 0.48)",
-                            }}
+                            className="font-helvetica font-bold text-6xl lg:text-7xl leading-none text-[#F2462E] transition-transform duration-500 select-none group-hover:scale-105"
                           >
                             {item.num}
                           </span>
 
-                          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#102F27] text-[#F5ECD9]">
-                            <Icon size={13} className="text-[#B08A4F]" />
+                          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#1D4A35] text-[#EEE5D4]">
+                            <Icon size={13} className="text-[#F2462E]" />
                             <span className="text-[10px] font-sans font-extrabold uppercase tracking-[0.18em]">
                               {item.tag}
                             </span>
@@ -721,15 +718,15 @@ export const ArchitecturalCreed: React.FC = memo(() => {
                         </div>
 
                         {/* Title & Role */}
-                        <h4 className="font-sans font-black text-2xl lg:text-3xl text-[#102F27] mb-2 leading-tight group-hover:text-[#F5ECD9] transition-colors">
+                        <h4 className="font-sans font-black text-2xl lg:text-3xl text-[#1D4A35] mb-2 leading-tight group-hover:text-[#F2462E] transition-colors">
                           {item.title}
                         </h4>
-                        <div className="text-xs lg:text-[13px] font-mono font-bold text-[#102F27]/80 mb-4 tracking-wide">
+                        <div className="text-xs lg:text-[13px] font-mono font-bold text-[#1D4A35]/80 mb-4 tracking-wide">
                           {item.role}
                         </div>
 
                         {/* Narrative */}
-                        <p className="font-sans font-medium text-sm lg:text-[15px] text-[#102F27]/85 leading-relaxed mb-6">
+                        <p className="font-sans font-medium text-sm lg:text-[15px] text-[#1D4A35]/85 leading-relaxed mb-6">
                           {item.desc}
                         </p>
 
@@ -739,7 +736,7 @@ export const ArchitecturalCreed: React.FC = memo(() => {
                             <motion.span
                               key={cIdx}
                               whileHover={{ scale: 1.07, rotate: 0 }}
-                              className={`creed-pill inline-block px-3.5 py-1.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-[#F5ECD9] border border-[#102F27]/20 text-[#102F27] shadow-[0_6px_16px_rgba(16,47,39,0.12)] cursor-default transition-colors hover:bg-[#102F27] hover:text-[#F5ECD9] ${
+                              className={`creed-pill inline-block px-3.5 py-1.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-[#FAF5EB] border border-[#1D4A35]/20 text-[#1D4A35] shadow-[0_6px_16px_rgba(29,74,53,0.10)] cursor-default transition-colors hover:bg-[#1D4A35] hover:text-[#EEE5D4] ${
                                 pillAngles[(idx + cIdx) % pillAngles.length]
                               }`}
                             >
@@ -748,9 +745,9 @@ export const ArchitecturalCreed: React.FC = memo(() => {
                           ))}
                           <motion.span
                             whileHover={{ scale: 1.07, rotate: 0 }}
-                            className="creed-pill inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-[#102F27] text-[#F5ECD9] rotate-1 cursor-default shadow-[0_6px_16px_rgba(16,47,39,0.22)]"
+                            className="creed-pill inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-[#1D4A35] text-[#EEE5D4] rotate-1 cursor-default shadow-[0_6px_16px_rgba(29,74,53,0.20)]"
                           >
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#B08A4F]" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#F2462E]" />
                             {item.status}
                           </motion.span>
                         </div>
@@ -762,7 +759,7 @@ export const ArchitecturalCreed: React.FC = memo(() => {
             </div>
 
             {/* Footer Telemetry */}
-            <div className="flex items-center justify-between text-[11px] font-mono font-semibold text-[#102F27]/70 mt-24 pt-6 border-t border-[#102F27]/20">
+            <div className="flex items-center justify-between text-[11px] font-mono font-semibold text-[#1D4A35]/70 mt-24 pt-6 border-t border-[#1D4A35]/20">
               <span>DISCIPLINE: ARTIFICIAL INTELLIGENCE · HIGH-THROUGHPUT SYSTEMS</span>
               <span>KOLKATA · LATVIA · GLOBAL EDGE</span>
             </div>

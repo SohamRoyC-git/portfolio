@@ -309,7 +309,7 @@ export default function Home() {
       >
         <main className="relative z-10">
           {/* Movement 01: Monumental Hero (Top of Portfolio Website) */}
-          <div id="hero-wrapper" className="relative w-full z-10 overflow-x-clip md:sticky md:top-0 md:h-[100svh] will-change-[transform,opacity]">
+          <div id="hero-wrapper" className="relative w-full z-30 overflow-x-clip md:sticky md:top-0 md:h-[100svh] will-change-[transform,opacity]">
             <MonumentalHero onExplore={() => handleNavigate("monument-statement")} onConnect={() => handleNavigate("monument-terminal")} />
           </div>
 

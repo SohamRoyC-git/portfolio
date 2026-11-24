@@ -252,68 +252,42 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
           }
         };
 
-        ScrollTrigger.create({
-          trigger: sectionRef.current,
-          start: "top bottom",
-          end: "top top",
-          scrub: 0.35,
-          onUpdate: (self) => {
-            renderApekonReveal(self.progress);
-          },
-        });
+        if (isDesktop) {
+          ScrollTrigger.create({
+            trigger: sectionRef.current,
+            start: "top bottom",
+            end: "top top",
+            scrub: 0.35,
+            onUpdate: (self) => {
+              renderApekonReveal(self.progress);
+            },
+          });
+        }
       }
 
-      // 1. Entrance: Horizontal Blade Sweep on desktop, or AUTHENTIC APEKON DISINTEGRATION REVEAL on mobile
-      if (stageRef.current) {
-        if (!isDesktop) {
-          // MOBILE: AUTHENTIC APEKON DISINTEGRATION REVEAL (Zero plunge zoom, zero blur!)
-          // Counteracts the vertical scroll displacement so the stage stays visually pinned at top: 0,
-          // while the apekonCanvas overlay executes the pure triangular shard shatter dissolve!
-          gsap.fromTo(
-            stageRef.current,
-            {
-              y: -window.innerHeight,
-              scale: 1.0,
-              opacity: 1,
-              filter: "none",
+      // 1. Entrance: Horizontal Blade Sweep on desktop
+      if (stageRef.current && isDesktop) {
+        gsap.fromTo(
+          stageRef.current,
+          { clipPath: "polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)" },
+          {
+            clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+            ease: "none",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top bottom",
+              end: "top top",
+              scrub: 0.4,
             },
-            {
-              y: 0,
-              scale: 1.0,
-              opacity: 1,
-              filter: "none",
-              ease: "none",
-              scrollTrigger: {
-                trigger: sectionRef.current,
-                start: "top bottom",
-                end: "top top",
-                scrub: true,
-              },
-            }
-          );
-        } else {
-          gsap.fromTo(
-            stageRef.current,
-            { clipPath: "polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)" },
-            {
-              clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
-              ease: "none",
-              scrollTrigger: {
-                trigger: sectionRef.current,
-                start: "top bottom",
-                end: "top top",
-                scrub: 0.4,
-              },
-            }
-          );
-        }
+          }
+        );
       }
 
       // 2. Master Scrub Timeline for Project Transitions (Crisp, Responsive Inertia)
       const masterTl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: "top top",
+          start: isDesktop ? "top top" : "top+=50vh top",
           end: "bottom bottom",
           scrub: isDesktop ? 0.6 : 0.5,
           onUpdate: (self) => {
@@ -482,7 +456,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
     <div
       id="monument-exhibition"
       ref={sectionRef}
-      className="relative w-full z-30"
+      className="relative w-full z-20 -mt-[150vh] md:mt-0"
       style={{ height: "calc(100svh + 2000px)" }}
     >
       {/* Sticky 100svh Architectural Stage (Rich Wine Red & Warm Italian Light Sand) */}
@@ -490,10 +464,10 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
         ref={stageRef}
         className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-between pt-16 xs:pt-20 sm:pt-24 pb-4 sm:pb-8 px-4 sm:px-12 md:px-16 lg:px-20 overflow-hidden bg-[#2D0A12] border-t border-[#EAD7C0]/20 will-change-[clip-path]"
       >
-        {/* Apekon Procedural Triangular Transition Canvas Overlay (Creed -> Projects reveal) */}
+        {/* Apekon Procedural Triangular Transition Canvas Overlay (Creed -> Projects reveal; Desktop only to prevent duplicate mobile shatter) */}
         <canvas
           ref={apekonCanvasRef}
-          className="absolute inset-0 w-full h-full pointer-events-none z-40"
+          className="hidden md:block absolute inset-0 w-full h-full pointer-events-none z-40"
         />
         {/* Subtle Ambient Reflected Depth (Forge Automotive Atmospheric Depth) */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { memo, useEffect, useRef, useState, useCallback } from "react";
+import React, { memo, useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { ArrowDown, ArrowUpRight, Sparkles } from "lucide-react";
@@ -81,34 +81,6 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
   const mobileCreedStageRef = useRef<HTMLDivElement | null>(null);
   const globeProgressRef = useRef({ value: 0 });
   const [creedProgress, setCreedProgress] = useState(0);
-  const masterTlRef = useRef<gsap.core.Timeline | null>(null);
-
-  const handleStationSelect = useCallback((index: number) => {
-    const tl = masterTlRef.current;
-    if (!tl) return;
-    const st = tl.scrollTrigger;
-    if (!st) return;
-
-    // Station times on masterTl:
-    // Station 0: 9.80, Station 1: 12.90, Station 2: 16.00, Station 3: 19.10
-    const clampedIdx = Math.max(0, Math.min(3, index));
-    const stationTime = 9.80 + (clampedIdx / 3) * 9.30;
-    const duration = tl.duration() || 19.85;
-    const p = stationTime / duration;
-    const targetScrollY = st.start + p * (st.end - st.start);
-
-    if ((window as any).lenis) {
-      (window as any).lenis.scrollTo(targetScrollY, {
-        duration: 1.1,
-        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      });
-    } else {
-      const scroller = document.getElementById("app-scroller");
-      if (scroller) {
-        scroller.scrollTo({ top: targetScrollY, behavior: "smooth" });
-      }
-    }
-  }, []);
 
   // Desktop Refs
   const desktopSectionRef = useRef<HTMLElement | null>(null);
@@ -278,11 +250,13 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
               mobileIdentityRef.current.style.pointerEvents =
                 self.progress >= 0.35 && self.progress <= 0.48 ? "auto" : "none";
             }
+
+            if (mobileStageRef.current) {
+              mobileStageRef.current.style.pointerEvents = self.progress >= 0.98 ? "none" : "auto";
+            }
           },
         },
       });
-
-      masterTlRef.current = masterTl;
 
       // Phase 1 (0.00 -> 1.50): Cue & initial bottom hint dissolve early
       if (laptopCueRef.current) {
@@ -430,26 +404,25 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         globeProgressRef.current,
         {
           value: 1,
-          duration: 9.30,
+          duration: 10.20,
           ease: "none",
           onUpdate: () => setCreedProgress(globeProgressRef.current.value),
         },
         9.80
       );
 
-      // Phase 18 (19.10 -> 19.85): Authentic Apekon Disintegration into Movement 03 (Projects)
-      // Creed stays rock-solid at scale 1.0 (zero plunge zoom/blur), dissolving via triangular shards
-      if (mobileCreedStageRef.current) {
+      // Phase 18 (19.00 -> 20.00): Authentic Apekon Disintegration into Movement 03 (Projects)
+      // Creed shatters via Apekon triangular canvas while the mobile stage dissolves cleanly,
+      // revealing Movement 03 (Selected Commissions) sitting stationary at top: 0 directly underneath!
+      if (mobileStageRef.current) {
         masterTl.to(
-          mobileCreedStageRef.current,
+          mobileStageRef.current,
           {
             opacity: 0,
-            scale: 1.0,
-            filter: "none",
-            duration: 0.75,
+            duration: 1.00,
             ease: "power2.out",
           },
-          19.10
+          19.00
         );
       }
 
@@ -489,7 +462,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
       {/* ========================================================================= */}
       <div
         ref={mobileContainerRef}
-        className="md:hidden relative w-full h-[600vh] bg-[#060709] overflow-clip"
+        className="md:hidden relative w-full h-[650vh] bg-transparent overflow-clip"
       >
         {/* Navigation & Explore Anchors for Statement & Creed phases */}
         <div
@@ -719,7 +692,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             ref={mobileCreedStageRef}
             className="absolute inset-0 z-30 flex flex-col justify-center items-center pointer-events-none opacity-0 select-none will-change-[transform,opacity,filter] overflow-hidden"
           >
-            <ApekonDisintegrationCreed progress={creedProgress} onStationSelect={handleStationSelect} />
+            <ApekonDisintegrationCreed progress={creedProgress} />
           </div>
 
 

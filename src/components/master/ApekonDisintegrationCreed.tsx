@@ -249,12 +249,11 @@ export const ApekonDisintegrationCreed: React.FC<ApekonDisintegrationCreedProps>
     }, []);
 
     // Compute active station and transition state based on scroll progress (0.0 to 1.0)
-    // Stations: 01 (0.00-0.22), T1 (0.22-0.28), 02 (0.28-0.47), T2 (0.47-0.53), 03 (0.53-0.72), T3 (0.72-0.78), 04 (0.78-0.90), Exit (0.90-1.00)
+    // Stations: 01 (0.00-0.22), T1 (0.22-0.28), 02 (0.28-0.47), T2 (0.47-0.53), 03 (0.53-0.72), T3 (0.72-0.78), 04 (0.78-1.00)
     let activeStationIdx = 0;
     let nextStationIdx = 0;
     let transitionProgress = 0; // 0 to 1
     let isTransitioning = false;
-    let isExitWave = false;
 
     if (progress < 0.22) {
       activeStationIdx = 0;
@@ -283,22 +282,16 @@ export const ApekonDisintegrationCreed: React.FC<ApekonDisintegrationCreedProps>
       nextStationIdx = 3;
       transitionProgress = (progress - 0.72) / 0.06;
       isTransitioning = true;
-    } else if (progress < 0.90) {
-      activeStationIdx = 3;
-      nextStationIdx = 3;
-      transitionProgress = 0;
     } else {
       activeStationIdx = 3;
       nextStationIdx = 3;
-      transitionProgress = Math.min(1, Math.max(0, (progress - 0.90) / 0.10));
-      isTransitioning = true;
-      isExitWave = true;
+      transitionProgress = 0;
     }
 
     // Direct scrub render of canvas
     useEffect(() => {
       if (isTransitioning) {
-        renderTransitionCanvas(transitionProgress, isExitWave);
+        renderTransitionCanvas(transitionProgress, false);
       } else {
         const canvas = transitionCanvasRef.current;
         if (canvas) {
@@ -306,7 +299,7 @@ export const ApekonDisintegrationCreed: React.FC<ApekonDisintegrationCreedProps>
           if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
       }
-    }, [isTransitioning, transitionProgress, isExitWave, renderTransitionCanvas]);
+    }, [isTransitioning, transitionProgress, renderTransitionCanvas]);
 
     // Current displayed pillar number for HUD (1, 2, 3, or 4)
     const displayPillarNum =
@@ -455,10 +448,7 @@ export const ApekonDisintegrationCreed: React.FC<ApekonDisintegrationCreedProps>
     let typoOpacity = 1;
     let typoScale = 1;
 
-    if (isExitWave) {
-      typoOpacity = Math.max(0, 1 - transitionProgress * 1.5);
-      typoScale = 1 + transitionProgress * 0.04;
-    } else if (isTransitioning) {
+    if (isTransitioning) {
       if (transitionProgress < 0.50) {
         typoOpacity = Math.max(0.1, 1 - transitionProgress * 1.8);
         typoScale = 1 - transitionProgress * 0.03;

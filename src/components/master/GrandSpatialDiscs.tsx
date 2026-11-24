@@ -149,6 +149,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
   const ambientBackdropsRef = useRef<(HTMLDivElement | null)[]>([]);
   const editorialBlocksRef = useRef<(HTMLDivElement | null)[]>([]);
   const apekonCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const entranceBlackCoverRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -224,6 +225,13 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
 
           if (p >= 1.0) return;
 
+          // Guarantee that Projects is 100% PITCH DARK before the disintegration wave begins
+          if (p <= 0.01) {
+            ctx.fillStyle = "#060709";
+            ctx.fillRect(0, 0, w, h);
+            return;
+          }
+
           const q = p * 1.35;
           for (let i = 0; i < triangles.length; i++) {
             const tri = triangles[i];
@@ -240,17 +248,20 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
             ctx.closePath();
 
             if (shardAlpha > 0.02) {
-              ctx.fillStyle = `rgba(6, 7, 9, ${(shardAlpha * 0.95).toFixed(3)})`;
+              ctx.fillStyle = `rgba(6, 7, 9, ${(shardAlpha * 1.0).toFixed(3)})`;
               ctx.fill();
             }
 
             if (edgeAlpha > 0.04) {
-              ctx.strokeStyle = `rgba(235, 240, 248, ${(edgeAlpha * 0.85).toFixed(3)})`;
-              ctx.lineWidth = 1.1;
+              ctx.strokeStyle = `rgba(235, 240, 248, ${(edgeAlpha * 0.90).toFixed(3)})`;
+              ctx.lineWidth = 1.15;
               ctx.stroke();
             }
           }
         };
+
+        // Render initial 100% pitch dark cover immediately
+        renderApekonReveal(0);
 
         if (isDesktop) {
           ScrollTrigger.create({
@@ -260,6 +271,31 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
             scrub: 0.35,
             onUpdate: (self) => {
               renderApekonReveal(self.progress);
+            },
+          });
+        } else {
+          // Mobile Entrance: As user enters GrandSpatialDiscs, the first 650px of scroll
+          // shatters the black triangles and reveals Project 01 in-place!
+          ScrollTrigger.create({
+            trigger: sectionRef.current,
+            start: "top top",
+            end: "top+=650 top",
+            scrub: 0.4,
+            onUpdate: (self) => {
+              if (entranceBlackCoverRef.current) {
+                if (self.progress > 0.01) {
+                  entranceBlackCoverRef.current.style.opacity = "0";
+                } else {
+                  entranceBlackCoverRef.current.style.opacity = "1";
+                }
+              }
+              renderApekonReveal(self.progress);
+            },
+            onLeaveBack: () => {
+              if (entranceBlackCoverRef.current) {
+                entranceBlackCoverRef.current.style.opacity = "1";
+              }
+              renderApekonReveal(0);
             },
           });
         }
@@ -287,7 +323,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
       const masterTl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: isDesktop ? "top top" : "top+=50vh top",
+          start: isDesktop ? "top top" : "top+=650 top",
           end: "bottom bottom",
           scrub: isDesktop ? 0.6 : 0.5,
           onUpdate: (self) => {
@@ -456,18 +492,24 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
     <div
       id="monument-exhibition"
       ref={sectionRef}
-      className="relative w-full z-20 -mt-[150vh] md:mt-0"
-      style={{ height: "calc(100svh + 2000px)" }}
+      className="relative w-full z-20 mt-0"
+      style={{ height: "calc(100svh + 2600px)" }}
     >
       {/* Sticky 100svh Architectural Stage (Rich Wine Red & Warm Italian Light Sand) */}
       <section
         ref={stageRef}
         className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-between pt-16 xs:pt-20 sm:pt-24 pb-4 sm:pb-8 px-4 sm:px-12 md:px-16 lg:px-20 overflow-hidden bg-[#2D0A12] border-t border-[#EAD7C0]/20 will-change-[clip-path]"
       >
-        {/* Apekon Procedural Triangular Transition Canvas Overlay (Creed -> Projects reveal; Desktop only to prevent duplicate mobile shatter) */}
+        {/* Guaranteed 100% Pitch-Black Cover until Apekon Disintegration starts */}
+        <div
+          ref={entranceBlackCoverRef}
+          className="absolute inset-0 z-35 pointer-events-none bg-[#060709] transition-opacity duration-150"
+        />
+
+        {/* Apekon Procedural Triangular Transition Canvas Overlay (Creed -> Projects reveal on Desktop & Mobile) */}
         <canvas
           ref={apekonCanvasRef}
-          className="hidden md:block absolute inset-0 w-full h-full pointer-events-none z-40"
+          className="absolute inset-0 w-full h-full pointer-events-none z-40"
         />
         {/* Subtle Ambient Reflected Depth (Forge Automotive Atmospheric Depth) */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">

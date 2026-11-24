@@ -404,25 +404,28 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         globeProgressRef.current,
         {
           value: 1,
-          duration: 10.20,
+          duration: 9.60,
           ease: "none",
           onUpdate: () => setCreedProgress(globeProgressRef.current.value),
         },
         9.80
       );
 
-      // Phase 18 (19.00 -> 20.00): Authentic Apekon Disintegration into Movement 03 (Projects)
-      // Creed shatters via Apekon triangular canvas while the mobile stage dissolves cleanly,
-      // revealing Movement 03 (Selected Commissions) sitting stationary at top: 0 directly underneath!
-      if (mobileStageRef.current) {
+      // Station 04 Reading Hold
+      masterTl.to({}, { duration: 0.80 }, 19.40);
+
+      // Phase 10: Smooth Z-axis Dissolve into Obsidian Void
+      if (mobileCreedStageRef.current) {
         masterTl.to(
-          mobileStageRef.current,
+          mobileCreedStageRef.current,
           {
             opacity: 0,
-            duration: 1.00,
-            ease: "power2.out",
+            scale: 0.94,
+            filter: "blur(8px)",
+            duration: 0.80,
+            ease: "power2.inOut",
           },
-          19.00
+          20.20
         );
       }
 
@@ -462,7 +465,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
       {/* ========================================================================= */}
       <div
         ref={mobileContainerRef}
-        className="md:hidden relative w-full h-[650vh] bg-transparent overflow-clip"
+        className="md:hidden relative w-full h-[550vh] bg-[#060709] overflow-clip"
       >
         {/* Navigation & Explore Anchors for Statement & Creed phases */}
         <div

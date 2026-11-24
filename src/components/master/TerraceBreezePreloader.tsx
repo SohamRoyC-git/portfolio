@@ -3,149 +3,6 @@
 import React, { useState, useEffect, useRef, useCallback, memo } from "react";
 import gsap from "gsap";
 
-// 5x7 Dot Matrix Font Map for the clean, minimalist tactile counter
-const DOT_MAP: Record<string, number[][]> = {
-  "0": [
-    [1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 1],
-    [1, 0, 0, 1, 1],
-    [1, 0, 1, 0, 1],
-    [1, 1, 0, 0, 1],
-    [1, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1],
-  ],
-  "1": [
-    [0, 0, 1, 0, 0],
-    [0, 1, 1, 0, 0],
-    [0, 0, 1, 0, 0],
-    [0, 0, 1, 0, 0],
-    [0, 0, 1, 0, 0],
-    [0, 0, 1, 0, 0],
-    [0, 1, 1, 1, 0],
-  ],
-  "2": [
-    [0, 1, 1, 1, 0],
-    [1, 0, 0, 0, 1],
-    [0, 0, 0, 0, 1],
-    [0, 0, 0, 1, 0],
-    [0, 0, 1, 0, 0],
-    [0, 1, 0, 0, 0],
-    [1, 1, 1, 1, 1],
-  ],
-  "3": [
-    [1, 1, 1, 1, 0],
-    [0, 0, 0, 0, 1],
-    [0, 0, 0, 0, 1],
-    [0, 1, 1, 1, 0],
-    [0, 0, 0, 0, 1],
-    [0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 0],
-  ],
-  "4": [
-    [0, 0, 0, 1, 0],
-    [0, 0, 1, 1, 0],
-    [0, 1, 0, 1, 0],
-    [1, 0, 0, 1, 0],
-    [1, 1, 1, 1, 1],
-    [0, 0, 0, 1, 0],
-    [0, 0, 0, 1, 0],
-  ],
-  "5": [
-    [1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0],
-    [1, 1, 1, 1, 0],
-    [0, 0, 0, 0, 1],
-    [0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1],
-    [0, 1, 1, 1, 0],
-  ],
-  "6": [
-    [0, 0, 1, 1, 0],
-    [0, 1, 0, 0, 0],
-    [1, 0, 0, 0, 0],
-    [1, 1, 1, 1, 0],
-    [1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1],
-    [0, 1, 1, 1, 0],
-  ],
-  "7": [
-    [1, 1, 1, 1, 1],
-    [0, 0, 0, 0, 1],
-    [0, 0, 0, 1, 0],
-    [0, 0, 1, 0, 0],
-    [0, 1, 0, 0, 0],
-    [0, 1, 0, 0, 0],
-    [0, 1, 0, 0, 0],
-  ],
-  "8": [
-    [0, 1, 1, 1, 0],
-    [1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1],
-    [0, 1, 1, 1, 0],
-    [1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1],
-    [0, 1, 1, 1, 0],
-  ],
-  "9": [
-    [0, 1, 1, 1, 0],
-    [1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1],
-    [0, 1, 1, 1, 1],
-    [0, 0, 0, 0, 1],
-    [0, 0, 0, 1, 0],
-    [0, 1, 1, 0, 0],
-  ],
-  "%": [
-    [1, 1, 0, 0, 1],
-    [1, 1, 0, 1, 0],
-    [0, 0, 1, 0, 0],
-    [0, 1, 0, 0, 0],
-    [0, 1, 0, 1, 1],
-    [1, 0, 0, 1, 1],
-    [0, 0, 0, 0, 0],
-  ],
-};
-
-const DotChar = memo(function DotChar({
-  char,
-  size = 4,
-  gap = 1.8,
-}: {
-  char: string;
-  size?: number;
-  gap?: number;
-}) {
-  const matrix = DOT_MAP[char] || DOT_MAP["0"];
-
-  return (
-    <div
-      className="inline-grid select-none"
-      style={{
-        gridTemplateColumns: `repeat(5, ${size}px)`,
-        gridTemplateRows: `repeat(7, ${size}px)`,
-        gap: `${gap}px`,
-      }}
-    >
-      {matrix.flatMap((row, r) =>
-        row.map((on, c) => (
-          <div
-            key={`${r}-${c}`}
-            className="rounded-full transition-all duration-150"
-            style={{
-              width: `${size}px`,
-              height: `${size}px`,
-              backgroundColor: on ? "#FFFFFF" : "rgba(255, 255, 255, 0.06)",
-              boxShadow: on ? "0 0 6px rgba(255, 255, 255, 0.7)" : "none",
-            }}
-          />
-        ))
-      )}
-    </div>
-  );
-});
-
-DotChar.displayName = "DotChar";
-
 export interface TerraceBreezePreloaderProps {
   onComplete?: () => void;
 }
@@ -159,46 +16,33 @@ export const TerraceBreezePreloader = memo(function TerraceBreezePreloader({
   const [visible, setVisible] = useState(true);
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const audioCtxRef = useRef<AudioContext | null>(null);
+  const monogramSRef = useRef<SVGPathElement>(null);
+  const monogramRStemRef = useRef<SVGPathElement>(null);
+  const monogramRBowlRef = useRef<SVGPathElement>(null);
+  const monogramFlourishRef = useRef<SVGPathElement>(null);
+  const monogramGroupRef = useRef<SVGGElement>(null);
 
-  // Synthesize tactile split-flap tick sounds
-  const playTickSound = useCallback(() => {
-    try {
-      if (!audioCtxRef.current) {
-        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-        if (AudioCtx) audioCtxRef.current = new AudioCtx();
-      }
-      if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
-        audioCtxRef.current.resume();
-      }
-      if (audioCtxRef.current) {
-        const ctx = audioCtxRef.current;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(1400, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(320, ctx.currentTime + 0.025);
-        gain.gain.setValueAtTime(0.015, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.025);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.03);
-      }
-    } catch {}
-  }, []);
+  const blob1Ref = useRef<SVGPathElement>(null);
+  const blob2Ref = useRef<SVGPathElement>(null);
+  const liquidWashRef = useRef<HTMLDivElement>(null);
+  const liquidWavePathRef = useRef<SVGPathElement>(null);
+  const readyBtnRef = useRef<HTMLDivElement>(null);
+
+  const audioCtxRef = useRef<AudioContext | null>(null);
 
   // Resonant deep enter chime
   const playEnterSound = useCallback(() => {
     try {
       if (!audioCtxRef.current) {
-        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+        const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
         if (AudioCtx) audioCtxRef.current = new AudioCtx();
       }
       if (audioCtxRef.current) {
+        if (audioCtxRef.current.state === "suspended") {
+          audioCtxRef.current.resume();
+        }
         const ctx = audioCtxRef.current;
         const now = ctx.currentTime;
-        // Warm low sub chime
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = "triangle";
@@ -214,62 +58,121 @@ export const TerraceBreezePreloader = memo(function TerraceBreezePreloader({
     } catch {}
   }, []);
 
-  // Calm, single-line poetic status indicator
+  // Calm single-line telemetry status
   const getStatus = (p: number) => {
-    if (p < 25) return "CALIBRATING SPATIAL STUDIO CANVAS...";
-    if (p < 55) return "SYNTHESIZING 3D WORKSPACE GEOMETRY...";
-    if (p < 85) return "CALIBRATING NATURAL SUNLIGHT CAUSTICS...";
-    if (p < 100) return "HARMONIZING ATELIER SOUNDSCAPE...";
-    return "THE WORKSPACE IS PEACEFUL AND READY [ 100% ]";
+    if (p < 30) return "PREPARING ATELIER CANVAS...";
+    if (p < 65) return "CALIBRATING 3D SPATIAL GEOMETRY...";
+    if (p < 100) return "ALIGNING MONOGRAM ARCHITECTURE...";
+    return "READY · STEP INTO THE VOID";
   };
 
-  // Buffer and progress simulation
+  // 1. Living 2D Liquid Background Blobs + 60fps SR Monogram Draw & Fill
   useEffect(() => {
-    let current = 0;
-    let tickCount = 0;
+    // Organic drifting background blobs so the Antique Gold canvas feels alive
+    if (blob1Ref.current) {
+      gsap.to(blob1Ref.current, {
+        attr: {
+          d: "M 0 180 Q 260 120 520 210 T 1040 160 T 1440 220 L 1440 0 L 0 0 Z",
+        },
+        duration: 4.5,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
+    }
+    if (blob2Ref.current) {
+      gsap.to(blob2Ref.current, {
+        attr: {
+          d: "M 0 760 Q 320 670 680 750 T 1180 690 T 1440 740 L 1440 900 L 0 900 Z",
+        },
+        duration: 5.2,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
+    }
 
-    const interval = setInterval(() => {
-      current += Math.floor(Math.random() * 4) + 2;
-      tickCount++;
-      if (tickCount % 4 === 0) playTickSound();
+    // Initialize trim-path lengths on SR Monogram
+    const paths = [
+      monogramSRef.current,
+      monogramRStemRef.current,
+      monogramRBowlRef.current,
+      monogramFlourishRef.current,
+    ];
+    const lengths = paths.map((p) => {
+      if (!p) return 0;
+      const len = p.getTotalLength();
+      gsap.set(p, { strokeDasharray: len, strokeDashoffset: len });
+      return len;
+    });
 
-      if (current >= 100) {
-        current = 100;
-        clearInterval(interval);
+    // Silky 60fps GSAP progress timeline (zero stepped interval jitter)
+    const state = { val: 0 };
+    const tl = gsap.timeline({
+      onComplete: () => {
         setProgress(100);
         setIsReady(true);
-      } else {
-        setProgress(current);
-      }
-    }, 40);
+      },
+    });
 
-    return () => clearInterval(interval);
-  }, [playTickSound]);
+    tl.to(state, {
+      val: 100,
+      duration: 2.5,
+      ease: "power2.inOut",
+      onUpdate: () => {
+        const p = state.val / 100;
+        setProgress(Math.round(state.val));
 
-  // Handle entry transition into the 3D studio
+        // 0% -> 82%: Smoothly draw the SR Monogram strokes
+        const drawP = Math.min(1, p / 0.82);
+        paths.forEach((pathEl, idx) => {
+          if (!pathEl) return;
+          // Slight stagger across S -> R -> Flourish
+          const startOffset = idx * 0.12;
+          const localP = Math.max(0, Math.min(1, (drawP - startOffset) / (1 - startOffset)));
+          pathEl.style.strokeDashoffset = String(lengths[idx] * (1 - localP));
+        });
+
+        // 72% -> 100%: Gentle scale settle & luminous glow
+        if (monogramGroupRef.current && p > 0.72) {
+          const bloom = (p - 0.72) / 0.28;
+          gsap.set(monogramGroupRef.current, {
+            scale: 0.96 + bloom * 0.04,
+            transformOrigin: "center center",
+          });
+        }
+      },
+    });
+
+    return () => {
+      tl.kill();
+    };
+  }, []);
+
+  // Gentle float on Ready button
+  useEffect(() => {
+    if (isReady && readyBtnRef.current) {
+      gsap.fromTo(
+        readyBtnRef.current,
+        { y: 16, opacity: 0, scale: 0.94 },
+        { y: 0, opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.4)" }
+      );
+    }
+  }, [isReady]);
+
+  // 2. Liquify 2D Obsidian Wave Wash Transition into the Dark Lorenz Attractor Screen
   const handleTriggerEnter = useCallback(() => {
     if (isEntering) return;
     setIsEntering(true);
     playEnterSound();
 
-    // Signal the 3D Studio to ignite its cinematic camera glide-in & stardust bloom
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new CustomEvent("atelier-enter-studio"));
-    }
-
-    if (containerRef.current) {
-      // High-production gallery iris/depth plunge & optical blur dissipation
-      gsap.to(containerRef.current, {
-        opacity: 0,
-        scale: 1.07,
-        filter: "blur(18px)",
-        duration: 1.15,
-        ease: "power2.inOut",
+    if (liquidWashRef.current && liquidWavePathRef.current) {
+      const washTl = gsap.timeline({
         onComplete: () => {
           setVisible(false);
           if (onComplete) onComplete();
           if (typeof window !== "undefined") {
-            const lenis = (window as any).lenis;
+            const lenis = (window as unknown as { lenis?: { start: () => void } }).lenis;
             if (lenis) lenis.start();
             import("gsap/dist/ScrollTrigger").then(({ ScrollTrigger }) => {
               ScrollTrigger.refresh();
@@ -277,7 +180,60 @@ export const TerraceBreezePreloader = memo(function TerraceBreezePreloader({
           }
         },
       });
+
+      // Gently lift the monogram as the liquid obsidian wave rises to wash over the screen
+      if (monogramGroupRef.current) {
+        washTl.to(
+          monogramGroupRef.current,
+          { y: -24, scale: 1.08, opacity: 0, duration: 0.65, ease: "power2.inOut" },
+          0
+        );
+      }
+
+      // Morph wave crest + sweep liquid obsidian wash from bottom (105%) all the way past top (-18%)
+      washTl.to(
+        liquidWavePathRef.current,
+        {
+          attr: {
+            d: "M 0 120 Q 360 10 720 110 T 1440 40 L 1440 900 L 0 900 Z",
+          },
+          duration: 0.55,
+          ease: "sine.inOut",
+        },
+        0
+      );
+
+      washTl.fromTo(
+        liquidWashRef.current,
+        { yPercent: 105 },
+        {
+          yPercent: -15,
+          duration: 1.05,
+          ease: "power3.inOut",
+          onStart: () => {
+            // Trigger 3D Studio entrance right as the wave washes across the viewport
+            setTimeout(() => {
+              if (typeof window !== "undefined") {
+                window.dispatchEvent(new CustomEvent("atelier-enter-studio"));
+              }
+            }, 420);
+          },
+        },
+        0.05
+      );
+
+      // Fade out the preloader container once completely washed in #06070B obsidian
+      if (containerRef.current) {
+        washTl.to(
+          containerRef.current,
+          { opacity: 0, duration: 0.35, ease: "power2.out" },
+          0.95
+        );
+      }
     } else {
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("atelier-enter-studio"));
+      }
       setVisible(false);
       if (onComplete) onComplete();
     }
@@ -305,53 +261,115 @@ export const TerraceBreezePreloader = memo(function TerraceBreezePreloader({
     <div
       ref={containerRef}
       onClick={isReady ? handleTriggerEnter : undefined}
-      className={`fixed inset-0 z-[99999] bg-[#07080A] text-white flex flex-col justify-between p-6 sm:p-10 select-none overflow-hidden touch-none ${
+      className={`fixed inset-0 z-[99999] bg-[#B08A4F] text-[#102F27] flex flex-col justify-between p-6 sm:p-10 select-none overflow-hidden touch-none ${
         isReady ? "cursor-pointer" : "cursor-default"
       }`}
       aria-label="Atelier Preloader"
     >
-      {/* Background Ambient Radial Glow */}
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_80%_60%_at_50%_45%,rgba(255,255,255,0.035),transparent_70%)]" />
+      {/* Living 2D Liquid Background Waves (Antique Gold highlights & subtle Forest depth) */}
+      <svg
+        className="absolute inset-0 w-full h-full pointer-events-none z-0"
+        viewBox="0 0 1440 900"
+        preserveAspectRatio="none"
+        fill="none"
+      >
+        <path
+          ref={blob1Ref}
+          d="M 0 140 Q 320 220 680 130 T 1180 190 T 1440 130 L 1440 0 L 0 0 Z"
+          fill="#C59E61"
+          fillOpacity="0.45"
+        />
+        <path
+          ref={blob2Ref}
+          d="M 0 720 Q 280 790 620 710 T 1120 770 T 1440 700 L 1440 900 L 0 900 Z"
+          fill="#102F27"
+          fillOpacity="0.09"
+        />
+      </svg>
 
-      {/* Top Header: Atelier Identity */}
-      <div className="relative z-10 w-full flex items-center justify-between text-[8px] sm:text-[10px] font-mono tracking-[0.24em] uppercase text-white/40">
+      {/* Top Header: Minimal Atelier Identity */}
+      <div className="relative z-10 w-full flex items-center justify-between text-[8px] sm:text-[10px] font-mono tracking-[0.24em] uppercase text-[#102F27]/70">
         <div className="flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-          <span className="text-white/80 font-medium">SOHAM ROYCHOUDHURY</span>
+          <span className="w-2 h-2 rounded-full bg-[#102F27] animate-pulse" />
+          <span className="text-[#102F27] font-bold">SR // ATELIER</span>
         </div>
-        <div className="tracking-[0.22em] text-white/35">
-          ATELIER // 2026
+        <div className="tracking-[0.22em] text-[#102F27]/70 font-semibold">
+          2026 EDITION
         </div>
       </div>
 
-      {/* Centerpiece: Clean Tactile Dot-Matrix Counter & Hairline Bar */}
+      {/* Centerpiece: Sculptural Animated SR Monogram */}
       <div className="relative z-10 my-auto w-full flex flex-col items-center justify-center max-w-xl mx-auto px-4">
-        {/* Dot Matrix Readout */}
-        <div className="flex items-center justify-center gap-2 sm:gap-3 mb-6 sm:mb-8">
-          <DotChar char={pStr[0]} size={4.5} gap={1.8} />
-          <DotChar char={pStr[1]} size={4.5} gap={1.8} />
-          <DotChar char={pStr[2]} size={4.5} gap={1.8} />
-          <DotChar char="%" size={4.5} gap={1.8} />
+        <div className="w-48 h-36 sm:w-64 sm:h-48 mb-4 flex items-center justify-center">
+          <svg
+            viewBox="0 0 240 180"
+            className="w-full h-full overflow-visible"
+            fill="none"
+          >
+            <g ref={monogramGroupRef}>
+              {/* Calligraphic S (Hero Script inspired) */}
+              <path
+                ref={monogramSRef}
+                d="M 106 44 C 94 24, 56 26, 52 54 C 48 78, 102 84, 98 114 C 94 140, 48 142, 38 118"
+                stroke="#102F27"
+                strokeWidth="10"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              {/* Architectural R Stem */}
+              <path
+                ref={monogramRStemRef}
+                d="M 132 134 L 132 34"
+                stroke="#102F27"
+                strokeWidth="11"
+                strokeLinecap="round"
+              />
+              {/* Architectural R Bowl + Sweeping Leg */}
+              <path
+                ref={monogramRBowlRef}
+                d="M 132 34 L 166 34 C 194 34, 196 82, 166 84 L 132 84 M 158 84 L 194 134"
+                stroke="#102F27"
+                strokeWidth="11"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              {/* Flowing 2D Underline Flourish */}
+              <path
+                ref={monogramFlourishRef}
+                d="M 38 152 Q 118 168 198 148"
+                stroke="#102F27"
+                strokeWidth="6"
+                strokeLinecap="round"
+              />
+            </g>
+          </svg>
         </div>
 
-        {/* Minimal Hairline Progress Bar */}
-        <div className="w-full max-w-[220px] sm:max-w-[280px] h-[1.5px] bg-white/10 rounded-full overflow-hidden mb-5">
+        {/* Clean Progress Readout */}
+        <div className="flex items-center gap-3 mb-4">
+          <span className="font-mono font-black text-lg sm:text-xl tracking-widest text-[#102F27]">
+            {pStr}%
+          </span>
+        </div>
+
+        {/* Minimal Forest Progress Bar */}
+        <div className="w-full max-w-[200px] sm:max-w-[240px] h-[3px] bg-[#102F27]/15 rounded-full overflow-hidden mb-4">
           <div
-            className="h-full bg-white transition-all duration-300 ease-out shadow-[0_0_10px_rgba(255,255,255,0.85)]"
+            className="h-full bg-[#102F27] rounded-full transition-all duration-100 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>
 
-        {/* Calm Poetic Status Telemetry */}
-        <div className="text-[8px] sm:text-[9.5px] font-mono tracking-[0.2em] uppercase text-white/45 text-center truncate max-w-full mb-8">
+        {/* Status Telemetry */}
+        <div className="text-[8.5px] sm:text-[9.5px] font-mono font-semibold tracking-[0.2em] uppercase text-[#102F27]/75 text-center truncate max-w-full mb-7">
           {getStatus(progress)}
         </div>
 
         {/* Tactile Entry Pill Button (Appears gracefully at 100%) */}
         {isReady && (
-          <div className="animate-in fade-in zoom-in-95 duration-500">
-            <div className="inline-flex items-center gap-2.5 px-6 sm:px-8 py-2.5 sm:py-3 rounded-full border border-white/20 bg-white/10 text-white font-mono text-[8.5px] sm:text-[10px] tracking-[0.24em] uppercase backdrop-blur-md shadow-[0_4px_24px_rgba(0,0,0,0.6)] hover:bg-white hover:text-black transition-all duration-300">
-              <span className="w-1.5 h-1.5 rounded-full bg-current animate-ping" />
+          <div ref={readyBtnRef}>
+            <div className="inline-flex items-center gap-2.5 px-7 sm:px-9 py-3 sm:py-3.5 rounded-full bg-[#102F27] text-[#F5ECD9] font-mono text-[9px] sm:text-[10.5px] font-bold tracking-[0.22em] uppercase shadow-[0_14px_34px_rgba(16,47,39,0.32)] hover:scale-105 active:scale-95 transition-transform duration-200">
+              <span className="w-2 h-2 rounded-full bg-[#B08A4F] animate-ping" />
               <span className="hidden sm:inline">Click or Press Enter to Step Inside</span>
               <span className="inline sm:hidden">Tap to Step Inside</span>
             </div>
@@ -360,9 +378,29 @@ export const TerraceBreezePreloader = memo(function TerraceBreezePreloader({
       </div>
 
       {/* Footer Details */}
-      <div className="relative z-10 w-full flex items-center justify-between text-[7px] sm:text-[8.5px] font-mono tracking-[0.2em] uppercase text-white/25 border-t border-white/[0.06] pt-3">
+      <div className="relative z-10 w-full flex items-center justify-between text-[7px] sm:text-[8.5px] font-mono font-semibold tracking-[0.2em] uppercase text-[#102F27]/60 border-t border-[#102F27]/15 pt-3">
         <span>HARDWARE ACCELERATED</span>
         <span>STANDALONE EXPERIENCE</span>
+      </div>
+
+      {/* 2D Liquid Obsidian Wave Wash Overlay (Washes smoothly over screen into Lorenz Attractor) */}
+      <div
+        ref={liquidWashRef}
+        className="fixed inset-x-0 -top-[20vh] h-[140vh] w-full pointer-events-none z-50"
+        style={{ transform: "translateY(105%)" }}
+      >
+        <svg
+          className="w-full h-full"
+          viewBox="0 0 1440 900"
+          preserveAspectRatio="none"
+          fill="none"
+        >
+          <path
+            ref={liquidWavePathRef}
+            d="M 0 140 Q 360 40 720 130 T 1440 60 L 1440 900 L 0 900 Z"
+            fill="#06070B"
+          />
+        </svg>
       </div>
     </div>
   );

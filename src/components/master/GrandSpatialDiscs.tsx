@@ -263,26 +263,25 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
         });
       }
 
-      // 1. Entrance: Horizontal Blade Sweep on desktop, or PURE Z-AXIS DEPTH PLUNGE on mobile
+      // 1. Entrance: Horizontal Blade Sweep on desktop, or AUTHENTIC APEKON DISINTEGRATION REVEAL on mobile
       if (stageRef.current) {
         if (!isDesktop) {
-          // MOBILE: PURE Z-AXIS CAMERA PLUNGE (Zero vertical sliding!)
+          // MOBILE: AUTHENTIC APEKON DISINTEGRATION REVEAL (Zero plunge zoom, zero blur!)
           // Counteracts the vertical scroll displacement so the stage stays visually pinned at top: 0,
-          // while scaling forward from deep Z-space (0.64 -> 1.0) and clearing depth blur
+          // while the apekonCanvas overlay executes the pure triangular shard shatter dissolve!
           gsap.fromTo(
             stageRef.current,
             {
               y: -window.innerHeight,
-              scale: 0.64,
-              opacity: 0,
-              filter: "blur(20px)",
-              transformOrigin: "center center",
+              scale: 1.0,
+              opacity: 1,
+              filter: "none",
             },
             {
               y: 0,
               scale: 1.0,
               opacity: 1,
-              filter: "blur(0px)",
+              filter: "none",
               ease: "none",
               scrollTrigger: {
                 trigger: sectionRef.current,

@@ -87,10 +87,11 @@ interface TriangleItem {
 
 interface ApekonDisintegrationCreedProps {
   progress?: number;
+  onStationSelect?: (index: number) => void;
 }
 
 export const ApekonDisintegrationCreed: React.FC<ApekonDisintegrationCreedProps> = memo(
-  ({ progress = 0 }) => {
+  ({ progress = 0, onStationSelect }) => {
     const [currentStationIdx, setCurrentStationIdx] = useState(0);
     const [displayedIdx, setDisplayedIdx] = useState(0);
     const [isDisintegrating, setIsDisintegrating] = useState(false);
@@ -544,22 +545,47 @@ export const ApekonDisintegrationCreed: React.FC<ApekonDisintegrationCreedProps>
       }
     };
 
+    const handleStationClick = (i: number, e?: React.MouseEvent) => {
+      if (typeof navigator !== "undefined" && navigator.vibrate) {
+        try { navigator.vibrate(8); } catch (_) {}
+      }
+      if (onStationSelect) {
+        onStationSelect(i);
+      } else {
+        triggerDisintegrationTo(i, e?.clientX, e?.clientY);
+      }
+    };
+
     const handleNext = (e?: React.MouseEvent) => {
+      if (typeof navigator !== "undefined" && navigator.vibrate) {
+        try { navigator.vibrate(8); } catch (_) {}
+      }
       const next = (currentStationIdx + 1) % CREED_STATIONS.length;
-      triggerDisintegrationTo(
-        next,
-        e ? e.clientX : undefined,
-        e ? e.clientY : undefined
-      );
+      if (onStationSelect) {
+        onStationSelect(next);
+      } else {
+        triggerDisintegrationTo(
+          next,
+          e ? e.clientX : undefined,
+          e ? e.clientY : undefined
+        );
+      }
     };
 
     const handlePrev = (e?: React.MouseEvent) => {
+      if (typeof navigator !== "undefined" && navigator.vibrate) {
+        try { navigator.vibrate(8); } catch (_) {}
+      }
       const prev = (currentStationIdx - 1 + CREED_STATIONS.length) % CREED_STATIONS.length;
-      triggerDisintegrationTo(
-        prev,
-        e ? e.clientX : undefined,
-        e ? e.clientY : undefined
-      );
+      if (onStationSelect) {
+        onStationSelect(prev);
+      } else {
+        triggerDisintegrationTo(
+          prev,
+          e ? e.clientX : undefined,
+          e ? e.clientY : undefined
+        );
+      }
     };
 
     const station = CREED_STATIONS[displayedIdx];
@@ -648,7 +674,7 @@ export const ApekonDisintegrationCreed: React.FC<ApekonDisintegrationCreedProps>
             {CREED_STATIONS.map((st, i) => (
               <button
                 key={st.num}
-                onClick={(e) => triggerDisintegrationTo(i, e.clientX, e.clientY)}
+                onClick={(e) => handleStationClick(i, e)}
                 className={`group relative flex items-center justify-center transition-all duration-300 ${
                   currentStationIdx === i
                     ? "w-8 h-6 bg-white text-black font-bold"

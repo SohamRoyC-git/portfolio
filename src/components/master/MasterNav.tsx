@@ -49,7 +49,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
     };
     updateTime();
     const interval = setInterval(updateTime, 1000);
-    const isLightSection = activeId === "monument-creed";
+    const isLightSection = activeId === "monument-creed" || activeId === "monument-matrix";
   const pillSurfaceClass = isLightSection
     ? "border-white/30 bg-white/5 md:border-[#14161A]/20 md:bg-[#14161A]/85 hover:bg-white/20 md:hover:bg-[#14161A]"
     : "border-white/30 bg-white/5 hover:bg-white/20";
@@ -65,7 +65,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
       }
     };
     window.addEventListener("keydown", handleKeyDown);
-    const isLightSection = activeId === "monument-creed";
+    const isLightSection = activeId === "monument-creed" || activeId === "monument-matrix";
   const pillSurfaceClass = isLightSection
     ? "border-white/30 bg-white/5 md:border-[#14161A]/20 md:bg-[#14161A]/85 hover:bg-white/20 md:hover:bg-[#14161A]"
     : "border-white/30 bg-white/5 hover:bg-white/20";
@@ -88,7 +88,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
     onNavigate(id);
   };
 
-  const isLightSection = activeId === "monument-creed";
+  const isLightSection = activeId === "monument-creed" || activeId === "monument-matrix";
   const pillSurfaceClass = isLightSection
     ? "border-white/30 bg-white/5 md:border-[#14161A]/20 md:bg-[#14161A]/85 hover:bg-white/20 md:hover:bg-[#14161A]"
     : "border-white/30 bg-white/5 hover:bg-white/20";
@@ -204,7 +204,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
             <div className="max-w-4xl mx-auto w-full my-auto py-6 sm:py-12 flex flex-col gap-2.5 sm:gap-5">
               {links.map((link, idx) => {
                 const isActive = activeId === link.id;
-                const isLightSection = activeId === "monument-creed";
+                const isLightSection = activeId === "monument-creed" || activeId === "monument-matrix";
   const pillSurfaceClass = isLightSection
     ? "border-white/30 bg-white/5 md:border-[#14161A]/20 md:bg-[#14161A]/85 hover:bg-white/20 md:hover:bg-[#14161A]"
     : "border-white/30 bg-white/5 hover:bg-white/20";

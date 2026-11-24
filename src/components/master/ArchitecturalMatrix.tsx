@@ -1,6 +1,8 @@
 "use client";
 
-import React, { memo, useState, useRef } from "react";
+import React, { memo, useState, useRef, useEffect } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles,
@@ -281,6 +283,37 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
   const [searchFilter, setSearchFilter] = useState<string>("");
 
   const sectionRef = useRef<HTMLElement | null>(null);
+  const sidewaysRibbonRef = useRef<SVGPathElement | null>(null);
+
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion || !sectionRef.current || !sidewaysRibbonRef.current) return;
+
+    gsap.registerPlugin(ScrollTrigger);
+    const mm = gsap.matchMedia();
+
+    mm.add("(min-width: 768px)", () => {
+      const pathEl = sidewaysRibbonRef.current;
+      if (!pathEl) return;
+      const len = pathEl.getTotalLength();
+      gsap.set(pathEl, {
+        strokeDasharray: len,
+        strokeDashoffset: len,
+      });
+      gsap.to(pathEl, {
+        strokeDashoffset: 0,
+        ease: "none",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 88%",
+          end: "bottom 92%",
+          scrub: 0.35,
+        },
+      });
+    });
+
+    return () => mm.revert();
+  }, []);
 
   const handleMarqueeSelect = (item: TechItem) => {
     setActiveMarqueeId((prev) => (prev === item.id ? null : item.id));
@@ -309,12 +342,29 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
     <section
       id="monument-matrix"
       ref={sectionRef}
-      className="relative w-full z-30 min-h-[100svh] py-24 sm:py-32 px-4 sm:px-8 md:px-12 lg:px-16 bg-[#0B0609] text-[#F8F5EE] border-t border-[#EAD7C0]/15 select-none overflow-hidden"
+      className="relative w-full z-30 min-h-[100svh] py-24 sm:py-32 px-4 sm:px-8 md:px-12 lg:px-16 bg-[#0B0609] md:bg-[#F7EFE7] text-[#F8F5EE] md:text-[#14161A] border-t border-[#EAD7C0]/15 md:border-black/10 select-none overflow-hidden"
     >
       {/* Background Architectural Mesh */}
-      <div className="absolute inset-0 bg-[radial-gradient(#EAD7C0_1px,transparent_1px)] [background-size:28px_28px] opacity-[0.035] pointer-events-none" />
-      <div className="absolute top-1/4 right-0 w-[500px] h-[500px] rounded-full bg-[#FF8C38]/5 blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 left-10 w-[500px] h-[500px] rounded-full bg-[#10B981]/5 blur-3xl pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(#EAD7C0_1px,transparent_1px)] md:bg-[radial-gradient(#14161A_1px,transparent_1px)] [background-size:28px_28px] opacity-[0.035] md:opacity-[0.06] pointer-events-none" />
+      <div className="md:hidden absolute top-1/4 right-0 w-[500px] h-[500px] rounded-full bg-[#FF8C38]/5 blur-3xl pointer-events-none" />
+      <div className="md:hidden absolute bottom-10 left-10 w-[500px] h-[500px] rounded-full bg-[#10B981]/5 blur-3xl pointer-events-none" />
+
+      {/* Desktop-Only Sideways Sweeping 2D Orange Ribbon (Guides across & behind the continuous tech stack) */}
+      <svg
+        className="hidden md:block absolute inset-0 w-full h-full pointer-events-none z-0 overflow-visible"
+        viewBox="0 0 1440 800"
+        preserveAspectRatio="none"
+        fill="none"
+      >
+        <path
+          ref={sidewaysRibbonRef}
+          d="M -40 220 C 260 60, 460 440, 760 290 C 1030 155, 1180 560, 1480 420"
+          stroke="#FF5400"
+          strokeWidth="28"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
 
       <div className="relative z-10 max-w-7xl mx-auto flex flex-col justify-between flex-1 gap-12 sm:gap-16">
         
@@ -330,26 +380,26 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
           <div className="lg:col-span-5 flex flex-col items-start">
             
             {/* Pill Eyebrow matching reference video "* Our Tech Stack" */}
-            <div className="inline-flex items-center gap-2 text-[10px] font-sans font-bold uppercase tracking-[0.24em] text-[#FF8C38] mb-5 px-3.5 py-1.5 rounded-full border border-[#FF8C38]/30 bg-[#FF8C38]/10 backdrop-blur-md">
+            <div className="inline-flex items-center gap-2 text-[10px] font-sans font-bold uppercase tracking-[0.24em] text-[#FF8C38] md:text-[#FF5400] mb-5 px-3.5 py-1.5 rounded-full border border-[#FF8C38]/30 md:border-[#FF5400]/30 bg-[#FF8C38]/10 md:bg-[#FF5400]/10 backdrop-blur-md">
               <span className="text-xs">✱</span>
               <span>OUR TECH STACK</span>
             </div>
 
             {/* Main Headline matching reference */}
-            <h2 className="font-sans font-black text-3xl xs:text-4xl sm:text-5xl lg:text-6xl text-[#FFFDF8] tracking-tight leading-[1.05] mb-5">
+            <h2 className="font-sans font-black text-3xl xs:text-4xl sm:text-5xl lg:text-6xl text-[#FFFDF8] md:text-[#14161A] tracking-tight leading-[1.05] mb-5">
               Key Technologies &amp; <br />
-              <span className="text-[#EAD7C0]/70">Platforms</span>
+              <span className="text-[#EAD7C0]/70 md:text-[#FF5400]">Platforms</span>
             </h2>
 
             {/* Descriptive Body Narrative matching reference */}
-            <p className="font-sans font-normal text-sm sm:text-base text-[#D8C4AE]/80 leading-relaxed max-w-md mb-8">
+            <p className="font-sans font-normal md:font-medium text-sm sm:text-base text-[#D8C4AE]/80 md:text-[#14161A]/75 leading-relaxed max-w-md mb-8">
               We work with leading platforms, modern runtimes, and engineering frameworks that empower digital transformation, accelerate delivery, and drive measurable real-world outcomes.
             </p>
 
             {/* Action Pill matching reference "Explore Tech Stack" */}
             <button
               onClick={() => setIsExplorationMode(!isExplorationMode)}
-              className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-white text-black hover:bg-[#FF8C38] hover:text-white font-sans font-bold text-xs uppercase tracking-wider transition-all duration-300 cursor-pointer shadow-xl hover:scale-105 active:scale-95"
+              className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-white md:bg-[#14161A] text-black md:text-[#F7EFE7] hover:bg-[#FF8C38] md:hover:bg-[#FF5400] hover:text-white font-sans font-bold text-xs uppercase tracking-wider transition-all duration-300 cursor-pointer shadow-xl hover:scale-105 active:scale-95"
             >
               <span>{isExplorationMode ? "Back to Kinetic Flow" : "Explore Tech Stack"}</span>
               {isExplorationMode ? (
@@ -361,8 +411,8 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
 
             {/* Active Mode Notice & Lit Logo Preview */}
             <div className="mt-5 flex flex-col gap-2.5">
-              <div className="flex items-center gap-2 text-[10px] font-mono text-white/40">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <div className="flex items-center gap-2 text-[10px] font-mono text-white/40 md:text-[#14161A]/55">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 md:bg-[#FF5400] animate-pulse" />
                 <span>
                   {isExplorationMode
                     ? "GRID EXPLORATION ACTIVE · CLICK ANY LOGO TO INSPECT EXAMPLES"
@@ -371,8 +421,8 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
               </div>
 
               {activeMarqueeId && !isExplorationMode && (
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EAD7C0] text-[#0B0609] text-xs font-mono font-bold shadow-lg animate-fade-in self-start border border-[#FF8C38]/40">
-                  <Sparkles size={12} className="text-[#FF8C38]" />
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EAD7C0] md:bg-[#14161A] text-[#0B0609] md:text-[#F7EFE7] text-xs font-mono font-bold shadow-lg animate-fade-in self-start border border-[#FF8C38]/40 md:border-[#FF5400]/40">
+                  <Sparkles size={12} className="text-[#FF8C38] md:text-[#FF5400]" />
                   <span>{selectedTech.name} // {selectedTech.role}</span>
                 </div>
               )}
@@ -395,11 +445,11 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.96 }}
                   transition={{ duration: 0.4 }}
-                  className="relative w-full max-w-xl h-[420px] xs:h-[460px] sm:h-[500px] rounded-3xl border border-[#EAD7C0]/20 bg-[#14050A]/60 backdrop-blur-2xl overflow-hidden p-3 xs:p-4 sm:p-6 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
+                  className="relative w-full max-w-xl h-[420px] xs:h-[460px] sm:h-[500px] rounded-3xl border border-[#EAD7C0]/20 md:border-[#14161A]/15 bg-[#14050A]/60 md:bg-[#EFE5DA]/85 backdrop-blur-2xl overflow-hidden p-3 xs:p-4 sm:p-6 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] md:shadow-[0_25px_60px_-15px_rgba(20,22,26,0.14)]"
                 >
                   {/* Top and Bottom Gradient Fade Masks (for smooth entry and exit) */}
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-16 sm:h-20 bg-gradient-to-b from-[#14050A] via-[#14050A]/80 to-transparent z-10" />
-                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 sm:h-20 bg-gradient-to-t from-[#14050A] via-[#14050A]/80 to-transparent z-10" />
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-16 sm:h-20 bg-gradient-to-b from-[#14050A] via-[#14050A]/80 md:from-[#EFE5DA] md:via-[#EFE5DA]/85 to-transparent z-10" />
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 sm:h-20 bg-gradient-to-t from-[#14050A] via-[#14050A]/80 md:from-[#EFE5DA] md:via-[#EFE5DA]/85 to-transparent z-10" />
 
                   {/* 4 Alternating Vertical Columns Container */}
                   <div className="grid grid-cols-4 gap-2 xs:gap-3 sm:gap-4 h-full">
@@ -416,8 +466,8 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
                             onClick={() => handleMarqueeSelect(item)}
                             className={`w-full aspect-square rounded-xl sm:rounded-2xl border transition-all duration-300 cursor-pointer flex items-center justify-center p-2 xs:p-2.5 sm:p-3 shadow-sm active:scale-95 ${
                               isLit
-                                ? "bg-[#EAD7C0] text-[#0B0609] border-[#FF8C38] scale-105 shadow-[0_0_25px_rgba(255,140,56,0.55)] z-20 ring-2 ring-[#FF8C38]/40"
-                                : "bg-white/5 text-white border-white/10 hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0] hover:scale-105"
+                                ? "bg-[#EAD7C0] md:bg-[#FF5400] text-[#0B0609] md:text-white border-[#FF8C38] md:border-[#FF5400] scale-105 shadow-[0_0_25px_rgba(255,140,56,0.55)] md:shadow-[0_10px_25px_rgba(255,84,0,0.35)] z-20 ring-2 ring-[#FF8C38]/40"
+                                : "bg-white/5 md:bg-white text-white md:text-[#14161A] border-white/10 md:border-[#14161A]/12 hover:bg-[#EAD7C0] md:hover:bg-[#14161A] hover:text-[#0B0609] md:hover:text-[#F7EFE7] hover:border-[#EAD7C0] md:hover:border-[#14161A] hover:scale-105"
                             }`}
                           >
                             <IconComponent size={24} className="transition-transform group-hover:scale-110" />
@@ -438,8 +488,8 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
                             onClick={() => handleMarqueeSelect(item)}
                             className={`w-full aspect-square rounded-xl sm:rounded-2xl border transition-all duration-300 cursor-pointer flex items-center justify-center p-2 xs:p-2.5 sm:p-3 shadow-sm active:scale-95 ${
                               isLit
-                                ? "bg-[#EAD7C0] text-[#0B0609] border-[#FF8C38] scale-105 shadow-[0_0_25px_rgba(255,140,56,0.55)] z-20 ring-2 ring-[#FF8C38]/40"
-                                : "bg-white/5 text-white border-white/10 hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0] hover:scale-105"
+                                ? "bg-[#EAD7C0] md:bg-[#FF5400] text-[#0B0609] md:text-white border-[#FF8C38] md:border-[#FF5400] scale-105 shadow-[0_0_25px_rgba(255,140,56,0.55)] md:shadow-[0_10px_25px_rgba(255,84,0,0.35)] z-20 ring-2 ring-[#FF8C38]/40"
+                                : "bg-white/5 md:bg-white text-white md:text-[#14161A] border-white/10 md:border-[#14161A]/12 hover:bg-[#EAD7C0] md:hover:bg-[#14161A] hover:text-[#0B0609] md:hover:text-[#F7EFE7] hover:border-[#EAD7C0] md:hover:border-[#14161A] hover:scale-105"
                             }`}
                           >
                             <IconComponent size={24} className="transition-transform group-hover:scale-110" />
@@ -460,8 +510,8 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
                             onClick={() => handleMarqueeSelect(item)}
                             className={`w-full aspect-square rounded-xl sm:rounded-2xl border transition-all duration-300 cursor-pointer flex items-center justify-center p-2 xs:p-2.5 sm:p-3 shadow-sm active:scale-95 ${
                               isLit
-                                ? "bg-[#EAD7C0] text-[#0B0609] border-[#FF8C38] scale-105 shadow-[0_0_25px_rgba(255,140,56,0.55)] z-20 ring-2 ring-[#FF8C38]/40"
-                                : "bg-white/5 text-white border-white/10 hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0] hover:scale-105"
+                                ? "bg-[#EAD7C0] md:bg-[#FF5400] text-[#0B0609] md:text-white border-[#FF8C38] md:border-[#FF5400] scale-105 shadow-[0_0_25px_rgba(255,140,56,0.55)] md:shadow-[0_10px_25px_rgba(255,84,0,0.35)] z-20 ring-2 ring-[#FF8C38]/40"
+                                : "bg-white/5 md:bg-white text-white md:text-[#14161A] border-white/10 md:border-[#14161A]/12 hover:bg-[#EAD7C0] md:hover:bg-[#14161A] hover:text-[#0B0609] md:hover:text-[#F7EFE7] hover:border-[#EAD7C0] md:hover:border-[#14161A] hover:scale-105"
                             }`}
                           >
                             <IconComponent size={24} className="transition-transform group-hover:scale-110" />
@@ -482,8 +532,8 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
                             onClick={() => handleMarqueeSelect(item)}
                             className={`w-full aspect-square rounded-xl sm:rounded-2xl border transition-all duration-300 cursor-pointer flex items-center justify-center p-2 xs:p-2.5 sm:p-3 shadow-sm active:scale-95 ${
                               isLit
-                                ? "bg-[#EAD7C0] text-[#0B0609] border-[#FF8C38] scale-105 shadow-[0_0_25px_rgba(255,140,56,0.55)] z-20 ring-2 ring-[#FF8C38]/40"
-                                : "bg-white/5 text-white border-white/10 hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0] hover:scale-105"
+                                ? "bg-[#EAD7C0] md:bg-[#FF5400] text-[#0B0609] md:text-white border-[#FF8C38] md:border-[#FF5400] scale-105 shadow-[0_0_25px_rgba(255,140,56,0.55)] md:shadow-[0_10px_25px_rgba(255,84,0,0.35)] z-20 ring-2 ring-[#FF8C38]/40"
+                                : "bg-white/5 md:bg-white text-white md:text-[#14161A] border-white/10 md:border-[#14161A]/12 hover:bg-[#EAD7C0] md:hover:bg-[#14161A] hover:text-[#0B0609] md:hover:text-[#F7EFE7] hover:border-[#EAD7C0] md:hover:border-[#14161A] hover:scale-105"
                             }`}
                           >
                             <IconComponent size={24} className="transition-transform group-hover:scale-110" />
@@ -504,10 +554,10 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.4 }}
-                  className="w-full flex flex-col gap-4 sm:gap-5 bg-[#14050A]/90 border border-[#EAD7C0]/25 rounded-3xl p-4 xs:p-5 sm:p-7 backdrop-blur-2xl shadow-2xl"
+                  className="w-full flex flex-col gap-4 sm:gap-5 bg-[#14050A]/90 md:bg-white/95 border border-[#EAD7C0]/25 md:border-[#14161A]/15 rounded-3xl p-4 xs:p-5 sm:p-7 backdrop-blur-2xl shadow-2xl"
                 >
                   {/* Category Filter Pills & Search */}
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-white/10 pb-3 sm:pb-4">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-white/10 md:border-[#14161A]/10 pb-3 sm:pb-4">
                     <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 sm:pb-0 scrollbar-none sm:flex-wrap">
                       {categories.map((cat) => (
                         <button
@@ -515,8 +565,8 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
                           onClick={() => setActiveCategoryFilter(cat.id)}
                           className={`whitespace-nowrap px-2.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider transition-all cursor-pointer ${
                             activeCategoryFilter === cat.id
-                              ? "bg-[#FF8C38] text-black font-bold shadow-sm"
-                              : "bg-white/5 border border-white/10 text-white/60 hover:text-white"
+                              ? "bg-[#FF8C38] md:bg-[#FF5400] text-black md:text-white font-bold shadow-sm"
+                              : "bg-white/5 md:bg-[#F7EFE7] border border-white/10 md:border-[#14161A]/15 text-white/60 md:text-[#14161A]/70 hover:text-white md:hover:text-[#14161A]"
                           }`}
                         >
                           {cat.label}
@@ -525,13 +575,13 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
                     </div>
 
                     <div className="relative w-full sm:w-auto">
-                      <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/40" />
+                      <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/40 md:text-[#14161A]/40" />
                       <input
                         type="text"
                         value={searchFilter}
                         onChange={(e) => setSearchFilter(e.target.value)}
                         placeholder="Filter stack..."
-                        className="w-full sm:w-auto pl-7 pr-3 py-1 rounded-full bg-black/40 border border-white/15 text-[11px] text-white placeholder:text-white/30 focus:outline-none focus:border-[#FF8C38]"
+                        className="w-full sm:w-auto pl-7 pr-3 py-1 rounded-full bg-black/40 md:bg-[#F7EFE7] border border-white/15 md:border-[#14161A]/15 text-[11px] text-white md:text-[#14161A] placeholder:text-white/30 md:placeholder:text-[#14161A]/40 focus:outline-none focus:border-[#FF8C38] md:focus:border-[#FF5400]"
                       />
                     </div>
                   </div>
@@ -547,8 +597,8 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
                           onClick={() => setSelectedTech(item)}
                           className={`aspect-square rounded-xl sm:rounded-2xl flex flex-col items-center justify-center p-2 sm:p-2.5 transition-all duration-200 cursor-pointer border ${
                             isSelected
-                              ? "bg-[#EAD7C0] text-[#0B0609] border-[#FF8C38] shadow-lg scale-105"
-                              : "bg-white/5 text-white border-white/10 hover:bg-[#EAD7C0] hover:text-[#0B0609] hover:border-[#EAD7C0]"
+                              ? "bg-[#EAD7C0] md:bg-[#FF5400] text-[#0B0609] md:text-white border-[#FF8C38] md:border-[#FF5400] shadow-lg scale-105"
+                              : "bg-white/5 md:bg-[#F7EFE7] text-white md:text-[#14161A] border-white/10 md:border-[#14161A]/12 hover:bg-[#EAD7C0] md:hover:bg-[#14161A] hover:text-[#0B0609] md:hover:text-[#F7EFE7] hover:border-[#EAD7C0] md:hover:border-[#14161A]"
                           }`}
                         >
                           <IconComponent size={22} />
@@ -561,40 +611,40 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
                   </div>
 
                   {/* Selected Tech Detail Drawer with Real-World Production Examples */}
-                  <div className="p-3.5 sm:p-5 rounded-2xl bg-black/60 border border-[#EAD7C0]/20 flex flex-col gap-2.5 sm:gap-3">
-                    <div className="flex items-start justify-between border-b border-white/10 pb-2.5">
+                  <div className="p-3.5 sm:p-5 rounded-2xl bg-black/60 md:bg-[#F7EFE7] border border-[#EAD7C0]/20 md:border-[#14161A]/15 flex flex-col gap-2.5 sm:gap-3">
+                    <div className="flex items-start justify-between border-b border-white/10 md:border-[#14161A]/10 pb-2.5">
                       <div>
                         <div className="flex items-center gap-2">
-                          <h4 className="font-sans font-black text-base sm:text-lg text-[#FFFDF8]">
+                          <h4 className="font-sans font-black text-base sm:text-lg text-[#FFFDF8] md:text-[#14161A]">
                             {selectedTech.name}
                           </h4>
-                          <span className="text-[8.5px] sm:text-[9px] font-mono px-2 py-0.5 rounded-full border border-emerald-500/40 text-emerald-400 bg-emerald-950/30">
+                          <span className="text-[8.5px] sm:text-[9px] font-mono px-2 py-0.5 rounded-full border border-emerald-500/40 md:border-[#FF5400]/30 text-emerald-400 md:text-[#FF5400] bg-emerald-950/30 md:bg-[#FF5400]/10">
                             {selectedTech.level}
                           </span>
                         </div>
-                        <div className="text-[10px] sm:text-[11px] font-mono text-[#FF8C38] uppercase mt-0.5">
+                        <div className="text-[10px] sm:text-[11px] font-mono text-[#FF8C38] md:text-[#FF5400] uppercase mt-0.5">
                           {selectedTech.role}
                         </div>
                       </div>
 
-                      <span className="text-[9px] sm:text-[10px] font-mono text-white/40 uppercase">
+                      <span className="text-[9px] sm:text-[10px] font-mono text-white/40 md:text-[#14161A]/50 uppercase">
                         {selectedTech.categoryLabel}
                       </span>
                     </div>
 
-                    <p className="font-sans text-xs text-[#D8C4AE] leading-relaxed">
+                    <p className="font-sans text-xs text-[#D8C4AE] md:text-[#14161A]/80 leading-relaxed">
                       {selectedTech.description}
                     </p>
 
                     {/* Production Example Highlight */}
-                    <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 sm:gap-2 border-t border-white/5 text-xs">
-                      <div className="flex flex-wrap items-center gap-1.5 text-white/90">
-                        <CheckCircle2 size={13} className="text-[#FF8C38] shrink-0" />
+                    <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 sm:gap-2 border-t border-white/5 md:border-[#14161A]/10 text-xs">
+                      <div className="flex flex-wrap items-center gap-1.5 text-white/90 md:text-[#14161A]">
+                        <CheckCircle2 size={13} className="text-[#FF8C38] md:text-[#FF5400] shrink-0" />
                         <span className="font-bold text-[10.5px] sm:text-[11px]">Production:</span>
-                        <span className="text-[10.5px] sm:text-[11px] text-[#EAD7C0]">{selectedTech.projectHighlight}</span>
+                        <span className="text-[10.5px] sm:text-[11px] text-[#EAD7C0] md:text-[#14161A]/75">{selectedTech.projectHighlight}</span>
                       </div>
 
-                      <div className="font-mono text-[9.5px] sm:text-[10px] text-emerald-400">
+                      <div className="font-mono text-[9.5px] sm:text-[10px] text-emerald-400 md:text-[#FF5400] font-semibold">
                         {selectedTech.metrics}
                       </div>
                     </div>

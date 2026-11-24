@@ -386,7 +386,7 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
             </div>
 
             {/* Main Headline matching reference */}
-            <h2 className="font-sans font-black text-3xl xs:text-4xl sm:text-5xl lg:text-6xl text-[#FFFDF8] md:text-[#1D4A35] tracking-tight leading-[1.05] mb-5">
+            <h2 className="oat-knockout-lg font-sans font-black text-3xl xs:text-4xl sm:text-5xl lg:text-6xl text-[#FFFDF8] md:text-[#1D4A35] tracking-tight leading-[1.05] mb-5">
               Key Technologies &amp; <br />
               <span className="text-[#EAD7C0]/70 md:text-[#F2462E]">Platforms</span>
             </h2>
@@ -683,6 +683,12 @@ export const ArchitecturalMatrix: React.FC = memo(() => {
         }
         .animate-marquee-down {
           animation: marqueeDown 24s linear infinite;
+        }
+        @media (min-width: 768px) {
+          .oat-knockout-lg {
+            -webkit-text-stroke: 10px #EEE5D4;
+            paint-order: stroke fill;
+          }
         }
       `}</style>
     </section>

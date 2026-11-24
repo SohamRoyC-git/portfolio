@@ -718,7 +718,13 @@ export const ArchitecturalCreed: React.FC = memo(() => {
                         </div>
 
                         {/* Title & Role */}
-                        <h4 className="font-sans font-black text-2xl lg:text-3xl text-[#1D4A35] mb-2 leading-tight group-hover:text-[#F2462E] transition-colors">
+                        <h4
+                          className="font-sans font-black text-2xl lg:text-3xl text-[#1D4A35] mb-2 leading-tight group-hover:text-[#F2462E] transition-colors"
+                          style={{
+                            WebkitTextStroke: "8px #EEE5D4",
+                            paintOrder: "stroke fill",
+                          }}
+                        >
                           {item.title}
                         </h4>
                         <div className="text-xs lg:text-[13px] font-mono font-bold text-[#1D4A35]/80 mb-4 tracking-wide">

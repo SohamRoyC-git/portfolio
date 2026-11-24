@@ -45,12 +45,15 @@ const INCOMING_PARTICLES = [
 ];
 
 export const ArchitecturalCreed: React.FC = memo(() => {
-  // Desktop Refs
+  // Desktop Refs (Flowing Ribbon Editorial Stream)
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
+  const headerLineRef = useRef<HTMLDivElement | null>(null);
   const gridRef = useRef<HTMLDivElement | null>(null);
+  const ribbonPathRef = useRef<SVGPathElement | null>(null);
+  const ribbonGlowRef = useRef<SVGPathElement | null>(null);
 
   // Mobile Cinematic Monograph Deck Refs (< 768px)
   const mobileSectionRef = useRef<HTMLDivElement | null>(null);
@@ -83,80 +86,134 @@ export const ArchitecturalCreed: React.FC = memo(() => {
     const mm = gsap.matchMedia();
 
     // =========================================================================
-    // DESKTOP & TABLET EXPERIENCE (>= 768px): HIGH-ART PLINTH CARDS GRID
-    // 100% UNTOUCHED & PRISTINE
+    // DESKTOP & TABLET EXPERIENCE (>= 768px):
+    // Direction 1: Flowing Ribbon Editorial Stream (Inspired by two26.studio)
     // =========================================================================
     mm.add("(min-width: 768px)", () => {
       if (!sectionRef.current) return;
 
-      // 1. Entrance Horizontal Curtain Sweep (Left-to-Right)
-      if (stageRef.current) {
+      // 1. Continuous Sweeping Trim-Path SVG Ribbon scrubbed to scroll
+      [ribbonPathRef.current, ribbonGlowRef.current].forEach((pathEl) => {
+        if (!pathEl) return;
+        const len = pathEl.getTotalLength();
+        gsap.set(pathEl, {
+          strokeDasharray: len,
+          strokeDashoffset: len,
+        });
+        gsap.to(pathEl, {
+          strokeDashoffset: 0,
+          ease: "none",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 75%",
+            end: "bottom 75%",
+            scrub: 0.45,
+          },
+        });
+      });
+
+      // 2. Editorial Header & Trim-Path Hairline Reveal
+      if (headerRef.current) {
         gsap.fromTo(
-          stageRef.current,
-          { clipPath: "polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)" },
+          headerRef.current,
+          { y: 36, opacity: 0 },
           {
-            clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
-            ease: "power2.out",
+            y: 0,
+            opacity: 1,
+            duration: 0.9,
+            ease: "power3.out",
             scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top bottom",
-              end: "top 20%",
-              scrub: 0.3,
+              trigger: headerRef.current,
+              start: "top 85%",
+              once: true,
             },
           }
         );
       }
 
-      // 2. Timeline for Header and Cards Reveal
-      const cards = gridRef.current?.querySelectorAll(".creed-card");
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top top",
-          end: "+=350",
-          scrub: 0.3,
-        },
-      });
-
-      if (headerRef.current) {
-        tl.fromTo(
-          headerRef.current,
-          { y: 25, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.25, ease: "power2.out" },
-          0
-        );
-      }
-
-      if (cards && cards.length > 0) {
-        tl.fromTo(
-          cards,
-          { y: 40, opacity: 0 },
+      if (headerLineRef.current) {
+        gsap.fromTo(
+          headerLineRef.current,
+          { scaleX: 0, transformOrigin: "left center" },
           {
-            y: 0,
-            opacity: 1,
-            stagger: 0.08,
-            duration: 0.35,
-            ease: "power2.out",
-          },
-          0.1
+            scaleX: 1,
+            duration: 1.1,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: headerRef.current,
+              start: "top 85%",
+              once: true,
+            },
+          }
         );
       }
 
-      // 3. Smooth Exit into Movement 03 (Projects Showcase)
-      if (containerRef.current) {
-        gsap.to(containerRef.current, {
-          scale: 0.94,
-          yPercent: -12,
-          opacity: 0.2,
-          ease: "power2.inOut",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "bottom bottom",
-            end: "bottom top",
-            scrub: true,
-          },
-        });
-      }
+      // 3. Alternating Editorial Pillars + Springy Tilted Floating Pills
+      const items = gridRef.current?.querySelectorAll(".creed-stream-item");
+      items?.forEach((item, idx) => {
+        const isEven = idx % 2 === 0;
+        const content = item.querySelector(".creed-stream-content");
+        const pills = item.querySelectorAll(".creed-pill");
+        const nodeDot = item.querySelector(".creed-node-dot");
+
+        if (content) {
+          gsap.fromTo(
+            content,
+            { y: 48, x: isEven ? -24 : 24, opacity: 0 },
+            {
+              y: 0,
+              x: 0,
+              opacity: 1,
+              duration: 0.9,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: item,
+                start: "top 82%",
+                once: true,
+              },
+            }
+          );
+        }
+
+        if (pills && pills.length > 0) {
+          gsap.fromTo(
+            pills,
+            { scale: 0.78, y: 18, opacity: 0 },
+            {
+              scale: 1,
+              y: 0,
+              opacity: 1,
+              stagger: 0.07,
+              duration: 0.65,
+              delay: 0.15,
+              ease: "back.out(1.6)",
+              scrollTrigger: {
+                trigger: item,
+                start: "top 82%",
+                once: true,
+              },
+            }
+          );
+        }
+
+        if (nodeDot) {
+          gsap.fromTo(
+            nodeDot,
+            { scale: 0, opacity: 0 },
+            {
+              scale: 1,
+              opacity: 1,
+              duration: 0.5,
+              ease: "back.out(2)",
+              scrollTrigger: {
+                trigger: item,
+                start: "top 75%",
+                once: true,
+              },
+            }
+          );
+        }
+      });
     });
 
     // =========================================================================
@@ -566,94 +623,172 @@ export const ArchitecturalCreed: React.FC = memo(() => {
       </div>
 
       {/* ========================================================================= */}
-      {/* DESKTOP EXPERIENCE (>= 768px): HIGH-ART GALLERY PLINTH GRID                */}
-      {/* 100% UNTOUCHED & PRISTINE                                                 */}
+      {/* DESKTOP EXPERIENCE (>= 768px): FLOWING RIBBON EDITORIAL STREAM             */}
+      {/* Inspired by two26.studio: Sweeping trim-path ribbon, tilted pills,        */}
+      {/* spacious alternating editorial choreography, and zero stiff boxes.        */}
       {/* ========================================================================= */}
       <div
         ref={sectionRef}
-        className="hidden md:block relative w-full h-[calc(100svh+500px)]"
+        className="hidden md:block relative w-full bg-[#060709] border-t border-white/10 overflow-hidden"
       >
+        {/* Subtle Ambient Warm Backlight */}
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_75%_40%_at_50%_15%,rgba(255,140,56,0.06)_0%,transparent_70%),radial-gradient(ellipse_65%_40%_at_50%_75%,rgba(234,215,192,0.04)_0%,transparent_70%)]" />
+
         <section
           ref={stageRef}
-          className="sticky top-0 h-[100svh] w-full flex flex-col justify-center px-12 md:px-16 overflow-hidden bg-[#060709] border-t border-white/10 will-change-[clip-path]"
+          className="relative w-full py-28 lg:py-36 px-12 md:px-16 lg:px-24"
         >
-          {/* Leading Architectural Razor Hairline */}
-          <div className="absolute top-0 inset-x-0 h-[1px] bg-white/20" />
-
           <div
             ref={containerRef}
-            className="w-full max-w-7xl mx-auto flex flex-col justify-center will-change-[transform,opacity]"
+            className="relative w-full max-w-6xl mx-auto"
           >
             {/* Header Block */}
-            <div ref={headerRef} className="mb-8">
-              <div className="flex items-center justify-between text-[11px] font-sans font-bold uppercase tracking-[0.24em] text-slate-400 mb-3">
-                <span>ACADEMIC & TECHNICAL FOUNDATIONS</span>
-                <span className="text-[#FF7A00]">04 MONOLITHIC PILLARS</span>
+            <div ref={headerRef} className="mb-20 lg:mb-28">
+              <div className="flex items-center justify-between text-[11px] font-sans font-bold uppercase tracking-[0.26em] text-[#CBB59D]/70 mb-4">
+                <span className="flex items-center gap-2.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#FF8C38] animate-pulse" />
+                  ACADEMIC &amp; TECHNICAL FOUNDATIONS
+                </span>
+                <span className="text-[#FF8C38]">04 MONOLITHIC PILLARS</span>
               </div>
-              <div className="w-full h-[1px] bg-white/10 mb-5" />
-              <div className="flex items-end justify-between gap-2">
-                <h3 className="font-sans font-black text-2xl md:text-3xl uppercase tracking-tight text-[#FFFDF9]">
-                  ARCHITECTURAL CREDENTIALS & SPECIALIZATIONS
+              <div
+                ref={headerLineRef}
+                className="w-full h-[1px] bg-gradient-to-r from-[#FF8C38]/60 via-[#EAD7C0]/25 to-transparent mb-7"
+              />
+              <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+                <h3 className="font-sans font-black text-3xl md:text-4xl lg:text-5xl uppercase tracking-tight text-[#FFFDF9] leading-[1.05]">
+                  Architectural <span className="text-[#FF8C38]">Credentials</span>
+                  <br />
+                  &amp; Specializations
                 </h3>
-                <span className="text-xs font-mono text-slate-400">VERIFIED ENGINEERING TRACK</span>
+                <span className="text-xs font-mono text-[#EAD7C0]/50 uppercase tracking-widest">
+                  VERIFIED ENGINEERING TRACK · 2026
+                </span>
               </div>
             </div>
 
-            {/* 4 Plinth Cards Grid */}
-            <div
-              ref={gridRef}
-              className="grid grid-cols-2 lg:grid-cols-4 gap-6 border-t border-b border-white/10 py-6"
-            >
-              {pillars.map((item, idx) => {
-                const Icon = item.icon;
-                return (
-                  <motion.div
-                    key={idx}
-                    whileHover={{ y: -4, transition: { type: "spring", stiffness: 350, damping: 25 } }}
-                    className="creed-card group p-7 flex flex-col justify-between min-h-[250px] bg-[#0A0D14] border border-white/10 rounded-xl hover:border-white/25 transition-all"
-                  >
-                    <div>
-                      {/* Top Meta Line */}
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="font-helvetica font-normal text-4xl text-white/30 leading-none group-hover:text-[#FF7A00] transition-colors">
-                          {item.num}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <Icon size={14} className="text-[#FF7A00]" />
-                          <span className="text-[10px] font-sans font-extrabold uppercase tracking-[0.16em] text-[#FF7A00]">
-                            {item.tag}
+            {/* Alternating Editorial Stream + Continuous Sweeping SVG Ribbon */}
+            <div ref={gridRef} className="relative">
+              {/* Sweeping Center SVG Ribbon (Draws continuously as user scrolls) */}
+              <svg
+                className="hidden lg:block absolute left-1/2 -translate-x-1/2 top-0 h-full w-[420px] pointer-events-none z-0 overflow-visible"
+                viewBox="0 0 420 1200"
+                preserveAspectRatio="none"
+                fill="none"
+              >
+                <defs>
+                  <linearGradient id="creedRibbonGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#FF8C38" stopOpacity="0.9" />
+                    <stop offset="50%" stopColor="#EAD7C0" stopOpacity="0.75" />
+                    <stop offset="100%" stopColor="#FF8C38" stopOpacity="0.95" />
+                  </linearGradient>
+                </defs>
+                {/* Soft Ambient Glow Trail */}
+                <path
+                  ref={ribbonGlowRef}
+                  d="M 210 10 C 360 140, 360 280, 210 380 C 60 480, 60 620, 210 730 C 360 840, 360 980, 210 1180"
+                  stroke="#FF8C38"
+                  strokeOpacity="0.18"
+                  strokeWidth="12"
+                  strokeLinecap="round"
+                />
+                {/* Crisp Main Flowing Ribbon */}
+                <path
+                  ref={ribbonPathRef}
+                  d="M 210 10 C 360 140, 360 280, 210 380 C 60 480, 60 620, 210 730 C 360 840, 360 980, 210 1180"
+                  stroke="url(#creedRibbonGrad)"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                />
+              </svg>
+
+              {/* 4 Alternating Editorial Pillars */}
+              <div className="relative z-10 flex flex-col gap-24 lg:gap-32">
+                {pillars.map((item, idx) => {
+                  const Icon = item.icon;
+                  const isLeft = idx % 2 === 0;
+                  const pillAngles = ["-rotate-2", "rotate-2", "-rotate-1", "rotate-1"];
+
+                  return (
+                    <div
+                      key={idx}
+                      className={`creed-stream-item relative flex flex-col lg:flex-row items-start lg:items-center ${
+                        isLeft ? "lg:justify-start" : "lg:justify-end"
+                      }`}
+                    >
+                      {/* Glowing Orbital Node on Center Ribbon */}
+                      <div className="creed-node-dot hidden lg:flex absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-[#060709] border-2 border-[#FF8C38] items-center justify-center shadow-[0_0_16px_rgba(255,140,56,0.65)] z-20">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#FFFDF8]" />
+                      </div>
+
+                      {/* Borderless Editorial Pillar Content */}
+                      <div
+                        className={`creed-stream-content group w-full lg:w-[44%] ${
+                          isLeft ? "lg:pr-8 text-left" : "lg:pl-8 text-left"
+                        }`}
+                      >
+                        {/* Top Tag + Oversized Hollow-to-Illuminated Numeral */}
+                        <div className="flex items-baseline justify-between gap-4 mb-4">
+                          <span
+                            className="font-helvetica font-normal text-6xl lg:text-7xl leading-none text-transparent transition-all duration-500 select-none group-hover:text-[#FF8C38]"
+                            style={{
+                              WebkitTextStroke: "1.2px rgba(234, 215, 192, 0.38)",
+                            }}
+                          >
+                            {item.num}
                           </span>
+
+                          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10">
+                            <Icon size={13} className="text-[#FF8C38]" />
+                            <span className="text-[10px] font-sans font-extrabold uppercase tracking-[0.18em] text-[#FF8C38]">
+                              {item.tag}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Title & Role */}
+                        <h4 className="font-sans font-bold text-2xl lg:text-3xl text-[#FFFDF9] mb-2 leading-tight group-hover:text-[#EAD7C0] transition-colors">
+                          {item.title}
+                        </h4>
+                        <div className="text-xs lg:text-[13px] font-mono text-[#FF8C38]/90 mb-4 tracking-wide">
+                          {item.role}
+                        </div>
+
+                        {/* Narrative */}
+                        <p className="font-sans font-normal text-sm lg:text-[15px] text-slate-300/85 leading-relaxed mb-6">
+                          {item.desc}
+                        </p>
+
+                        {/* Two26-Inspired Tilted Floating Pills + Status */}
+                        <div className="flex flex-wrap items-center gap-2.5">
+                          {item.chips.map((chip, cIdx) => (
+                            <motion.span
+                              key={cIdx}
+                              whileHover={{ scale: 1.07, rotate: 0 }}
+                              className={`creed-pill inline-block px-3.5 py-1.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-[#11151E] border border-[#EAD7C0]/20 text-[#EAD7C0] shadow-[0_8px_20px_rgba(0,0,0,0.45)] cursor-default transition-colors hover:border-[#FF8C38] hover:text-[#FF8C38] ${
+                                pillAngles[(idx + cIdx) % pillAngles.length]
+                              }`}
+                            >
+                              {chip}
+                            </motion.span>
+                          ))}
+                          <motion.span
+                            whileHover={{ scale: 1.07, rotate: 0 }}
+                            className="creed-pill inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-[#FF8C38]/15 border border-[#FF8C38]/40 text-[#FF8C38] rotate-1 cursor-default"
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#FF8C38]" />
+                            {item.status}
+                          </motion.span>
                         </div>
                       </div>
-
-                      {/* Institution / Project Title */}
-                      <h4 className="font-sans font-bold text-lg text-white mb-1.5 leading-snug group-hover:text-amber-100 transition-colors">
-                        {item.title}
-                      </h4>
-
-                      {/* Role / Degree */}
-                      <div className="text-xs font-mono text-white/60 mb-3 leading-snug">
-                        {item.role}
-                      </div>
-
-                      {/* Detailed Narrative */}
-                      <p className="font-sans font-normal text-[13px] text-slate-400 leading-relaxed">
-                        {item.desc}
-                      </p>
                     </div>
-
-                    {/* Status Pill */}
-                    <div className="pt-4 border-t border-white/5 flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-slate-500">
-                      <span>STATUS</span>
-                      <span className="text-slate-300 font-semibold">{item.status}</span>
-                    </div>
-                  </motion.div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
 
             {/* Footer Telemetry */}
-            <div className="flex items-center justify-between text-[11px] font-mono text-slate-500 mt-5">
+            <div className="flex items-center justify-between text-[11px] font-mono text-[#CBB59D]/55 mt-24 pt-6 border-t border-white/10">
               <span>DISCIPLINE: ARTIFICIAL INTELLIGENCE · HIGH-THROUGHPUT SYSTEMS</span>
               <span>KOLKATA · LATVIA · GLOBAL EDGE</span>
             </div>

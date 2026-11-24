@@ -17,6 +17,7 @@ import { TerminalFinale } from "@/components/master/TerminalFinale";
 import { SiteFooter } from "@/components/master/SiteFooter";
 import { TerraceBreezePreloader } from "@/components/master/TerraceBreezePreloader";
 import { Studio3DWorkspace } from "@/components/master/Studio3DWorkspace";
+import { LofiMascotTracker } from "@/components/master/LofiMascotTracker";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -283,6 +284,14 @@ export default function Home() {
 
       {/* Tactile In-App Pull-Down Refresh (Leaves browser bottom toolbar locked & stable) */}
       <PullToRefresh scrollerRef={scrollerRef} />
+
+      {/* Playful Lo-Fi Mascot Blob Corner Scroll Tracker */}
+      {!isStudioActive && (
+        <LofiMascotTracker
+          scrollerRef={scrollerRef}
+          onScrollToTop={() => handleNavigate("monument-hero")}
+        />
+      )}
 
       {/* Movement 00: Interactive 3D Studio Workspace (Fixed Viewport; strictly decoupled from scroller track) */}
       <div

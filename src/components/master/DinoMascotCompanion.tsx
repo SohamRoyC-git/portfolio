@@ -2,7 +2,7 @@
 
 import React, { memo, useRef, useEffect, useState, useCallback } from "react";
 import gsap from "gsap";
-import { Volume2, VolumeX, MessageSquare, Send, X, Sparkles, Music } from "lucide-react";
+import { Volume2, VolumeX, MessageSquare, Send, X, Sparkles, Music, Headphones } from "lucide-react";
 
 interface DinoMascotCompanionProps {
   scrollerRef?: React.RefObject<HTMLDivElement | null>;
@@ -26,7 +26,7 @@ const KNOWLEDGE_RESPONSES: Record<string, string> = {
   hire:
     "🦖 Yes! Soham is available for high-impact full-stack development, creative engineering, and spatial computing architecture. You can connect via the terminal at the bottom of the page or directly through LinkedIn!",
   dino:
-    "🦖 That's me! I'm Soham's portfolio companion. I rock an oversized black streetwear hoodie and studio monitor headphones because I love deep bass and good music. Right now, I'm jamming to Michael Jackson's 'Chicago'!",
+    "🦖 That's me! I'm Soham's portfolio companion. I wear this custom streetwear black hoodie and studio headphones because I love deep bass and good grooves. Right now, I'm jamming to Michael Jackson's 'Chicago'!",
 };
 
 export const DinoMascotCompanion: React.FC<DinoMascotCompanionProps> = memo(
@@ -35,19 +35,17 @@ export const DinoMascotCompanion: React.FC<DinoMascotCompanionProps> = memo(
     const [progress, setProgress] = useState(0);
     const [currentSection, setCurrentSection] = useState("HERO");
     const [isHovered, setIsHovered] = useState(false);
-    const [isScrolling, setIsScrolling] = useState(false);
-    const [isMuted, setIsMuted] = useState(false);
     const [isPlayingAudio, setIsPlayingAudio] = useState(false);
     const [isChatOpen, setIsChatOpen] = useState(false);
-    const [hasWaved, setHasWaved] = useState(false);
-    const [showWaveBubble, setShowWaveBubble] = useState(false);
-    const [showChatPrompt, setShowChatPrompt] = useState(false);
+    const [isGrowing, setIsGrowing] = useState(false);
+    const [isTypingQuestion, setIsTypingQuestion] = useState(false);
     const [isDinoSpeaking, setIsDinoSpeaking] = useState(false);
+    const [showHeadphonePrompt, setShowHeadphonePrompt] = useState(false);
     const [messages, setMessages] = useState<ChatMessage[]>([
       {
         id: "intro-1",
         sender: "dino",
-        text: "Hey! 🦖 I'm Soham's companion. I'm currently vibing to Michael Jackson's 'Chicago' on my headphones! Ask me anything about Soham's projects, tech stack, or creative philosophy.",
+        text: "Hey! 🦖 I'm Soham's companion. I'm currently jamming to Michael Jackson's 'Chicago' on my headphones! Ask me anything about Soham's projects, tech stack, or creative philosophy.",
         timestamp: "Just now",
       },
     ]);
@@ -56,23 +54,29 @@ export const DinoMascotCompanion: React.FC<DinoMascotCompanionProps> = memo(
 
     // Refs
     const audioRef = useRef<HTMLAudioElement | null>(null);
-    const mascotRootRef = useRef<SVGSVGElement | null>(null);
-    const wavingArmRef = useRef<SVGGElement | null>(null);
-    const leftEyeRef = useRef<SVGGElement | null>(null);
-    const rightEyeRef = useRef<SVGGElement | null>(null);
+    const dockContainerRef = useRef<HTMLDivElement | null>(null);
+    const modalBackdropRef = useRef<HTMLDivElement | null>(null);
+    const modalStageRef = useRef<HTMLDivElement | null>(null);
+    const chatConsoleRef = useRef<HTMLDivElement | null>(null);
+    const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+    // SVG Layer Refs for Animation & Lip-Sync / Eye Tracking
+    const danceRootRef = useRef<SVGGElement | null>(null);
+    const leftArmRef = useRef<SVGGElement | null>(null);
+    const rightArmRef = useRef<SVGGElement | null>(null);
     const tailRef = useRef<SVGGElement | null>(null);
+    const eyesRef = useRef<SVGGElement | null>(null);
     const mouthRef = useRef<SVGPathElement | null>(null);
     const drawstringsRef = useRef<SVGGElement | null>(null);
-    const messagesEndRef = useRef<HTMLDivElement | null>(null);
-    const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const prevScrollY = useRef(0);
+    const leftEyeRef = useRef<SVGGElement | null>(null);
+    const rightEyeRef = useRef<SVGGElement | null>(null);
     const noteIdRef = useRef(0);
 
-    // Progress Ring Circumference (r = 44 => 2 * PI * 44 ≈ 276.46)
+    // Circular Progress Perimeter Ring (r=44)
     const circumference = 2 * Math.PI * 44;
     const strokeDashoffset = circumference - progress * circumference;
 
-    // Trigger floating musical notes
+    // Trigger Floating Musical Notes
     const emitMusicNote = useCallback(() => {
       const symbols = ["♪", "♫", "♩", "♬", "✨"];
       const symbol = symbols[Math.floor(Math.random() * symbols.length)];
@@ -85,128 +89,97 @@ export const DinoMascotCompanion: React.FC<DinoMascotCompanionProps> = memo(
       }, 1600);
     }, []);
 
-    // 1. Audio Playback Control (Michael Jackson - Chicago)
-    const tryPlayAudio = useCallback(() => {
-      if (!audioRef.current) return;
-      audioRef.current.volume = 0.22; // subtle headphone leakage volume
-      audioRef.current
-        .play()
-        .then(() => {
-          setIsPlayingAudio(true);
-        })
-        .catch(() => {
-          // Autoplay policy prevented immediate playback; waiting for user gesture
+    // 1. Audio Control: "Want to hear what Dino is hearing? Tap his headphones"
+    const toggleHeadphoneAudio = useCallback(
+      (e?: React.MouseEvent) => {
+        if (e) e.stopPropagation();
+        if (!audioRef.current) return;
+
+        if (isPlayingAudio) {
+          audioRef.current.pause();
           setIsPlayingAudio(false);
-        });
-    }, []);
-
-    // Initialize audio on first user gesture anywhere on the page
-    useEffect(() => {
-      const handleFirstInteraction = () => {
-        if (!isMuted && audioRef.current && audioRef.current.paused) {
-          tryPlayAudio();
+        } else {
+          audioRef.current.volume = 0.24; // mellow, warm headphone bleed volume
+          audioRef.current
+            .play()
+            .then(() => {
+              setIsPlayingAudio(true);
+              emitMusicNote();
+            })
+            .catch(() => {
+              setIsPlayingAudio(false);
+            });
         }
-        window.removeEventListener("pointerdown", handleFirstInteraction);
-        window.removeEventListener("keydown", handleFirstInteraction);
-      };
+      },
+      [isPlayingAudio, emitMusicNote]
+    );
 
-      window.addEventListener("pointerdown", handleFirstInteraction, { passive: true });
-      window.addEventListener("keydown", handleFirstInteraction, { passive: true });
-
-      // Try autoplaying right away
-      tryPlayAudio();
-
-      return () => {
-        window.removeEventListener("pointerdown", handleFirstInteraction);
-        window.removeEventListener("keydown", handleFirstInteraction);
-      };
-    }, [tryPlayAudio, isMuted]);
-
-    const toggleMute = (e?: React.MouseEvent) => {
-      if (e) e.stopPropagation();
-      if (!audioRef.current) return;
-      if (isMuted) {
-        audioRef.current.muted = false;
-        audioRef.current.play().catch(() => {});
-        setIsMuted(false);
-        setIsPlayingAudio(true);
-      } else {
-        audioRef.current.muted = true;
-        setIsMuted(true);
-        setIsPlayingAudio(false);
-      }
-    };
-
-    // 2. Wave Animation on Site Entry
+    // 2. Full Chibi Dance Animation (~104 BPM groove to "Chicago" by MJ)
     useEffect(() => {
-      if (hasWaved || !wavingArmRef.current) return;
+      if (!danceRootRef.current) return;
 
-      const waveDelay = setTimeout(() => {
-        setShowWaveBubble(true);
-        setHasWaved(true);
-
-        const waveTl = gsap.timeline({
-          onComplete: () => {
-            setTimeout(() => setShowWaveBubble(false), 3800);
-          },
+      // Hip sway and knee bounce: 104 BPM = ~0.58s per beat
+      const danceTl = gsap.timeline({ repeat: -1 });
+      danceTl
+        .to(danceRootRef.current, {
+          y: 4,
+          rotation: -2.5,
+          duration: 0.29,
+          ease: "sine.inOut",
+        })
+        .to(danceRootRef.current, {
+          y: 0,
+          rotation: 0,
+          duration: 0.29,
+          ease: "sine.inOut",
+        })
+        .to(danceRootRef.current, {
+          y: 4,
+          rotation: 2.5,
+          duration: 0.29,
+          ease: "sine.inOut",
+        })
+        .to(danceRootRef.current, {
+          y: 0,
+          rotation: 0,
+          duration: 0.29,
+          ease: "sine.inOut",
         });
 
-        // Joyful wave motion: 3 distinct back-and-forth arm waves
-        waveTl
-          .to(wavingArmRef.current, {
-            rotation: 26,
-            duration: 0.26,
-            ease: "power2.out",
-          })
-          .to(wavingArmRef.current, {
-            rotation: -8,
-            duration: 0.26,
-            repeat: 4,
-            yoyo: true,
+      // Grooving Arms (Left & Right alternating paw bobs)
+      const armTl = gsap.timeline({ repeat: -1, yoyo: true });
+      if (leftArmRef.current && rightArmRef.current) {
+        armTl
+          .to(leftArmRef.current, {
+            rotation: -18,
+            duration: 0.58,
             ease: "sine.inOut",
-          })
-          .to(wavingArmRef.current, {
-            rotation: 0,
-            duration: 0.35,
-            ease: "power1.out",
-          });
-      }, 1500);
+          }, 0)
+          .to(rightArmRef.current, {
+            rotation: 20,
+            duration: 0.58,
+            ease: "sine.inOut",
+          }, 0);
+      }
 
-      return () => clearTimeout(waveDelay);
-    }, [hasWaved]);
-
-    // 3. Idle Head-Bobbing to "Chicago" by MJ (~104 BPM chill groove)
-    useEffect(() => {
-      if (!mascotRootRef.current) return;
-
-      // 104 BPM = ~0.58s per beat
-      const idleTl = gsap.timeline({ repeat: -1, yoyo: true });
-      idleTl.to(mascotRootRef.current, {
-        y: 3.5,
-        scaleY: 0.96,
-        scaleX: 1.03,
-        duration: 0.58,
-        ease: "sine.inOut",
-      });
-
-      // Tail wagging
+      // Tail Wagging
       let tailTween: gsap.core.Tween | null = null;
       if (tailRef.current) {
         tailTween = gsap.to(tailRef.current, {
-          rotation: 7,
-          duration: 0.85,
+          rotation: 8,
+          duration: 0.58,
           repeat: -1,
           yoyo: true,
           ease: "sine.inOut",
         });
       }
 
-      // Drawstrings swinging
+      // Drawstrings Swaying
       let stringTween: gsap.core.Tween | null = null;
       if (drawstringsRef.current) {
         stringTween = gsap.to(drawstringsRef.current, {
-          rotation: 5,
-          transformOrigin: "76px 106px",
+          rotation: 4,
+          transformOrigin: "93px 126px",
           duration: 1.16,
           repeat: -1,
           yoyo: true,
@@ -214,7 +187,7 @@ export const DinoMascotCompanion: React.FC<DinoMascotCompanionProps> = memo(
         });
       }
 
-      // Cute round eye blink cycle every ~3.5 seconds
+      // Cute Round Eyes Blink Cycle
       const blinkInterval = setInterval(() => {
         if (!leftEyeRef.current || !rightEyeRef.current) return;
         gsap.to([leftEyeRef.current, rightEyeRef.current], {
@@ -225,25 +198,26 @@ export const DinoMascotCompanion: React.FC<DinoMascotCompanionProps> = memo(
           repeat: 1,
           ease: "power2.inOut",
         });
-      }, 3500);
+      }, 3400);
 
-      // Periodic music note release
+      // Periodic music notes when audio is playing
       const noteInterval = setInterval(() => {
-        if (isPlayingAudio && !isMuted) {
+        if (isPlayingAudio) {
           emitMusicNote();
         }
-      }, 2600);
+      }, 2400);
 
       return () => {
-        idleTl.kill();
+        danceTl.kill();
+        armTl.kill();
         if (tailTween) tailTween.kill();
         if (stringTween) stringTween.kill();
         clearInterval(blinkInterval);
         clearInterval(noteInterval);
       };
-    }, [isPlayingAudio, isMuted, emitMusicNote]);
+    }, [isPlayingAudio, emitMusicNote]);
 
-    // 4. Scroll Tracking & Velocity Reaction
+    // 3. Scroll Tracking (Stable, NO deflating/shrinking blob velocity!)
     useEffect(() => {
       const getScrollTarget = () => {
         if (scrollerRef && scrollerRef.current) return scrollerRef.current;
@@ -271,7 +245,6 @@ export const DinoMascotCompanion: React.FC<DinoMascotCompanionProps> = memo(
             const p = Math.min(1, Math.max(0, currentY / (maxY || 1)));
             setProgress(p);
 
-            // Section Identification
             let sec = "HERO";
             if (p < 0.15) sec = "HERO";
             else if (p < 0.32) sec = "STATEMENT";
@@ -279,39 +252,6 @@ export const DinoMascotCompanion: React.FC<DinoMascotCompanionProps> = memo(
             else if (p < 0.88) sec = "COMMISSIONS";
             else sec = "MATRIX";
             setCurrentSection(sec);
-
-            // Scroll velocity
-            const deltaY = currentY - prevScrollY.current;
-            prevScrollY.current = currentY;
-
-            setIsScrolling(true);
-            if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
-            scrollTimeoutRef.current = setTimeout(() => {
-              setIsScrolling(false);
-            }, 1800);
-
-            // Velocity Squash & Stretch
-            if (mascotRootRef.current && !isChatOpen) {
-              const clamped = Math.max(-35, Math.min(35, deltaY));
-              const squish = Math.abs(clamped) * 0.003;
-              gsap.to(mascotRootRef.current, {
-                y: clamped * 0.15,
-                scaleY: 1 - squish,
-                scaleX: 1 + squish * 0.8,
-                duration: 0.14,
-                ease: "power1.out",
-                overwrite: "auto",
-                onComplete: () => {
-                  gsap.to(mascotRootRef.current, {
-                    y: 0,
-                    scaleY: 1,
-                    scaleX: 1,
-                    duration: 0.5,
-                    ease: "elastic.out(1.2, 0.45)",
-                  });
-                },
-              });
-            }
 
             ticking = false;
           });
@@ -332,27 +272,148 @@ export const DinoMascotCompanion: React.FC<DinoMascotCompanionProps> = memo(
           window.removeEventListener("scroll", handleScroll);
         }
       };
-    }, [scrollerRef, isChatOpen]);
+    }, [scrollerRef]);
 
-    // 5. Chat Interaction
+    // 4. Spatial Morph Growth: Smoothly Grow from Corner to Center
     const handleOpenChat = () => {
+      if (isGrowing || isChatOpen) return;
       setIsChatOpen(true);
-      setShowChatPrompt(false);
-      setShowWaveBubble(false);
 
-      // Boost volume slightly for interactive chat mood
-      if (audioRef.current && !isMuted) {
+      // If audio is playing, gently adjust volume for chat atmosphere
+      if (audioRef.current && isPlayingAudio) {
         audioRef.current.volume = 0.28;
       }
     };
 
+    // Animate modal entry as soon as it mounts
+    useEffect(() => {
+      if (!isChatOpen) return;
+      if (!modalBackdropRef.current || !modalStageRef.current || !chatConsoleRef.current) return;
+
+      // 1. Fade backdrop in smoothly
+      gsap.fromTo(
+        modalBackdropRef.current,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.45, ease: "power2.out" }
+      );
+
+      // 2. Animate modal stage growing and gliding from the bottom-right corner to center
+      const isDesktop = typeof window !== "undefined" && window.innerWidth > 768;
+      gsap.fromTo(
+        modalStageRef.current,
+        {
+          scale: 0.2,
+          x: isDesktop ? 320 : 120,
+          y: isDesktop ? 260 : 180,
+          opacity: 0,
+        },
+        {
+          scale: 1,
+          x: 0,
+          y: 0,
+          opacity: 1,
+          duration: 0.65,
+          ease: "back.out(1.15)",
+        }
+      );
+
+      // 3. Unfold chat console smoothly from the right
+      gsap.fromTo(
+        chatConsoleRef.current,
+        { opacity: 0, x: 40 },
+        { opacity: 1, x: 0, duration: 0.5, delay: 0.25, ease: "power3.out" }
+      );
+    }, [isChatOpen]);
+
     const handleCloseChat = () => {
-      setIsChatOpen(false);
-      if (audioRef.current && !isMuted) {
-        audioRef.current.volume = 0.22;
+      if (isGrowing || !isChatOpen) return;
+      setIsGrowing(true);
+
+      if (modalStageRef.current && modalBackdropRef.current && chatConsoleRef.current) {
+        // Slide out chat panel
+        gsap.to(chatConsoleRef.current, {
+          opacity: 0,
+          x: 40,
+          duration: 0.25,
+          ease: "power2.in",
+        });
+
+        // Smoothly glide Dino & stage back to bottom-right corner
+        const isDesktop = typeof window !== "undefined" && window.innerWidth > 768;
+        gsap.to(modalStageRef.current, {
+          scale: 0.2,
+          x: isDesktop ? 320 : 120,
+          y: isDesktop ? 260 : 180,
+          opacity: 0,
+          duration: 0.45,
+          ease: "power3.in",
+        });
+
+        gsap.to(modalBackdropRef.current, {
+          opacity: 0,
+          duration: 0.45,
+          ease: "power2.in",
+          onComplete: () => {
+            setIsChatOpen(false);
+            setIsGrowing(false);
+            if (audioRef.current && isPlayingAudio) {
+              audioRef.current.volume = 0.24;
+            }
+          },
+        });
+      } else {
+        setIsChatOpen(false);
+        setIsGrowing(false);
       }
     };
 
+    // 5. Interactive Dino Reactions: Eye Tracking & Lip-Sync
+    // Look down at what user is typing
+    useEffect(() => {
+      if (!eyesRef.current) return;
+      if (isTypingQuestion) {
+        // Eyes shift down and slightly right, head tilts attentively
+        gsap.to(eyesRef.current, {
+          y: 4,
+          x: 2.5,
+          duration: 0.2,
+          ease: "power1.out",
+        });
+      } else {
+        // Return eyes to looking at user
+        gsap.to(eyesRef.current, {
+          y: 0,
+          x: 0,
+          duration: 0.25,
+          ease: "power1.out",
+        });
+      }
+    }, [isTypingQuestion]);
+
+    // Animate mouth when Dino speaks
+    useEffect(() => {
+      if (!mouthRef.current) return;
+      if (isDinoSpeaking) {
+        gsap.to(mouthRef.current, {
+          scaleY: 1.5,
+          y: 1.5,
+          transformOrigin: "center center",
+          duration: 0.12,
+          repeat: -1,
+          yoyo: true,
+          ease: "power1.inOut",
+        });
+      } else {
+        gsap.to(mouthRef.current, {
+          scaleY: 1,
+          y: 0,
+          duration: 0.2,
+          ease: "power1.out",
+        });
+      }
+    }, [isDinoSpeaking]);
+
+    // 6. Chat Messaging
     const handleSendMessage = (textToSend?: string) => {
       const query = (textToSend || inputValue).trim();
       if (!query) return;
@@ -366,21 +427,10 @@ export const DinoMascotCompanion: React.FC<DinoMascotCompanionProps> = memo(
 
       setMessages((prev) => [...prev, userMsg]);
       setInputValue("");
+      setIsTypingQuestion(false);
       setIsDinoSpeaking(true);
 
-      // Animate Dino Speaking (mouth wiggle + happy head nod)
-      if (mouthRef.current) {
-        gsap.to(mouthRef.current, {
-          scaleY: 1.4,
-          transformOrigin: "center center",
-          duration: 0.15,
-          repeat: 7,
-          yoyo: true,
-          ease: "power1.inOut",
-        });
-      }
-
-      // Generate Knowledge Response
+      // Generate response with animated lip-sync
       setTimeout(() => {
         let replyText = "";
         const lower = query.toLowerCase();
@@ -419,7 +469,7 @@ export const DinoMascotCompanion: React.FC<DinoMascotCompanionProps> = memo(
       }
     }, [messages, isDinoSpeaking]);
 
-    // Handle Escape key to close chat
+    // Handle Escape Key to close
     useEffect(() => {
       const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === "Escape" && isChatOpen) {
@@ -429,6 +479,184 @@ export const DinoMascotCompanion: React.FC<DinoMascotCompanionProps> = memo(
       window.addEventListener("keydown", handleKeyDown);
       return () => window.removeEventListener("keydown", handleKeyDown);
     }, [isChatOpen]);
+
+    // ─────────────────────────────────────────────────────────────
+    // Reusable Organic Dino SVG Vector Component
+    // ─────────────────────────────────────────────────────────────
+    const renderOrganicDino = (isLargeStage = false) => (
+      <svg
+        viewBox="0 0 200 220"
+        className="w-full h-full overflow-visible select-none"
+      >
+        <g ref={isLargeStage ? null : danceRootRef} id="dino-dance-root">
+          {/* 1. Tail with Teal Dorsal Plates */}
+          <g ref={isLargeStage ? null : tailRef} id="tail-group" style={{ transformOrigin: "130px 165px" }}>
+            <path d="M 148 142 C 164 140, 168 156, 154 164" fill="#256F4E" stroke="#161F18" strokeWidth="3.5" strokeLinecap="round" />
+            <path d="M 158 162 C 172 164, 172 180, 156 182" fill="#256F4E" stroke="#161F18" strokeWidth="3.5" strokeLinecap="round" />
+            <path d="M 124 156 C 154 154, 178 166, 170 182 C 156 192, 132 180, 118 172 Z" fill="#8CE56C" stroke="#161F18" strokeWidth="3.8" strokeLinejoin="round" />
+          </g>
+
+          {/* 2. Dorsal Plates along Head and Spine */}
+          <g id="dorsal-plates">
+            <path d="M 86 16 C 92 4, 114 4, 120 18" fill="#256F4E" stroke="#161F18" strokeWidth="3.8" strokeLinecap="round" />
+            <path d="M 128 32 C 146 28, 154 46, 140 58" fill="#256F4E" stroke="#161F18" strokeWidth="3.8" strokeLinecap="round" />
+            <path d="M 140 64 C 158 62, 164 80, 148 92" fill="#256F4E" stroke="#161F18" strokeWidth="3.8" strokeLinecap="round" />
+            <path d="M 146 98 C 164 98, 166 118, 150 128" fill="#256F4E" stroke="#161F18" strokeWidth="3.8" strokeLinecap="round" />
+          </g>
+
+          {/* 3. Stubby Feet with Rounded Toes */}
+          <g id="feet">
+            <path d="M 60 172 L 60 188 C 60 196, 80 196, 80 188 L 81 172 Z" fill="#8CE56C" stroke="#161F18" strokeWidth="3.6" strokeLinejoin="round" />
+            <path d="M 66 189 Q 67 185 68 189 M 73 189 Q 74 185 75 189" stroke="#256F4E" strokeWidth="2.2" strokeLinecap="round" />
+            <path d="M 106 172 L 106 188 C 106 196, 126 196, 126 188 L 125 172 Z" fill="#8CE56C" stroke="#161F18" strokeWidth="3.6" strokeLinejoin="round" />
+            <path d="M 112 189 Q 113 185 114 189 M 119 189 Q 120 185 121 189" stroke="#256F4E" strokeWidth="2.2" strokeLinecap="round" />
+          </g>
+
+          {/* 4. Pear-Shaped Chubby Body & Head (Organic flow from reference image) */}
+          <path
+            id="dino-body"
+            d="
+              M 50 62
+              C 36 82, 36 108, 52 128
+              C 44 142, 46 166, 60 178
+              L 126 178
+              C 140 166, 140 138, 134 122
+              C 148 104, 146 66, 130 42
+              C 108 20, 68 30, 50 62 Z
+            "
+            fill="#8CE56C"
+            stroke="#161F18"
+            strokeWidth="4"
+            strokeLinejoin="round"
+          />
+
+          {/* 5. Cream Belly Oval */}
+          <ellipse cx="93" cy="138" rx="28" ry="25" fill="#FFF8DC" stroke="#161F18" strokeWidth="3" />
+
+          {/* 6. Real Streetwear Black Hoodie (Fitted smoothly over body) */}
+          <g id="black-hoodie">
+            <path
+              d="
+                M 52 126
+                C 45 140, 46 164, 60 176
+                L 78 176
+                C 70 158, 68 142, 74 126
+                C 64 127, 56 126, 52 126 Z
+              "
+              fill="#151820"
+              stroke="#0D1016"
+              strokeWidth="3.2"
+              strokeLinejoin="round"
+            />
+            <path
+              d="
+                M 134 126
+                C 141 140, 140 164, 126 176
+                L 108 176
+                C 116 158, 118 142, 112 126
+                C 122 127, 130 126, 134 126 Z
+              "
+              fill="#151820"
+              stroke="#0D1016"
+              strokeWidth="3.2"
+              strokeLinejoin="round"
+            />
+            <path d="M 50 118 C 72 132, 114 132, 136 118 C 130 110, 56 110, 50 118 Z" fill="#1D222D" stroke="#0D1016" strokeWidth="3" />
+            <path d="M 61 154 L 75 154 L 75 170 L 61 168 Z" fill="#222835" stroke="#323B4E" strokeWidth="1.6" />
+            <path d="M 125 154 L 111 154 L 111 170 L 125 168 Z" fill="#222835" stroke="#323B4E" strokeWidth="1.6" />
+
+            {/* Drawstrings */}
+            <g ref={isLargeStage ? null : drawstringsRef} id="drawstrings">
+              <path d="M 77 126 Q 76 142, 75 152" stroke="#424A5E" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+              <circle cx="75" cy="153" r="2.2" fill="#FFF8DC" />
+              <path d="M 109 126 Q 110 142, 111 152" stroke="#424A5E" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+              <circle cx="111" cy="153" r="2.2" fill="#FFF8DC" />
+            </g>
+          </g>
+
+          {/* 7. Cute Chubby Face */}
+          <g id="face">
+            {/* Peach Blush Cheeks */}
+            <ellipse cx="56" cy="94" rx="9" ry="5.5" fill="#FFA563" opacity="0.48" />
+            <ellipse cx="128" cy="94" rx="9" ry="5.5" fill="#FFA563" opacity="0.48" />
+
+            {/* Interactive Eyes Group (Tracks user typing!) */}
+            <g ref={isLargeStage ? eyesRef : null} id="dino-eyes">
+              <g ref={isLargeStage ? null : leftEyeRef} id="left-eye">
+                <circle cx="66" cy="82" r="7.2" fill="#161F18" />
+                <circle cx="68.8" cy="79.2" r="2.4" fill="#FFFFFF" />
+                <circle cx="64.5" cy="84" r="1" fill="#FFFFFF" opacity="0.75" />
+              </g>
+              <g ref={isLargeStage ? null : rightEyeRef} id="right-eye">
+                <circle cx="118" cy="82" r="7.2" fill="#161F18" />
+                <circle cx="120.8" cy="79.2" r="2.4" fill="#FFFFFF" />
+                <circle cx="116.5" cy="84" r="1" fill="#FFFFFF" opacity="0.75" />
+              </g>
+            </g>
+
+            {/* Interactive Mouth (Lip-syncs while Dino speaks!) */}
+            <path
+              ref={isLargeStage ? mouthRef : null}
+              id="dino-mouth"
+              d="M 85 91 Q 89.5 97 94 92 Q 98.5 97 103 91"
+              fill="none"
+              stroke="#161F18"
+              strokeWidth="3.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </g>
+
+          {/* 8. Arms / Paws */}
+          <g id="arms">
+            <g ref={isLargeStage ? null : leftArmRef} id="left-arm" style={{ transformOrigin: "64px 132px" }}>
+              <path d="M 52 124 C 42 132, 44 148, 56 150 C 62 144, 62 136, 56 126 Z" fill="#8CE56C" stroke="#161F18" strokeWidth="3.4" strokeLinejoin="round" />
+              <path d="M 44 144 Q 45 147 47 145" stroke="#256F4E" strokeWidth="1.8" strokeLinecap="round" />
+            </g>
+            <g ref={isLargeStage ? null : rightArmRef} id="right-arm" style={{ transformOrigin: "136px 132px" }}>
+              <path d="M 132 124 C 142 132, 140 148, 128 150 C 122 144, 122 136, 128 126 Z" fill="#8CE56C" stroke="#161F18" strokeWidth="3.4" strokeLinejoin="round" />
+              <path d="M 140 144 Q 139 147 137 145" stroke="#256F4E" strokeWidth="1.8" strokeLinecap="round" />
+            </g>
+          </g>
+
+          {/* 9. Retro Studio Headphones (Interactive Audio Trigger) */}
+          <g
+            id="headphones"
+            onClick={toggleHeadphoneAudio}
+            className="cursor-pointer group/headphones"
+            role="button"
+            tabIndex={0}
+            aria-label={isPlayingAudio ? "Pause MJ Chicago" : "Want to hear what Dino is hearing? Tap his headphones!"}
+          >
+            <title>{isPlayingAudio ? "Pause MJ Chicago" : "Want to hear what Dino is hearing? Tap his headphones!"}</title>
+            {/* Padded Headband */}
+            <path d="M 42 66 C 35 20, 149 20, 142 66" fill="none" stroke="#161920" strokeWidth="8.5" strokeLinecap="round" />
+            <path d="M 52 46 C 68 30, 116 30, 132 46" fill="none" stroke="#2F3646" strokeWidth="3.5" strokeLinecap="round" />
+
+            <rect x="40" y="60" width="5.5" height="10" rx="2" fill="#B0B6C6" />
+            <rect x="138.5" y="60" width="5.5" height="10" rx="2" fill="#B0B6C6" />
+
+            {/* Left Earcup */}
+            <g id="left-earcup">
+              <rect x="28" y="55" width="17" height="32" rx="8.5" fill="#151820" stroke="#353D50" strokeWidth="2" />
+              <rect x="39" y="58" width="5.5" height="26" rx="2.5" fill="#0C0E13" />
+              {/* Amber LED Indicator (Pulses actively when music is playing) */}
+              <circle cx="36" cy="71" r="3.6" fill="#FF8C38" className={isPlayingAudio ? "animate-ping" : "opacity-75"} />
+              <circle cx="36" cy="71" r="2" fill="#FFF0D6" />
+            </g>
+
+            {/* Right Earcup */}
+            <g id="right-earcup">
+              <rect x="139" y="55" width="17" height="32" rx="8.5" fill="#151820" stroke="#353D50" strokeWidth="2" />
+              <rect x="139.5" y="58" width="5.5" height="26" rx="2.5" fill="#0C0E13" />
+              {/* Amber LED Indicator (Pulses actively when music is playing) */}
+              <circle cx="148" cy="71" r="3.6" fill="#FF8C38" className={isPlayingAudio ? "animate-ping" : "opacity-75"} />
+              <circle cx="148" cy="71" r="2" fill="#FFF0D6" />
+            </g>
+          </g>
+        </g>
+      </svg>
+    );
 
     return (
       <>
@@ -442,40 +670,41 @@ export const DinoMascotCompanion: React.FC<DinoMascotCompanionProps> = memo(
         />
 
         {/* ══════════════════════════════════════════════════════════════
-            CORNER DOCKED MASCOT POD (PROMINENT ~105px)
+            CORNER DOCKED MASCOT POD (CONTINUOUSLY DANCING, NO SCROLL SQUISH)
         ══════════════════════════════════════════════════════════════ */}
         <aside
+          ref={dockContainerRef}
           aria-label="Dino Companion & Scroll Tracker"
-          className="fixed bottom-14 right-4 sm:bottom-8 sm:right-8 z-40 flex items-end gap-3 select-none pointer-events-auto"
-          onMouseEnter={() => {
-            setIsHovered(true);
-            setShowChatPrompt(true);
-          }}
-          onMouseLeave={() => {
-            setIsHovered(false);
-            setShowChatPrompt(false);
-          }}
+          className={`fixed bottom-14 right-4 sm:bottom-8 sm:right-8 z-40 flex items-end gap-3 select-none pointer-events-auto transition-opacity duration-300 ${
+            isChatOpen ? "opacity-0 pointer-events-none" : "opacity-100"
+          }`}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
         >
-          {/* Floating Speech / Interaction Pill (Wave Greeting or "Want to chat?") */}
-          <div className="flex flex-col items-end gap-2 mb-3">
-            {/* Entry Wave Greeting Bubble */}
-            {showWaveBubble && (
-              <div className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-[#0E1117]/95 border border-[#8CE56C]/40 shadow-[0_10px_35px_rgba(0,0,0,0.8)] backdrop-blur-md animate-bounce">
-                <span className="text-sm">👋</span>
-                <span className="font-sans text-[11px] sm:text-[12px] font-bold text-[#FAF6EE]">
-                  Hey! I&apos;m Dino. Vibe with me!
-                </span>
-              </div>
-            )}
-
-            {/* "Want to chat?" Popup Bar */}
+          {/* Tooltip Badges Column */}
+          <div className="flex flex-col items-end gap-2 mb-2">
+            {/* Audio Prompt: "Want to hear what Dino is hearing? Tap his headphones" */}
             <div
-              onClick={handleOpenChat}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0D1016]/90 border border-[#8CE56C]/30 shadow-[0_8px_30px_rgba(0,0,0,0.7)] backdrop-blur-md cursor-pointer transition-all duration-300 transform hover:scale-105 hover:border-[#8CE56C] ${
-                isHovered || isScrolling || showChatPrompt
-                  ? "opacity-100 translate-x-0 scale-100 pointer-events-auto"
-                  : "opacity-0 translate-x-3 scale-95 pointer-events-none sm:opacity-90 sm:translate-x-0 sm:scale-100"
+              onClick={toggleHeadphoneAudio}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0D1016]/95 border shadow-[0_8px_30px_rgba(0,0,0,0.7)] backdrop-blur-md cursor-pointer transition-all duration-300 transform hover:scale-105 ${
+                isPlayingAudio
+                  ? "border-[#FF8C38]/50 text-[#FF8C38]"
+                  : "border-[#8CE56C]/40 text-[#EAD7C0] hover:border-[#8CE56C]"
               }`}
+            >
+              <Headphones className="w-3.5 h-3.5 text-[#FF8C38] shrink-0" />
+              <span className="font-mono text-[9.5px] sm:text-[10px] tracking-wide font-medium">
+                {isPlayingAudio
+                  ? "Listening to Chicago (MJ) 🎶"
+                  : "Want to hear what Dino is hearing? Tap headphones 🎧"}
+              </span>
+            </div>
+
+            {/* "Want to chat?" Bar */}
+            <div
+              id="btn-open-dino-chat"
+              onClick={handleOpenChat}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0D1016]/90 border border-[#8CE56C]/40 shadow-[0_8px_30px_rgba(0,0,0,0.7)] backdrop-blur-md cursor-pointer transition-all duration-300 transform hover:scale-105 hover:border-[#8CE56C]"
             >
               <MessageSquare className="w-3.5 h-3.5 text-[#8CE56C]" />
               <span className="font-mono text-[10px] tracking-wider text-[#EAD7C0] font-bold">
@@ -489,7 +718,7 @@ export const DinoMascotCompanion: React.FC<DinoMascotCompanionProps> = memo(
             {/* Telemetry Indicator Pill */}
             <div
               className={`flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#0E1015]/80 border border-[#EAD7C0]/15 backdrop-blur-sm transition-all duration-300 ${
-                isHovered || isScrolling ? "opacity-100" : "opacity-0 sm:opacity-75"
+                isHovered ? "opacity-100" : "opacity-0 sm:opacity-75"
               }`}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-[#FF8C38] animate-pulse" />
@@ -506,14 +735,14 @@ export const DinoMascotCompanion: React.FC<DinoMascotCompanionProps> = memo(
           {/* Dino Mascot Stage in Corner */}
           <div
             onClick={handleOpenChat}
-            className="relative w-20 h-24 sm:w-24 sm:h-28 flex items-center justify-center cursor-pointer group"
+            className="relative w-22 h-26 sm:w-26 sm:h-30 flex items-center justify-center cursor-pointer group"
             role="button"
             tabIndex={0}
-            title="Dino Mascot: Listening to Chicago by MJ (Click to chat!)"
+            title="Dino: Tap to chat or tap his headphones to listen!"
           >
             {/* SVG Circular Progress Perimeter Ring */}
             <svg
-              className="absolute inset-x-0 bottom-0 w-20 h-20 sm:w-24 sm:h-24 -rotate-90 pointer-events-none"
+              className="absolute inset-x-0 bottom-0 w-22 h-22 sm:w-26 sm:h-26 -rotate-90 pointer-events-none"
               viewBox="0 0 100 100"
             >
               <circle
@@ -556,188 +785,47 @@ export const DinoMascotCompanion: React.FC<DinoMascotCompanionProps> = memo(
             </div>
 
             {/* Frosted Dock Disc Base */}
-            <div className="relative w-18 h-18 sm:w-22 sm:h-22 rounded-full bg-[#0D1016]/90 border border-[#EAD7C0]/25 shadow-[0_12px_36px_rgba(0,0,0,0.85)] backdrop-blur-md flex items-center justify-center overflow-visible transition-transform duration-300 group-hover:scale-105 group-hover:border-[#8CE56C]/50">
+            <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[#0D1016]/90 border border-[#EAD7C0]/25 shadow-[0_12px_36px_rgba(0,0,0,0.85)] backdrop-blur-md flex items-center justify-center overflow-visible transition-transform duration-300 group-hover:scale-105 group-hover:border-[#8CE56C]/50">
               {/* Cozy Ambient Horizon Glow */}
               <div className="absolute inset-0 rounded-full pointer-events-none bg-[radial-gradient(circle_at_50%_120%,rgba(140,229,108,0.25)_0%,transparent_70%)]" />
 
-              {/* The Dino Mascot (SVG Illustration) */}
-              <svg
-                ref={mascotRootRef}
-                viewBox="0 0 170 190"
-                className="w-20 h-22 sm:w-24 sm:h-26 overflow-visible transform origin-bottom"
-              >
-                {/* 1. Tail with Dorsal Plates */}
-                <g ref={tailRef} id="tail-group" style={{ transformOrigin: "100px 145px" }}>
-                  <path d="M 124 122 C 138 122, 140 136, 128 142" fill="#256B4A" stroke="#121814" strokeWidth="3" strokeLinecap="round" />
-                  <path d="M 134 140 C 146 142, 145 156, 131 156" fill="#256B4A" stroke="#121814" strokeWidth="3" strokeLinecap="round" />
-                  <path d="M 102 136 C 128 135, 148 145, 142 158 C 130 166, 110 156, 98 150 Z" fill="#8CE56C" stroke="#121814" strokeWidth="3.2" strokeLinejoin="round" />
-                </g>
+              {/* Dancing Dino Vector */}
+              <div className="w-22 h-24 sm:w-26 sm:h-28 overflow-visible transform origin-bottom">
+                {renderOrganicDino(false)}
+              </div>
 
-                {/* 2. Dorsal Plates along Back & Head */}
-                <g id="dorsal-plates">
-                  <path d="M 72 16 C 76 6, 94 6, 98 18" fill="#256B4A" stroke="#121814" strokeWidth="3.2" strokeLinecap="round" />
-                  <path d="M 106 28 C 120 25, 126 39, 116 48" fill="#256B4A" stroke="#121814" strokeWidth="3.2" strokeLinecap="round" />
-                  <path d="M 116 54 C 130 52, 134 68, 122 76" fill="#256B4A" stroke="#121814" strokeWidth="3.2" strokeLinecap="round" />
-                  <path d="M 120 84 C 134 84, 136 100, 123 108" fill="#256B4A" stroke="#121814" strokeWidth="3.2" strokeLinecap="round" />
-                </g>
-
-                {/* 3. Stubby Feet */}
-                <g id="feet">
-                  <path d="M 50 148 L 50 162 C 50 168, 66 168, 66 162 L 67 148 Z" fill="#8CE56C" stroke="#121814" strokeWidth="3.2" strokeLinejoin="round" />
-                  <path d="M 54 163 Q 55 160 56 163 M 60 163 Q 61 160 62 163" stroke="#256B4A" strokeWidth="2" strokeLinecap="round" />
-                  <path d="M 88 148 L 88 162 C 88 168, 104 168, 104 162 L 103 148 Z" fill="#8CE56C" stroke="#121814" strokeWidth="3.2" strokeLinejoin="round" />
-                  <path d="M 92 163 Q 93 160 94 163 M 98 163 Q 99 160 100 163" stroke="#256B4A" strokeWidth="2" strokeLinecap="round" />
-                </g>
-
-                {/* 4. Chubby Dino Body & Head */}
-                <path
-                  id="dino-body"
-                  d="
-                    M 42 54
-                    C 30 70, 30 92, 44 108
-                    C 38 120, 40 140, 50 152
-                    L 104 152
-                    C 116 142, 116 118, 112 104
-                    C 122 88, 120 56, 106 36
-                    C 88 18, 56 26, 42 54 Z
-                  "
-                  fill="#8CE56C"
-                  stroke="#121814"
-                  strokeWidth="3.4"
-                  strokeLinejoin="round"
-                />
-
-                {/* 5. Cream Belly Patch */}
-                <ellipse cx="76" cy="120" rx="22" ry="20" fill="#FFF8DC" stroke="#121814" strokeWidth="2.6" />
-
-                {/* 6. Streetwear Open-Zipped Black Hoodie */}
-                <g id="black-hoodie">
-                  <path
-                    d="
-                      M 44 106
-                      C 39 118, 40 138, 50 150
-                      L 64 150
-                      C 58 136, 56 122, 60 108
-                      C 52 108, 46 106, 44 106 Z
-                    "
-                    fill="#14171D"
-                    stroke="#0C0E12"
-                    strokeWidth="2.6"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="
-                      M 108 106
-                      C 113 118, 112 138, 104 150
-                      L 88 150
-                      C 94 136, 96 122, 92 108
-                      C 100 108, 106 106, 108 106 Z
-                    "
-                    fill="#14171D"
-                    stroke="#0C0E12"
-                    strokeWidth="2.6"
-                    strokeLinejoin="round"
-                  />
-                  <path d="M 44 100 C 60 110, 92 110, 108 100 C 104 94, 48 94, 44 100 Z" fill="#1A1E26" stroke="#0C0E12" strokeWidth="2.4" />
-                  <path d="M 52 132 L 64 132 L 64 146 L 52 144 Z" fill="#1F242F" stroke="#2B313E" strokeWidth="1.4" />
-                  <path d="M 100 132 L 88 132 L 88 146 L 100 144 Z" fill="#1F242F" stroke="#2B313E" strokeWidth="1.4" />
-
-                  {/* Drawstrings */}
-                  <g ref={drawstringsRef} id="drawstrings">
-                    <path d="M 64 106 Q 63 118, 62 126" stroke="#383E4D" strokeWidth="2.2" strokeLinecap="round" fill="none" />
-                    <circle cx="62" cy="127" r="1.8" fill="#FFF8DC" />
-                    <path d="M 88 106 Q 89 118, 90 126" stroke="#383E4D" strokeWidth="2.2" strokeLinecap="round" fill="none" />
-                    <circle cx="90" cy="127" r="1.8" fill="#FFF8DC" />
-                  </g>
-                </g>
-
-                {/* 7. Chibi Face */}
-                <g id="face">
-                  <ellipse cx="48" cy="78" rx="7.5" ry="4.5" fill="#FFA35C" opacity="0.48" />
-                  <ellipse cx="104" cy="78" rx="7.5" ry="4.5" fill="#FFA35C" opacity="0.48" />
-
-                  {/* Cute Round Eyes */}
-                  <g ref={leftEyeRef} id="left-eye">
-                    <circle cx="56" cy="68" r="6" fill="#121814" />
-                    <circle cx="58.2" cy="65.8" r="2" fill="#FFFFFF" />
-                    <circle cx="54.8" cy="69.8" r="0.9" fill="#FFFFFF" opacity="0.75" />
-                  </g>
-                  <g ref={rightEyeRef} id="right-eye">
-                    <circle cx="96" cy="68" r="6" fill="#121814" />
-                    <circle cx="98.2" cy="65.8" r="2" fill="#FFFFFF" />
-                    <circle cx="94.8" cy="69.8" r="0.9" fill="#FFFFFF" opacity="0.75" />
-                  </g>
-
-                  {/* :3 Mouth */}
-                  <path
-                    ref={mouthRef}
-                    d="M 70 75 Q 73.5 80 77 76 Q 80.5 80 84 75"
-                    fill="none"
-                    stroke="#121814"
-                    strokeWidth="2.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </g>
-
-                {/* 8. Arms */}
-                <g id="arms">
-                  <path d="M 46 102 C 38 108, 40 120, 50 122 C 54 118, 54 112, 50 104 Z" fill="#8CE56C" stroke="#121814" strokeWidth="2.8" strokeLinejoin="round" />
-                  <g ref={wavingArmRef} id="waving-arm" style={{ transformOrigin: "104px 105px" }}>
-                    <path d="M 102 102 C 114 104, 126 98, 126 84 C 120 80, 112 84, 104 94 Z" fill="#8CE56C" stroke="#121814" strokeWidth="2.8" strokeLinejoin="round" />
-                    <path d="M 123 85 Q 125 87 126 84" stroke="#256B4A" strokeWidth="1.6" strokeLinecap="round" />
-                  </g>
-                </g>
-
-                {/* 9. Retro Studio Headphones */}
-                <g id="studio-headphones">
-                  <path d="M 36 56 C 30 18, 122 18, 116 56" fill="none" stroke="#14171E" strokeWidth="7" strokeLinecap="round" />
-                  <path d="M 44 40 C 56 26, 96 26, 108 40" fill="none" stroke="#2B303E" strokeWidth="3" strokeLinecap="round" />
-                  <rect x="34" y="52" width="4.5" height="8" rx="1.5" fill="#A0A6B5" />
-                  <rect x="113.5" y="52" width="4.5" height="8" rx="1.5" fill="#A0A6B5" />
-
-                  {/* Left Earcup */}
-                  <g id="left-earcup">
-                    <rect x="24" y="48" width="14" height="26" rx="7" fill="#12141A" stroke="#2D3342" strokeWidth="1.6" />
-                    <rect x="33" y="50" width="4.5" height="22" rx="2" fill="#090A0D" />
-                    <circle cx="31" cy="61" r="3" fill="#FF8C38" className="animate-pulse" />
-                    <circle cx="31" cy="61" r="1.5" fill="#FFE5C2" />
-                  </g>
-
-                  {/* Right Earcup */}
-                  <g id="right-earcup">
-                    <rect x="114" y="48" width="14" height="26" rx="7" fill="#12141A" stroke="#2D3342" strokeWidth="1.6" />
-                    <rect x="114.5" y="50" width="4.5" height="22" rx="2" fill="#090A0D" />
-                    <circle cx="121" cy="61" r="3" fill="#FF8C38" className="animate-pulse" />
-                    <circle cx="121" cy="61" r="1.5" fill="#FFE5C2" />
-                  </g>
-                </g>
-              </svg>
-
-              {/* Mute / Unmute Button on Dock Edge */}
+              {/* Headphone Audio Indicator / Toggle Badge on Rim */}
               <button
-                onClick={toggleMute}
-                className="absolute -top-1 -right-1 p-1.5 rounded-full bg-[#141822] border border-[#EAD7C0]/30 text-[#FF8C38] shadow-md hover:scale-110 hover:border-[#FF8C38] transition-all"
-                title={isMuted ? "Unmute MJ Chicago" : "Mute MJ Chicago"}
+                onClick={toggleHeadphoneAudio}
+                className="absolute -top-1 -right-1 p-1.5 rounded-full bg-[#141822] border border-[#EAD7C0]/30 shadow-md hover:scale-110 transition-all"
+                title={isPlayingAudio ? "Pause MJ Chicago" : "Listen to what Dino is hearing"}
               >
-                {isMuted ? <VolumeX className="w-3 h-3 text-[#A0A6B5]" /> : <Volume2 className="w-3 h-3 text-[#FF8C38] animate-pulse" />}
+                {isPlayingAudio ? (
+                  <Volume2 className="w-3.5 h-3.5 text-[#FF8C38] animate-pulse" />
+                ) : (
+                  <VolumeX className="w-3.5 h-3.5 text-[#A0A6B5]" />
+                )}
               </button>
             </div>
           </div>
         </aside>
 
         {/* ══════════════════════════════════════════════════════════════
-            EXPANDED MAIN ATTRACTION CHATBOT MODAL
+            EXPANDED SPLIT-STAGE CHATBOT MODAL (GROWTH MORPH FROM CORNER)
         ══════════════════════════════════════════════════════════════ */}
         {isChatOpen && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-2xl animate-in fade-in duration-300"
+            ref={modalBackdropRef}
+            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-2xl"
             role="dialog"
             aria-modal="true"
             aria-label="Dino Chatbot Companion"
           >
-            {/* Modal Container */}
-            <div className="relative w-full max-w-4xl max-h-[88vh] h-[88vh] md:h-auto bg-[#0C0F14]/95 border border-[#8CE56C]/30 rounded-3xl shadow-[0_25px_80px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col md:flex-row">
+            {/* Morphing Split-Stage Modal Container */}
+            <div
+              ref={modalStageRef}
+              className="relative w-full max-w-4xl max-h-[88vh] h-[88vh] md:h-auto bg-[#0C0F14]/95 border border-[#8CE56C]/30 rounded-3xl shadow-[0_25px_80px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col md:flex-row"
+            >
               {/* Close Button */}
               <button
                 onClick={handleCloseChat}
@@ -747,13 +835,12 @@ export const DinoMascotCompanion: React.FC<DinoMascotCompanionProps> = memo(
                 <X className="w-5 h-5" />
               </button>
 
-              {/* Left Side: Large Dino Showcase (The Main Attraction!) */}
+              {/* Left Side: Large Dino Showcase (Split Stage Main Attraction!) */}
               <div className="md:w-5/12 bg-gradient-to-b from-[#141A22] to-[#0A0D12] border-b md:border-b-0 md:border-r border-[#8CE56C]/20 p-3 sm:p-6 shrink-0 flex flex-col items-center justify-between text-center relative overflow-hidden">
-                {/* Ambient glow behind Dino */}
                 <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_50%_60%,rgba(140,229,108,0.18)_0%,transparent_70%)]" />
 
                 {/* Dino Header Pill */}
-                <div className="flex items-center gap-2 px-3 py-0.5 sm:py-1 rounded-full bg-[#0D1016] border border-[#8CE56C]/30 z-10">
+                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#0D1016] border border-[#8CE56C]/30 z-10">
                   <span className="w-2 h-2 rounded-full bg-[#8CE56C] animate-pulse" />
                   <span className="font-mono text-[9px] sm:text-[10px] tracking-widest text-[#EAD7C0] uppercase font-bold">
                     PORTFOLIO COMPANION
@@ -762,130 +849,40 @@ export const DinoMascotCompanion: React.FC<DinoMascotCompanionProps> = memo(
 
                 {/* Large Interactive Dino Illustration (~300px on desktop, ~120px on mobile) */}
                 <div className="my-1 sm:my-3 relative w-24 h-28 sm:w-48 sm:h-56 md:w-64 md:h-72 flex items-center justify-center">
-                  <svg
-                    viewBox="0 0 170 190"
-                    className="w-full h-full overflow-visible transform"
-                  >
-                    {/* Tail */}
-                    <g id="large-tail">
-                      <path d="M 124 122 C 138 122, 140 136, 128 142" fill="#256B4A" stroke="#121814" strokeWidth="3" strokeLinecap="round" />
-                      <path d="M 134 140 C 146 142, 145 156, 131 156" fill="#256B4A" stroke="#121814" strokeWidth="3" strokeLinecap="round" />
-                      <path d="M 102 136 C 128 135, 148 145, 142 158 C 130 166, 110 156, 98 150 Z" fill="#8CE56C" stroke="#121814" strokeWidth="3.2" strokeLinejoin="round" />
-                    </g>
-                    {/* Dorsal Plates */}
-                    <g id="large-dorsal">
-                      <path d="M 72 16 C 76 6, 94 6, 98 18" fill="#256B4A" stroke="#121814" strokeWidth="3.2" strokeLinecap="round" />
-                      <path d="M 106 28 C 120 25, 126 39, 116 48" fill="#256B4A" stroke="#121814" strokeWidth="3.2" strokeLinecap="round" />
-                      <path d="M 116 54 C 130 52, 134 68, 122 76" fill="#256B4A" stroke="#121814" strokeWidth="3.2" strokeLinecap="round" />
-                      <path d="M 120 84 C 134 84, 136 100, 123 108" fill="#256B4A" stroke="#121814" strokeWidth="3.2" strokeLinecap="round" />
-                    </g>
-                    {/* Feet */}
-                    <g id="large-feet">
-                      <path d="M 50 148 L 50 162 C 50 168, 66 168, 66 162 L 67 148 Z" fill="#8CE56C" stroke="#121814" strokeWidth="3.2" strokeLinejoin="round" />
-                      <path d="M 54 163 Q 55 160 56 163 M 60 163 Q 61 160 62 163" stroke="#256B4A" strokeWidth="2" strokeLinecap="round" />
-                      <path d="M 88 148 L 88 162 C 88 168, 104 168, 104 162 L 103 148 Z" fill="#8CE56C" stroke="#121814" strokeWidth="3.2" strokeLinejoin="round" />
-                      <path d="M 92 163 Q 93 160 94 163 M 98 163 Q 99 160 100 163" stroke="#256B4A" strokeWidth="2" strokeLinecap="round" />
-                    </g>
-                    {/* Body */}
-                    <path
-                      d="
-                        M 42 54
-                        C 30 70, 30 92, 44 108
-                        C 38 120, 40 140, 50 152
-                        L 104 152
-                        C 116 142, 116 118, 112 104
-                        C 122 88, 120 56, 106 36
-                        C 88 18, 56 26, 42 54 Z
-                      "
-                      fill="#8CE56C"
-                      stroke="#121814"
-                      strokeWidth="3.4"
-                      strokeLinejoin="round"
-                    />
-                    <ellipse cx="76" cy="120" rx="22" ry="20" fill="#FFF8DC" stroke="#121814" strokeWidth="2.6" />
-                    {/* Black Hoodie */}
-                    <g id="large-hoodie">
-                      <path d="M 44 106 C 39 118, 40 138, 50 150 L 64 150 C 58 136, 56 122, 60 108 C 52 108, 46 106, 44 106 Z" fill="#14171D" stroke="#0C0E12" strokeWidth="2.6" />
-                      <path d="M 108 106 C 113 118, 112 138, 104 150 L 88 150 C 94 136, 96 122, 92 108 C 100 108, 106 106, 108 106 Z" fill="#14171D" stroke="#0C0E12" strokeWidth="2.6" />
-                      <path d="M 44 100 C 60 110, 92 110, 108 100 C 104 94, 48 94, 44 100 Z" fill="#1A1E26" stroke="#0C0E12" strokeWidth="2.4" />
-                      <path d="M 52 132 L 64 132 L 64 146 L 52 144 Z" fill="#1F242F" stroke="#2B313E" strokeWidth="1.4" />
-                      <path d="M 100 132 L 88 132 L 88 146 L 100 144 Z" fill="#1F242F" stroke="#2B313E" strokeWidth="1.4" />
-                      <path d="M 64 106 Q 63 118, 62 126" stroke="#383E4D" strokeWidth="2.2" strokeLinecap="round" fill="none" />
-                      <circle cx="62" cy="127" r="1.8" fill="#FFF8DC" />
-                      <path d="M 88 106 Q 89 118, 90 126" stroke="#383E4D" strokeWidth="2.2" strokeLinecap="round" fill="none" />
-                      <circle cx="90" cy="127" r="1.8" fill="#FFF8DC" />
-                    </g>
-                    {/* Face */}
-                    <g id="large-face">
-                      <ellipse cx="48" cy="78" rx="7.5" ry="4.5" fill="#FFA35C" opacity="0.48" />
-                      <ellipse cx="104" cy="78" rx="7.5" ry="4.5" fill="#FFA35C" opacity="0.48" />
-                      <g id="large-left-eye">
-                        <circle cx="56" cy="68" r="6" fill="#121814" />
-                        <circle cx="58.2" cy="65.8" r="2" fill="#FFFFFF" />
-                        <circle cx="54.8" cy="69.8" r="0.9" fill="#FFFFFF" opacity="0.75" />
-                      </g>
-                      <g id="large-right-eye">
-                        <circle cx="96" cy="68" r="6" fill="#121814" />
-                        <circle cx="98.2" cy="65.8" r="2" fill="#FFFFFF" />
-                        <circle cx="94.8" cy="69.8" r="0.9" fill="#FFFFFF" opacity="0.75" />
-                      </g>
-                      <path
-                        d="M 70 75 Q 73.5 80 77 76 Q 80.5 80 84 75"
-                        fill="none"
-                        stroke="#121814"
-                        strokeWidth="2.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </g>
-                    {/* Arms */}
-                    <g id="large-arms">
-                      <path d="M 46 102 C 38 108, 40 120, 50 122 C 54 118, 54 112, 50 104 Z" fill="#8CE56C" stroke="#121814" strokeWidth="2.8" strokeLinejoin="round" />
-                      <path d="M 102 102 C 114 104, 126 98, 126 84 C 120 80, 112 84, 104 94 Z" fill="#8CE56C" stroke="#121814" strokeWidth="2.8" strokeLinejoin="round" />
-                      <path d="M 123 85 Q 125 87 126 84" stroke="#256B4A" strokeWidth="1.6" strokeLinecap="round" />
-                    </g>
-                    {/* Headphones */}
-                    <g id="large-headphones">
-                      <path d="M 36 56 C 30 18, 122 18, 116 56" fill="none" stroke="#14171E" strokeWidth="7" strokeLinecap="round" />
-                      <path d="M 44 40 C 56 26, 96 26, 108 40" fill="none" stroke="#2B303E" strokeWidth="3" strokeLinecap="round" />
-                      <rect x="34" y="52" width="4.5" height="8" rx="1.5" fill="#A0A6B5" />
-                      <rect x="113.5" y="52" width="4.5" height="8" rx="1.5" fill="#A0A6B5" />
-                      <g id="large-left-earcup">
-                        <rect x="24" y="48" width="14" height="26" rx="7" fill="#12141A" stroke="#2D3342" strokeWidth="1.6" />
-                        <rect x="33" y="50" width="4.5" height="22" rx="2" fill="#090A0D" />
-                        <circle cx="31" cy="61" r="3" fill="#FF8C38" className="animate-pulse" />
-                        <circle cx="31" cy="61" r="1.5" fill="#FFE5C2" />
-                      </g>
-                      <g id="large-right-earcup">
-                        <rect x="114" y="48" width="14" height="26" rx="7" fill="#12141A" stroke="#2D3342" strokeWidth="1.6" />
-                        <rect x="114.5" y="50" width="4.5" height="22" rx="2" fill="#090A0D" />
-                        <circle cx="121" cy="61" r="3" fill="#FF8C38" className="animate-pulse" />
-                        <circle cx="121" cy="61" r="1.5" fill="#FFE5C2" />
-                      </g>
-                    </g>
-                  </svg>
+                  {renderOrganicDino(true)}
                 </div>
 
-                {/* Music Player Status */}
+                {/* Music Player Bar with Headphone Toggle */}
                 <div className="flex items-center gap-3 px-3 py-1.5 rounded-xl bg-[#0E121A]/80 border border-[#EAD7C0]/15 w-full justify-between z-10">
                   <div className="flex items-center gap-2 text-left">
-                    <Music className="w-4 h-4 text-[#FF8C38] animate-spin" style={{ animationDuration: "6s" }} />
+                    <Music
+                      className={`w-4 h-4 text-[#FF8C38] ${isPlayingAudio ? "animate-spin" : ""}`}
+                      style={{ animationDuration: "6s" }}
+                    />
                     <div>
                       <div className="font-mono text-[10px] text-[#EAD7C0] font-bold">CHICAGO</div>
                       <div className="font-mono text-[9px] text-[#CBB59D]/60">Michael Jackson (Xscape)</div>
                     </div>
                   </div>
                   <button
-                    onClick={toggleMute}
+                    onClick={toggleHeadphoneAudio}
                     className="p-1.5 rounded-lg bg-[#151A24] border border-[#EAD7C0]/20 text-[#FF8C38] hover:scale-105"
+                    title={isPlayingAudio ? "Pause" : "Play"}
                   >
-                    {isMuted ? <VolumeX className="w-3.5 h-3.5 text-gray-400" /> : <Volume2 className="w-3.5 h-3.5 text-[#FF8C38]" />}
+                    {isPlayingAudio ? (
+                      <Volume2 className="w-3.5 h-3.5 text-[#FF8C38]" />
+                    ) : (
+                      <VolumeX className="w-3.5 h-3.5 text-gray-400" />
+                    )}
                   </button>
                 </div>
               </div>
 
-              {/* Right Side: Interactive Chat Conversation Console */}
-              <div className="flex-1 min-h-0 md:w-7/12 p-4 sm:p-6 flex flex-col justify-between bg-[#0C0F14]">
+              {/* Right Side: Interactive Chat Console */}
+              <div
+                ref={chatConsoleRef}
+                className="flex-1 min-h-0 md:w-7/12 p-4 sm:p-6 flex flex-col justify-between bg-[#0C0F14]"
+              >
                 {/* Chat Header */}
                 <div className="flex items-center justify-between pb-3 border-b border-[#EAD7C0]/10">
                   <div>
@@ -894,7 +891,7 @@ export const DinoMascotCompanion: React.FC<DinoMascotCompanionProps> = memo(
                       Dino Assistant
                     </h3>
                     <p className="font-mono text-[10px] text-[#CBB59D]/60">
-                      Powered by portfolio knowledge base
+                      Looking at what you type & lip-syncing replies!
                     </p>
                   </div>
                   <span className="font-mono text-[9px] px-2 py-0.5 rounded-full bg-[#8CE56C]/20 text-[#8CE56C] font-semibold border border-[#8CE56C]/30">
@@ -902,7 +899,7 @@ export const DinoMascotCompanion: React.FC<DinoMascotCompanionProps> = memo(
                   </span>
                 </div>
 
-                {/* Conversation Scroll Area */}
+                {/* Messages Scroll Area */}
                 <div className="flex-1 overflow-y-auto py-4 space-y-3.5 pr-1">
                   {messages.map((msg) => (
                     <div
@@ -921,13 +918,19 @@ export const DinoMascotCompanion: React.FC<DinoMascotCompanionProps> = memo(
                     </div>
                   ))}
 
-                  {/* Dino Typing Indicator */}
+                  {/* Dino Lip-sync Typing Indicator */}
                   {isDinoSpeaking && (
                     <div className="flex justify-start">
                       <div className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-[#141822] border border-[#8CE56C]/30 text-[#8CE56C]">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#8CE56C] animate-ping" />
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#8CE56C] animate-ping" style={{ animationDelay: "0.2s" }} />
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#8CE56C] animate-ping" style={{ animationDelay: "0.4s" }} />
+                        <span
+                          className="w-1.5 h-1.5 rounded-full bg-[#8CE56C] animate-ping"
+                          style={{ animationDelay: "0.2s" }}
+                        />
+                        <span
+                          className="w-1.5 h-1.5 rounded-full bg-[#8CE56C] animate-ping"
+                          style={{ animationDelay: "0.4s" }}
+                        />
                       </div>
                     </div>
                   )}
@@ -961,9 +964,15 @@ export const DinoMascotCompanion: React.FC<DinoMascotCompanionProps> = memo(
                   >
                     💼 Hire / Contact
                   </button>
+                  <button
+                    onClick={() => handleSendMessage("Why are you wearing a black hoodie and headphones?")}
+                    className="shrink-0 px-2.5 py-1 rounded-full bg-[#161B26] border border-[#EAD7C0]/15 text-[10px] font-mono text-[#EAD7C0] hover:border-[#8CE56C] hover:text-[#8CE56C] transition-colors"
+                  >
+                    🦖 About Dino
+                  </button>
                 </div>
 
-                {/* Freeform Input Field */}
+                {/* Freeform Input Field (With Eye Tracking on Focus & Change) */}
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -974,8 +983,13 @@ export const DinoMascotCompanion: React.FC<DinoMascotCompanionProps> = memo(
                   <input
                     type="text"
                     value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    placeholder="Ask Dino about Soham's portfolio..."
+                    onFocus={() => setIsTypingQuestion(true)}
+                    onBlur={() => setIsTypingQuestion(false)}
+                    onChange={(e) => {
+                      setInputValue(e.target.value);
+                      setIsTypingQuestion(true);
+                    }}
+                    placeholder="Ask Dino about Soham's portfolio (watch his eyes!)..."
                     className="flex-1 px-4 py-2.5 rounded-xl bg-[#141822] border border-[#EAD7C0]/20 text-[#FAF6EE] text-xs sm:text-[13px] placeholder:text-[#CBB59D]/40 focus:outline-none focus:border-[#8CE56C] transition-colors"
                   />
                   <button

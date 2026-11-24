@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useCallback, memo } from "react";
 import Image from "next/image";
 import * as THREE from "three";
-import { Sparkles, ExternalLink } from "lucide-react";
+import { Sparkles, ExternalLink, Activity, Layers } from "lucide-react";
 
 export interface CreedStationData {
   num: string;
@@ -489,13 +489,35 @@ export const ApekonDisintegrationCreed: React.FC<ApekonDisintegrationCreedProps>
         ref={rootRef}
         className={`relative w-full h-full flex flex-col justify-between items-center text-white select-none overflow-hidden ${
           isProjectActive
-            ? "pt-16 xs:pt-20 sm:pt-24 pb-4 sm:pb-8 px-4 sm:px-12 border-t border-[#EAD7C0]/20"
+            ? "pt-16 xs:pt-20 sm:pt-24 pb-4 sm:pb-8 px-4 sm:px-12 md:px-16 lg:px-20 border-t border-[#EAD7C0]/20"
             : "px-6 pt-16 pb-8 border-t border-transparent"
         } transition-colors duration-300`}
         style={{
           backgroundColor: isProjectActive ? "#2D0A12" : "#060709",
         }}
       >
+        {/* Subtle Ambient Reflected Silhouette Backdrop */}
+        {isProjectActive && (
+          <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
+            <div className="absolute -right-16 -top-16 sm:-right-28 sm:-top-28 md:-right-36 md:-top-36 w-[360px] h-[360px] sm:w-[600px] sm:h-[600px] md:w-[750px] md:h-[750px] rounded-full blur-[100px] sm:blur-[140px] md:blur-[180px]">
+              <div className="relative w-full h-full opacity-20 sm:opacity-25 saturate-150">
+                <Image
+                  src="/assets/logos/izieat.png"
+                  alt=""
+                  fill
+                  className="object-contain"
+                  aria-hidden="true"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Leading Architectural Razor Hairline */}
+        {isProjectActive && (
+          <div className="absolute top-0 inset-x-0 h-[1px] bg-[#EAD7C0]/30" />
+        )}
+
         {/* 1. Subtle 3D Geodesic Atmosphere Canvas (Apekon Inspiration) */}
         <canvas
           ref={threeCanvasRef}
@@ -511,51 +533,39 @@ export const ApekonDisintegrationCreed: React.FC<ApekonDisintegrationCreedProps>
           className="absolute inset-0 w-full h-full pointer-events-none z-20"
         />
 
-        {/* 3. Top Architectural Header (Headroom below global nav) */}
-        <header className="relative z-10 w-full flex items-center justify-between pt-1">
-          <div className="flex items-center gap-2">
-            <span
-              className={`w-1.5 h-1.5 rounded-full ${
-                isProjectActive ? "bg-[#FF8C38]" : "bg-white"
-              } animate-pulse`}
-            />
-            <span
-              className={`font-mono text-[10px] tracking-[0.22em] uppercase ${
-                isProjectActive ? "text-[#CBB59D]" : "text-white/70"
-              }`}
-            >
-              {isProjectActive
-                ? "SELECTED COMMISSIONS // ARCHITECTURAL SHOWCASE"
-                : "ARCHITECTURAL CREED"}
-            </span>
+        {/* 3. Top Architectural Header */}
+        {isProjectActive ? (
+          <div className="w-full max-w-7xl mx-auto flex items-center justify-between text-[10px] sm:text-[11px] font-sans font-bold uppercase tracking-[0.22em] text-[#CBB59D] pb-2 sm:pb-3 border-b border-[#EAD7C0]/20 relative z-10">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <span className="w-2 h-2 rounded-full bg-[#FF8C38]" />
+              <span className="text-[#EAD7C0]">SELECTED COMMISSIONS // ARCHITECTURAL SHOWCASE</span>
+            </div>
+            <div className="flex items-center gap-3 sm:gap-4 text-xs font-mono">
+              <span className="text-[#CBB59D]/70">DEPTH:</span>
+              <span className="text-[#FF8C38] font-bold">01 / 04</span>
+            </div>
           </div>
+        ) : (
+          <header className="relative z-10 w-full flex items-center justify-between pt-1">
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+              <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-white/70">
+                ARCHITECTURAL CREED
+              </span>
+            </div>
 
-          <div
-            className={`flex items-center gap-1.5 font-mono text-[11px] tracking-wider ${
-              isProjectActive ? "text-[#CBB59D]" : "text-white/50"
-            }`}
-          >
-            {isProjectActive ? (
-              <>
-                <span className="text-[#CBB59D]/70">DEPTH:</span>
-                <span className="text-[#FF8C38] font-bold">01</span>
-                <span>/</span>
-                <span>04</span>
-              </>
-            ) : (
-              <>
-                <span className="text-white font-bold">{currentStation.num}</span>
-                <span>/</span>
-                <span>04</span>
-              </>
-            )}
-          </div>
-        </header>
+            <div className="flex items-center gap-1.5 font-mono text-[11px] tracking-wider text-white/50">
+              <span className="text-white font-bold">{currentStation.num}</span>
+              <span>/</span>
+              <span>04</span>
+            </div>
+          </header>
+        )}
 
         {/* 4. Central Content: Either Project 01 Showcase or Creed Pillar Station */}
         {isProjectActive ? (
-          <main
-            className="relative z-10 w-full max-w-sm my-auto flex flex-col items-center text-center transition-[filter] duration-150 py-1"
+          <div
+            className="showcase-container w-full max-w-7xl mx-auto flex-1 flex items-center my-auto will-change-[transform,opacity]"
             style={{
               opacity: typoOpacity,
               transform: `scale(${typoScale.toFixed(3)})`,
@@ -564,67 +574,110 @@ export const ApekonDisintegrationCreed: React.FC<ApekonDisintegrationCreedProps>
                 : "none",
             }}
           >
-            {/* Project Monogram Logo Frame */}
-            <div className="relative w-full max-w-[200px] xs:max-w-[240px] aspect-square rounded-2xl bg-[#160408] border border-[#EAD7C0]/15 shadow-[0_30px_90px_rgba(0,0,0,0.85)] overflow-hidden flex items-center justify-center p-5 mb-2">
-              <Image
-                src="/assets/logos/izieat.png"
-                alt="IZIEAT Export Portal Monogram Logo"
-                fill
-                className="object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)] select-none pointer-events-none p-3"
-                priority
-              />
-            </div>
-
-            {/* Category */}
-            <div className="flex items-center gap-2 mb-1">
-              <span className="font-serif italic text-xl text-[#FF8C38] font-normal leading-none">01</span>
-              <span className="text-[#EAD7C0]/30 font-sans text-sm">/</span>
-              <span className="text-[#EAD7C0]/50 font-mono text-xs">04</span>
-              <span className="w-[1px] h-3 bg-[#EAD7C0]/20 mx-1" />
-              <span className="text-[9px] font-sans font-extrabold uppercase tracking-[0.2em] text-[#FF8C38]">
-                GLOBAL TRADE INFRASTRUCTURE
-              </span>
-            </div>
-
-            {/* Title */}
-            <h3 className="font-sans font-black text-lg xs:text-xl uppercase tracking-tight text-[#EAD7C0] mb-1 leading-[1.05]">
-              IZIEAT Export Portal
-            </h3>
-
-            {/* Summary */}
-            <p className="font-sans font-normal text-xs text-[#D8C4AE] leading-relaxed max-w-xs mb-2 line-clamp-2">
-              Global wholesale export portal engineered with an in-memory 278-key instant English-Russian dictionary (&lt;5ms latency), eliminating external translation API roundtrips and powering international buyer operations across the EU and CIS regions.
-            </p>
-
-            {/* Metrics Row */}
-            <div className="grid grid-cols-3 gap-2 border-t border-b border-[#EAD7C0]/20 py-1.5 mb-2.5 w-full max-w-xs text-left">
-              <div>
-                <div className="text-[8px] font-mono uppercase text-[#CBB59D] tracking-wider mb-0.5">TRANSLATION KEYS</div>
-                <div className="text-xs font-sans font-bold text-[#EAD7C0] tracking-tight truncate">278 Keys</div>
+            <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-8 lg:gap-16 items-center">
+              {/* LEFT COLUMN: Dedicated Architectural Canvas Frame (Forge Style) */}
+              <div className="md:col-span-6 lg:col-span-6 flex justify-center items-center">
+                <div className="relative w-full max-w-[260px] xs:max-w-[300px] sm:max-w-[400px] md:max-w-[450px] lg:max-w-[490px] xl:max-w-[530px] aspect-square rounded-2xl md:rounded-3xl bg-[#160408] border border-[#EAD7C0]/15 shadow-[0_30px_90px_rgba(0,0,0,0.85)] overflow-hidden">
+                  <div className="absolute inset-0 flex items-center justify-center bg-[#160408]">
+                    <div className="relative w-full h-full flex items-center justify-center p-6 xs:p-8 sm:p-12 md:p-14">
+                      <Image
+                        src="/assets/logos/izieat.png"
+                        alt="IZIEAT Export Portal Monogram Logo"
+                        fill
+                        className="object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)] select-none pointer-events-none p-2 sm:p-4"
+                        sizes="(max-width: 768px) 300px, (max-width: 1280px) 490px, 550px"
+                        priority
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div>
-                <div className="text-[8px] font-mono uppercase text-[#CBB59D] tracking-wider mb-0.5">SWITCH LATENCY</div>
-                <div className="text-xs font-sans font-bold text-[#EAD7C0] tracking-tight truncate">&lt; 5ms</div>
-              </div>
-              <div>
-                <div className="text-[8px] font-mono uppercase text-[#CBB59D] tracking-wider mb-0.5">TRADING REGION</div>
-                <div className="text-xs font-sans font-bold text-[#EAD7C0] tracking-tight truncate">EU &amp; CIS</div>
-              </div>
-            </div>
 
-            {/* Action Link Button */}
-            <div className="flex items-center justify-center gap-2">
-              <a
-                href="https://www.izieat.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#EAD7C0] text-[#2D0A12] font-sans font-bold text-[10px] uppercase tracking-wider hover:bg-[#FF8C38] hover:text-white transition-all shadow-md"
-              >
-                <span>EXPLORE LIVE PLATFORM</span>
-                <ExternalLink size={12} />
-              </a>
+              {/* RIGHT COLUMN: Editorial Narrative (Downward Flow on Scroll) */}
+              <div className="md:col-span-6 lg:col-span-6 relative min-h-[220px] xs:min-h-[250px] sm:min-h-[340px] md:min-h-[440px] flex items-center">
+                <div className="relative w-full flex flex-col justify-center">
+                  {/* Project Index & Category */}
+                  <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-3">
+                    <span className="font-serif italic text-xl xs:text-2xl sm:text-4xl text-[#FF8C38] font-normal leading-none">
+                      01
+                    </span>
+                    <span className="text-[#EAD7C0]/30 font-sans text-sm sm:text-xl">/</span>
+                    <span className="text-[#EAD7C0]/50 font-mono text-xs sm:text-sm">04</span>
+                    <span className="w-[1px] h-3 sm:h-4 bg-[#EAD7C0]/20 mx-1" />
+                    <span className="text-[9px] sm:text-[11px] font-sans font-extrabold uppercase tracking-[0.2em] text-[#FF8C38]">
+                      GLOBAL TRADE INFRASTRUCTURE
+                    </span>
+                  </div>
+
+                  {/* Monumental Editorial Heading in Italian Light Sand */}
+                  <h3 className="font-sans font-black text-lg xs:text-xl sm:text-3xl md:text-4xl lg:text-5xl uppercase tracking-tight text-[#EAD7C0] mb-1 xs:mb-2 sm:mb-4 leading-[1.05]">
+                    IZIEAT Export Portal
+                  </h3>
+
+                  {/* Narrative Subtext in Warm Sand */}
+                  <p className="font-sans font-normal text-xs sm:text-sm md:text-base text-[#D8C4AE] leading-relaxed max-w-2xl mb-2 sm:mb-6 line-clamp-2 sm:line-clamp-none">
+                    Global wholesale export portal engineered with an in-memory 278-key instant English-Russian dictionary (&lt;5ms latency), eliminating external translation API roundtrips and powering international buyer operations across the EU and CIS regions.
+                  </p>
+
+                  {/* Micro-Spec Hairline Metrics */}
+                  <div className="grid grid-cols-3 gap-2 sm:gap-3 border-t border-b border-[#EAD7C0]/20 py-1.5 sm:py-3.5 mb-2 sm:mb-6 max-w-xl">
+                    <div>
+                      <div className="text-[8px] sm:text-[9px] font-mono uppercase text-[#CBB59D] tracking-wider mb-0.5">
+                        TRANSLATION KEYS
+                      </div>
+                      <div className="text-xs sm:text-sm font-sans font-bold text-[#EAD7C0] tracking-tight truncate">
+                        278 Keys
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-[8px] sm:text-[9px] font-mono uppercase text-[#CBB59D] tracking-wider mb-0.5">
+                        SWITCH LATENCY
+                      </div>
+                      <div className="text-xs sm:text-sm font-sans font-bold text-[#EAD7C0] tracking-tight truncate">
+                        &lt; 5ms
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-[8px] sm:text-[9px] font-mono uppercase text-[#CBB59D] tracking-wider mb-0.5">
+                        TRADING REGION
+                      </div>
+                      <div className="text-xs sm:text-sm font-sans font-bold text-[#EAD7C0] tracking-tight truncate">
+                        EU &amp; CIS
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Link Stack */}
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <a
+                      href="https://www.izieat.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 xs:px-4 xs:py-2 sm:px-6 sm:py-3 rounded-full bg-[#EAD7C0] text-[#2D0A12] font-sans font-bold text-[10px] xs:text-[11px] sm:text-xs uppercase tracking-wider hover:bg-[#FF8C38] hover:text-white transition-all shadow-md group cursor-pointer"
+                    >
+                      <span>EXPLORE LIVE PLATFORM</span>
+                      <ExternalLink size={12} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </a>
+
+                    <button
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 xs:px-3.5 xs:py-2 sm:px-5 sm:py-3 rounded-full bg-[#1A060B] border border-[#EAD7C0]/30 text-[#EAD7C0] font-sans font-bold text-[10px] xs:text-[11px] sm:text-xs uppercase tracking-wider hover:border-[#FF8C38] hover:text-[#FF8C38] transition-colors cursor-pointer"
+                    >
+                      <Activity size={12} className="text-[#FF8C38]" />
+                      <span>TEST &lt;5MS</span>
+                    </button>
+
+                    <button
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 xs:px-3 xs:py-2 text-[#D8C4AE] hover:text-[#EAD7C0] font-mono text-[10px] xs:text-[11px] sm:text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                    >
+                      <Layers size={12} />
+                      <span>DOSSIER</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
             </div>
-          </main>
+          </div>
         ) : (
           <main
             className="relative z-10 w-full max-w-md my-auto flex flex-col items-start transition-[filter] duration-150"
@@ -672,41 +725,29 @@ export const ApekonDisintegrationCreed: React.FC<ApekonDisintegrationCreedProps>
           </main>
         )}
 
-        {/* 5. Pure Minimalist Scroll Progress HUD (100% Scroll-Driven · Zero Buttons) */}
-        <footer className="relative z-10 w-full flex items-center justify-between pt-3 border-t border-white/[0.08] text-[10px] font-mono tracking-wider text-white/45">
-          <div className="flex items-center gap-2">
-            <span
-              className={`w-1.5 h-1.5 rounded-full ${
-                isProjectActive ? "bg-[#FF8C38]" : "bg-white"
-              } animate-pulse`}
-            />
-            <span
-              className={`uppercase tracking-[0.2em] ${
-                isProjectActive ? "text-[#CBB59D]" : ""
-              }`}
-            >
-              {isProjectActive
-                ? "SCROLL TO ADVANCE COMMISSIONS"
-                : "SCROLL TO ADVANCE PILLARS"}
-            </span>
-          </div>
+        {/* 5. Minimalist Scroll Progress HUD */}
+        {isProjectActive ? (
+          <footer className="w-full max-w-7xl mx-auto flex items-center justify-between pt-2 sm:pt-4 border-t border-[#EAD7C0]/20 text-[9px] sm:text-[10px] font-mono text-[#CBB59D] relative z-10">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FF8C38] animate-pulse" />
+              <span className="tracking-[0.2em] uppercase">SCROLL TO ADVANCE COMMISSIONS</span>
+            </div>
+            <span className="text-[#CBB59D]">01 — 04 PORTFOLIO CORE</span>
+          </footer>
+        ) : (
+          <footer className="relative z-10 w-full flex items-center justify-between pt-3 border-t border-white/[0.08] text-[10px] font-mono tracking-wider text-white/45">
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+              <span className="uppercase tracking-[0.2em]">SCROLL TO ADVANCE PILLARS</span>
+            </div>
 
-          <div
-            className={`flex items-center gap-1.5 font-bold ${
-              isProjectActive ? "text-[#CBB59D]" : "text-white/80"
-            }`}
-          >
-            {isProjectActive ? (
-              <span>01 — 04 PORTFOLIO CORE</span>
-            ) : (
-              <>
-                <span>PILLAR {displayPillarNum}</span>
-                <span className="text-white/30">/</span>
-                <span className="text-white/40">04</span>
-              </>
-            )}
-          </div>
-        </footer>
+            <div className="flex items-center gap-1.5 font-bold text-white/80">
+              <span>PILLAR {displayPillarNum}</span>
+              <span className="text-white/30">/</span>
+              <span className="text-white/40">04</span>
+            </div>
+          </footer>
+        )}
       </div>
     );
   }

@@ -474,11 +474,10 @@ export const IsometricConsoleCreed: React.FC<IsometricConsoleCreedProps> = memo(
                   setCurrentIdx(i);
                   playHapticTick();
                 }}
-                className={`px-3.5 py-1 rounded-full text-[10px] font-medium transition-all duration-200 ${
-                  i === currentIdx
+                className={`px-3.5 py-1 rounded-full text-[10px] font-medium transition-all duration-200 ${i === currentIdx
                     ? "bg-white text-black font-semibold shadow-lg shadow-white/20"
                     : "text-white/60 hover:text-white"
-                }`}
+                  }`}
               >
                 {st.short}
               </button>

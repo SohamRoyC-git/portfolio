@@ -174,7 +174,9 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
 
         const side = 28;
         const height = side * 0.8660254;
-        const maxDist = Math.hypot(w * 0.5, h);
+        const originX = w * 0.5;
+        const originY = h * 0.5;
+        const maxDist = Math.hypot(originX, originY);
 
         const triangles: { corners: [number, number][]; n: number }[] = [];
         const rows = Math.ceil(h / height) + 2;
@@ -197,7 +199,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
             ];
             const cxA = (xLeft + xRight + xMid) / 3;
             const cyA = (yBottom + yBottom + yTop) / 3;
-            const distA = Math.hypot(cxA - w * 0.5, cyA);
+            const distA = Math.hypot(cxA - originX, cyA - originY);
             const noiseA = (distA / maxDist) * 0.76 + FX(cxA * 0.013, cyA * 0.017) * 0.24;
             triangles.push({ corners: cornersA, n: noiseA });
 
@@ -208,7 +210,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
             ];
             const cxB = (xMid + (xRight + side / 2) + xRight) / 3;
             const cyB = (yTop + yTop + yBottom) / 3;
-            const distB = Math.hypot(cxB - w * 0.5, cyB);
+            const distB = Math.hypot(cxB - originX, cyB - originY);
             const noiseB = (distB / maxDist) * 0.76 + FX(cxB * 0.013, cyB * 0.017) * 0.24;
             triangles.push({ corners: cornersB, n: noiseB });
           }
@@ -261,22 +263,51 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
         });
       }
 
-      // 1. Entrance: Horizontal Blade Sweep on desktop, or smooth iris expansion on mobile
+      // 1. Entrance: Horizontal Blade Sweep on desktop, or PURE Z-AXIS DEPTH PLUNGE on mobile
       if (stageRef.current) {
-        gsap.fromTo(
-          stageRef.current,
-          { clipPath: isDesktop ? "polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)" : "inset(0% 0% round 0px)" },
-          {
-            clipPath: isDesktop ? "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)" : "inset(0% 0% round 0px)",
-            ease: "none",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top bottom",
-              end: "top top",
-              scrub: 0.4,
+        if (!isDesktop) {
+          // MOBILE: PURE Z-AXIS CAMERA PLUNGE (Zero vertical sliding!)
+          // Counteracts the vertical scroll displacement so the stage stays visually pinned at top: 0,
+          // while scaling forward from deep Z-space (0.64 -> 1.0) and clearing depth blur
+          gsap.fromTo(
+            stageRef.current,
+            {
+              y: -window.innerHeight,
+              scale: 0.64,
+              opacity: 0,
+              filter: "blur(20px)",
+              transformOrigin: "center center",
             },
-          }
-        );
+            {
+              y: 0,
+              scale: 1.0,
+              opacity: 1,
+              filter: "blur(0px)",
+              ease: "none",
+              scrollTrigger: {
+                trigger: sectionRef.current,
+                start: "top bottom",
+                end: "top top",
+                scrub: true,
+              },
+            }
+          );
+        } else {
+          gsap.fromTo(
+            stageRef.current,
+            { clipPath: "polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)" },
+            {
+              clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+              ease: "none",
+              scrollTrigger: {
+                trigger: sectionRef.current,
+                start: "top bottom",
+                end: "top top",
+                scrub: 0.4,
+              },
+            }
+          );
+        }
       }
 
       // 2. Master Scrub Timeline for Project Transitions (Crisp, Responsive Inertia)

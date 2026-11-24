@@ -407,18 +407,20 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         9.80
       );
 
-      // Phase 18 (19.20 -> 19.85): Smooth cinematic dissolve into Movement 03
+      // Phase 18 (19.10 -> 19.85): Pure Z-axis plunge dissolve into Movement 03 (Projects)
+      // Creed scales up towards and past the camera along Z-axis while dissolving into triangular shards
       if (mobileCreedStageRef.current) {
         masterTl.to(
           mobileCreedStageRef.current,
           {
             opacity: 0,
-            scale: 0.94,
-            filter: "blur(8px)",
-            duration: 0.55,
+            scale: 1.45,
+            z: 350,
+            filter: "blur(18px)",
+            duration: 0.75,
             ease: "power2.in",
           },
-          19.30
+          19.10
         );
       }
 

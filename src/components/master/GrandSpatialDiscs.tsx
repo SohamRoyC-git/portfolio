@@ -149,7 +149,6 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
   const ambientBackdropsRef = useRef<(HTMLDivElement | null)[]>([]);
   const editorialBlocksRef = useRef<(HTMLDivElement | null)[]>([]);
   const apekonCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  const entranceBlackCoverRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -179,7 +178,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
         const originY = h * 0.5;
         const maxDist = Math.hypot(originX, originY);
 
-        const triangles: { corners: [number, number][]; n: number }[] = [];
+        const triangles: { corners: [number, number][]; n: number; seed: number }[] = [];
         const rows = Math.ceil(h / height) + 2;
         const cols = Math.ceil(w / side) + 2;
 
@@ -202,7 +201,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
             const cyA = (yBottom + yBottom + yTop) / 3;
             const distA = Math.hypot(cxA - originX, cyA - originY);
             const noiseA = (distA / maxDist) * 0.76 + FX(cxA * 0.013, cyA * 0.017) * 0.24;
-            triangles.push({ corners: cornersA, n: noiseA });
+            triangles.push({ corners: cornersA, n: noiseA, seed: FX(cxA * 0.05, cyA * 0.05) });
 
             const cornersB: [number, number][] = [
               [xMid, yTop],
@@ -213,7 +212,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
             const cyB = (yTop + yTop + yBottom) / 3;
             const distB = Math.hypot(cxB - originX, cyB - originY);
             const noiseB = (distB / maxDist) * 0.76 + FX(cxB * 0.013, cyB * 0.017) * 0.24;
-            triangles.push({ corners: cornersB, n: noiseB });
+            triangles.push({ corners: cornersB, n: noiseB, seed: FX(cxB * 0.05, cyB * 0.05) });
           }
         }
 
@@ -223,23 +222,20 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
           ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
           ctx.clearRect(0, 0, apekonCanvas.width, apekonCanvas.height);
 
-          if (p >= 1.0) return;
+          if (p <= 0.001 || p >= 0.999) return;
 
-          // Guarantee that Projects is 100% PITCH DARK before the disintegration wave begins
-          if (p <= 0.01) {
-            ctx.fillStyle = "#060709";
-            ctx.fillRect(0, 0, w, h);
-            return;
-          }
+          const q = p * 1.45;
+          const waveSpan = 0.40;
 
-          const q = p * 1.35;
           for (let i = 0; i < triangles.length; i++) {
             const tri = triangles[i];
-            if (q >= tri.n + 0.38) continue;
+            if (q < tri.n) continue;
 
-            const waveDist = Math.max(0, q - tri.n);
-            const shardAlpha = q < tri.n ? 1.0 : 1.0 - smoothstep(0, 0.38, waveDist);
-            const edgeAlpha = q < tri.n ? 0.0 : Math.sin(smoothstep(0, 0.38, waveDist) * Math.PI);
+            const waveDist = q - tri.n;
+            if (waveDist > waveSpan) continue;
+
+            const shardAlpha = 1 - smoothstep(0, waveSpan, waveDist);
+            const edgeAlpha = Math.sin(smoothstep(0, waveSpan, waveDist) * Math.PI);
 
             ctx.beginPath();
             ctx.moveTo(tri.corners[0][0], tri.corners[0][1]);
@@ -247,20 +243,26 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
             ctx.lineTo(tri.corners[2][0], tri.corners[2][1]);
             ctx.closePath();
 
-            if (shardAlpha > 0.02) {
-              ctx.fillStyle = `rgba(6, 7, 9, ${(shardAlpha * 1.0).toFixed(3)})`;
+            if (shardAlpha > 0.04) {
+              const glint = (tri.seed * 0.12).toFixed(3);
+              ctx.fillStyle = `rgba(6, 7, 9, ${(shardAlpha * 0.95).toFixed(3)})`;
               ctx.fill();
+
+              if (edgeAlpha > 0.3) {
+                ctx.fillStyle = `rgba(255, 255, 255, ${(edgeAlpha * Number(glint)).toFixed(3)})`;
+                ctx.fill();
+              }
             }
 
             if (edgeAlpha > 0.04) {
-              ctx.strokeStyle = `rgba(235, 240, 248, ${(edgeAlpha * 0.90).toFixed(3)})`;
+              ctx.strokeStyle = `rgba(235, 242, 250, ${(edgeAlpha * 0.92).toFixed(3)})`;
               ctx.lineWidth = 1.15;
               ctx.stroke();
             }
           }
         };
 
-        // Render initial 100% pitch dark cover immediately
+        // Render initial state
         renderApekonReveal(0);
 
         if (isDesktop) {
@@ -274,37 +276,73 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
             },
           });
         } else {
-          // Hide stage initially on mobile until it reaches top: 0 (prevents upward slide during Creed)
+          // Initialize stage opacity to 0 on mobile so Station 04 in Creed is 100% visible beneath it
           if (stageRef.current) {
-            stageRef.current.style.visibility = "hidden";
+            stageRef.current.style.opacity = "0";
+            stageRef.current.style.pointerEvents = "none";
           }
 
-          // Mobile Entrance: In-place Apekon triangular shatter reveal strictly at top: 0
-          // Zero vertical downward scrolling — occurs directly on that screen itself!
+          // Mobile Entrance: Traveling Apekon triangular shatter wave sweeps directly over Station 04,
+          // crossfading Station 04 into Project 01 exactly like Stations 01 -> 02 -> 03 -> 04!
           ScrollTrigger.create({
             trigger: sectionRef.current,
             start: "top top",
-            end: "top+=650 top",
+            end: "top+=420 top",
             scrub: 0.4,
             onUpdate: (self) => {
-              if (stageRef.current) {
-                stageRef.current.style.visibility = self.progress > 0 ? "visible" : "hidden";
-              }
-              if (entranceBlackCoverRef.current) {
-                if (self.progress > 0.01) {
-                  entranceBlackCoverRef.current.style.opacity = "0";
+              const p = self.progress;
+              const creedStageEl = document.getElementById("mobile-creed-stage");
+
+              // 1. Station 04 glitches, scales down, and smoothly dissolves from 0.00 to 0.60
+              if (creedStageEl) {
+                if (p < 0.60) {
+                  const creedAlpha = Math.max(0, 1 - p * 1.7);
+                  creedStageEl.style.opacity = creedAlpha.toFixed(3);
+                  creedStageEl.style.transform = `scale(${(1 - p * 0.04).toFixed(3)})`;
+                  creedStageEl.style.filter =
+                    p > 0.06
+                      ? "drop-shadow(-2px 0px rgba(239,68,68,0.75)) drop-shadow(2px 0px rgba(56,189,248,0.75))"
+                      : "none";
                 } else {
-                  entranceBlackCoverRef.current.style.opacity = "1";
+                  creedStageEl.style.opacity = "0";
+                  creedStageEl.style.filter = "none";
                 }
               }
-              renderApekonReveal(self.progress);
+
+              // 2. Project 01 smoothly materializes from 0.15 to 0.75 under the shimmering triangles with glitch
+              if (stageRef.current) {
+                if (p < 0.15) {
+                  stageRef.current.style.opacity = "0";
+                  stageRef.current.style.pointerEvents = "none";
+                  stageRef.current.style.filter = "none";
+                } else {
+                  const projectAlpha = smoothstep(0.15, 0.70, p);
+                  stageRef.current.style.opacity = p >= 0.95 ? "1" : projectAlpha.toFixed(3);
+                  stageRef.current.style.pointerEvents = p >= 0.60 ? "auto" : "none";
+
+                  // Chromatic aberration glitch during active transition (matching Creed stations)
+                  if (p > 0.15 && p < 0.85) {
+                    stageRef.current.style.filter =
+                      "drop-shadow(-2px 0px rgba(239,68,68,0.75)) drop-shadow(2px 0px rgba(56,189,248,0.75))";
+                  } else {
+                    stageRef.current.style.filter = "none";
+                  }
+                }
+              }
+
+              renderApekonReveal(p);
             },
             onLeaveBack: () => {
-              if (stageRef.current) {
-                stageRef.current.style.visibility = "hidden";
+              const creedStageEl = document.getElementById("mobile-creed-stage");
+              if (creedStageEl) {
+                creedStageEl.style.opacity = "1";
+                creedStageEl.style.transform = "scale(1)";
+                creedStageEl.style.filter = "none";
               }
-              if (entranceBlackCoverRef.current) {
-                entranceBlackCoverRef.current.style.opacity = "1";
+              if (stageRef.current) {
+                stageRef.current.style.opacity = "0";
+                stageRef.current.style.filter = "none";
+                stageRef.current.style.pointerEvents = "none";
               }
               renderApekonReveal(0);
             },
@@ -334,7 +372,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
       const masterTl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: isDesktop ? "top top" : "top+=650 top",
+          start: isDesktop ? "top top" : "top+=420 top",
           end: "bottom bottom",
           scrub: isDesktop ? 0.6 : 0.5,
           onUpdate: (self) => {
@@ -511,12 +549,6 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
         ref={stageRef}
         className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-between pt-16 xs:pt-20 sm:pt-24 pb-4 sm:pb-8 px-4 sm:px-12 md:px-16 lg:px-20 overflow-hidden bg-[#2D0A12] border-t border-[#EAD7C0]/20 will-change-[clip-path]"
       >
-        {/* Guaranteed 100% Pitch-Black Cover until Apekon Disintegration starts */}
-        <div
-          ref={entranceBlackCoverRef}
-          className="absolute inset-0 z-35 pointer-events-none bg-[#060709] transition-opacity duration-150"
-        />
-
         {/* Apekon Procedural Triangular Transition Canvas Overlay (Creed -> Projects reveal on Desktop & Mobile) */}
         <canvas
           ref={apekonCanvasRef}

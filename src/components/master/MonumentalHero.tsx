@@ -411,23 +411,8 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         9.80
       );
 
-      // Station 04 Reading Hold
-      masterTl.to({}, { duration: 0.80 }, 19.40);
-
-      // Phase 10: Smooth Z-axis Dissolve into Obsidian Void
-      if (mobileCreedStageRef.current) {
-        masterTl.to(
-          mobileCreedStageRef.current,
-          {
-            opacity: 0,
-            scale: 0.94,
-            filter: "blur(8px)",
-            duration: 0.80,
-            ease: "power2.inOut",
-          },
-          20.20
-        );
-      }
+      // Station 04 Reading Hold (Held in full crisp glory until the Apekon disintegration wave sweeps into Projects)
+      masterTl.to({}, { duration: 1.20 }, 19.40);
 
       return () => {
         if (cueTween) cueTween.kill();
@@ -692,6 +677,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
 
           {/* 7. MOVEMENT 02: APEKON PROCEDURAL DISINTEGRATION CREED */}
           <div
+            id="mobile-creed-stage"
             ref={mobileCreedStageRef}
             className="absolute inset-0 z-30 flex flex-col justify-center items-center pointer-events-none opacity-0 select-none will-change-[transform,opacity,filter] overflow-hidden"
           >

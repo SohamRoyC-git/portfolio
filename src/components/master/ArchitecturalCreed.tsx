@@ -53,7 +53,6 @@ export const ArchitecturalCreed: React.FC = memo(() => {
   const headerLineRef = useRef<HTMLDivElement | null>(null);
   const gridRef = useRef<HTMLDivElement | null>(null);
   const ribbonPathRef = useRef<SVGPathElement | null>(null);
-  const ribbonGlowRef = useRef<SVGPathElement | null>(null);
 
   // Mobile Cinematic Monograph Deck Refs (< 768px)
   const mobileSectionRef = useRef<HTMLDivElement | null>(null);
@@ -92,8 +91,8 @@ export const ArchitecturalCreed: React.FC = memo(() => {
     mm.add("(min-width: 768px)", () => {
       if (!sectionRef.current) return;
 
-      // 1. Continuous Sweeping Trim-Path SVG Ribbon scrubbed to scroll
-      [ribbonPathRef.current, ribbonGlowRef.current].forEach((pathEl) => {
+      // 1. Continuous Sweeping Thick 2D Trim-Path SVG Ribbon (Starts at very top edge, finishes cleanly at bottom)
+      [ribbonPathRef.current].forEach((pathEl) => {
         if (!pathEl) return;
         const len = pathEl.getTotalLength();
         gsap.set(pathEl, {
@@ -105,9 +104,9 @@ export const ArchitecturalCreed: React.FC = memo(() => {
           ease: "none",
           scrollTrigger: {
             trigger: sectionRef.current,
-            start: "top 75%",
-            end: "bottom 75%",
-            scrub: 0.45,
+            start: "top 90%",
+            end: "bottom 92%",
+            scrub: 0.35,
           },
         });
       });
@@ -623,20 +622,33 @@ export const ArchitecturalCreed: React.FC = memo(() => {
       </div>
 
       {/* ========================================================================= */}
-      {/* DESKTOP EXPERIENCE (>= 768px): FLOWING RIBBON EDITORIAL STREAM             */}
-      {/* Inspired by two26.studio: Sweeping trim-path ribbon, tilted pills,        */}
-      {/* spacious alternating editorial choreography, and zero stiff boxes.        */}
+      {/* DESKTOP EXPERIENCE (>= 768px): FLOWING 2D RIBBON EDITORIAL STREAM          */}
+      {/* Light Warm Cream Canvas (#F7EFE7) + Bold 2D Orange Ribbon (#FF5400)       */}
       {/* ========================================================================= */}
       <div
         ref={sectionRef}
-        className="hidden md:block relative w-full bg-[#060709] border-t border-white/10 overflow-hidden"
+        className="hidden md:block relative w-full bg-[#F7EFE7] text-[#14161A] border-t border-black/10 overflow-hidden"
       >
-        {/* Subtle Ambient Warm Backlight */}
-        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_75%_40%_at_50%_15%,rgba(255,140,56,0.06)_0%,transparent_70%),radial-gradient(ellipse_65%_40%_at_50%_75%,rgba(234,215,192,0.04)_0%,transparent_70%)]" />
+        {/* Full-Height Sweeping 2D Ribbon (Starts cleanly at top-right edge above header, weaves smoothly through all 4 pillars to bottom) */}
+        <svg
+          className="hidden lg:block absolute left-1/2 -translate-x-1/2 inset-y-0 h-full w-[640px] pointer-events-none z-0 overflow-visible"
+          viewBox="0 0 640 1600"
+          preserveAspectRatio="none"
+          fill="none"
+        >
+          <path
+            ref={ribbonPathRef}
+            d="M 610 -20 C 630 160, 560 330, 320 500 C 120 650, 120 860, 320 1010 C 520 1160, 480 1380, 320 1620"
+            stroke="#FF5400"
+            strokeWidth="28"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
 
         <section
           ref={stageRef}
-          className="relative w-full py-28 lg:py-36 px-12 md:px-16 lg:px-24"
+          className="relative z-10 w-full py-28 lg:py-36 px-12 md:px-16 lg:px-24"
         >
           <div
             ref={containerRef}
@@ -644,64 +656,31 @@ export const ArchitecturalCreed: React.FC = memo(() => {
           >
             {/* Header Block */}
             <div ref={headerRef} className="mb-20 lg:mb-28">
-              <div className="flex items-center justify-between text-[11px] font-sans font-bold uppercase tracking-[0.26em] text-[#CBB59D]/70 mb-4">
+              <div className="flex items-center justify-between text-[11px] font-sans font-bold uppercase tracking-[0.26em] text-[#14161A]/60 mb-4">
                 <span className="flex items-center gap-2.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#FF8C38] animate-pulse" />
+                  <span className="w-2 h-2 rounded-full bg-[#FF5400]" />
                   ACADEMIC &amp; TECHNICAL FOUNDATIONS
                 </span>
-                <span className="text-[#FF8C38]">04 MONOLITHIC PILLARS</span>
+                <span className="text-[#FF5400]">04 MONOLITHIC PILLARS</span>
               </div>
               <div
                 ref={headerLineRef}
-                className="w-full h-[1px] bg-gradient-to-r from-[#FF8C38]/60 via-[#EAD7C0]/25 to-transparent mb-7"
+                className="w-full h-[1.5px] bg-[#14161A]/15 mb-7"
               />
               <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
-                <h3 className="font-sans font-black text-3xl md:text-4xl lg:text-5xl uppercase tracking-tight text-[#FFFDF9] leading-[1.05]">
-                  Architectural <span className="text-[#FF8C38]">Credentials</span>
+                <h3 className="font-sans font-black text-3xl md:text-4xl lg:text-5xl uppercase tracking-tight text-[#14161A] leading-[1.05]">
+                  Architectural <span className="text-[#FF5400]">Credentials</span>
                   <br />
                   &amp; Specializations
                 </h3>
-                <span className="text-xs font-mono text-[#EAD7C0]/50 uppercase tracking-widest">
+                <span className="text-xs font-mono text-[#14161A]/55 uppercase tracking-widest">
                   VERIFIED ENGINEERING TRACK · 2026
                 </span>
               </div>
             </div>
 
-            {/* Alternating Editorial Stream + Continuous Sweeping SVG Ribbon */}
+            {/* Alternating Editorial Stream */}
             <div ref={gridRef} className="relative">
-              {/* Sweeping Center SVG Ribbon (Draws continuously as user scrolls) */}
-              <svg
-                className="hidden lg:block absolute left-1/2 -translate-x-1/2 top-0 h-full w-[420px] pointer-events-none z-0 overflow-visible"
-                viewBox="0 0 420 1200"
-                preserveAspectRatio="none"
-                fill="none"
-              >
-                <defs>
-                  <linearGradient id="creedRibbonGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#FF8C38" stopOpacity="0.9" />
-                    <stop offset="50%" stopColor="#EAD7C0" stopOpacity="0.75" />
-                    <stop offset="100%" stopColor="#FF8C38" stopOpacity="0.95" />
-                  </linearGradient>
-                </defs>
-                {/* Soft Ambient Glow Trail */}
-                <path
-                  ref={ribbonGlowRef}
-                  d="M 210 10 C 360 140, 360 280, 210 380 C 60 480, 60 620, 210 730 C 360 840, 360 980, 210 1180"
-                  stroke="#FF8C38"
-                  strokeOpacity="0.18"
-                  strokeWidth="12"
-                  strokeLinecap="round"
-                />
-                {/* Crisp Main Flowing Ribbon */}
-                <path
-                  ref={ribbonPathRef}
-                  d="M 210 10 C 360 140, 360 280, 210 380 C 60 480, 60 620, 210 730 C 360 840, 360 980, 210 1180"
-                  stroke="url(#creedRibbonGrad)"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                />
-              </svg>
-
               {/* 4 Alternating Editorial Pillars */}
               <div className="relative z-10 flex flex-col gap-24 lg:gap-32">
                 {pillars.map((item, idx) => {
@@ -716,46 +695,41 @@ export const ArchitecturalCreed: React.FC = memo(() => {
                         isLeft ? "lg:justify-start" : "lg:justify-end"
                       }`}
                     >
-                      {/* Glowing Orbital Node on Center Ribbon */}
-                      <div className="creed-node-dot hidden lg:flex absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-[#060709] border-2 border-[#FF8C38] items-center justify-center shadow-[0_0_16px_rgba(255,140,56,0.65)] z-20">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#FFFDF8]" />
-                      </div>
-
                       {/* Borderless Editorial Pillar Content */}
                       <div
-                        className={`creed-stream-content group w-full lg:w-[44%] ${
+                        className={`creed-stream-content group w-full lg:w-[42%] ${
                           isLeft ? "lg:pr-8 text-left" : "lg:pl-8 text-left"
                         }`}
                       >
                         {/* Top Tag + Oversized Hollow-to-Illuminated Numeral */}
                         <div className="flex items-baseline justify-between gap-4 mb-4">
                           <span
-                            className="font-helvetica font-normal text-6xl lg:text-7xl leading-none text-transparent transition-all duration-500 select-none group-hover:text-[#FF8C38]"
+                            className="font-helvetica font-normal text-6xl lg:text-7xl leading-none text-transparent transition-all duration-500 select-none group-hover:text-[#FF5400]"
                             style={{
-                              WebkitTextStroke: "1.2px rgba(234, 215, 192, 0.38)",
+                              WebkitTextStroke: "1.5px rgba(20, 22, 26, 0.32)",
                             }}
                           >
                             {item.num}
                           </span>
 
-                          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10">
-                            <Icon size={13} className="text-[#FF8C38]" />
-                            <span className="text-[10px] font-sans font-extrabold uppercase tracking-[0.18em] text-[#FF8C38]">
+                          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#14161A] text-[#F7EFE7]">
+                            <Icon size={13} className="text-[#FF5400]" />
+                            <span className="text-[10px] font-sans font-extrabold uppercase tracking-[0.18em]">
                               {item.tag}
                             </span>
                           </div>
                         </div>
 
                         {/* Title & Role */}
-                        <h4 className="font-sans font-bold text-2xl lg:text-3xl text-[#FFFDF9] mb-2 leading-tight group-hover:text-[#EAD7C0] transition-colors">
+                        <h4 className="font-sans font-black text-2xl lg:text-3xl text-[#14161A] mb-2 leading-tight group-hover:text-[#FF5400] transition-colors">
                           {item.title}
                         </h4>
-                        <div className="text-xs lg:text-[13px] font-mono text-[#FF8C38]/90 mb-4 tracking-wide">
+                        <div className="text-xs lg:text-[13px] font-mono font-bold text-[#FF5400] mb-4 tracking-wide">
                           {item.role}
                         </div>
 
                         {/* Narrative */}
-                        <p className="font-sans font-normal text-sm lg:text-[15px] text-slate-300/85 leading-relaxed mb-6">
+                        <p className="font-sans font-medium text-sm lg:text-[15px] text-[#14161A]/75 leading-relaxed mb-6">
                           {item.desc}
                         </p>
 
@@ -765,7 +739,7 @@ export const ArchitecturalCreed: React.FC = memo(() => {
                             <motion.span
                               key={cIdx}
                               whileHover={{ scale: 1.07, rotate: 0 }}
-                              className={`creed-pill inline-block px-3.5 py-1.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-[#11151E] border border-[#EAD7C0]/20 text-[#EAD7C0] shadow-[0_8px_20px_rgba(0,0,0,0.45)] cursor-default transition-colors hover:border-[#FF8C38] hover:text-[#FF8C38] ${
+                              className={`creed-pill inline-block px-3.5 py-1.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-white border border-[#14161A]/15 text-[#14161A] shadow-[0_6px_16px_rgba(20,22,26,0.08)] cursor-default transition-colors hover:bg-[#14161A] hover:text-[#F7EFE7] ${
                                 pillAngles[(idx + cIdx) % pillAngles.length]
                               }`}
                             >
@@ -774,9 +748,9 @@ export const ArchitecturalCreed: React.FC = memo(() => {
                           ))}
                           <motion.span
                             whileHover={{ scale: 1.07, rotate: 0 }}
-                            className="creed-pill inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-[#FF8C38]/15 border border-[#FF8C38]/40 text-[#FF8C38] rotate-1 cursor-default"
+                            className="creed-pill inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-[#FF5400] text-white rotate-1 cursor-default shadow-[0_6px_16px_rgba(255,84,0,0.22)]"
                           >
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#FF8C38]" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-white" />
                             {item.status}
                           </motion.span>
                         </div>
@@ -788,7 +762,7 @@ export const ArchitecturalCreed: React.FC = memo(() => {
             </div>
 
             {/* Footer Telemetry */}
-            <div className="flex items-center justify-between text-[11px] font-mono text-[#CBB59D]/55 mt-24 pt-6 border-t border-white/10">
+            <div className="flex items-center justify-between text-[11px] font-mono font-semibold text-[#14161A]/60 mt-24 pt-6 border-t border-[#14161A]/15">
               <span>DISCIPLINE: ARTIFICIAL INTELLIGENCE · HIGH-THROUGHPUT SYSTEMS</span>
               <span>KOLKATA · LATVIA · GLOBAL EDGE</span>
             </div>

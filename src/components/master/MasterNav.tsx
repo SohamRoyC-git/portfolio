@@ -49,7 +49,12 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
     };
     updateTime();
     const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
+    const isLightSection = activeId === "monument-creed";
+  const pillSurfaceClass = isLightSection
+    ? "border-white/30 bg-white/5 md:border-[#14161A]/20 md:bg-[#14161A]/85 hover:bg-white/20 md:hover:bg-[#14161A]"
+    : "border-white/30 bg-white/5 hover:bg-white/20";
+
+  return () => clearInterval(interval);
   }, []);
 
   // Handle ESC key to close drawer
@@ -60,7 +65,12 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
       }
     };
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    const isLightSection = activeId === "monument-creed";
+  const pillSurfaceClass = isLightSection
+    ? "border-white/30 bg-white/5 md:border-[#14161A]/20 md:bg-[#14161A]/85 hover:bg-white/20 md:hover:bg-[#14161A]"
+    : "border-white/30 bg-white/5 hover:bg-white/20";
+
+  return () => window.removeEventListener("keydown", handleKeyDown);
   }, [menuOpen]);
 
   const links = [
@@ -77,6 +87,11 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
     setMenuOpen(false);
     onNavigate(id);
   };
+
+  const isLightSection = activeId === "monument-creed";
+  const pillSurfaceClass = isLightSection
+    ? "border-white/30 bg-white/5 md:border-[#14161A]/20 md:bg-[#14161A]/85 hover:bg-white/20 md:hover:bg-[#14161A]"
+    : "border-white/30 bg-white/5 hover:bg-white/20";
 
   return (
     <>
@@ -101,7 +116,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
               target="_blank"
               rel="noopener noreferrer"
               aria-label="LinkedIn Profile"
-              className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-white/30 bg-white/5 hover:bg-white/20 text-white transition-all backdrop-blur-sm group cursor-pointer shadow-sm hover:scale-105 active:scale-95"
+              className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full border ${pillSurfaceClass} text-white transition-all backdrop-blur-sm group cursor-pointer shadow-sm hover:scale-105 active:scale-95`}
             >
               <LinkedinIcon size={14} className="text-white group-hover:scale-110 transition-transform" />
             </a>
@@ -112,7 +127,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Open Soham Roychoudhury CV (PDF)"
-              className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-white/30 bg-white/5 hover:bg-white/20 text-white transition-all backdrop-blur-sm group cursor-pointer shadow-sm hover:scale-105 active:scale-95"
+              className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full border ${pillSurfaceClass} text-white transition-all backdrop-blur-sm group cursor-pointer shadow-sm hover:scale-105 active:scale-95`}
             >
               <Mail size={14} className="text-white group-hover:scale-110 transition-transform" />
             </a>
@@ -123,7 +138,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
             {/* Connect Action Button */}
             <button
               onClick={() => onNavigate("monument-terminal")}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full font-sans font-bold text-[10px] sm:text-[11px] uppercase tracking-wider text-white border border-white/30 bg-white/5 hover:bg-white hover:text-[#0A0C10] transition-all backdrop-blur-sm cursor-pointer shadow-sm hover:scale-105 active:scale-95"
+              className={`hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full font-sans font-bold text-[10px] sm:text-[11px] uppercase tracking-wider text-white border ${pillSurfaceClass} hover:bg-white hover:text-[#0A0C10] transition-all backdrop-blur-sm cursor-pointer shadow-sm hover:scale-105 active:scale-95`}
             >
               <span>CONNECT</span>
               <ArrowUpRight size={12} />
@@ -133,7 +148,7 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label="Toggle Navigation Menu"
-              className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-white/30 bg-white/5 hover:bg-white/20 text-white transition-all backdrop-blur-sm group cursor-pointer shadow-sm hover:scale-105 active:scale-95"
+              className={`flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border ${pillSurfaceClass} text-white transition-all backdrop-blur-sm group cursor-pointer shadow-sm hover:scale-105 active:scale-95`}
             >
               <span className="font-sans font-black text-[10px] sm:text-[11px] tracking-[0.24em] uppercase text-white">
                 NAVIGATE
@@ -189,7 +204,12 @@ export const MasterNav: React.FC<MasterNavProps> = ({ onNavigate, activeId }) =>
             <div className="max-w-4xl mx-auto w-full my-auto py-6 sm:py-12 flex flex-col gap-2.5 sm:gap-5">
               {links.map((link, idx) => {
                 const isActive = activeId === link.id;
-                return (
+                const isLightSection = activeId === "monument-creed";
+  const pillSurfaceClass = isLightSection
+    ? "border-white/30 bg-white/5 md:border-[#14161A]/20 md:bg-[#14161A]/85 hover:bg-white/20 md:hover:bg-[#14161A]"
+    : "border-white/30 bg-white/5 hover:bg-white/20";
+
+  return (
                   <motion.button
                     key={link.id}
                     initial={{ opacity: 0, x: -40, filter: "blur(6px)" }}

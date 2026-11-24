@@ -85,6 +85,40 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
   // Desktop Refs
   const desktopSectionRef = useRef<HTMLElement | null>(null);
   const desktopVideoRef = useRef<HTMLDivElement | null>(null);
+  const desktopVideoElRef = useRef<HTMLVideoElement | null>(null);
+  const mobileVideoElRef = useRef<HTMLVideoElement | null>(null);
+
+  // Ensure Hero videos always play reliably (including after exiting 3D Studio or tab switch)
+  useEffect(() => {
+    const ensureVideoPlayback = () => {
+      const videos = [desktopVideoElRef.current, mobileVideoElRef.current];
+      videos.forEach((v) => {
+        if (!v) return;
+        v.muted = true;
+        if (v.paused) {
+          v.play().catch(() => {});
+        }
+      });
+    };
+
+    ensureVideoPlayback();
+    const timer1 = setTimeout(ensureVideoPlayback, 600);
+    const timer2 = setTimeout(ensureVideoPlayback, 2000);
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") ensureVideoPlayback();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener("pointerdown", ensureVideoPlayback, { once: true, passive: true });
+
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("pointerdown", ensureVideoPlayback);
+    };
+  }, []);
 
   const handleTouchMove = (e: React.TouchEvent<HTMLElement>) => {
     const touch = e.touches[0];
@@ -473,11 +507,16 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
             className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden will-change-[transform,opacity]"
           >
             <video
+              ref={mobileVideoElRef}
               autoPlay
               loop
               muted
               playsInline
               preload="auto"
+              onCanPlay={(e) => {
+                e.currentTarget.muted = true;
+                e.currentTarget.play().catch(() => {});
+              }}
               className="w-full h-full object-cover object-[85%_60%]"
             >
               <source src="/assets/hero_pixel_art_loop.mp4" type="video/mp4" />
@@ -704,11 +743,16 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
           }}
         >
           <video
+            ref={desktopVideoElRef}
             autoPlay
             loop
             muted
             playsInline
             preload="auto"
+            onCanPlay={(e) => {
+              e.currentTarget.muted = true;
+              e.currentTarget.play().catch(() => {});
+            }}
             className="w-full h-full object-cover object-bottom"
           >
             <source src="/assets/hero_pixel_art_loop.mp4" type="video/mp4" />

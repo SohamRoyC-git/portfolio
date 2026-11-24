@@ -17,7 +17,6 @@ import { TerminalFinale } from "@/components/master/TerminalFinale";
 import { SiteFooter } from "@/components/master/SiteFooter";
 import { TerraceBreezePreloader } from "@/components/master/TerraceBreezePreloader";
 import { Studio3DWorkspace } from "@/components/master/Studio3DWorkspace";
-import { DinoMascotCompanion } from "@/components/master/DinoMascotCompanion";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -285,14 +284,6 @@ export default function Home() {
       {/* Tactile In-App Pull-Down Refresh (Leaves browser bottom toolbar locked & stable) */}
       <PullToRefresh scrollerRef={scrollerRef} />
 
-      {/* Playful Dino Mascot Companion & Scroll Tracker */}
-      {!isStudioActive && (
-        <DinoMascotCompanion
-          scrollerRef={scrollerRef}
-          onScrollToTop={() => handleNavigate("monument-hero")}
-        />
-      )}
-
       {/* Movement 00: Interactive 3D Studio Workspace (Fixed Viewport; strictly decoupled from scroller track) */}
       <div
         id="monument-studio-3d"
@@ -318,7 +309,7 @@ export default function Home() {
       >
         <main className="relative z-10">
           {/* Movement 01: Monumental Hero (Top of Portfolio Website) */}
-          <div id="hero-wrapper" className="relative w-full z-30 overflow-x-clip md:sticky md:top-0 md:h-[100svh] will-change-[transform,opacity]">
+          <div id="hero-wrapper" className="relative w-full z-30 md:z-10 overflow-x-clip md:sticky md:top-0 md:h-[100svh] will-change-[transform,opacity]">
             <MonumentalHero onExplore={() => handleNavigate("monument-statement")} onConnect={() => handleNavigate("monument-terminal")} />
           </div>
 

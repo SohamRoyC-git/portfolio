@@ -163,9 +163,9 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
     // Right: Downward Flowing Editorial Narrative
     // =========================================================================
     const setupShowcase = (isDesktop: boolean) => {
-      // Apekon Procedural Triangular Entrance Reveal (Creed -> Projects Disintegration Bridge)
+      // Apekon Procedural Triangular Entrance Reveal (Mobile-only for now; desktop will be designed separately)
       const apekonCanvas = apekonCanvasRef.current;
-      if (apekonCanvas) {
+      if (apekonCanvas && !isDesktop) {
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
         const w = apekonCanvas.clientWidth || window.innerWidth;
         const h = apekonCanvas.clientHeight || window.innerHeight;
@@ -494,10 +494,10 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
         ref={stageRef}
         className="invisible md:visible sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-between pt-16 xs:pt-20 sm:pt-24 pb-4 sm:pb-8 px-4 sm:px-12 md:px-16 lg:px-20 overflow-hidden bg-[#2D0A12] border-t border-[#EAD7C0]/20 will-change-[clip-path]"
       >
-        {/* Apekon Procedural Triangular Transition Canvas Overlay (Desktop Reveal) */}
+        {/* Apekon Procedural Triangular Transition Canvas Overlay (Mobile-only for now) */}
         <canvas
           ref={apekonCanvasRef}
-          className="absolute inset-0 w-full h-full pointer-events-none z-40"
+          className="md:hidden absolute inset-0 w-full h-full pointer-events-none z-40"
         />
 
         {/* Subtle Ambient Reflected Depth (Forge Automotive Atmospheric Depth) */}

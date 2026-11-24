@@ -103,6 +103,7 @@ export const ApekonDisintegrationCreed: React.FC<ApekonDisintegrationCreedProps>
     const touchOriginRef = useRef<{ x: number; y: number }>({ x: 195, y: 422 });
     const animFrameRef = useRef<number | null>(null);
     const lastScrollProgressRef = useRef<number>(0);
+    const isExitingRef = useRef(false);
 
     // Triangles geometry cache
     const trianglesRef = useRef<TriangleItem[]>([]);
@@ -294,12 +295,92 @@ export const ApekonDisintegrationCreed: React.FC<ApekonDisintegrationCreedProps>
     );
 
     /**
+     * Trigger full-viewport triangular disintegration burst into Projects
+     */
+    const triggerExitDisintegration = useCallback(() => {
+      const canvas = transitionCanvasRef.current;
+      if (!canvas) return;
+
+      const rect = canvas.getBoundingClientRect();
+      touchOriginRef.current = {
+        x: rect.width * 0.5,
+        y: rect.height * 0.45,
+      };
+      rebuildTriangleGrid();
+      setIsDisintegrating(true);
+
+      let startTime: number | null = null;
+      const duration = 720;
+
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+
+      const renderExit = (timestamp: number) => {
+        if (!startTime) startTime = timestamp;
+        const elapsed = timestamp - startTime;
+        const p = Math.min(1, elapsed / duration);
+        const q = p * 1.45;
+
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          const dpr = Math.min(window.devicePixelRatio || 1, 2);
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          const triangles = trianglesRef.current;
+          for (let i = 0; i < triangles.length; i++) {
+            const tri = triangles[i];
+            if (q < tri.n) continue;
+            const waveDist = q - tri.n;
+            if (waveDist > 0.40) continue;
+
+            const shardAlpha = 1 - smoothstep(0, 0.40, waveDist);
+            const edgeAlpha = Math.sin(smoothstep(0, 0.40, waveDist) * Math.PI);
+
+            ctx.beginPath();
+            ctx.moveTo(tri.corners[0][0], tri.corners[0][1]);
+            ctx.lineTo(tri.corners[1][0], tri.corners[1][1]);
+            ctx.lineTo(tri.corners[2][0], tri.corners[2][1]);
+            ctx.closePath();
+
+            if (shardAlpha > 0.04) {
+              ctx.fillStyle = `rgba(6, 7, 9, ${(shardAlpha * 0.95).toFixed(3)})`;
+              ctx.fill();
+            }
+            if (edgeAlpha > 0.04) {
+              ctx.strokeStyle = `rgba(235, 242, 250, ${(edgeAlpha * 0.90).toFixed(3)})`;
+              ctx.lineWidth = 1.15;
+              ctx.stroke();
+            }
+          }
+        }
+
+        if (p < 1) {
+          animFrameRef.current = requestAnimationFrame(renderExit);
+        } else {
+          setIsDisintegrating(false);
+          animFrameRef.current = null;
+        }
+      };
+
+      animFrameRef.current = requestAnimationFrame(renderExit);
+    }, [rebuildTriangleGrid]);
+
+    /**
      * 3. Sync with parent scroll progress (0.0 -> 1.0)
      */
     useEffect(() => {
       if (progress === undefined || progress === null) return;
       if (Math.abs(progress - lastScrollProgressRef.current) < 0.01) return;
       lastScrollProgressRef.current = progress;
+
+      // When scrolling past station 4 towards Projects (progress > 0.88), trigger exit disintegration wave
+      if (progress > 0.88 && !isExitingRef.current) {
+        isExitingRef.current = true;
+        triggerExitDisintegration();
+        return;
+      } else if (progress <= 0.88 && isExitingRef.current) {
+        isExitingRef.current = false;
+      }
 
       // 4 stations distributed across scroll progress
       let targetIdx = 0;
@@ -311,7 +392,7 @@ export const ApekonDisintegrationCreed: React.FC<ApekonDisintegrationCreedProps>
       if (targetIdx !== currentStationIdx && !isDisintegrating) {
         triggerDisintegrationTo(targetIdx);
       }
-    }, [progress, currentStationIdx, isDisintegrating, triggerDisintegrationTo]);
+    }, [progress, currentStationIdx, isDisintegrating, triggerDisintegrationTo, triggerExitDisintegration]);
 
     /**
      * 4. Three.js Background Geodesic Sphere Scene (Apekon Atmosphere)
@@ -336,34 +417,35 @@ export const ApekonDisintegrationCreed: React.FC<ApekonDisintegrationCreedProps>
       const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
       camera.position.set(0, 0, 4.4);
 
-      // Deep atmospheric studio lighting
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+      // Deep atmospheric studio lighting (Soft diffused ambient + silhouette grazing rim lights; zero harsh hotspots)
+      const ambientLight = new THREE.AmbientLight(0xdde3ea, 0.65);
       scene.add(ambientLight);
 
-      const topLight = new THREE.DirectionalLight(0xffffff, 1.9);
-      topLight.position.set(2, 4, 3);
-      scene.add(topLight);
+      // Subtle, non-glaring directional fill from top-left (low intensity, diffused)
+      const fillLight = new THREE.DirectionalLight(0xffffff, 0.65);
+      fillLight.position.set(-2, 3, 2);
+      scene.add(fillLight);
 
       // Soft dual rim lights for subtle chromatic depth
-      const rimLightBlue = new THREE.PointLight(0x38bdf8, 2.4, 8);
-      rimLightBlue.position.set(-2.8, -1.8, -1);
+      const rimLightBlue = new THREE.PointLight(0x38bdf8, 1.8, 8);
+      rimLightBlue.position.set(-3.2, -1.8, -1.5);
       scene.add(rimLightBlue);
 
-      const rimLightAmber = new THREE.PointLight(0xff7a00, 1.8, 8);
-      rimLightAmber.position.set(2.8, 2.5, -1.5);
+      const rimLightAmber = new THREE.PointLight(0xff7a00, 1.4, 8);
+      rimLightAmber.position.set(3.0, -2.0, -1.5);
       scene.add(rimLightAmber);
 
       // Apekon-style dark geodesic hemisphere/sphere
       const geometry = new THREE.IcosahedronGeometry(2.35, 4);
 
-      // Custom dark obsidian-chrome physical material
+      // Custom dark obsidian-chrome physical material (Matte luxury obsidian; zero white glare flare)
       const material = new THREE.MeshPhysicalMaterial({
-        color: 0x08090d,
-        metalness: 0.94,
-        roughness: 0.20,
-        clearcoat: 0.90,
-        clearcoatRoughness: 0.12,
-        reflectivity: 0.98,
+        color: 0x0a0c10,
+        metalness: 0.70,
+        roughness: 0.42,
+        clearcoat: 0.25,
+        clearcoatRoughness: 0.50,
+        reflectivity: 0.50,
         wireframe: false,
       });
 

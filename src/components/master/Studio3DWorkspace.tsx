@@ -673,56 +673,42 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
       const fontFamily = "'Druk Trial', 'Druk', 'Helvetica Compressed', 'Anton', -apple-system, sans-serif";
 
-      // STRICT MONUMENTAL SEQUENCE: WELCOME -> TO -> MY -> PORTFOLIO
-      // No two words ever appear or animate simultaneously!
-      // 1. WELCOME:   0.00s -> 1.56s (7 letters, solid ivory bloom)
-      //    [pause 1.56s -> 1.90s]
-      // 2. TO:        1.90s -> 2.62s (2 letters wireframe outline only)
-      //    [pause 2.62s -> 3.00s]
-      // 3. MY:        3.00s -> 3.72s (2 letters wireframe outline only)
-      //    [pause 3.72s -> 4.10s]
-      // 4. PORTFOLIO: 4.10s -> 5.98s (9 letters, solid ivory bloom)
+      // STRICT MONUMENTAL SEQUENCE: WELCOME TO -> MY PORTFOLIO
+      // Unified single-line pairs to avoid broken line-wrap glitches
+      // 1. WELCOME TO:   0.00s -> 1.80s (10 characters, solid warm ivory bloom)
+      //    [pause 1.80s -> 2.20s]
+      // 2. MY PORTFOLIO: 2.20s -> 4.20s (12 characters, solid warm ivory bloom)
 
       const cW = textCanvas.width;
       const cH = textCanvas.height;
 
       if (isMobile) {
         // MOBILE PORTRAIT (Proportional to tall vertical screen)
-        // High-fashion condensed typography positioned cleanly within safe margins
-        const welcomeFontSize = 165;
-        const portfolioFontSize = 155;
+        // High-fashion condensed typography positioned cleanly on single lines
+        const welcomeFontSize = 130;
         const leftMargin = 60;
         const rightMargin = cW - 60;
 
-        // Top-Left: WELCOME (solid warm ivory) + TO (1px wireframe outline)
-        // Safely below top bar / dynamic island
-        drawLetterString(tCtx, "WELCOME", leftMargin, 210, welcomeFontSize, fontFamily, "left", "top", false, 0.0, animTime, 0.16, 0.60);
-        drawLetterString(tCtx, "TO", leftMargin, 385, welcomeFontSize, fontFamily, "left", "top", true, 1.90, animTime, 0.22, 0.50);
+        // Top-Left: WELCOME TO (Unified single line, safely below top bar)
+        drawLetterString(tCtx, "WELCOME TO", leftMargin, 220, welcomeFontSize, fontFamily, "left", "top", false, 0.0, animTime, 0.14, 0.50);
 
-        // Bottom-Right: MY (1px wireframe outline) + PORTFOLIO (solid warm ivory)
-        // Safely above bottom HUD hint and iOS home indicator
-        drawLetterString(tCtx, "MY", rightMargin, cH - 365, welcomeFontSize, fontFamily, "right", "bottom", true, 3.00, animTime, 0.22, 0.50);
-        drawLetterString(tCtx, "PORTFOLIO", rightMargin, cH - 200, portfolioFontSize, fontFamily, "right", "bottom", false, 4.10, animTime, 0.16, 0.60);
+        // Bottom-Right: MY PORTFOLIO (Unified single line, safely above bottom hint)
+        drawLetterString(tCtx, "MY PORTFOLIO", rightMargin, cH - 220, welcomeFontSize, fontFamily, "right", "bottom", false, 2.20, animTime, 0.14, 0.50);
       } else {
-        // DESKTOP: Monumental Druk Diagonal (Solid Ivory vs. 1px Razor-Sharp Wireframe)
+        // DESKTOP: Monumental Druk Diagonal (Solid Ivory single-line pairs)
         // Dynamically scaled relative to canvas dimensions so it NEVER goes off screen on any monitor
-        const welcomeFontSize = Math.min(270, Math.round(cH * 0.18));
-        const portfolioFontSize = Math.min(280, Math.round(cH * 0.19));
+        const welcomeFontSize = Math.min(210, Math.round(cH * 0.14));
 
         const leftMargin = 80;
-        const topMargin = 70;
+        const topMargin = 80;
         const rightMargin = cW - 80;
-        const bottomMargin = cH - 70;
+        const bottomMargin = cH - 80;
 
-        // 1. Top-Left: WELCOME (solid warm ivory bloom)
-        drawLetterString(tCtx, "WELCOME", leftMargin, topMargin, welcomeFontSize, fontFamily, "left", "top", false, 0.0, animTime, 0.16, 0.60);
-        // 2. Top-Left: TO (wireframe outline only, begins only after WELCOME finishes)
-        drawLetterString(tCtx, "TO", leftMargin, topMargin + welcomeFontSize + 12, welcomeFontSize, fontFamily, "left", "top", true, 1.90, animTime, 0.22, 0.50);
+        // 1. Top-Left: WELCOME TO (Unified clean single line)
+        drawLetterString(tCtx, "WELCOME TO", leftMargin, topMargin, welcomeFontSize, fontFamily, "left", "top", false, 0.0, animTime, 0.14, 0.50);
 
-        // 3. Bottom-Right: MY (wireframe outline only, begins only after TO finishes)
-        drawLetterString(tCtx, "MY", rightMargin, bottomMargin - portfolioFontSize - 10, welcomeFontSize, fontFamily, "right", "bottom", true, 3.00, animTime, 0.22, 0.50);
-        // 4. Bottom-Right: PORTFOLIO (solid warm ivory bloom, begins only after MY finishes)
-        drawLetterString(tCtx, "PORTFOLIO", rightMargin, bottomMargin, portfolioFontSize, fontFamily, "right", "bottom", false, 4.10, animTime, 0.16, 0.60);
+        // 2. Bottom-Right: MY PORTFOLIO (Unified clean single line)
+        drawLetterString(tCtx, "MY PORTFOLIO", rightMargin, bottomMargin, welcomeFontSize, fontFamily, "right", "bottom", false, 2.20, animTime, 0.14, 0.50);
       }
     };
 

@@ -15,6 +15,24 @@ import { LocalizationDemo } from "@/components/LocalizationDemo";
 
 gsap.registerPlugin(ScrollTrigger);
 
+// Apekon Deterministic Pseudo-Random Noise function
+const FX = (s: number, e: number): number => {
+  let t = (s * 123.34) % 1;
+  let n = (e * 456.21) % 1;
+  if (t < 0) t += 1;
+  if (n < 0) n += 1;
+  const i = t * (t + 45.32) + n * (n + 45.32);
+  t += i;
+  n += i;
+  const r = (t * n) % 1;
+  return r < 0 ? r + 1 : r;
+};
+
+const smoothstep = (min: number, max: number, val: number): number => {
+  const n = Math.min(1, Math.max(0, (val - min) / (max - min)));
+  return n * n * (3 - 2 * n);
+};
+
 interface ProjectItem {
   id: string;
   num: string;
@@ -130,6 +148,7 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
   const logoContainersRef = useRef<(HTMLDivElement | null)[]>([]);
   const ambientBackdropsRef = useRef<(HTMLDivElement | null)[]>([]);
   const editorialBlocksRef = useRef<(HTMLDivElement | null)[]>([]);
+  const apekonCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -144,11 +163,109 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
     // Right: Downward Flowing Editorial Narrative
     // =========================================================================
     const setupShowcase = (isDesktop: boolean) => {
+      // Apekon Procedural Triangular Entrance Reveal (Creed -> Projects Disintegration Bridge)
+      const apekonCanvas = apekonCanvasRef.current;
+      if (apekonCanvas) {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const w = apekonCanvas.clientWidth || window.innerWidth;
+        const h = apekonCanvas.clientHeight || window.innerHeight;
+        apekonCanvas.width = Math.round(w * dpr);
+        apekonCanvas.height = Math.round(h * dpr);
+
+        const side = 28;
+        const height = side * 0.8660254;
+        const maxDist = Math.hypot(w * 0.5, h);
+
+        const triangles: { corners: [number, number][]; n: number }[] = [];
+        const rows = Math.ceil(h / height) + 2;
+        const cols = Math.ceil(w / side) + 2;
+
+        for (let r = -1; r < rows; r++) {
+          const yTop = r * height;
+          const yBottom = yTop + height;
+          const xOffset = r % 2 === 0 ? 0 : side / 2;
+
+          for (let c = -1; c < cols; c++) {
+            const xLeft = c * side - xOffset;
+            const xMid = xLeft + side / 2;
+            const xRight = xLeft + side;
+
+            const cornersA: [number, number][] = [
+              [xLeft, yBottom],
+              [xRight, yBottom],
+              [xMid, yTop],
+            ];
+            const cxA = (xLeft + xRight + xMid) / 3;
+            const cyA = (yBottom + yBottom + yTop) / 3;
+            const distA = Math.hypot(cxA - w * 0.5, cyA);
+            const noiseA = (distA / maxDist) * 0.76 + FX(cxA * 0.013, cyA * 0.017) * 0.24;
+            triangles.push({ corners: cornersA, n: noiseA });
+
+            const cornersB: [number, number][] = [
+              [xMid, yTop],
+              [xRight + side / 2, yTop],
+              [xRight, yBottom],
+            ];
+            const cxB = (xMid + (xRight + side / 2) + xRight) / 3;
+            const cyB = (yTop + yTop + yBottom) / 3;
+            const distB = Math.hypot(cxB - w * 0.5, cyB);
+            const noiseB = (distB / maxDist) * 0.76 + FX(cxB * 0.013, cyB * 0.017) * 0.24;
+            triangles.push({ corners: cornersB, n: noiseB });
+          }
+        }
+
+        const renderApekonReveal = (p: number) => {
+          const ctx = apekonCanvas.getContext("2d");
+          if (!ctx) return;
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          ctx.clearRect(0, 0, apekonCanvas.width, apekonCanvas.height);
+
+          if (p >= 1.0) return;
+
+          const q = p * 1.35;
+          for (let i = 0; i < triangles.length; i++) {
+            const tri = triangles[i];
+            if (q >= tri.n + 0.38) continue;
+
+            const waveDist = Math.max(0, q - tri.n);
+            const shardAlpha = q < tri.n ? 1.0 : 1.0 - smoothstep(0, 0.38, waveDist);
+            const edgeAlpha = q < tri.n ? 0.0 : Math.sin(smoothstep(0, 0.38, waveDist) * Math.PI);
+
+            ctx.beginPath();
+            ctx.moveTo(tri.corners[0][0], tri.corners[0][1]);
+            ctx.lineTo(tri.corners[1][0], tri.corners[1][1]);
+            ctx.lineTo(tri.corners[2][0], tri.corners[2][1]);
+            ctx.closePath();
+
+            if (shardAlpha > 0.02) {
+              ctx.fillStyle = `rgba(6, 7, 9, ${(shardAlpha * 0.95).toFixed(3)})`;
+              ctx.fill();
+            }
+
+            if (edgeAlpha > 0.04) {
+              ctx.strokeStyle = `rgba(235, 240, 248, ${(edgeAlpha * 0.85).toFixed(3)})`;
+              ctx.lineWidth = 1.1;
+              ctx.stroke();
+            }
+          }
+        };
+
+        ScrollTrigger.create({
+          trigger: sectionRef.current,
+          start: "top bottom",
+          end: "top top",
+          scrub: 0.35,
+          onUpdate: (self) => {
+            renderApekonReveal(self.progress);
+          },
+        });
+      }
+
       // 1. Entrance: Horizontal Blade Sweep on desktop, or smooth iris expansion on mobile
       if (stageRef.current) {
         gsap.fromTo(
           stageRef.current,
-          { clipPath: isDesktop ? "polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)" : "inset(20% 0% round 0px)" },
+          { clipPath: isDesktop ? "polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)" : "inset(0% 0% round 0px)" },
           {
             clipPath: isDesktop ? "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)" : "inset(0% 0% round 0px)",
             ease: "none",
@@ -343,6 +460,11 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
         ref={stageRef}
         className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-between pt-16 xs:pt-20 sm:pt-24 pb-4 sm:pb-8 px-4 sm:px-12 md:px-16 lg:px-20 overflow-hidden bg-[#2D0A12] border-t border-[#EAD7C0]/20 will-change-[clip-path]"
       >
+        {/* Apekon Procedural Triangular Transition Canvas Overlay (Creed -> Projects reveal) */}
+        <canvas
+          ref={apekonCanvasRef}
+          className="absolute inset-0 w-full h-full pointer-events-none z-40"
+        />
         {/* Subtle Ambient Reflected Depth (Forge Automotive Atmospheric Depth) */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
           {PROJECTS.map((proj, idx) => (

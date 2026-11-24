@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useEffect, useRef, useCallback, memo } from "react";
+import Image from "next/image";
 import * as THREE from "three";
-import { Sparkles } from "lucide-react";
+import { Sparkles, ExternalLink } from "lucide-react";
 
 export interface CreedStationData {
   num: string;
@@ -13,6 +14,7 @@ export interface CreedStationData {
   metricLabel: string;
   metricValue: string;
   accent: string;
+  isProject?: boolean;
 }
 
 export const CREED_STATIONS: CreedStationData[] = [
@@ -55,6 +57,17 @@ export const CREED_STATIONS: CreedStationData[] = [
     metricLabel: "Academic Distinction",
     metricValue: "Top Tier",
     accent: "#34d399",
+  },
+  {
+    num: "01",
+    tag: "01 / 04 // GLOBAL TRADE INFRASTRUCTURE",
+    headline: "IZIEAT EXPORT PORTAL",
+    entity: "B2B International Trade Platform",
+    details: "Global wholesale export portal engineered with an in-memory 278-key instant English-Russian dictionary (<5ms latency), multi-currency telemetry, and verified EU compliance.",
+    metricLabel: "Switch Latency",
+    metricValue: "< 5ms",
+    accent: "#FF8C38",
+    isProject: true,
   },
 ];
 
@@ -249,49 +262,58 @@ export const ApekonDisintegrationCreed: React.FC<ApekonDisintegrationCreedProps>
     }, []);
 
     // Compute active station and transition state based on scroll progress (0.0 to 1.0)
-    // Stations: 01 (0.00-0.22), T1 (0.22-0.28), 02 (0.28-0.47), T2 (0.47-0.53), 03 (0.53-0.72), T3 (0.72-0.78), 04 (0.78-1.00)
+    // Stations: 01 (0.00-0.20), T1 (0.20-0.26), 02 (0.26-0.44), T2 (0.44-0.50), 03 (0.50-0.68), T3 (0.68-0.74), 04 (0.74-0.88), T4 (0.88-0.98 -> Project 01!)
     let activeStationIdx = 0;
     let nextStationIdx = 0;
     let transitionProgress = 0; // 0 to 1
     let isTransitioning = false;
 
-    if (progress < 0.22) {
+    if (progress < 0.20) {
       activeStationIdx = 0;
       nextStationIdx = 0;
       transitionProgress = 0;
-    } else if (progress < 0.28) {
+    } else if (progress < 0.26) {
       activeStationIdx = 0;
       nextStationIdx = 1;
-      transitionProgress = (progress - 0.22) / 0.06;
+      transitionProgress = (progress - 0.20) / 0.06;
       isTransitioning = true;
-    } else if (progress < 0.47) {
+    } else if (progress < 0.44) {
       activeStationIdx = 1;
       nextStationIdx = 1;
       transitionProgress = 0;
-    } else if (progress < 0.53) {
+    } else if (progress < 0.50) {
       activeStationIdx = 1;
       nextStationIdx = 2;
-      transitionProgress = (progress - 0.47) / 0.06;
+      transitionProgress = (progress - 0.44) / 0.06;
       isTransitioning = true;
-    } else if (progress < 0.72) {
+    } else if (progress < 0.68) {
       activeStationIdx = 2;
       nextStationIdx = 2;
       transitionProgress = 0;
-    } else if (progress < 0.78) {
+    } else if (progress < 0.74) {
       activeStationIdx = 2;
       nextStationIdx = 3;
-      transitionProgress = (progress - 0.72) / 0.06;
+      transitionProgress = (progress - 0.68) / 0.06;
       isTransitioning = true;
-    } else {
+    } else if (progress < 0.88) {
       activeStationIdx = 3;
       nextStationIdx = 3;
+      transitionProgress = 0;
+    } else if (progress < 0.98) {
+      activeStationIdx = 3;
+      nextStationIdx = 4;
+      transitionProgress = Math.min(1, (progress - 0.88) / 0.10);
+      isTransitioning = true;
+    } else {
+      activeStationIdx = 4;
+      nextStationIdx = 4;
       transitionProgress = 0;
     }
 
     // Direct scrub render of canvas
     useEffect(() => {
       if (isTransitioning) {
-        renderTransitionCanvas(transitionProgress, false);
+        renderTransitionCanvas(transitionProgress, nextStationIdx === 4);
       } else {
         const canvas = transitionCanvasRef.current;
         if (canvas) {
@@ -299,7 +321,7 @@ export const ApekonDisintegrationCreed: React.FC<ApekonDisintegrationCreedProps>
           if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
       }
-    }, [isTransitioning, transitionProgress, renderTransitionCanvas]);
+    }, [isTransitioning, transitionProgress, nextStationIdx, renderTransitionCanvas]);
 
     // Current displayed pillar number for HUD (1, 2, 3, or 4)
     const displayPillarNum =
@@ -460,15 +482,27 @@ export const ApekonDisintegrationCreed: React.FC<ApekonDisintegrationCreedProps>
 
     const isGlitchActive = isTransitioning && transitionProgress > 0.12 && transitionProgress < 0.88;
 
+    const isProjectActive = currentStation.isProject === true;
+
     return (
       <div
         ref={rootRef}
-        className="relative w-full h-full flex flex-col justify-between items-center text-white select-none overflow-hidden bg-[#060709] px-6 pt-16 pb-8"
+        className={`relative w-full h-full flex flex-col justify-between items-center text-white select-none overflow-hidden ${
+          isProjectActive
+            ? "pt-16 xs:pt-20 sm:pt-24 pb-4 sm:pb-8 px-4 sm:px-12 border-t border-[#EAD7C0]/20"
+            : "px-6 pt-16 pb-8 border-t border-transparent"
+        } transition-colors duration-300`}
+        style={{
+          backgroundColor: isProjectActive ? "#2D0A12" : "#060709",
+        }}
       >
         {/* 1. Subtle 3D Geodesic Atmosphere Canvas (Apekon Inspiration) */}
         <canvas
           ref={threeCanvasRef}
-          className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-85"
+          className="absolute inset-0 w-full h-full pointer-events-none z-0 transition-opacity duration-300"
+          style={{
+            opacity: isProjectActive ? 0 : 0.85,
+          }}
         />
 
         {/* 2. Procedural Equilateral Triangle Disintegration Overlay Canvas */}
@@ -480,76 +514,197 @@ export const ApekonDisintegrationCreed: React.FC<ApekonDisintegrationCreedProps>
         {/* 3. Top Architectural Header (Headroom below global nav) */}
         <header className="relative z-10 w-full flex items-center justify-between pt-1">
           <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-            <span className="font-mono text-[10px] tracking-[0.25em] text-white/70 uppercase">
-              ARCHITECTURAL CREED
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                isProjectActive ? "bg-[#FF8C38]" : "bg-white"
+              } animate-pulse`}
+            />
+            <span
+              className={`font-mono text-[10px] tracking-[0.22em] uppercase ${
+                isProjectActive ? "text-[#CBB59D]" : "text-white/70"
+              }`}
+            >
+              {isProjectActive
+                ? "SELECTED COMMISSIONS // ARCHITECTURAL SHOWCASE"
+                : "ARCHITECTURAL CREED"}
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 font-mono text-[11px] tracking-wider text-white/50">
-            <span className="text-white font-bold">{currentStation.num}</span>
-            <span>/</span>
-            <span>04</span>
+          <div
+            className={`flex items-center gap-1.5 font-mono text-[11px] tracking-wider ${
+              isProjectActive ? "text-[#CBB59D]" : "text-white/50"
+            }`}
+          >
+            {isProjectActive ? (
+              <>
+                <span className="text-[#CBB59D]/70">DEPTH:</span>
+                <span className="text-[#FF8C38] font-bold">01</span>
+                <span>/</span>
+                <span>04</span>
+              </>
+            ) : (
+              <>
+                <span className="text-white font-bold">{currentStation.num}</span>
+                <span>/</span>
+                <span>04</span>
+              </>
+            )}
           </div>
         </header>
 
-        {/* 4. Central Monumental Typography (100% Scroll Scrubbed · Zero Timers) */}
-        <main
-          className="relative z-10 w-full max-w-md my-auto flex flex-col items-start transition-[filter] duration-150"
-          style={{
-            opacity: typoOpacity,
-            transform: `scale(${typoScale.toFixed(3)})`,
-            filter: isGlitchActive
-              ? "drop-shadow(-2px 0px rgba(239,68,68,0.75)) drop-shadow(2px 0px rgba(56,189,248,0.75))"
-              : "none",
-          }}
-        >
-          {/* Eyebrow Pillar Tag */}
-          <div className="flex items-center gap-2 mb-3">
-            <span className="h-[1px] w-5 bg-white/40" />
-            <span className="font-mono text-[11px] tracking-[0.22em] text-white/60 uppercase">
-              {currentStation.tag}
-            </span>
-          </div>
+        {/* 4. Central Content: Either Project 01 Showcase or Creed Pillar Station */}
+        {isProjectActive ? (
+          <main
+            className="relative z-10 w-full max-w-sm my-auto flex flex-col items-center text-center transition-[filter] duration-150 py-1"
+            style={{
+              opacity: typoOpacity,
+              transform: `scale(${typoScale.toFixed(3)})`,
+              filter: isGlitchActive
+                ? "drop-shadow(-2px 0px rgba(239,68,68,0.75)) drop-shadow(2px 0px rgba(56,189,248,0.75))"
+                : "none",
+            }}
+          >
+            {/* Project Monogram Logo Frame */}
+            <div className="relative w-full max-w-[200px] xs:max-w-[240px] aspect-square rounded-2xl bg-[#160408] border border-[#EAD7C0]/15 shadow-[0_30px_90px_rgba(0,0,0,0.85)] overflow-hidden flex items-center justify-center p-5 mb-2">
+              <Image
+                src="/assets/logos/izieat.png"
+                alt="IZIEAT Export Portal Monogram Logo"
+                fill
+                className="object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)] select-none pointer-events-none p-3"
+                priority
+              />
+            </div>
 
-          {/* Monumental Headline */}
-          <h2 className="text-[26px] sm:text-[30px] font-light leading-[1.18] tracking-[-0.03em] text-white mb-4">
-            {currentStation.headline}
-          </h2>
+            {/* Category */}
+            <div className="flex items-center gap-2 mb-1">
+              <span className="font-serif italic text-xl text-[#FF8C38] font-normal leading-none">01</span>
+              <span className="text-[#EAD7C0]/30 font-sans text-sm">/</span>
+              <span className="text-[#EAD7C0]/50 font-mono text-xs">04</span>
+              <span className="w-[1px] h-3 bg-[#EAD7C0]/20 mx-1" />
+              <span className="text-[9px] font-sans font-extrabold uppercase tracking-[0.2em] text-[#FF8C38]">
+                GLOBAL TRADE INFRASTRUCTURE
+              </span>
+            </div>
 
-          {/* Entity & Proof Sub-text */}
-          <div className="flex flex-col gap-1.5">
-            <p className="text-[13px] font-medium tracking-wide text-white/90">
-              {currentStation.entity}
+            {/* Title */}
+            <h3 className="font-sans font-black text-lg xs:text-xl uppercase tracking-tight text-[#EAD7C0] mb-1 leading-[1.05]">
+              IZIEAT Export Portal
+            </h3>
+
+            {/* Summary */}
+            <p className="font-sans font-normal text-xs text-[#D8C4AE] leading-relaxed max-w-xs mb-2 line-clamp-2">
+              Global wholesale export portal engineered with an in-memory 278-key instant English-Russian dictionary (&lt;5ms latency), eliminating external translation API roundtrips and powering international buyer operations across the EU and CIS regions.
             </p>
-            <p className="text-[12px] font-normal leading-[1.5] text-white/55 pr-2">
-              {currentStation.details}
-            </p>
-          </div>
 
-          {/* Minimal Key Metric Pill */}
-          <div className="mt-5 flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-white/[0.05] border border-white/10 backdrop-blur-sm">
-            <Sparkles className="w-3 h-3 text-white/70" />
-            <span className="font-mono text-[10px] tracking-wider text-white/50 uppercase">
-              {currentStation.metricLabel}:
-            </span>
-            <span className="font-mono text-[10px] font-bold text-white tracking-widest">
-              {currentStation.metricValue}
-            </span>
-          </div>
-        </main>
+            {/* Metrics Row */}
+            <div className="grid grid-cols-3 gap-2 border-t border-b border-[#EAD7C0]/20 py-1.5 mb-2.5 w-full max-w-xs text-left">
+              <div>
+                <div className="text-[8px] font-mono uppercase text-[#CBB59D] tracking-wider mb-0.5">TRANSLATION KEYS</div>
+                <div className="text-xs font-sans font-bold text-[#EAD7C0] tracking-tight truncate">278 Keys</div>
+              </div>
+              <div>
+                <div className="text-[8px] font-mono uppercase text-[#CBB59D] tracking-wider mb-0.5">SWITCH LATENCY</div>
+                <div className="text-xs font-sans font-bold text-[#EAD7C0] tracking-tight truncate">&lt; 5ms</div>
+              </div>
+              <div>
+                <div className="text-[8px] font-mono uppercase text-[#CBB59D] tracking-wider mb-0.5">TRADING REGION</div>
+                <div className="text-xs font-sans font-bold text-[#EAD7C0] tracking-tight truncate">EU &amp; CIS</div>
+              </div>
+            </div>
+
+            {/* Action Link Button */}
+            <div className="flex items-center justify-center gap-2">
+              <a
+                href="https://www.izieat.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#EAD7C0] text-[#2D0A12] font-sans font-bold text-[10px] uppercase tracking-wider hover:bg-[#FF8C38] hover:text-white transition-all shadow-md"
+              >
+                <span>EXPLORE LIVE PLATFORM</span>
+                <ExternalLink size={12} />
+              </a>
+            </div>
+          </main>
+        ) : (
+          <main
+            className="relative z-10 w-full max-w-md my-auto flex flex-col items-start transition-[filter] duration-150"
+            style={{
+              opacity: typoOpacity,
+              transform: `scale(${typoScale.toFixed(3)})`,
+              filter: isGlitchActive
+                ? "drop-shadow(-2px 0px rgba(239,68,68,0.75)) drop-shadow(2px 0px rgba(56,189,248,0.75))"
+                : "none",
+            }}
+          >
+            {/* Eyebrow Pillar Tag */}
+            <div className="flex items-center gap-2 mb-3">
+              <span className="h-[1px] w-5 bg-white/40" />
+              <span className="font-mono text-[11px] tracking-[0.22em] text-white/60 uppercase">
+                {currentStation.tag}
+              </span>
+            </div>
+
+            {/* Monumental Headline */}
+            <h2 className="text-[26px] sm:text-[30px] font-light leading-[1.18] tracking-[-0.03em] text-white mb-4">
+              {currentStation.headline}
+            </h2>
+
+            {/* Entity & Proof Sub-text */}
+            <div className="flex flex-col gap-1.5">
+              <p className="text-[13px] font-medium tracking-wide text-white/90">
+                {currentStation.entity}
+              </p>
+              <p className="text-[12px] font-normal leading-[1.5] text-white/55 pr-2">
+                {currentStation.details}
+              </p>
+            </div>
+
+            {/* Minimal Key Metric Pill */}
+            <div className="mt-5 flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-white/[0.05] border border-white/10 backdrop-blur-sm">
+              <Sparkles className="w-3 h-3 text-white/70" />
+              <span className="font-mono text-[10px] tracking-wider text-white/50 uppercase">
+                {currentStation.metricLabel}:
+              </span>
+              <span className="font-mono text-[10px] font-bold text-white tracking-widest">
+                {currentStation.metricValue}
+              </span>
+            </div>
+          </main>
+        )}
 
         {/* 5. Pure Minimalist Scroll Progress HUD (100% Scroll-Driven · Zero Buttons) */}
         <footer className="relative z-10 w-full flex items-center justify-between pt-3 border-t border-white/[0.08] text-[10px] font-mono tracking-wider text-white/45">
           <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-            <span className="uppercase tracking-[0.2em]">SCROLL TO ADVANCE PILLARS</span>
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                isProjectActive ? "bg-[#FF8C38]" : "bg-white"
+              } animate-pulse`}
+            />
+            <span
+              className={`uppercase tracking-[0.2em] ${
+                isProjectActive ? "text-[#CBB59D]" : ""
+              }`}
+            >
+              {isProjectActive
+                ? "SCROLL TO ADVANCE COMMISSIONS"
+                : "SCROLL TO ADVANCE PILLARS"}
+            </span>
           </div>
 
-          <div className="flex items-center gap-1.5 font-bold text-white/80">
-            <span>PILLAR {displayPillarNum}</span>
-            <span className="text-white/30">/</span>
-            <span className="text-white/40">04</span>
+          <div
+            className={`flex items-center gap-1.5 font-bold ${
+              isProjectActive ? "text-[#CBB59D]" : "text-white/80"
+            }`}
+          >
+            {isProjectActive ? (
+              <span>01 — 04 PORTFOLIO CORE</span>
+            ) : (
+              <>
+                <span>PILLAR {displayPillarNum}</span>
+                <span className="text-white/30">/</span>
+                <span className="text-white/40">04</span>
+              </>
+            )}
           </div>
         </footer>
       </div>

@@ -399,20 +399,17 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
         );
       }
 
-      // Smoothly drive globe rotation progress across the 4 pillars (0 -> 1)
+      // Smoothly drive globe rotation progress across the 4 pillars and into Project 01 (0 -> 1)
       masterTl.to(
         globeProgressRef.current,
         {
           value: 1,
-          duration: 9.60,
+          duration: 10.20,
           ease: "none",
           onUpdate: () => setCreedProgress(globeProgressRef.current.value),
         },
         9.80
       );
-
-      // Station 04 Reading Hold (Held in full crisp glory until the Apekon disintegration wave sweeps into Projects)
-      masterTl.to({}, { duration: 2.20 }, 19.40);
 
       return () => {
         if (cueTween) cueTween.kill();
@@ -450,7 +447,7 @@ export const MonumentalHero: React.FC<MonumentalHeroProps> = memo(({ onExplore, 
       {/* ========================================================================= */}
       <div
         ref={mobileContainerRef}
-        className="md:hidden relative w-full h-[600vh] bg-[#060709] overflow-clip"
+        className="md:hidden relative w-full h-[550vh] bg-[#060709] overflow-clip"
       >
         {/* Navigation & Explore Anchors for Statement & Creed phases */}
         <div

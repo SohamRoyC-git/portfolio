@@ -149,7 +149,6 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
   const ambientBackdropsRef = useRef<(HTMLDivElement | null)[]>([]);
   const editorialBlocksRef = useRef<(HTMLDivElement | null)[]>([]);
   const apekonCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  const projectContentRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -276,97 +275,6 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
               renderApekonReveal(self.progress);
             },
           });
-        } else {
-          // Initialize mobile styles: Stage is transparent so Station 04 in Creed is 100% visible beneath it
-          if (stageRef.current) {
-            stageRef.current.style.backgroundColor = "transparent";
-            stageRef.current.style.borderColor = "transparent";
-            stageRef.current.style.pointerEvents = "none";
-          }
-          if (projectContentRef.current) {
-            projectContentRef.current.style.opacity = "0";
-            projectContentRef.current.style.pointerEvents = "none";
-          }
-
-          // Mobile Entrance: Apekon procedural triangular disintegration wave sweeps directly in-place over Station 04,
-          // disintegrating Station 04 directly into Project 01 exactly like Stations 01 -> 02 -> 03 -> 04!
-          ScrollTrigger.create({
-            trigger: sectionRef.current,
-            start: "top top",
-            end: "top+=420 top",
-            scrub: 0.4,
-            onUpdate: (self) => {
-              const p = self.progress;
-              const creedStageEl = document.getElementById("mobile-creed-stage");
-
-              // Phase A (0.00 -> 0.50): Station 04 glitches, scales down slightly, and dissolves under the peak of the shatter wave
-              if (p < 0.50) {
-                if (creedStageEl) {
-                  creedStageEl.style.display = "flex";
-                  creedStageEl.style.opacity = Math.max(0.05, 1 - p * 1.8).toFixed(3);
-                  creedStageEl.style.transform = `scale(${(1 - p * 0.03).toFixed(3)})`;
-                  creedStageEl.style.filter =
-                    p > 0.06
-                      ? "drop-shadow(-2px 0px rgba(239,68,68,0.75)) drop-shadow(2px 0px rgba(56,189,248,0.75))"
-                      : "none";
-                }
-                if (stageRef.current) {
-                  stageRef.current.style.backgroundColor = "transparent";
-                  stageRef.current.style.borderColor = "transparent";
-                  stageRef.current.style.pointerEvents = "none";
-                }
-                if (projectContentRef.current) {
-                  projectContentRef.current.style.opacity = "0";
-                  projectContentRef.current.style.pointerEvents = "none";
-                  projectContentRef.current.style.filter = "none";
-                }
-              } else {
-                // Phase B (0.50 -> 1.00): Station 04 is immediately hidden; Project 01 emerges directly from inside the shatter wave!
-                if (creedStageEl) {
-                  creedStageEl.style.display = "none";
-                }
-                if (stageRef.current) {
-                  stageRef.current.style.backgroundColor = "#2D0A12";
-                  stageRef.current.style.borderColor = "rgba(234, 215, 192, 0.2)";
-                  stageRef.current.style.pointerEvents = p >= 0.85 ? "auto" : "none";
-                }
-                if (projectContentRef.current) {
-                  const projectAlpha = Math.min(1, (p - 0.50) * 2.0);
-                  const projectScale = 0.97 + (p - 0.50) * 0.06;
-                  projectContentRef.current.style.opacity = p >= 0.96 ? "1" : projectAlpha.toFixed(3);
-                  projectContentRef.current.style.transform = `scale(${projectScale.toFixed(3)})`;
-                  projectContentRef.current.style.filter =
-                    p < 0.90
-                      ? "drop-shadow(-2px 0px rgba(239,68,68,0.75)) drop-shadow(2px 0px rgba(56,189,248,0.75))"
-                      : "none";
-                  projectContentRef.current.style.pointerEvents = p >= 0.85 ? "auto" : "none";
-                }
-              }
-
-              renderApekonReveal(p);
-            },
-            onLeaveBack: () => {
-              const creedStageEl = document.getElementById("mobile-creed-stage");
-              if (creedStageEl) {
-                creedStageEl.style.display = "flex";
-                creedStageEl.style.opacity = "1";
-                creedStageEl.style.transform = "scale(1)";
-                creedStageEl.style.filter = "none";
-              }
-              if (stageRef.current) {
-                stageRef.current.style.backgroundColor = "transparent";
-                stageRef.current.style.borderColor = "transparent";
-                stageRef.current.style.pointerEvents = "none";
-              }
-              if (projectContentRef.current) {
-                projectContentRef.current.style.opacity = "0";
-                projectContentRef.current.style.transform = "scale(1)";
-                projectContentRef.current.style.filter = "none";
-                projectContentRef.current.style.pointerEvents = "none";
-              }
-              renderApekonReveal(0);
-            },
-          });
         }
       }
 
@@ -388,11 +296,28 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
         );
       }
 
+      // On mobile (< 768px): Stage is hidden until section reaches top top to prevent bottom peeking during Creed
+      if (!isDesktop && stageRef.current && sectionRef.current) {
+        ScrollTrigger.create({
+          trigger: sectionRef.current,
+          start: "top top",
+          onEnter: () => {
+            if (stageRef.current) stageRef.current.style.visibility = "visible";
+          },
+          onEnterBack: () => {
+            if (stageRef.current) stageRef.current.style.visibility = "visible";
+          },
+          onLeaveBack: () => {
+            if (stageRef.current) stageRef.current.style.visibility = "hidden";
+          },
+        });
+      }
+
       // 2. Master Scrub Timeline for Project Transitions (Crisp, Responsive Inertia)
       const masterTl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: isDesktop ? "top top" : "top+=420 top",
+          start: isDesktop ? "top top" : "top+=350 top",
           end: "bottom bottom",
           scrub: isDesktop ? 0.6 : 0.5,
           onUpdate: (self) => {
@@ -561,27 +486,22 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
     <div
       id="monument-exhibition"
       ref={sectionRef}
-      className="relative w-full z-40 -mt-[150vh] md:mt-0"
+      className="relative w-full z-40 -mt-[100svh] md:mt-0"
       style={{ height: "calc(100svh + 2600px)" }}
     >
       {/* Sticky 100svh Architectural Stage (Rich Wine Red & Warm Italian Light Sand) */}
       <section
         ref={stageRef}
-        className="sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-between pt-16 xs:pt-20 sm:pt-24 pb-4 sm:pb-8 px-4 sm:px-12 md:px-16 lg:px-20 overflow-hidden md:bg-[#2D0A12] border-t border-transparent md:border-[#EAD7C0]/20 will-change-[clip-path]"
+        className="invisible md:visible sticky top-0 h-[100svh] min-h-[100svh] w-full flex flex-col justify-between pt-16 xs:pt-20 sm:pt-24 pb-4 sm:pb-8 px-4 sm:px-12 md:px-16 lg:px-20 overflow-hidden bg-[#2D0A12] border-t border-[#EAD7C0]/20 will-change-[clip-path]"
       >
-        {/* Apekon Procedural Triangular Transition Canvas Overlay (Creed -> Projects reveal on Desktop & Mobile) */}
+        {/* Apekon Procedural Triangular Transition Canvas Overlay (Desktop Reveal) */}
         <canvas
           ref={apekonCanvasRef}
           className="absolute inset-0 w-full h-full pointer-events-none z-40"
         />
 
-        {/* Project 01 Content Container: Solid Opacity Reveal with Zero Ghosting / Opacity Crossfade */}
-        <div
-          ref={projectContentRef}
-          className="relative w-full h-full flex flex-col justify-between opacity-0 md:opacity-100 will-change-[transform,opacity,filter]"
-        >
-          {/* Subtle Ambient Reflected Depth (Forge Automotive Atmospheric Depth) */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
+        {/* Subtle Ambient Reflected Depth (Forge Automotive Atmospheric Depth) */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
           {PROJECTS.map((proj, idx) => (
             <div
               key={`ambient-${proj.id}`}
@@ -767,7 +687,6 @@ export const GrandSpatialDiscs: React.FC = memo(() => {
           </div>
 
           <span className="text-[#CBB59D]">01 — 04 PORTFOLIO CORE</span>
-        </div>
         </div>
       </section>
 

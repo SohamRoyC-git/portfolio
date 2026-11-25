@@ -202,7 +202,7 @@ export default function Home() {
     }, 150);
   }, []);
 
-  const handleNavigate = useCallback((id: string) => {
+  const handleNavigate = useCallback((id: string, projectId?: string) => {
     if (id === "monument-studio-3d") {
       setIsStudioActive(true);
       setIsWorkspaceLocked(true);
@@ -223,6 +223,34 @@ export default function Home() {
 
     if (lenisRef.current) {
       lenisRef.current.start();
+    }
+
+    // Direct jump to a specific project inside #monument-exhibition (from 3D Globe client pins)
+    if (id === "monument-exhibition" && projectId) {
+      const exEl = document.getElementById("monument-exhibition");
+      if (exEl) {
+        const progressMap: Record<string, number> = {
+          "izieat-export": 0.0,
+          "latvia-cricket": 0.36,
+          "india-center": 0.70,
+          "varti-international": 0.99,
+        };
+        const p = progressMap[projectId] ?? 0.0;
+        const isDesktop = typeof window !== "undefined" && window.innerWidth >= 768;
+        const startOffset = isDesktop ? 0 : 350;
+        const trackDist = Math.max(0, exEl.offsetHeight - window.innerHeight - startOffset);
+        const targetY = exEl.offsetTop + startOffset + trackDist * p;
+
+        if (lenisRef.current) {
+          lenisRef.current.scrollTo(targetY, { immediate: true });
+        } else if (scrollerRef.current) {
+          scrollerRef.current.scrollTop = targetY;
+        }
+        setTimeout(() => {
+          ScrollTrigger.refresh();
+        }, 80);
+        return;
+      }
     }
 
     // On mobile (< 768px), "monument-statement" and "monument-creed" live in the unified 3D camera depth tunnel in #hero-wrapper

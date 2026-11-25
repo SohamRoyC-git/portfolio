@@ -13,7 +13,7 @@ import {
 
 export interface Studio3DWorkspaceProps {
   onEnterPortfolio: () => void;
-  onNavigateToSection?: (sectionId: string) => void;
+  onNavigateToSection?: (sectionId: string, projectId?: string) => void;
   isLocked?: boolean;
   isActive?: boolean;
 }
@@ -429,7 +429,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
   // Star Wars Galactic Lightspeed Hyperspace Jump (Sustained 3.8 Seconds with Needle Streaks)
   const triggerWarpTransition = useCallback(
-    (destination: "hero" | "projects" = "hero") => {
+    (destination: "hero" | "projects" = "hero", projectId?: string) => {
       if (isTransitioningRef.current || !cameraRef.current) return;
       isTransitioningRef.current = true;
       warpStartTimeRef.current = performance.now();
@@ -464,7 +464,7 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
       const finishNavigation = () => {
         if (destination === "projects" && onNavigateToSection) {
-          onNavigateToSection("monument-exhibition");
+          onNavigateToSection("monument-exhibition", projectId);
         } else {
           onEnterPortfolio();
         }
@@ -1452,7 +1452,8 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           const screenY = (-projected.y * 0.5 + 0.5) * viewH;
 
           const isFront = facing > 0.06;
-          el.style.transform = `translate3d(${screenX.toFixed(1)}px, ${screenY.toFixed(1)}px, 0) translate(-50%, -50%)`;
+          const anchorX = pin.align === "left" ? "calc(-100% + 8px)" : "-8px";
+          el.style.transform = `translate3d(${screenX.toFixed(1)}px, ${screenY.toFixed(1)}px, 0) translate(${anchorX}, -50%)`;
           el.style.opacity = isFront ? "1" : "0.10";
           el.style.pointerEvents = isFront && !isHoldingRef.current && !isTransitioningRef.current ? "auto" : "none";
           el.style.zIndex = isFront ? "35" : "20";
@@ -1994,9 +1995,11 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
               onMouseLeave={() => setHoveredPinId(null)}
               onClick={(e) => {
                 e.stopPropagation();
-                triggerWarpTransition(pin.destination);
+                triggerWarpTransition(pin.destination, pin.projectId);
               }}
-              className="group absolute top-0 left-0 flex items-center gap-2 cursor-pointer focus:outline-none transition-opacity duration-200"
+              className={`group absolute top-0 left-0 flex items-center gap-2 cursor-pointer focus:outline-none transition-opacity duration-200 ${
+                pin.align === "left" ? "flex-row-reverse" : "flex-row"
+              }`}
               aria-label={`${pin.city}, ${pin.country} - ${pin.subtitle}`}
             >
               {/* Pulsing Beacon Core */}
@@ -2013,16 +2016,21 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
                 />
               </span>
 
-              {/* City Pill & Hover Context */}
+              {/* City Pill & Bracketed Client Context */}
               <span
                 className={`flex flex-col items-start text-left px-2.5 py-1 rounded-full backdrop-blur-md border transition-all duration-200 ${
                   isHome
                     ? "bg-[#F2462E]/20 border-[#F2462E]/70 text-[#FFF8F0] shadow-[0_0_18px_rgba(242,70,46,0.35)]"
-                    : "bg-[#06070B]/75 border-[#F5E6D3]/35 text-[#F5E6D3] group-hover:border-[#FFB347] group-hover:bg-[#06070B]/90"
+                    : "bg-[#06070B]/80 border-[#F5E6D3]/35 text-[#F5E6D3] group-hover:border-[#FFB347] group-hover:bg-[#06070B]/95"
                 }`}
               >
-                <span className="flex items-center gap-1.5 text-[9.5px] sm:text-[10px] font-mono font-bold uppercase tracking-[0.16em] leading-none">
+                <span className="flex items-center gap-1.5 text-[9.5px] sm:text-[10px] font-mono font-bold uppercase tracking-[0.14em] leading-none whitespace-nowrap">
                   <span>{pin.city}</span>
+                  {pin.bracketLabel && (
+                    <span className="text-[8px] sm:text-[8.5px] font-normal text-[#F5E6D3]/75 tracking-[0.06em]">
+                      {pin.bracketLabel}
+                    </span>
+                  )}
                   <ArrowRight size={10} className="opacity-70 group-hover:translate-x-0.5 transition-transform" />
                 </span>
                 {isHovered && (

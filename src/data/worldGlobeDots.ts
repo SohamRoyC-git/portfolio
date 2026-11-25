@@ -7,6 +7,9 @@ export interface GlobePinConfig {
   lat: number;
   lon: number;
   destination: "hero" | "projects";
+  projectId?: "izieat-export" | "latvia-cricket" | "india-center" | "varti-international";
+  bracketLabel?: string;
+  align?: "left" | "right";
   tag: string;
   subtitle: string;
 }
@@ -29,8 +32,10 @@ export const GLOBE_PINS: GlobePinConfig[] = [
     lat: 28.6139,
     lon: 77.209,
     destination: "projects",
+    projectId: "izieat-export",
+    bracketLabel: "(IZIEAT, Varti International)",
     tag: "CLIENT · INDIA & EXPORT",
-    subtitle: "Multi-Region & International Export",
+    subtitle: "Open IZIEAT Export Portal",
   },
   {
     id: "dubai",
@@ -39,8 +44,11 @@ export const GLOBE_PINS: GlobePinConfig[] = [
     lat: 25.2048,
     lon: 55.2708,
     destination: "projects",
+    projectId: "varti-international",
+    bracketLabel: "(Varti International)",
+    align: "left",
     tag: "CLIENT · UAE",
-    subtitle: "Middle East Deployment",
+    subtitle: "Open Varti International",
   },
   {
     id: "russia",
@@ -49,8 +57,11 @@ export const GLOBE_PINS: GlobePinConfig[] = [
     lat: 55.7558,
     lon: 37.6173,
     destination: "projects",
+    projectId: "varti-international",
+    bracketLabel: "(Varti International)",
+    align: "right",
     tag: "CLIENT · RUSSIA",
-    subtitle: "Eurasia Enterprise Systems",
+    subtitle: "Open Varti International",
   },
   {
     id: "latvia",
@@ -59,8 +70,11 @@ export const GLOBE_PINS: GlobePinConfig[] = [
     lat: 56.9496,
     lon: 24.1052,
     destination: "projects",
+    projectId: "latvia-cricket",
+    bracketLabel: "(LCF, India Center)",
+    align: "left",
     tag: "CLIENT · LATVIA",
-    subtitle: "Baltic / EU Operations",
+    subtitle: "Open Latvian Cricket Federation",
   },
 ];
 

@@ -29,11 +29,6 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   const telemetryHintRef = useRef<HTMLDivElement>(null);
   const pinsOverlayRef = useRef<HTMLDivElement>(null);
   const pinElementsRef = useRef<Record<string, HTMLButtonElement | null>>({});
-  const cursorRingRef = useRef<HTMLDivElement>(null);
-  const cursorDotRef = useRef<HTMLDivElement>(null);
-  const cursorTargetRef = useRef({ x: -200, y: -200, visible: false });
-  const cursorPosRef = useRef({ x: -200, y: -200 });
-  const hoveredPinRef = useRef<string | null>(null);
 
   // Interaction HUD & Status
   const [interactionHint, setInteractionHint] = useState<string>(
@@ -1244,19 +1239,10 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       }
     };
 
-    // POINTER MOVE: Drag globe OR update fluid brush / black hole position + custom cursor
+    // POINTER MOVE: Drag globe OR update fluid brush / black hole position
     const holdTimerRef = { id: 0 as any };
     const unspoolTimerRef = { id: 0 as any };
     const onPointerMove = (e: PointerEvent) => {
-      cursorTargetRef.current = { x: e.clientX, y: e.clientY, visible: e.pointerType === "mouse" };
-      if (cursorDotRef.current && e.pointerType === "mouse") {
-        cursorDotRef.current.style.opacity = "1";
-        cursorDotRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`;
-      }
-      if (cursorRingRef.current && e.pointerType === "mouse") {
-        cursorRingRef.current.style.opacity = "1";
-      }
-
       updateMousePos(e.clientX, e.clientY);
 
       if (isHoldingRef.current) {
@@ -1441,28 +1427,6 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         const worldGroupPos = new THREE.Vector3();
         attractorGroupRef.current.getWorldPosition(worldGroupPos);
         const normalMat = new THREE.Matrix3().getNormalMatrix(attractorGroupRef.current.matrixWorld);
-
-        // Sync custom orbital reticle cursor with spring lag
-        if (cursorRingRef.current && cursorTargetRef.current.visible) {
-          cursorPosRef.current.x += (cursorTargetRef.current.x - cursorPosRef.current.x) * 0.22;
-          cursorPosRef.current.y += (cursorTargetRef.current.y - cursorPosRef.current.y) * 0.22;
-          const ringScale = isHoldingRef.current
-            ? 0.65
-            : hoveredPinRef.current
-              ? 1.45
-              : isDraggingGlobeRef.current
-                ? 0.78
-                : 1.0;
-          cursorRingRef.current.style.transform = `translate3d(${cursorPosRef.current.x.toFixed(1)}px, ${cursorPosRef.current.y.toFixed(1)}px, 0) translate(-50%, -50%) scale(${ringScale})`;
-          cursorRingRef.current.style.borderColor =
-            hoveredPinRef.current === "kolkata"
-              ? "rgba(242, 70, 46, 0.9)"
-              : hoveredPinRef.current
-                ? "rgba(255, 179, 71, 0.9)"
-                : isHoldingRef.current
-                  ? "rgba(255, 248, 240, 0.95)"
-                  : "rgba(245, 230, 211, 0.55)";
-        }
 
         // Ensure pins overlay always returns cleanly after unspooling
         if (pinsOverlayRef.current && !isHoldingRef.current && !isTransitioningRef.current) {
@@ -2005,19 +1969,9 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   }, [triggerWarpTransition, startBlackHoleSound, stopBlackHoleSound, playCosmicReleaseSound]);
 
   return (
-    <div className="relative w-full h-[100svh] bg-[#06070B] text-[#F8F5EE] overflow-hidden select-none md:cursor-none">
+    <div className="relative w-full h-[100svh] bg-[#06070B] text-[#F8F5EE] overflow-hidden select-none">
       {/* Three.js Canvas Container */}
-      <div ref={mountRef} className="absolute inset-0 w-full h-full z-10 md:cursor-none touch-none" />
-
-      {/* Custom Orbital Reticle Cursor (Desktop fine pointers) */}
-      <div
-        ref={cursorRingRef}
-        className="hidden md:block fixed top-0 left-0 w-8 h-8 rounded-full border border-[#F5E6D3]/55 pointer-events-none z-50 opacity-0 transition-[border-color,opacity] duration-200 will-change-transform shadow-[0_0_14px_rgba(245,230,211,0.18)]"
-      />
-      <div
-        ref={cursorDotRef}
-        className="hidden md:block fixed top-0 left-0 w-1.5 h-1.5 rounded-full bg-[#FFF8F0] pointer-events-none z-50 opacity-0 transition-opacity duration-200 will-change-transform shadow-[0_0_8px_rgba(255,248,240,0.9)]"
-      />
+      <div ref={mountRef} className="absolute inset-0 w-full h-full z-10 cursor-grab active:cursor-grabbing touch-none" />
 
       {/* Interactive 3D Globe Location Pins Overlay */}
       <div
@@ -2036,19 +1990,13 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
               type="button"
               onPointerDown={(e) => e.stopPropagation()}
               onPointerUp={(e) => e.stopPropagation()}
-              onMouseEnter={() => {
-                hoveredPinRef.current = pin.id;
-                setHoveredPinId(pin.id);
-              }}
-              onMouseLeave={() => {
-                hoveredPinRef.current = null;
-                setHoveredPinId(null);
-              }}
+              onMouseEnter={() => setHoveredPinId(pin.id)}
+              onMouseLeave={() => setHoveredPinId(null)}
               onClick={(e) => {
                 e.stopPropagation();
                 triggerWarpTransition(pin.destination);
               }}
-              className="group absolute top-0 left-0 flex items-center gap-2 cursor-pointer md:cursor-none focus:outline-none transition-opacity duration-200"
+              className="group absolute top-0 left-0 flex items-center gap-2 cursor-pointer focus:outline-none transition-opacity duration-200"
               aria-label={`${pin.city}, ${pin.country} - ${pin.subtitle}`}
             >
               {/* Pulsing Beacon Core */}

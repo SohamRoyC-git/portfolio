@@ -4,6 +4,12 @@ import React, { useEffect, useRef, useState, useCallback, memo } from "react";
 import * as THREE from "three";
 import gsap from "gsap";
 import { ArrowRight } from "lucide-react";
+import {
+  GLOBE_PINS,
+  GlobePinConfig,
+  generateWorldGlobeDots,
+  latLonToVector3,
+} from "@/data/worldGlobeDots";
 
 export interface Studio3DWorkspaceProps {
   onEnterPortfolio: () => void;
@@ -21,11 +27,14 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   const mountRef = useRef<HTMLDivElement>(null);
   const warpFlashRef = useRef<HTMLDivElement>(null);
   const telemetryHintRef = useRef<HTMLDivElement>(null);
+  const pinsOverlayRef = useRef<HTMLDivElement>(null);
+  const pinElementsRef = useRef<Record<string, HTMLButtonElement | null>>({});
 
   // Interaction HUD & Status
   const [interactionHint, setInteractionHint] = useState<string>(
-    "MOVE ACROSS ATTRACTOR · HOLD FOR BLACK HOLE · CLICK FOR HYPERSPACE"
+    "DRAG GLOBE · CLICK PINS TO EXPLORE · HOLD FOR BLACK HOLE"
   );
+  const [hoveredPinId, setHoveredPinId] = useState<string | null>(null);
 
   // Three.js instances refs
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -74,6 +83,15 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   const isTransitioningRef = useRef(false);
   const warpProgressRef = useRef(0);
   const warpStartTimeRef = useRef(0);
+
+  // 3D Globe rotation & drag inertia state
+  const globeRotYRef = useRef(-2.62); // Centers India / Dubai / Russia / Latvia toward viewer on load
+  const globeRotXRef = useRef(0.32);
+  const globeVelYRef = useRef(0);
+  const globeVelXRef = useRef(0);
+  const isDraggingGlobeRef = useRef(false);
+  const didDragRef = useRef(false);
+  const dragLastPosRef = useRef({ x: 0, y: 0 });
 
   // Web Audio Context & Nodes
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -410,50 +428,64 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   }, [triggerCinematicEntrance]);
 
   // Star Wars Galactic Lightspeed Hyperspace Jump (Sustained 3.8 Seconds with Needle Streaks)
-  const triggerWarpTransition = useCallback(() => {
-    if (isTransitioningRef.current || !cameraRef.current) return;
-    isTransitioningRef.current = true;
-    warpStartTimeRef.current = performance.now();
-    if (telemetryHintRef.current) {
-      telemetryHintRef.current.style.opacity = "0";
-    }
-    setInteractionHint("LIGHTSPEED WARP · CROSSING EVENT HORIZON INTO ARCHIVE");
+  const triggerWarpTransition = useCallback(
+    (destination: "hero" | "projects" = "hero") => {
+      if (isTransitioningRef.current || !cameraRef.current) return;
+      isTransitioningRef.current = true;
+      warpStartTimeRef.current = performance.now();
+      if (telemetryHintRef.current) {
+        telemetryHintRef.current.style.opacity = "0";
+      }
+      if (pinsOverlayRef.current) {
+        pinsOverlayRef.current.style.opacity = "0";
+        pinsOverlayRef.current.style.pointerEvents = "none";
+      }
+      setInteractionHint(
+        destination === "projects"
+          ? "LIGHTSPEED WARP · JUMPING TO CLIENT COMMISSIONS"
+          : "LIGHTSPEED WARP · CROSSING EVENT HORIZON INTO PORTFOLIO"
+      );
 
-    const camera = cameraRef.current;
+      const camera = cameraRef.current;
 
-    // Warp progress ramps smoothly over 3.8 seconds
-    gsap.to(warpProgressRef, {
-      current: 1.0,
-      duration: 3.8,
-      ease: "power2.inOut",
-    });
-
-    // Camera surges forward smoothly through the starfield
-    gsap.to(camera.position, {
-      z: 0.8,
-      duration: 3.8,
-      ease: "power2.in",
-    });
-
-    // Final lightspeed flash overlay dissolves into portfolio hero
-    if (warpFlashRef.current) {
-      gsap.to(warpFlashRef.current, {
-        opacity: 1,
-        duration: 0.6,
-        delay: 3.2,
+      // Warp progress ramps smoothly over 3.8 seconds
+      gsap.to(warpProgressRef, {
+        current: 1.0,
+        duration: 3.8,
         ease: "power2.inOut",
-        onComplete: () => {
-          onEnterPortfolio();
-          isTransitioningRef.current = false;
-        },
       });
-    } else {
-      setTimeout(() => {
-        onEnterPortfolio();
+
+      // Camera surges forward smoothly through the starfield
+      gsap.to(camera.position, {
+        z: 0.8,
+        duration: 3.8,
+        ease: "power2.in",
+      });
+
+      const finishNavigation = () => {
+        if (destination === "projects" && onNavigateToSection) {
+          onNavigateToSection("monument-exhibition");
+        } else {
+          onEnterPortfolio();
+        }
         isTransitioningRef.current = false;
-      }, 3800);
-    }
-  }, [onEnterPortfolio, playHyperspaceSound]);
+      };
+
+      // Final lightspeed flash overlay dissolves into target section
+      if (warpFlashRef.current) {
+        gsap.to(warpFlashRef.current, {
+          opacity: 1,
+          duration: 0.6,
+          delay: 3.2,
+          ease: "power2.inOut",
+          onComplete: finishNavigation,
+        });
+      } else {
+        setTimeout(finishNavigation, 3800);
+      }
+    },
+    [onEnterPortfolio, onNavigateToSection, playHyperspaceSound]
+  );
 
   // Main Three.js Particle Physics Engine (Lorenz Strange Attractor + Studio Smoke)
   useEffect(() => {
@@ -940,78 +972,27 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
     shockwaveMesh.visible = false;
     attractorGroup.add(shockwaveMesh);
 
-    // 6. NUMERICAL INTEGRATION OF THE 3D LORENZ STRANGE ATTRACTOR TRAJECTORY
-    // Perfectly centered with breathing room matching IMURUN reference
-    const LORENZ_STEPS = 24000;
-    const lorenzPath = new Float32Array(LORENZ_STEPS * 3);
-    {
-      let x = 0.1, y = 0.0, z = 0.0;
-      const sigma = 10.0;
-      const rho = 28.0;
-      const beta = 8.0 / 3.0;
-      const dt = 0.004;
+    // 6. REAL-WORLD DOTTED 3D GLOBE GENERATION + CLIENT NETWORK ARCS
+    const GLOBE_RADIUS = isMobile ? 0.92 : 1.18;
+    const PARTICLE_COUNT = isMobile ? 4200 : 6400;
+    const globeData = generateWorldGlobeDots(PARTICLE_COUNT, GLOBE_RADIUS);
 
-      // Warm-up to settle onto the manifold
-      for (let i = 0; i < 4000; i++) {
-        const f = (cx: number, cy: number, cz: number) => [
-          sigma * (cy - cx),
-          cx * (rho - cz) - cy,
-          cx * cy - beta * cz,
-        ];
-        const [k1x, k1y, k1z] = f(x, y, z);
-        const [k2x, k2y, k2z] = f(x + 0.5 * dt * k1x, y + 0.5 * dt * k1y, z + 0.5 * dt * k1z);
-        const [k3x, k3y, k3z] = f(x + 0.5 * dt * k2x, y + 0.5 * dt * k2y, z + 0.5 * dt * k2z);
-        const [k4x, k4y, k4z] = f(x + dt * k3x, y + dt * k3y, z + dt * k3z);
-        x += (dt / 6.0) * (k1x + 2 * k2x + 2 * k3x + k4x);
-        y += (dt / 6.0) * (k1y + 2 * k2y + 2 * k3y + k4y);
-        z += (dt / 6.0) * (k1z + 2 * k2z + 2 * k3z + k4z);
-      }
-
-      // Record trajectory centered at (0.32, 0.61, 25.09) with scale giving commanding cinematic presence
-      const scale = isMobile ? 0.026 : 0.040;
-      for (let i = 0; i < LORENZ_STEPS; i++) {
-        const f = (cx: number, cy: number, cz: number) => [
-          sigma * (cy - cx),
-          cx * (rho - cz) - cy,
-          cx * cy - beta * cz,
-        ];
-        const [k1x, k1y, k1z] = f(x, y, z);
-        const [k2x, k2y, k2z] = f(x + 0.5 * dt * k1x, y + 0.5 * dt * k1y, z + 0.5 * dt * k1z);
-        const [k3x, k3y, k3z] = f(x + 0.5 * dt * k2x, y + 0.5 * dt * k2y, z + 0.5 * dt * k2z);
-        const [k4x, k4y, k4z] = f(x + dt * k3x, y + dt * k3y, z + dt * k3z);
-
-        x += (dt / 6.0) * (k1x + 2 * k2x + 2 * k3x + k4x);
-        y += (dt / 6.0) * (k1y + 2 * k2y + 2 * k3y + k4y);
-        z += (dt / 6.0) * (k1z + 2 * k2z + 2 * k3z + k4z);
-
-        const idx3 = i * 3;
-        // Map X -> Screen X, Z -> Screen Y (canonical butterfly orientation), Y -> Depth Z
-        lorenzPath[idx3] = (x - 0.32) * scale;
-        lorenzPath[idx3 + 1] = (z - 25.09) * scale;
-        lorenzPath[idx3 + 2] = (y - 0.61) * scale;
-      }
-    }
-
-    // 7. PARTICLES INITIALIZATION: PRISTINE STARDUST FILAMENT (6,400 Desktop / 3,800 Mobile)
-    // Distinct, sparkling individual stardust embers with crystal-clear negative space
-    const PARTICLE_COUNT = isMobile ? 3800 : 6400;
+    // 7. PARTICLES INITIALIZATION: LUMINOUS CONTINENT & SPHERE DOT MATRIX
     const currentPositions = new Float32Array(PARTICLE_COUNT * 3);
     const targetPositions = new Float32Array(PARTICLE_COUNT * 3);
+    const basePositions = new Float32Array(globeData.positions);
     const velocities = new Float32Array(PARTICLE_COUNT * 3);
     const particleColors = new Float32Array(PARTICLE_COUNT * 3);
     const particleSizes = new Float32Array(PARTICLE_COUNT);
     const particleScales = new Float32Array(PARTICLE_COUNT);
-    const particleIndices = new Float32Array(PARTICLE_COUNT); // Position along trajectory
-    const particleSpeeds = new Float32Array(PARTICLE_COUNT);  // Flow velocity along trajectory
-    const particleRadii = new Float32Array(PARTICLE_COUNT);   // Radial ribbon dispersion
-    const particleAngles = new Float32Array(PARTICLE_COUNT);  // Angle around ribbon core
+    const particlePhases = new Float32Array(PARTICLE_COUNT);
 
     currentPositionsRef.current = currentPositions;
     targetPositionsRef.current = targetPositions;
     velocitiesRef.current = velocities;
     particleScalesRef.current = particleScales;
 
-    // Refined Monochromatic Champagne / Warm Sand Palette (IMURUN Palette)
+    // Refined Monochromatic Champagne / Warm Sand Palette
     const SAND_SHADES = [
       [0.98, 0.95, 0.90], // Light Champagne (#FFF8F0)
       [0.94, 0.88, 0.78], // Cream Sand (#F5E6D3)
@@ -1022,26 +1003,9 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
 
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       const i3 = i * 3;
-
-      const sIndex = (i / PARTICLE_COUNT) * LORENZ_STEPS + Math.random() * 12.0;
-      particleIndices[i] = sIndex % LORENZ_STEPS;
-      // Calibrated speed: 12 to 22 steps per second (slow, meditative, serene majestic flow)
-      particleSpeeds[i] = Math.random() * 4.0 + 4.5;
-
-      // Delicate cross-sectional ribbon width around the curve (ample breathing room)
-      particleRadii[i] = Math.random() * 0.016 + 0.003;
-      particleAngles[i] = Math.random() * Math.PI * 2;
-
-      const baseIdx = Math.floor(particleIndices[i]) % LORENZ_STEPS;
-      const bx = lorenzPath[baseIdx * 3];
-      const by = lorenzPath[baseIdx * 3 + 1];
-      const bz = lorenzPath[baseIdx * 3 + 2];
-
-      const r = particleRadii[i];
-      const theta = particleAngles[i];
-      const x = bx + Math.cos(theta) * r;
-      const y = by + Math.sin(theta) * r;
-      const z = bz + (Math.random() - 0.5) * 0.015;
+      const x = basePositions[i3];
+      const y = basePositions[i3 + 1];
+      const z = basePositions[i3 + 2];
 
       currentPositions[i3] = x;
       currentPositions[i3 + 1] = y;
@@ -1054,16 +1018,72 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       velocities[i3] = 0;
       velocities[i3 + 1] = 0;
       velocities[i3 + 2] = 0;
+      particlePhases[i] = Math.random() * Math.PI * 2;
 
-      const shade = SAND_SHADES[Math.floor(Math.random() * SAND_SHADES.length)];
-      particleColors[i3] = shade[0] + (Math.random() - 0.5) * 0.02;
-      particleColors[i3 + 1] = shade[1] + (Math.random() - 0.5) * 0.02;
-      particleColors[i3 + 2] = shade[2] + (Math.random() - 0.5) * 0.02;
-
-      // Crisp, fine diamond stardust embers (calibrated for high-DPI displays)
-      particleSizes[i] = Math.random() * 1.4 + 1.2;
+      if (globeData.isLandFlags[i] === 1) {
+        const shade = SAND_SHADES[Math.floor(Math.random() * SAND_SHADES.length)];
+        particleColors[i3] = shade[0] + (Math.random() - 0.5) * 0.02;
+        particleColors[i3 + 1] = shade[1] + (Math.random() - 0.5) * 0.02;
+        particleColors[i3 + 2] = shade[2] + (Math.random() - 0.5) * 0.02;
+        particleSizes[i] = Math.random() * 1.3 + 1.35;
+      } else {
+        // Subtle ocean silhouette shimmer dots
+        particleColors[i3] = 0.45;
+        particleColors[i3 + 1] = 0.39;
+        particleColors[i3 + 2] = 0.31;
+        particleSizes[i] = 0.85;
+      }
       particleScales[i] = 1.0;
     }
+
+    // Subtle 3D Great-Circle Arcs linking Kolkata / Delhi / Dubai / Russia / Latvia
+    const arcPairs: Array<[string, string]> = [
+      ["kolkata", "delhi"],
+      ["delhi", "dubai"],
+      ["dubai", "russia"],
+      ["russia", "latvia"],
+      ["delhi", "latvia"],
+    ];
+    const globeArcsGroup = new THREE.Group();
+    const arcMaterials: THREE.LineBasicMaterial[] = [];
+    arcPairs.forEach(([fromId, toId]) => {
+      const pFrom = GLOBE_PINS.find((p) => p.id === fromId);
+      const pTo = GLOBE_PINS.find((p) => p.id === toId);
+      if (!pFrom || !pTo) return;
+      const vStart = latLonToVector3(pFrom.lat, pFrom.lon, GLOBE_RADIUS * 1.005);
+      const vEnd = latLonToVector3(pTo.lat, pTo.lon, GLOBE_RADIUS * 1.005);
+      const arcPts: THREE.Vector3[] = [];
+      const segments = 36;
+      for (let s = 0; s <= segments; s++) {
+        const t = s / segments;
+        const pt = new THREE.Vector3().lerpVectors(vStart, vEnd, t).normalize();
+        const lift = 1.0 + Math.sin(t * Math.PI) * 0.12;
+        pt.multiplyScalar(GLOBE_RADIUS * lift);
+        arcPts.push(pt);
+      }
+      const arcGeo = new THREE.BufferGeometry().setFromPoints(arcPts);
+      const arcMat = new THREE.LineBasicMaterial({
+        color: fromId === "kolkata" ? 0xf2462e : 0xf5e6d3,
+        transparent: true,
+        opacity: 0.24,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      });
+      arcMaterials.push(arcMat);
+      globeArcsGroup.add(new THREE.Line(arcGeo, arcMat));
+    });
+    attractorGroup.add(globeArcsGroup);
+
+    // Precompute local 3D surface positions for each pin inside attractorGroup
+    const pinLocalData = GLOBE_PINS.map((pin) => {
+      const pos = latLonToVector3(pin.lat, pin.lon, GLOBE_RADIUS * 1.015);
+      const normal = pos.clone().normalize();
+      return { pin, pos, normal };
+    });
+
+    // Apply initial globe rotation so India / Dubai / Russia / Latvia face viewer
+    attractorGroup.rotation.x = globeRotXRef.current;
+    attractorGroup.rotation.y = globeRotYRef.current;
 
     // 8. ATTRACTOR POINT CLOUD GEOMETRY & SHADER
     const particleGeo = new THREE.BufferGeometry();
@@ -1219,19 +1239,43 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       }
     };
 
-    // POINTER MOVE: Update tilt & fluid brush
+    // POINTER MOVE: Drag globe OR update fluid brush / black hole position
+    const holdTimerRef = { id: 0 as any };
     const onPointerMove = (e: PointerEvent) => {
       updateMousePos(e.clientX, e.clientY);
+
       if (isHoldingRef.current) {
         blackHolePosRef.current.copy(mouseLocalPosRef.current);
+        return;
+      }
+
+      if (isDraggingGlobeRef.current && !isTransitioningRef.current) {
+        const totalDx = Math.abs(e.clientX - pointerDownPosRef.current.x);
+        const totalDy = Math.abs(e.clientY - pointerDownPosRef.current.y);
+        if (totalDx > 7 || totalDy > 7) {
+          didDragRef.current = true;
+          clearTimeout(holdTimerRef.id);
+        }
+        const deltaX = e.clientX - dragLastPosRef.current.x;
+        const deltaY = e.clientY - dragLastPosRef.current.y;
+        dragLastPosRef.current = { x: e.clientX, y: e.clientY };
+
+        const dragVelY = deltaX * 0.0055;
+        const dragVelX = deltaY * 0.0045;
+        globeRotYRef.current += dragVelY;
+        globeRotXRef.current = Math.max(-0.85, Math.min(0.95, globeRotXRef.current + dragVelX));
+        globeVelYRef.current = dragVelY;
+        globeVelXRef.current = dragVelX;
       }
     };
 
-    // POINTER DOWN: Record position & initiate Cascading Accretion Black Hole Intake
-    const holdTimerRef = { id: 0 as any };
+    // POINTER DOWN: Start globe drag OR hold for Cascading Accretion Black Hole Intake
     const onPointerDown = (e: PointerEvent) => {
       updateMousePos(e.clientX, e.clientY);
       pointerDownPosRef.current = { x: e.clientX, y: e.clientY };
+      dragLastPosRef.current = { x: e.clientX, y: e.clientY };
+      isDraggingGlobeRef.current = true;
+      didDragRef.current = false;
       holdStartRef.current = performance.now();
 
       // Mobile haptic vibration on touch engagement
@@ -1239,8 +1283,10 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         navigator.vibrate(18);
       }
 
-      // Trigger Black Hole only after deliberate hold (>260ms)
+      // Trigger Black Hole only after stationary hold (>340ms without dragging)
       holdTimerRef.id = setTimeout(() => {
+        if (didDragRef.current) return;
+        isDraggingGlobeRef.current = false;
         isHoldingRef.current = true;
         isAbsorbedRef.current = false;
         isUnspoolingRef.current = false;
@@ -1249,16 +1295,21 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         if (telemetryHintRef.current) {
           telemetryHintRef.current.style.opacity = "0";
         }
+        if (pinsOverlayRef.current) {
+          pinsOverlayRef.current.style.opacity = "0";
+          pinsOverlayRef.current.style.pointerEvents = "none";
+        }
         if (typeof navigator !== "undefined" && navigator.vibrate) {
           navigator.vibrate(22);
         }
         setInteractionHint("GRAVITATIONAL DECONSTRUCTION · COLLAPSING INTO SINGULARITY");
-      }, 260);
+      }, 340);
     };
 
-    // POINTER UP: Reverse Accretion River Supernova & Spacetime Typography Restoration
+    // POINTER UP: Release Black Hole OR finish Globe Drag OR Quick Click Hyperspace
     const onPointerUp = (e: PointerEvent) => {
       clearTimeout(holdTimerRef.id);
+      isDraggingGlobeRef.current = false;
       const pressDuration = performance.now() - holdStartRef.current;
       const dx = Math.abs(e.clientX - pointerDownPosRef.current.x);
       const dy = Math.abs(e.clientY - pointerDownPosRef.current.y);
@@ -1276,24 +1327,20 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         if (typeof navigator !== "undefined" && navigator.vibrate) {
           navigator.vibrate([35, 40, 20]);
         }
-        setInteractionHint("REVERSE ACCRETION RIVER · STARDUST STREAMING OUT OF SINGULARITY");
+        setInteractionHint("REVERSE ACCRETION RIVER · REFORMING PLANETARY MATRIX");
 
         gsap.killTweensOf(textLensingRef);
         gsap.killTweensOf(textAlphaRef);
         gsap.killTweensOf(textFlareRef);
 
-        // If text was sucked in (or in process of being sucked in), keep it collapsed until particles flow back!
         if (textLensingRef.current > 0.3) {
           textLensingRef.current = 1.0;
           textAlphaRef.current = 0.0;
         } else {
-          // If released early before text started suction:
           gsap.to(textLensingRef, { current: 0.0, duration: 0.5, ease: "power2.out" });
           gsap.to(textAlphaRef, { current: 1.0, duration: 0.5, ease: "power2.out" });
         }
 
-        // Initialize particles at the singularity point with zero velocity and zero scale
-        // They will emerge sequentially as a continuous flowing river of stardust
         const bh = blackHolePosRef.current;
         for (let i = 0; i < PARTICLE_COUNT; i++) {
           const i3 = i * 3;
@@ -1306,17 +1353,20 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           particleScales[i] = 0.0;
         }
 
-        // Slower 4.6s timeline gives plenty of time for river unspooling followed by typography restoration
         setTimeout(() => {
           isUnspoolingRef.current = false;
           if (telemetryHintRef.current) {
             telemetryHintRef.current.style.opacity = "1";
           }
-          setInteractionHint("MOVE TO DISTURB · HOLD TO CONDENSE MANIFOLD · TAP TO WARP");
+          if (pinsOverlayRef.current && !isTransitioningRef.current) {
+            pinsOverlayRef.current.style.opacity = "1";
+            pinsOverlayRef.current.style.pointerEvents = "auto";
+          }
+          setInteractionHint("DRAG GLOBE · CLICK PINS TO EXPLORE · HOLD FOR BLACK HOLE");
         }, 4600);
-      } else if (pressDuration < 260 && dx < 20 && dy < 20 && !isTransitioningRef.current) {
-        // Quick tap or click anywhere on screen -> engage Star Wars Hyperspace Jump!
-        triggerWarpTransition();
+      } else if (!didDragRef.current && pressDuration < 340 && dx < 12 && dy < 12 && !isTransitioningRef.current) {
+        // Quick tap or click on empty space/globe -> engage Star Wars Hyperspace Jump to Hero!
+        triggerWarpTransition("hero");
       }
     };
 
@@ -1338,12 +1388,56 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
       particleMat.uniforms.uWarpProgress.value = warpProgressRef.current;
       pulsatingLightMat.uniforms.uTime.value = elapsed;
 
-      // A. DYNAMIC 3D PERSPECTIVE TILT TOWARDS CURSOR & GYROSCOPE
+      // A. AUTO-ROTATING + DRAGGABLE 3D GLOBE WITH SMOOTH INERTIA & GYRO PARALLAX
       if (attractorGroupRef.current) {
-        const targetTiltX = -mouseNormRef.current.y * 0.42 + gyroTiltRef.current.y * 0.32;
-        const targetTiltY = mouseNormRef.current.x * 0.48 + gyroTiltRef.current.x * 0.36;
-        attractorGroupRef.current.rotation.x += (targetTiltX - attractorGroupRef.current.rotation.x) * 0.06;
-        attractorGroupRef.current.rotation.y += (targetTiltY - attractorGroupRef.current.rotation.y) * 0.06;
+        if (!isDraggingGlobeRef.current && !isHoldingRef.current && !isTransitioningRef.current) {
+          globeRotYRef.current += 0.14 * delta + globeVelYRef.current;
+          globeRotXRef.current = Math.max(
+            -0.85,
+            Math.min(0.95, globeRotXRef.current + globeVelXRef.current)
+          );
+          globeVelYRef.current *= 0.94;
+          globeVelXRef.current *= 0.94;
+        }
+
+        const gyroX = gyroTiltRef.current.y * 0.22;
+        const gyroY = gyroTiltRef.current.x * 0.24;
+        attractorGroupRef.current.rotation.x = globeRotXRef.current + gyroX;
+        attractorGroupRef.current.rotation.y = globeRotYRef.current + gyroY;
+        attractorGroupRef.current.updateMatrixWorld();
+
+        // Fade client connection arcs during black hole / warp
+        const arcOpacity = isHoldingRef.current || isTransitioningRef.current ? 0.0 : 0.24;
+        arcMaterials.forEach((mat) => {
+          mat.opacity += (arcOpacity - mat.opacity) * 0.12;
+        });
+
+        // Project 3D surface pins to 2D screen coordinates
+        const viewW = renderer.domElement.clientWidth || window.innerWidth;
+        const viewH = renderer.domElement.clientHeight || window.innerHeight;
+        const worldGroupPos = new THREE.Vector3();
+        attractorGroupRef.current.getWorldPosition(worldGroupPos);
+        const normalMat = new THREE.Matrix3().getNormalMatrix(attractorGroupRef.current.matrixWorld);
+
+        pinLocalData.forEach(({ pin, pos, normal }) => {
+          const el = pinElementsRef.current[pin.id];
+          if (!el) return;
+
+          const worldPos = pos.clone().applyMatrix4(attractorGroupRef.current!.matrixWorld);
+          const worldNormal = normal.clone().applyMatrix3(normalMat).normalize();
+          const toCam = camera.position.clone().sub(worldPos).normalize();
+          const facing = worldNormal.dot(toCam);
+
+          const projected = worldPos.project(camera);
+          const screenX = (projected.x * 0.5 + 0.5) * viewW;
+          const screenY = (-projected.y * 0.5 + 0.5) * viewH;
+
+          const isFront = facing > 0.06;
+          el.style.transform = `translate3d(${screenX.toFixed(1)}px, ${screenY.toFixed(1)}px, 0) translate(-50%, -50%)`;
+          el.style.opacity = isFront ? "1" : "0.10";
+          el.style.pointerEvents = isFront && !isHoldingRef.current && !isTransitioningRef.current ? "auto" : "none";
+          el.style.zIndex = isFront ? "35" : "20";
+        });
       }
 
       // B. BLACK HOLE VISUAL ANIMATION & SUPERNOVA SHOCKWAVE
@@ -1456,27 +1550,10 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             py = Math.sin(theta) * r;
           }
         } else if (isHolding) {
-          // CASCADING ACCRETION STREAM INTAKE (SLOW, CINEMATIC, INTEGRATED INTO SCENE)
-          // Stream coordinates continue advancing along Lorenz manifold
-          let pIdx = particleIndices[i] + particleSpeeds[i] * delta;
-          if (pIdx >= LORENZ_STEPS) pIdx -= LORENZ_STEPS;
-          particleIndices[i] = pIdx;
-
-          const idxA = Math.floor(pIdx) % LORENZ_STEPS;
-          const idxB = (idxA + 1) % LORENZ_STEPS;
-          const frac = pIdx - Math.floor(pIdx);
-
-          const idxA3 = idxA * 3;
-          const idxB3 = idxB * 3;
-          const bx = lorenzPath[idxA3] + (lorenzPath[idxB3] - lorenzPath[idxA3]) * frac;
-          const by = lorenzPath[idxA3 + 1] + (lorenzPath[idxB3 + 1] - lorenzPath[idxA3 + 1]) * frac;
-          const bz = lorenzPath[idxA3 + 2] + (lorenzPath[idxB3 + 2] - lorenzPath[idxA3 + 2]) * frac;
-
-          const r = particleRadii[i];
-          const theta = particleAngles[i];
-          const tx = bx + Math.cos(theta) * r;
-          const ty = by + Math.sin(theta) * r;
-          const tz = bz;
+          // CASCADING ACCRETION STREAM INTAKE (Sucking globe dots into singularity)
+          const tx = basePositions[i3];
+          const ty = basePositions[i3 + 1];
+          const tz = basePositions[i3 + 2];
 
           targetArr[i3] = tx;
           targetArr[i3 + 1] = ty;
@@ -1495,7 +1572,6 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
           const rGrav = 0.30 + holdDuration * 1.6;
 
           if (dist < 0.022) {
-            // Swallowed cleanly inside the singularity void core
             px = bh.x;
             py = bh.y;
             pz = bh.z;
@@ -1505,19 +1581,15 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             scl = 0.0;
             swallowedCount++;
           } else if (distStream <= rGrav || dist < 0.60) {
-            // Captured: pulled DIRECTLY into the black hole center (no orbital tangential swirl)
             const uX = dx / dist;
             const uY = dy / dist;
             const uZ = dz / dist;
 
-            // Inward relativistic acceleration that increases as particles plunge towards the core
-            // Slower, weighted, cinematic suction
             const inwardAccel = 0.016 + Math.min(holdDuration * 0.010, 0.022) + 0.005 / (dist + 0.040);
             vx += uX * inwardAccel * (delta * 60);
             vy += uY * inwardAccel * (delta * 60);
             vz += uZ * inwardAccel * (delta * 60);
 
-            // Smooth scale attenuation ONLY right at the doorstep of the singularity core (0.16 to 0.022)
             if (dist < 0.16) {
               scl = Math.max(0.0, (dist - 0.022) / 0.138);
             } else {
@@ -1527,7 +1599,6 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             vy *= 0.90;
             vz *= 0.90;
           } else {
-            // Outside gravitational reach: continues natural flow along Lorenz attractor towards intake
             const springK = 2.4;
             vx += (tx - px) * springK * delta;
             vy += (ty - py) * springK * delta;
@@ -1537,36 +1608,18 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             vz *= 0.91;
           }
         } else if (isUnspooling) {
-          // REVERSE ACCRETION RIVER (Slower, Sequential Ribbon of Light Flowing Back into Both Lobes)
-          let pIdx = particleIndices[i] + particleSpeeds[i] * delta;
-          if (pIdx >= LORENZ_STEPS) pIdx -= LORENZ_STEPS;
-          particleIndices[i] = pIdx;
-
-          const idxA = Math.floor(pIdx) % LORENZ_STEPS;
-          const idxB = (idxA + 1) % LORENZ_STEPS;
-          const frac = pIdx - Math.floor(pIdx);
-
-          const idxA3 = idxA * 3;
-          const idxB3 = idxB * 3;
-          const bx = lorenzPath[idxA3] + (lorenzPath[idxB3] - lorenzPath[idxA3]) * frac;
-          const by = lorenzPath[idxA3 + 1] + (lorenzPath[idxB3 + 1] - lorenzPath[idxA3 + 1]) * frac;
-          const bz = lorenzPath[idxA3 + 2] + (lorenzPath[idxB3 + 2] - lorenzPath[idxA3 + 2]) * frac;
-
-          const r = particleRadii[i];
-          const theta = particleAngles[i];
-          const tx = bx + Math.cos(theta) * r;
-          const ty = by + Math.sin(theta) * r;
-          const tz = bz;
+          // REVERSE ACCRETION RIVER (Streaming stardust back out onto globe continents)
+          const tx = basePositions[i3];
+          const ty = basePositions[i3 + 1];
+          const tz = basePositions[i3 + 2];
 
           targetArr[i3] = tx;
           targetArr[i3 + 1] = ty;
           targetArr[i3 + 2] = tz;
 
-          // Slower staggered launch across 2.2s: stardust flows out as a continuous ribbon of light
           const launchTime = (i / PARTICLE_COUNT) * 2.2;
 
           if (timeSinceUnspool < launchTime) {
-            // Particle still waiting inside singularity core
             px = bh.x;
             py = bh.y;
             pz = bh.z;
@@ -1575,12 +1628,9 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             vz = 0;
             scl = 0.0;
           } else {
-            // Stardust ember travelling along curved accretion river back to the Lorenz manifold
             const travelProg = Math.min(1.0, (timeSinceUnspool - launchTime) / 1.8);
-            // Smooth quintic S-curve
             const s = travelProg * travelProg * travelProg * (travelProg * (travelProg * 6.0 - 15.0) + 10.0);
 
-            // Arced ribbon path retracing the curved intake stream
             const arcFactor = Math.sin(travelProg * Math.PI);
             const arcX = -(ty - bh.y) * 0.28 * arcFactor;
             const arcY = (tx - bh.x) * 0.28 * arcFactor;
@@ -1604,34 +1654,16 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
             }
           }
         } else {
-          // ACTIVE LORENZ ATTRACTOR FLIGHT (ELEGANT 22-40 STEPS/SEC MOTION)
-          let pIdx = particleIndices[i] + particleSpeeds[i] * delta;
-          if (pIdx >= LORENZ_STEPS) pIdx -= LORENZ_STEPS;
-          particleIndices[i] = pIdx;
-
-          // Interpolate between discrete trajectory points for silky smooth flight
-          const idxA = Math.floor(pIdx) % LORENZ_STEPS;
-          const idxB = (idxA + 1) % LORENZ_STEPS;
-          const frac = pIdx - Math.floor(pIdx);
-
-          const idxA3 = idxA * 3;
-          const idxB3 = idxB * 3;
-          const bx = lorenzPath[idxA3] + (lorenzPath[idxB3] - lorenzPath[idxA3]) * frac;
-          const by = lorenzPath[idxA3 + 1] + (lorenzPath[idxB3 + 1] - lorenzPath[idxA3 + 1]) * frac;
-          const bz = lorenzPath[idxA3 + 2] + (lorenzPath[idxB3 + 2] - lorenzPath[idxA3 + 2]) * frac;
-
-          // Ribbon cross-section
-          const r = particleRadii[i];
-          const theta = particleAngles[i];
-          const tx = bx + Math.cos(theta) * r;
-          const ty = by + Math.sin(theta) * r;
-          const tz = bz;
+          // ACTIVE 3D GLOBE SHIMMER & FLUID CURSOR INTERACTION
+          const pulse = 1.0 + Math.sin(elapsed * 1.6 + particlePhases[i]) * 0.008;
+          const tx = basePositions[i3] * pulse;
+          const ty = basePositions[i3 + 1] * pulse;
+          const tz = basePositions[i3 + 2] * pulse;
 
           targetArr[i3] = tx;
           targetArr[i3 + 1] = ty;
           targetArr[i3 + 2] = tz;
 
-          // CRITICALLY DAMPED FLUID TRACKING: Smooth return without jelly wobble or elastic bounce!
           const dispX = tx - px;
           const dispY = ty - py;
           const dispZ = tz - pz;
@@ -1917,7 +1949,70 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
   return (
     <div className="relative w-full h-[100svh] bg-[#06070B] text-[#F8F5EE] overflow-hidden select-none">
       {/* Three.js Canvas Container */}
-      <div ref={mountRef} className="absolute inset-0 w-full h-full z-10 cursor-crosshair touch-none" />
+      <div ref={mountRef} className="absolute inset-0 w-full h-full z-10 cursor-grab active:cursor-grabbing touch-none" />
+
+      {/* Interactive 3D Globe Location Pins Overlay */}
+      <div
+        ref={pinsOverlayRef}
+        className="absolute inset-0 z-30 pointer-events-none transition-opacity duration-500"
+      >
+        {GLOBE_PINS.map((pin: GlobePinConfig) => {
+          const isHome = pin.destination === "hero";
+          const isHovered = hoveredPinId === pin.id;
+          return (
+            <button
+              key={pin.id}
+              ref={(el) => {
+                pinElementsRef.current[pin.id] = el;
+              }}
+              type="button"
+              onPointerDown={(e) => e.stopPropagation()}
+              onPointerUp={(e) => e.stopPropagation()}
+              onMouseEnter={() => setHoveredPinId(pin.id)}
+              onMouseLeave={() => setHoveredPinId(null)}
+              onClick={(e) => {
+                e.stopPropagation();
+                triggerWarpTransition(pin.destination);
+              }}
+              className="group absolute top-0 left-0 flex items-center gap-2 cursor-pointer focus:outline-none transition-opacity duration-200"
+              aria-label={`${pin.city}, ${pin.country} - ${pin.subtitle}`}
+            >
+              {/* Pulsing Beacon Core */}
+              <span className="relative flex h-4 w-4 items-center justify-center">
+                <span
+                  className={`absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping ${
+                    isHome ? "bg-[#F2462E]" : "bg-[#FFB347]"
+                  }`}
+                />
+                <span
+                  className={`relative inline-flex h-2.5 w-2.5 rounded-full border border-white/80 shadow-[0_0_12px_rgba(255,255,255,0.85)] transition-transform duration-200 group-hover:scale-125 ${
+                    isHome ? "bg-[#F2462E]" : "bg-[#F5E6D3]"
+                  }`}
+                />
+              </span>
+
+              {/* City Pill & Hover Context */}
+              <span
+                className={`flex flex-col items-start text-left px-2.5 py-1 rounded-full backdrop-blur-md border transition-all duration-200 ${
+                  isHome
+                    ? "bg-[#F2462E]/20 border-[#F2462E]/70 text-[#FFF8F0] shadow-[0_0_18px_rgba(242,70,46,0.35)]"
+                    : "bg-[#06070B]/75 border-[#F5E6D3]/35 text-[#F5E6D3] group-hover:border-[#FFB347] group-hover:bg-[#06070B]/90"
+                }`}
+              >
+                <span className="flex items-center gap-1.5 text-[9.5px] sm:text-[10px] font-mono font-bold uppercase tracking-[0.16em] leading-none">
+                  <span>{pin.city}</span>
+                  <ArrowRight size={10} className="opacity-70 group-hover:translate-x-0.5 transition-transform" />
+                </span>
+                {isHovered && (
+                  <span className="mt-1 text-[8px] font-mono uppercase tracking-[0.14em] text-[#F5E6D3]/80 leading-none whitespace-nowrap">
+                    {pin.tag} · {pin.subtitle}
+                  </span>
+                )}
+              </span>
+            </button>
+          );
+        })}
+      </div>
 
       {/* Star Wars Hyperspace Lightspeed Flash Overlay */}
       <div
@@ -1925,13 +2020,13 @@ export const Studio3DWorkspace = memo(function Studio3DWorkspace({
         className="absolute inset-0 bg-[#FFFDF5] pointer-events-none opacity-0 z-50"
       />
 
-      {/* Whisper-Quiet Subtle Center Telemetry Hint (Pure CASA MOMO Layout) */}
+      {/* Whisper-Quiet Subtle Center Telemetry Hint */}
       <div
         ref={telemetryHintRef}
         className="absolute bottom-6 left-0 right-0 z-30 flex justify-center pointer-events-none select-none transition-opacity duration-500 pb-[env(safe-area-inset-bottom,0px)]"
       >
-        <span className="text-[9px] sm:text-[9.5px] font-mono tracking-[0.24em] sm:tracking-[0.28em] text-[#F5EEDA]/40 uppercase px-4 text-center">
-          TAP TO WARP · HOLD TO CONDENSE
+        <span className="text-[9px] sm:text-[9.5px] font-mono tracking-[0.22em] sm:tracking-[0.26em] text-[#F5EEDA]/50 uppercase px-4 text-center">
+          {interactionHint}
         </span>
       </div>
     </div>
